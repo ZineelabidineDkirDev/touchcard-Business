@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function PublicCardPage({ params }: { params: Promise<{ slug: string }> }) {
+  await connection();
   const { slug } = await params;
   const supabase = await createClient();
   const { data: card } = await supabase.from("cards")
