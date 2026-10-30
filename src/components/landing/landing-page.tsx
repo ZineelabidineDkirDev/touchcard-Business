@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
 const rise = {
@@ -188,19 +188,27 @@ function DashboardPreview() {
 export function LandingPage() {
   const reduceMotion = useReducedMotion();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 24);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   const reveal = reduceMotion
     ? { hidden: { opacity: 1, y: 0 }, visible: { opacity: 1, y: 0 } }
     : rise;
 
   return (
     <main className="overflow-hidden bg-white text-slate-950">
-      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#090b1b]/65 text-white shadow-lg shadow-black/10 backdrop-blur-xl transition-colors duration-300">
+      <header className={`fixed inset-x-0 top-0 z-50 border-b backdrop-blur-xl transition-all duration-300 ${isScrolled ? "border-slate-200 bg-white/95 text-slate-900 shadow-lg shadow-slate-900/10" : "border-white/10 bg-[#090b1b]/95 text-white shadow-lg shadow-black/10"}`}>
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-4 sm:px-8 lg:px-12">
           <Link href="/" className="group flex items-center gap-2.5">
             <img src="/brand/touchcard-mark.svg" alt="TouchCard" className="h-11 w-11 object-contain transition-transform group-hover:rotate-3" />
-            <span className="text-xl font-black tracking-tight text-white">Touch<span className="text-indigo-300">Card</span><span className="ml-2 hidden rounded-md border border-white/15 bg-white/10 px-2 py-1 align-middle text-[9px] font-extrabold tracking-[.18em] text-indigo-200 sm:inline-block">BUSINESS</span></span>
+            <span className={`text-xl font-black tracking-tight transition-colors duration-300 ${isScrolled ? "text-slate-950" : "text-white"}`}>Touch<span className="text-indigo-500">Card</span><span className={`ml-2 hidden rounded-md px-2 py-1 align-middle text-[9px] font-extrabold tracking-[.18em] sm:inline-block ${isScrolled ? "border border-indigo-100 bg-indigo-50 text-indigo-700" : "border border-white/15 bg-white/10 text-indigo-200"}`}>BUSINESS</span></span>
           </Link>
-          <nav aria-label="Navigation principale" className="hidden items-center gap-6 text-sm font-semibold text-slate-600 xl:flex">
+          <nav aria-label="Navigation principale" className={`hidden items-center gap-6 text-sm font-semibold transition-colors duration-300 xl:flex ${isScrolled ? "text-slate-700" : "text-white/90"}`}>
             <details className="group relative">
               <summary className="flex cursor-pointer list-none items-center gap-2 transition hover:text-indigo-600 [&::-webkit-details-marker]:hidden">Solutions <span className="text-[10px] transition group-open:rotate-180">⌄</span></summary>
               <div className="absolute left-0 top-full z-50 mt-4 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-slate-950/10">
@@ -215,9 +223,9 @@ export function LandingPage() {
             <a className="transition hover:text-indigo-600" href="#faq">FAQ</a>
           </nav>
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link href="/login" className="hidden rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-100 sm:inline-flex">Connexion</Link>
+            <Link href="/login" className={`hidden rounded-xl px-4 py-2.5 text-sm font-bold transition sm:inline-flex ${isScrolled ? "text-slate-700 hover:bg-slate-100" : "text-white hover:bg-white/10"}`}>Connexion</Link>
             <Link href="/register" className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-700 sm:px-5">Créer mon espace <Arrow /></Link>
-            <button type="button" aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"} aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((open) => !open)} className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-xl text-slate-700 xl:hidden">
+            <button type="button" aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"} aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((open) => !open)} className={`inline-flex h-11 w-11 items-center justify-center rounded-xl border text-xl transition-colors xl:hidden ${isScrolled ? "border-slate-200 bg-white text-slate-700" : "border-white/20 bg-white/10 text-white"}`}>
               {mobileMenuOpen ? "×" : "☰"}
             </button>
           </div>
