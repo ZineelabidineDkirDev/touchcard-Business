@@ -11,6 +11,7 @@ export const metadata: Metadata = {
     template: "%s | TouchCard Business",
   },
   description: "Cartes de visite digitales, NFC, QR code, CRM et fidélisation client réunis dans une seule plateforme.",
+  icons: { icon: "/brand/touchcard-mark.svg", shortcut: "/brand/touchcard-mark.svg" },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
