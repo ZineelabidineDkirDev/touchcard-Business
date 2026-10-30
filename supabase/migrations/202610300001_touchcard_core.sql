@@ -200,6 +200,19 @@ create trigger on_organization_created
 after insert on public.organizations
 for each row execute procedure public.add_organization_owner();
 
+create or replace function public.add_organization_owner()
+returns trigger language plpgsql security definer set search_path = public
+as $
+begin
+  insert into public.organization_members(organization_id,user_id,role)
+  values(new.id,new.owner_id,'organization_admin')
+  on conflict (organization_id,user_id) do nothing;
+  return new;
+end;
+$;
+
+create trigger on_organization_created after insert on public.organizations for each row execute procedure public.add_organization_owner();
+
 create policy organizations_select_member on public.organizations for select to authenticated using (public.is_org_member(id) or owner_id = auth.uid());
 create policy organizations_insert_owner on public.organizations for insert to authenticated with check (owner_id = auth.uid());
 create policy organizations_update_admin on public.organizations for update to authenticated using (public.has_org_role(id,array['organization_admin','super_admin']::public.app_role[])) with check (public.has_org_role(id,array['organization_admin','super_admin']::public.app_role[]));
