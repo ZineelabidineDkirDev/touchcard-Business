@@ -256,10 +256,10 @@ export function LandingPage() {
               Bien plus qu’une carte de visite. Créez votre identité digitale, partagez-la avec NFC ou QR code, développez vos contacts et fidélisez vos clients depuis une seule plateforme.
             </p>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <Link href="/register" className="group inline-flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-500 px-7 py-[1.125rem] text-base font-bold text-white shadow-xl shadow-indigo-950/40 transition duration-300 hover:-translate-y-1 hover:from-indigo-400 hover:to-violet-400">
+              <Link href="/register" className="group inline-flex items-center justify-center gap-3 rounded-2xl border border-white/25 bg-gradient-to-r from-indigo-500/35 via-violet-500/30 to-fuchsia-500/25 px-7 py-[1.125rem] text-base font-bold text-white shadow-[0_12px_40px_-18px_rgba(99,102,241,.8)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-white/40 hover:from-indigo-500/55 hover:to-violet-500/45">
                 Commencer maintenant <span className="transition-transform group-hover:translate-x-1">→</span>
               </Link>
-              <a href="#solutions" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/[.06] px-7 py-[1.125rem] text-base font-bold text-white shadow-sm backdrop-blur transition hover:border-indigo-300/50 hover:bg-white/10">Explorer les solutions <span>↓</span></a>
+              <a href="#solutions" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/[.035] px-7 py-[1.125rem] text-base font-bold text-white/95 shadow-sm backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-indigo-200/50 hover:bg-white/[.09]">Explorer les solutions <span className="text-indigo-200">↓</span></a>
             </div>
             <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-sm font-medium text-slate-300">
               <span className="inline-flex items-center gap-2"><span className="text-emerald-500">✓</span> Sans application à installer</span>
@@ -281,25 +281,35 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section id="solutions" className="mx-auto max-w-[1440px] px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={reveal} transition={{ duration: 0.65}} className="mx-auto max-w-3xl text-center">
-          <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">Un écosystème, pas seulement une carte</p>
-          <h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] text-slate-950 sm:text-5xl lg:text-6xl">Tous vos outils pour <span className="text-indigo-600">développer votre réseau.</span></h2>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-500">De la première prise de contact à la fidélisation, TouchCard rassemble les outils essentiels à votre développement professionnel.</p>
-        </motion.div>
-        <div className="mt-16 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature, index) => (
-            <motion.article key={feature.number} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.16 }} variants={reveal} transition={{ duration: 0.55, delay: index * 0.07 }} whileHover={reduceMotion ? undefined : { y: -7 }} className="group relative overflow-hidden rounded-[1.7rem] border border-slate-200/80 bg-white p-7 shadow-[0_10px_40px_-28px_rgba(15,23,42,.22)] transition-shadow hover:border-indigo-200 hover:shadow-[0_25px_65px_-35px_rgba(79,70,229,.35)] sm:p-8">
-              <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-indigo-50 opacity-0 blur-2xl transition-opacity group-hover:opacity-100" />
-              <div className="relative flex items-center justify-between">
-                <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-50 to-violet-100 text-2xl font-semibold text-indigo-700 transition-transform group-hover:scale-110">{feature.icon}</span>
-                <span className="text-xs font-black tracking-[.18em] text-slate-300">{feature.number}</span>
-              </div>
-              <h3 className="relative mt-9 text-xl font-extrabold tracking-tight text-slate-950">{feature.title}</h3>
-              <p className="relative mt-3 min-h-[76px] text-sm leading-7 text-slate-500">{feature.description}</p>
-              <p className="relative mt-7 border-t border-slate-100 pt-5 text-[11px] font-bold leading-5 text-indigo-600">{feature.detail}</p>
-            </motion.article>
-          ))}
+      <section id="solutions" className="relative isolate overflow-hidden bg-[#0b0d20] px-5 py-24 text-white sm:px-8 lg:px-12 lg:py-32">
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute -right-40 top-0 h-[34rem] w-[34rem] rounded-full bg-indigo-600/15 blur-[120px]" />
+          <div className="absolute -bottom-48 -left-32 h-[30rem] w-[30rem] rounded-full bg-fuchsia-600/10 blur-[120px]" />
+          <div className="absolute inset-0 opacity-[.08]" style={{ backgroundImage: "linear-gradient(rgba(165,180,252,.35) 1px, transparent 1px), linear-gradient(90deg, rgba(165,180,252,.35) 1px, transparent 1px)", backgroundSize: "52px 52px" }} />
+        </div>
+        <div className="relative mx-auto max-w-[1440px]">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={reveal} transition={{ duration: 0.65}} className="mx-auto max-w-3xl text-center">
+            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-indigo-400/[.08] px-4 py-2 text-[10px] font-extrabold uppercase tracking-[.2em] text-indigo-200"><span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400" /> L’écosystème TouchCard</span>
+            <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-.045em] text-white sm:text-5xl lg:text-6xl">Tous vos outils pour <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">développer votre réseau.</span></h2>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-400">De la première prise de contact à la fidélisation, une suite professionnelle conçue pour transformer chaque échange en opportunité.</p>
+          </motion.div>
+          <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {features.map((feature, index) => (
+              <motion.article key={feature.number} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.16 }} variants={reveal} transition={{ duration: 0.55, delay: index * 0.07 }} whileHover={reduceMotion ? undefined : { y: -8, scale: 1.012 }} className="group relative isolate overflow-hidden rounded-[1.65rem] border border-white/[.09] bg-white/[.045] p-7 shadow-[0_18px_55px_-35px_rgba(0,0,0,.8)] backdrop-blur-xl transition-all duration-300 hover:border-indigo-300/35 hover:bg-white/[.075] hover:shadow-[0_25px_70px_-35px_rgba(99,102,241,.35)] sm:p-8">
+                <div className="pointer-events-none absolute -right-16 -top-20 -z-10 h-48 w-48 rounded-full bg-indigo-500/0 blur-3xl transition-colors duration-500 group-hover:bg-indigo-500/20" />
+                <div className="relative flex items-center justify-between">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-300/20 bg-gradient-to-br from-indigo-400/20 to-fuchsia-400/10 text-2xl font-semibold text-indigo-200 shadow-inner shadow-white/[.04] transition duration-300 group-hover:scale-110 group-hover:border-violet-300/40 group-hover:text-white">{feature.icon}</span>
+                  <span className="rounded-full border border-white/10 px-3 py-1.5 text-[10px] font-bold tracking-[.18em] text-slate-500">{feature.number}</span>
+                </div>
+                <h3 className="relative mt-8 text-xl font-extrabold tracking-tight text-white transition-colors group-hover:text-indigo-100">{feature.title}</h3>
+                <p className="relative mt-3 min-h-[76px] text-sm leading-7 text-slate-400">{feature.description}</p>
+                <div className="relative mt-7 flex items-center justify-between gap-3 border-t border-white/[.09] pt-5">
+                  <p className="text-[10px] font-bold leading-5 tracking-wide text-indigo-200/80">{feature.detail}</p>
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 text-sm text-slate-400 transition-all group-hover:translate-x-1 group-hover:border-indigo-300/40 group-hover:bg-indigo-400/10 group-hover:text-indigo-200">↗</span>
+                </div>
+              </motion.article>
+            ))}
+          </div>
         </div>
       </section>
 
