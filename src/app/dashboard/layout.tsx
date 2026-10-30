@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
+import { Suspense } from "react";
 import { signOut } from "@/app/actions/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -14,7 +15,21 @@ const navigation = [
   ["Paramètres", "/dashboard/settings"],
 ];
 
-export default async function DashboardLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+function DashboardLoading() {
+  return (
+    <div className="min-h-screen bg-slate-50 p-8">
+      <div className="mx-auto max-w-7xl animate-pulse">
+        <div className="h-8 w-56 rounded bg-slate-200" />
+        <div className="mt-6 h-4 w-80 rounded bg-slate-200" />
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 4 }, (_, index) => <div key={index} className="h-32 rounded-2xl bg-white" />)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+async function AuthenticatedDashboard({ children }: Readonly<{ children: React.ReactNode }>) {
   await connection();
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -36,5 +51,13 @@ export default async function DashboardLayout({ children }: Readonly<{ children:
       </aside>
       <main className="min-w-0 flex-1 p-5 sm:p-8 lg:ml-64">{children}</main>
     </div>
+  );
+}
+
+export default function DashboardLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <Suspense fallback={<DashboardLoading />}>
+      <AuthenticatedDashboard>{children}</AuthenticatedDashboard>
+    </Suspense>
   );
 }
