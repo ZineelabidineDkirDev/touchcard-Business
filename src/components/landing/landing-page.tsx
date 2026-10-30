@@ -424,11 +424,11 @@ export function LandingPage() {
           </motion.div>
           <div className="mt-20 grid gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {[
-              {name:"Business",type:"Réseau professionnel",desc:"Présentez votre profil, vos coordonnées et tous vos liens professionnels en un seul geste.",tone:"metal",number:"01"},
-              {name:"Contact",type:"Partage de coordonnées",desc:"Facilitez l’échange de vos informations et l’enregistrement de vos coordonnées.",tone:"metal",number:"02"},
-              {name:"E-Service",type:"Services & accès rapides",desc:"Dirigez vos clients vers vos services, réservations, menus ou pages utiles.",tone:"metal",number:"03"},
-              {name:"Avis Google",type:"Collecte d’avis clients",desc:"Invitez vos clients à découvrir votre page Google et à partager leur expérience.",tone:"from-[#111827] via-[#202b50] to-[#394b8c]",number:"04"},
-              {name:"Personnalisée",type:"Logo personnalisé",desc:"Affichez votre propre logo au centre et créez une carte à l’image de votre marque.",tone:"from-[#171521] via-[#29233f] to-[#514078]",number:"05"}
+              {name:"Business",type:"Réseau professionnel",desc:"Présentez votre profil, vos coordonnées et tous vos liens professionnels en un seul geste.",price:"399 DH",tone:"metal",number:"01"},
+              {name:"Contact",type:"Partage de coordonnées",desc:"Facilitez l’échange de vos informations et l’enregistrement de vos coordonnées.",price:"249 DH",tone:"metal",number:"02"},
+              {name:"E-Service",type:"Services & accès rapides",desc:"Dirigez vos clients vers vos services, réservations, menus ou pages utiles.",price:"399 DH",tone:"metal",number:"03"},
+              {name:"Avis Google",type:"Collecte d’avis clients",desc:"Invitez vos clients à découvrir votre page Google et à partager leur expérience.",price:"199 DH",tone:"from-[#111827] via-[#202b50] to-[#394b8c]",number:"04"},
+              {name:"Personnalisée",type:"Logo personnalisé",desc:"Affichez votre propre logo au centre et créez une carte à l’image de votre marque.",price:"499 DH",tone:"from-[#171521] via-[#29233f] to-[#514078]",number:"05"}
             ].map((card,index) => (
               <motion.article key={card.name} initial="hidden" whileInView="visible" viewport={{ once:true, amount:.18 }} variants={reveal} transition={{ duration:.6, delay:index*.07 }} className="group">
                 <div className="relative mx-auto flex h-[245px] items-center justify-center [perspective:1100px]">
@@ -448,6 +448,7 @@ export function LandingPage() {
                   <span className="text-xs font-black tracking-[.18em] text-slate-500">{card.number}</span>
                 </div>
                 <p className="mt-3 text-sm leading-7 text-slate-400">{card.desc}</p>
+                <p className="mt-4 text-2xl font-black tracking-tight text-white">{card.price}</p>
                 {card.name === "Personnalisée" && <p className="mt-3 inline-flex rounded-full border border-fuchsia-400/25 bg-fuchsia-400/10 px-3 py-1.5 text-[10px] font-bold text-fuchsia-200">Votre logo au centre</p>}
               </motion.article>
             ))}
