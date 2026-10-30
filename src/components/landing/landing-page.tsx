@@ -229,10 +229,10 @@ export function LandingPage() {
               Bien plus qu’une carte de visite. Créez votre identité digitale, partagez-la avec NFC ou QR code, développez vos contacts et fidélisez vos clients depuis une seule plateforme.
             </p>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <Link href="/register" className="group inline-flex items-center justify-center gap-3 rounded-2xl bg-indigo-600 px-7 py-4.5 text-base font-bold text-white shadow-xl shadow-indigo-600/25 transition duration-300 hover:-translate-y-1 hover:bg-indigo-700">
+              <Link href="/register" className="group inline-flex items-center justify-center gap-3 rounded-2xl bg-indigo-600 px-7 py-[1.125rem] text-base font-bold text-white shadow-xl shadow-indigo-600/25 transition duration-300 hover:-translate-y-1 hover:bg-indigo-700">
                 Commencer maintenant <span className="transition-transform group-hover:translate-x-1">→</span>
               </Link>
-              <a href="#solutions" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/80 px-7 py-4.5 text-base font-bold text-slate-700 shadow-sm transition hover:border-indigo-200 hover:text-indigo-700">Explorer les solutions <span>↓</span></a>
+              <a href="#solutions" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/80 px-7 py-[1.125rem] text-base font-bold text-slate-700 shadow-sm transition hover:border-indigo-200 hover:text-indigo-700">Explorer les solutions <span>↓</span></a>
             </div>
             <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-sm font-medium text-slate-500">
               <span className="inline-flex items-center gap-2"><span className="text-emerald-500">✓</span> Sans application à installer</span>
