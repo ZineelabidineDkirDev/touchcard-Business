@@ -194,7 +194,7 @@ export function LandingPage() {
 
   return (
     <main className="overflow-hidden bg-white text-slate-950">
-      <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/85 backdrop-blur-xl">
+      <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-[#090b1b]/65 text-white shadow-lg shadow-black/10 backdrop-blur-xl transition-colors duration-300">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-4 sm:px-8 lg:px-12">
           <Link href="/" className="group flex items-center gap-2.5">
             <img src="/brand/touchcard-mark.svg" alt="TouchCard" className="h-11 w-11 object-contain transition-transform group-hover:rotate-3" />
