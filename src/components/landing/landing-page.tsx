@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
 const rise = {
@@ -186,6 +187,7 @@ function DashboardPreview() {
 
 export function LandingPage() {
   const reduceMotion = useReducedMotion();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const reveal = reduceMotion
     ? { hidden: { opacity: 1, y: 0 }, visible: { opacity: 1, y: 0 } }
     : rise;
@@ -198,16 +200,34 @@ export function LandingPage() {
             <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 text-lg font-black text-white shadow-lg shadow-indigo-600/20 transition-transform group-hover:rotate-6">T</span>
             <span className="text-xl font-black tracking-tight text-slate-950">Touch<span className="text-indigo-600">Card</span><span className="ml-2 hidden rounded-md bg-indigo-50 px-2 py-1 align-middle text-[9px] font-extrabold tracking-[.18em] text-indigo-700 sm:inline-block">BUSINESS</span></span>
           </Link>
-          <nav className="hidden items-center gap-9 text-sm font-semibold text-slate-600 lg:flex">
+          <nav aria-label="Navigation principale" className="hidden items-center gap-7 text-sm font-semibold text-slate-600 xl:flex">
             <a className="transition hover:text-indigo-600" href="#solutions">Solutions</a>
-            <a className="transition hover:text-indigo-600" href="#experience">La plateforme</a>
-            <a className="transition hover:text-indigo-600" href="#fonctionnement">Comment ça marche</a>
+            <a className="transition hover:text-indigo-600" href="#experience">Plateforme</a>
+            <a className="transition hover:text-indigo-600" href="#demo">Démo</a>
+            <a className="transition hover:text-indigo-600" href="#tarifs">Tarifs</a>
+            <a className="transition hover:text-indigo-600" href="#faq">FAQ</a>
           </nav>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link href="/login" className="hidden rounded-xl px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-100 sm:inline-flex">Connexion</Link>
             <Link href="/register" className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-700 sm:px-5">Créer mon espace <Arrow /></Link>
+            <button type="button" aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"} aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((open) => !open)} className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-white text-xl text-slate-700 xl:hidden">
+              {mobileMenuOpen ? "×" : "☰"}
+            </button>
           </div>
         </div>
+        {mobileMenuOpen && (
+          <nav aria-label="Navigation mobile" className="border-t border-slate-200 bg-white px-5 py-4 shadow-xl xl:hidden">
+            <div className="mx-auto grid max-w-[1440px] gap-1">
+              {[["Solutions", "#solutions"], ["La plateforme", "#experience"], ["Démonstration", "#demo"], ["Comment ça marche", "#fonctionnement"], ["Tarifs", "#tarifs"], ["FAQ", "#faq"]].map(([label, href]) => (
+                <a key={href} href={href} onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-700">{label}</a>
+              ))}
+              <div className="mt-2 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-xl border border-slate-200 px-3 py-3 text-center text-sm font-bold text-slate-700">Connexion</Link>
+                <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="rounded-xl bg-indigo-600 px-3 py-3 text-center text-sm font-bold text-white">Créer un espace</Link>
+              </div>
+            </div>
+          </nav>
+        )}
       </header>
 
       <section className="relative isolate bg-[#f7f7ff]">
@@ -339,6 +359,90 @@ export function LandingPage() {
         </div>
       </section>
 
+
+      <section id="demo" className="bg-[#f7f7ff] px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
+        <div className="mx-auto grid max-w-[1280px] items-center gap-14 lg:grid-cols-[.85fr_1.15fr]">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">Découvrez TouchCard</p>
+            <h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl">Votre activité mérite une <span className="text-indigo-600">meilleure vitrine.</span></h2>
+            <p className="mt-6 text-lg leading-8 text-slate-600">Découvrez comment une carte digitale peut simplifier le partage de vos coordonnées, organiser vos prospects et renforcer votre relation client.</p>
+            <ul className="mt-8 space-y-4 text-sm font-semibold text-slate-700">
+              {["Un profil professionnel accessible en un scan", "Un espace centralisé pour vos contacts et votre équipe", "Des indicateurs pour suivre vos interactions"].map((item) => <li key={item} className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">✓</span>{item}</li>)}
+            </ul>
+            <Link href="/register" className="mt-9 inline-flex rounded-xl bg-indigo-600 px-6 py-4 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-1 hover:bg-indigo-700">Essayer la plateforme <Arrow /></Link>
+          </div>
+          <div className="relative">
+            <div className="absolute -inset-5 rounded-[2.5rem] bg-gradient-to-br from-indigo-200/70 to-violet-200/70 blur-2xl" />
+            <div className="relative overflow-hidden rounded-[2rem] border border-white bg-[#11132d] p-3 shadow-2xl shadow-indigo-950/20 sm:p-5">
+              <div className="flex items-center gap-2 px-3 py-3"><span className="h-2.5 w-2.5 rounded-full bg-rose-400"/><span className="h-2.5 w-2.5 rounded-full bg-amber-300"/><span className="h-2.5 w-2.5 rounded-full bg-emerald-400"/><span className="ml-3 text-xs font-semibold text-slate-400">Présentation de la plateforme</span></div>
+              <div className="relative flex min-h-[290px] flex-col items-center justify-center overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-indigo-600 via-[#3530a2] to-violet-800 px-6 py-10 text-center sm:min-h-[390px]">
+                <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full border border-white/10"/><div className="absolute -bottom-28 -right-16 h-80 w-80 rounded-full border border-white/10"/>
+                <div className="relative flex h-20 w-20 items-center justify-center rounded-3xl border border-white/20 bg-white/15 text-4xl text-white shadow-xl backdrop-blur">▶</div>
+                <p className="relative mt-7 text-2xl font-black text-white sm:text-3xl">TouchCard Business</p>
+                <p className="relative mt-3 max-w-md text-sm leading-6 text-indigo-100">Un aperçu visuel de votre futur espace de gestion. La vidéo de présentation sera intégrée ici dès que son fichier ou son lien sera disponible.</p>
+                <span className="relative mt-6 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[.18em] text-white/90">Espace vidéo · prêt à intégrer</span>
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-4 text-xs text-slate-400"><span>Cartes · CRM · Fidélité · Analyses</span><span className="font-semibold text-indigo-200">Une seule plateforme</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-5 py-24 sm:px-8 lg:px-12 lg:py-28">
+        <div className="mx-auto max-w-[1280px]">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">Pensé pour votre métier</p>
+            <h2 className="mt-5 text-4xl font-black tracking-[-.045em] sm:text-5xl">Une solution pour chaque <span className="text-indigo-600">façon de travailler.</span></h2>
+            <p className="mt-5 text-lg leading-8 text-slate-500">Indépendant, commerçant ou entreprise : adaptez votre présence digitale à votre activité.</p>
+          </div>
+          <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[["Indépendants", "Présentez votre savoir-faire et partagez vos coordonnées en quelques secondes.", "↗"], ["Commerces", "Facilitez les avis, les contacts et les programmes de fidélité de vos clients.", "✳"], ["Équipes commerciales", "Centralisez les cartes de vos collaborateurs et suivez les opportunités.", "◎"], ["Entreprises", "Gérez plusieurs profils et donnez une image cohérente à votre organisation.", "▦"]].map(([title, desc, icon]) => <article key={title} className="rounded-3xl border border-slate-200 bg-white p-6 transition hover:-translate-y-1 hover:border-indigo-200 hover:shadow-xl hover:shadow-indigo-950/5"><span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-2xl text-indigo-700">{icon}</span><h3 className="mt-6 text-lg font-extrabold text-slate-950">{title}</h3><p className="mt-3 text-sm leading-7 text-slate-500">{desc}</p></article>)}
+          </div>
+        </div>
+      </section>
+
+      <section id="tarifs" className="bg-[#f7f7ff] px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
+        <div className="mx-auto max-w-[1280px]">
+          <div className="mx-auto max-w-3xl text-center">
+            <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">Des offres adaptées à vos ambitions</p>
+            <h2 className="mt-5 text-4xl font-black tracking-[-.045em] sm:text-5xl">Choisissez votre <span className="text-indigo-600">prochaine étape.</span></h2>
+            <p className="mt-5 text-lg leading-8 text-slate-500">Des formules pensées pour démarrer seul, développer votre activité ou équiper toute une organisation.</p>
+          </div>
+          <div className="mt-14 grid items-stretch gap-5 lg:grid-cols-3">
+            {[
+              {name:"Starter",tag:"Pour démarrer",desc:"L'essentiel pour créer votre présence professionnelle.",items:["Profil digital personnalisé","Partage par QR code et lien","Coordonnées et liens professionnels","Accès à votre espace personnel"]},
+              {name:"Business",tag:"Pour développer",desc:"Les outils pour gérer vos contacts et développer votre réseau.",items:["Tout Starter","Gestion des contacts et prospects","Statistiques des interactions","Campagnes et fidélisation","Personnalisation avancée"],featured:true},
+              {name:"Entreprise",tag:"Pour vos équipes",desc:"Une gestion centralisée pour votre organisation.",items:["Tout Business","Gestion des collaborateurs","Rôles et accès par équipe","Vue centralisée de l'organisation","Accompagnement de déploiement"]}
+            ].map((plan) => <article key={plan.name} className={`relative flex flex-col rounded-[2rem] border p-7 sm:p-8 ${plan.featured ? "border-indigo-500 bg-[#11132d] text-white shadow-2xl shadow-indigo-900/20 lg:-translate-y-3" : "border-slate-200 bg-white text-slate-950"}`}>
+              {plan.featured && <span className="absolute -top-3 left-7 rounded-full bg-indigo-500 px-4 py-1.5 text-[10px] font-black uppercase tracking-[.15em] text-white">Offre recommandée</span>}
+              <p className={`text-xs font-bold uppercase tracking-[.16em] ${plan.featured ? "text-indigo-300" : "text-indigo-600"}`}>{plan.tag}</p>
+              <h3 className="mt-4 text-3xl font-black">{plan.name}</h3>
+              <p className={`mt-3 min-h-12 text-sm leading-6 ${plan.featured ? "text-slate-300" : "text-slate-500"}`}>{plan.desc}</p>
+              <div className={`mt-7 border-y py-5 ${plan.featured ? "border-white/10" : "border-slate-100"}`}><p className="text-2xl font-black">Tarif à définir</p><p className={`mt-1 text-xs ${plan.featured ? "text-slate-400" : "text-slate-400"}`}>Contactez-nous pour les conditions de l'offre</p></div>
+              <ul className="mt-7 flex-1 space-y-4">{plan.items.map((item) => <li key={item} className={`flex gap-3 text-sm ${plan.featured ? "text-slate-200" : "text-slate-600"}`}><span className="font-black text-emerald-500">✓</span>{item}</li>)}</ul>
+              <Link href="/register" className={`mt-9 inline-flex items-center justify-center gap-2 rounded-xl px-5 py-4 text-sm font-bold transition hover:-translate-y-0.5 ${plan.featured ? "bg-white text-indigo-700 hover:bg-indigo-50" : "bg-indigo-600 text-white hover:bg-indigo-700"}`}>Choisir {plan.name} <Arrow /></Link>
+            </article>)}
+          </div>
+          <p className="mt-8 text-center text-xs leading-6 text-slate-500">Les tarifs définitifs, les limites d'utilisation et les options seront précisés avant l'ouverture commerciale.</p>
+        </div>
+      </section>
+
+      <section id="faq" className="px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
+        <div className="mx-auto grid max-w-[1180px] gap-12 lg:grid-cols-[.8fr_1.2fr]">
+          <div><p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">Questions fréquentes</p><h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl">Vous souhaitez en savoir <span className="text-indigo-600">plus ?</span></h2><p className="mt-6 text-base leading-8 text-slate-500">Voici quelques réponses pour mieux comprendre le fonctionnement de TouchCard Business.</p><Link href="/register" className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-indigo-700 hover:text-indigo-900">Créer mon espace <Arrow /></Link></div>
+          <div className="space-y-3">
+            {[
+              ["Qu'est-ce qu'une carte de visite digitale ?", "C'est un profil professionnel en ligne qui rassemble vos coordonnées, vos liens et vos informations. Vous pouvez le partager par QR code, lien ou carte NFC compatible."],
+              ["Le destinataire doit-il installer une application ?", "Non. Le profil public s'ouvre dans le navigateur du téléphone. Le destinataire n'a pas besoin d'installer une application pour consulter vos informations."],
+              ["Puis-je gérer plusieurs collaborateurs ?", "La formule Entreprise est pensée pour centraliser les profils et les accès des membres d'une organisation."],
+              ["Puis-je modifier mes informations après création ?", "Oui. Les informations de votre profil sont gérées depuis votre espace professionnel et peuvent être mises à jour."],
+              ["Les cartes NFC sont-elles incluses ?", "La plateforme prend en charge le partage via NFC et QR code. La fourniture et le prix des supports physiques seront précisés dans les offres commerciales."],
+              ["Comment connaître les tarifs ?", "Les tarifs définitifs sont en cours de définition. Vous pouvez créer votre espace ou nous contacter pour discuter de votre besoin."]
+            ].map(([question, answer]) => <details key={question} className="group rounded-2xl border border-slate-200 bg-white p-5 open:border-indigo-200 open:bg-indigo-50/40 sm:p-6"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-extrabold text-slate-900 [&::-webkit-details-marker]:hidden">{question}<span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-lg text-indigo-700 transition group-open:rotate-45">+</span></summary><p className="mt-4 max-w-2xl pr-8 text-sm leading-7 text-slate-600">{answer}</p></details>)}
+          </div>
+        </div>
+      </section>
+
       <section className="px-5 pb-24 sm:px-8 lg:px-12 lg:pb-32">
         <div className="relative mx-auto max-w-[1440px] overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-800 px-6 py-16 text-center text-white shadow-2xl shadow-indigo-900/20 sm:px-12 sm:py-20">
           <div className="absolute -right-20 -top-40 h-96 w-96 rounded-full border border-white/10" />
@@ -352,13 +456,18 @@ export function LandingPage() {
         </div>
       </section>
 
-      <footer className="border-t border-slate-200 bg-[#fafaff]">
-        <div className="mx-auto flex max-w-[1440px] flex-col gap-5 px-5 py-9 sm:px-8 md:flex-row md:items-center md:justify-between lg:px-12">
-          <Link href="/" className="text-xl font-black tracking-tight">Touch<span className="text-indigo-600">Card</span><span className="ml-2 text-[9px] font-extrabold tracking-[.18em] text-slate-400">BUSINESS</span></Link>
-          <p className="text-xs text-slate-500">La carte digitale qui connecte votre activité.</p>
-          <div className="flex gap-6 text-xs font-semibold text-slate-500"><Link className="transition hover:text-indigo-600" href="/login">Connexion</Link><Link className="transition hover:text-indigo-600" href="/register">Créer un compte</Link></div>
-          <p className="text-xs text-slate-400">© 2026 TouchCard Business. Tous droits réservés.</p>
+      <footer className="border-t border-slate-200 bg-[#0e1028] text-white">
+        <div className="mx-auto grid max-w-[1440px] gap-12 px-5 py-16 sm:px-8 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:px-12 lg:py-20">
+          <div>
+            <Link href="/" className="inline-flex items-center gap-2.5"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 text-lg font-black">T</span><span className="text-xl font-black">Touch<span className="text-indigo-300">Card</span><span className="ml-2 text-[9px] font-extrabold tracking-[.18em] text-indigo-300">BUSINESS</span></span></Link>
+            <p className="mt-5 max-w-sm text-sm leading-7 text-slate-400">La plateforme qui connecte votre identité professionnelle, vos contacts et votre relation client.</p>
+            <Link href="/register" className="mt-7 inline-flex rounded-xl bg-indigo-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-400">Créer mon espace <Arrow /></Link>
+          </div>
+          <div><h3 className="text-sm font-extrabold">Plateforme</h3><ul className="mt-5 space-y-3 text-sm text-slate-400"><li><a className="hover:text-white" href="#solutions">Solutions</a></li><li><a className="hover:text-white" href="#experience">Fonctionnalités</a></li><li><a className="hover:text-white" href="#demo">Démonstration</a></li><li><a className="hover:text-white" href="#tarifs">Tarifs</a></li></ul></div>
+          <div><h3 className="text-sm font-extrabold">Découvrir</h3><ul className="mt-5 space-y-3 text-sm text-slate-400"><li><a className="hover:text-white" href="#fonctionnement">Comment ça marche</a></li><li><a className="hover:text-white" href="#faq">Questions fréquentes</a></li><li><Link className="hover:text-white" href="/register">Créer un compte</Link></li><li><Link className="hover:text-white" href="/login">Connexion</Link></li></ul></div>
+          <div><h3 className="text-sm font-extrabold">Votre espace</h3><p className="mt-5 text-sm leading-7 text-slate-400">Prêt à donner une nouvelle dimension à vos échanges professionnels ?</p><Link href="/register" className="mt-4 inline-flex text-sm font-bold text-indigo-300 hover:text-white">Commencer maintenant ↗</Link></div>
         </div>
+        <div className="border-t border-white/10"><div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-5 py-6 text-xs text-slate-500 sm:px-8 md:flex-row md:items-center md:justify-between lg:px-12"><p>© 2026 TouchCard Business. Tous droits réservés.</p><p>Conçu pour connecter les opportunités.</p><div className="flex gap-5"><Link href="/login" className="hover:text-white">Connexion</Link><Link href="/register" className="hover:text-white">Inscription</Link></div></div></div>
       </footer>
     </main>
   );
