@@ -234,7 +234,6 @@ create policy nfc_manage_member on public.nfc_tags for all to authenticated usin
 
 create policy contacts_manage_member on public.contacts for all to authenticated using (public.is_org_member(organization_id)) with check (public.is_org_member(organization_id));
 create policy events_read_member on public.card_events for select to authenticated using (public.is_org_member(organization_id));
-create policy events_insert_for_published_card on public.card_events for insert to anon,authenticated with check (exists(select 1 from public.cards c where c.id = card_id and c.organization_id = card_events.organization_id and c.is_published = true));
 
 create policy loyalty_programs_manage on public.loyalty_programs for all to authenticated using (public.has_org_role(organization_id,array['organization_admin','manager','staff','super_admin']::public.app_role[])) with check (public.has_org_role(organization_id,array['organization_admin','manager','staff','super_admin']::public.app_role[]));
 create policy loyalty_accounts_manage on public.loyalty_accounts for all to authenticated using (exists(select 1 from public.loyalty_programs p where p.id = program_id and public.is_org_member(p.organization_id))) with check (exists(select 1 from public.loyalty_programs p where p.id = program_id and public.is_org_member(p.organization_id)));
@@ -245,7 +244,6 @@ create policy subscriptions_select_admin on public.subscriptions for select to a
 
 grant usage on schema public to anon,authenticated;
 grant select on public.cards,public.card_links,public.products to anon,authenticated;
-grant insert on public.card_events to anon,authenticated;
 grant select,insert,update on public.profiles to authenticated;
 grant select,insert,update,delete on public.organizations,public.organization_members,public.cards,public.card_links,public.nfc_tags,public.contacts,public.loyalty_programs,public.loyalty_accounts,public.products to authenticated;
 grant select on public.card_events,public.points_transactions,public.subscriptions to authenticated;
@@ -263,4 +261,4 @@ create trigger on_auth_user_created after insert on auth.users
 for each row execute procedure public.handle_new_user();
 
 -- Les écritures de points doivent passer par une fonction RPC transactionnelle.
--- Ajouter une protection anti-abus au suivi public des événements avant production.
+-- Les événements publics seront enregistrés via une Edge Function avec validation et limitation de débit.
