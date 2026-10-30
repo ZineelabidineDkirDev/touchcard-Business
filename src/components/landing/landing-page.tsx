@@ -200,9 +200,16 @@ export function LandingPage() {
             <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 text-lg font-black text-white shadow-lg shadow-indigo-600/20 transition-transform group-hover:rotate-6">T</span>
             <span className="text-xl font-black tracking-tight text-slate-950">Touch<span className="text-indigo-600">Card</span><span className="ml-2 hidden rounded-md bg-indigo-50 px-2 py-1 align-middle text-[9px] font-extrabold tracking-[.18em] text-indigo-700 sm:inline-block">BUSINESS</span></span>
           </Link>
-          <nav aria-label="Navigation principale" className="hidden items-center gap-7 text-sm font-semibold text-slate-600 xl:flex">
-            <a className="transition hover:text-indigo-600" href="#solutions">Solutions</a>
+          <nav aria-label="Navigation principale" className="hidden items-center gap-6 text-sm font-semibold text-slate-600 xl:flex">
+            <details className="group relative">
+              <summary className="flex cursor-pointer list-none items-center gap-2 transition hover:text-indigo-600 [&::-webkit-details-marker]:hidden">Solutions <span className="text-[10px] transition group-open:rotate-180">⌄</span></summary>
+              <div className="absolute left-0 top-full z-50 mt-4 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-slate-950/10">
+                <a className="block rounded-xl px-4 py-3 hover:bg-indigo-50 hover:text-indigo-700" href="#solutions"><span className="block text-sm font-bold">Toutes les fonctionnalités</span><span className="mt-1 block text-xs font-normal text-slate-500">NFC, QR, CRM, fidélité et boutique</span></a>
+                <a className="block rounded-xl px-4 py-3 hover:bg-indigo-50 hover:text-indigo-700" href="#secteurs"><span className="block text-sm font-bold">Par secteur d’activité</span><span className="mt-1 block text-xs font-normal text-slate-500">Indépendants, commerces et équipes</span></a>
+              </div>
+            </details>
             <a className="transition hover:text-indigo-600" href="#experience">Plateforme</a>
+            <a className="transition hover:text-indigo-600" href="#fonctionnement">Comment ça marche</a>
             <a className="transition hover:text-indigo-600" href="#demo">Démo</a>
             <a className="transition hover:text-indigo-600" href="#tarifs">Tarifs</a>
             <a className="transition hover:text-indigo-600" href="#faq">FAQ</a>
@@ -230,31 +237,31 @@ export function LandingPage() {
         )}
       </header>
 
-      <section className="relative isolate bg-[#f7f7ff]">
+      <section className="relative isolate overflow-hidden bg-[#090b1b] text-white">
         <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute -right-48 -top-56 h-[42rem] w-[42rem] rounded-full bg-indigo-200/50 blur-[100px]" />
-          <div className="absolute -bottom-64 -left-40 h-[34rem] w-[34rem] rounded-full bg-violet-200/40 blur-[100px]" />
-          <div className="absolute inset-0 opacity-[.24]" style={{ backgroundImage: "radial-gradient(#818cf8 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+          <div className="absolute -right-48 -top-56 h-[42rem] w-[42rem] rounded-full bg-indigo-600/30 blur-[120px]" />
+          <div className="absolute -bottom-64 -left-40 h-[34rem] w-[34rem] rounded-full bg-violet-700/25 blur-[120px]" />
+          <div className="absolute inset-0 opacity-[.16]" style={{ backgroundImage: "radial-gradient(#a5b4fc 1px, transparent 1px)", backgroundSize: "30px 30px" }} />
         </div>
         <div className="mx-auto grid min-h-[760px] max-w-[1440px] items-center gap-16 px-5 py-20 sm:px-8 lg:grid-cols-[1fr_1.08fr] lg:px-12 lg:py-28">
           <motion.div initial="hidden" animate="visible" variants={reveal} transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}>
-            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-200/80 bg-white/80 px-4 py-2 text-[11px] font-extrabold uppercase tracking-[.16em] text-indigo-700 shadow-sm">
+            <div className="inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-white/[.06] px-4 py-2 text-[11px] font-extrabold uppercase tracking-[.16em] text-indigo-200 shadow-sm backdrop-blur">
               <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" /></span>
               La nouvelle génération de cartes professionnelles
             </div>
-            <h1 className="mt-8 max-w-3xl text-[clamp(3.25rem,6.5vw,6.4rem)] font-black leading-[.99] tracking-[-.065em] text-slate-950">
+            <h1 className="mt-8 max-w-3xl text-[clamp(3.25rem,6.5vw,6.4rem)] font-black leading-[.99] tracking-[-.065em] text-white">
               Chaque rencontre peut devenir <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent">une opportunité.</span>
             </h1>
-            <p className="mt-8 max-w-xl text-lg leading-8 text-slate-600 sm:text-xl sm:leading-9">
+            <p className="mt-8 max-w-xl text-lg leading-8 text-slate-300 sm:text-xl sm:leading-9">
               Bien plus qu’une carte de visite. Créez votre identité digitale, partagez-la avec NFC ou QR code, développez vos contacts et fidélisez vos clients depuis une seule plateforme.
             </p>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <Link href="/register" className="group inline-flex items-center justify-center gap-3 rounded-2xl bg-indigo-600 px-7 py-[1.125rem] text-base font-bold text-white shadow-xl shadow-indigo-600/25 transition duration-300 hover:-translate-y-1 hover:bg-indigo-700">
+              <Link href="/register" className="group inline-flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-indigo-500 to-violet-500 px-7 py-[1.125rem] text-base font-bold text-white shadow-xl shadow-indigo-950/40 transition duration-300 hover:-translate-y-1 hover:from-indigo-400 hover:to-violet-400">
                 Commencer maintenant <span className="transition-transform group-hover:translate-x-1">→</span>
               </Link>
-              <a href="#solutions" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white/80 px-7 py-[1.125rem] text-base font-bold text-slate-700 shadow-sm transition hover:border-indigo-200 hover:text-indigo-700">Explorer les solutions <span>↓</span></a>
+              <a href="#solutions" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/15 bg-white/[.06] px-7 py-[1.125rem] text-base font-bold text-white shadow-sm backdrop-blur transition hover:border-indigo-300/50 hover:bg-white/10">Explorer les solutions <span>↓</span></a>
             </div>
-            <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-sm font-medium text-slate-500">
+            <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-sm font-medium text-slate-300">
               <span className="inline-flex items-center gap-2"><span className="text-emerald-500">✓</span> Sans application à installer</span>
               <span className="inline-flex items-center gap-2"><span className="text-emerald-500">✓</span> NFC, QR code et lien</span>
               <span className="inline-flex items-center gap-2"><span className="text-emerald-500">✓</span> Pour les équipes</span>
@@ -265,10 +272,10 @@ export function LandingPage() {
             <DashboardPreview />
           </motion.div>
         </div>
-        <div className="border-t border-indigo-100/80 bg-white/70">
+        <div className="border-t border-white/10 bg-[#0d1025]/90">
           <div className="mx-auto grid max-w-[1440px] grid-cols-2 gap-5 px-5 py-7 text-center sm:grid-cols-4 sm:px-8 lg:px-12">
             {[["01", "Une identité digitale"], ["02", "Un partage instantané"], ["03", "Des contacts organisés"], ["04", "Une relation durable"]].map(([n, label]) => (
-              <div key={n} className="flex items-center justify-center gap-3"><span className="text-xs font-black text-indigo-500">{n}</span><span className="text-xs font-bold text-slate-600 sm:text-sm">{label}</span></div>
+              <div key={n} className="flex items-center justify-center gap-3"><span className="text-xs font-black text-indigo-500">{n}</span><span className="text-xs font-bold text-slate-300 sm:text-sm">{label}</span></div>
             ))}
           </div>
         </div>
@@ -388,7 +395,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="px-5 py-24 sm:px-8 lg:px-12 lg:py-28">
+      <section id="secteurs" className="px-5 py-24 sm:px-8 lg:px-12 lg:py-28">
         <div className="mx-auto max-w-[1280px]">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">Pensé pour votre métier</p>
