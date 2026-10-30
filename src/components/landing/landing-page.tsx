@@ -424,33 +424,23 @@ export function LandingPage() {
           </motion.div>
           <div className="mt-20 grid gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {[
-              {name:"Business",type:"Réseau professionnel",desc:"Présentez votre profil, vos coordonnées et tous vos liens professionnels en un seul geste.",tone:"from-[#172b72] via-[#343e9b] to-[#7651cf]",chip:"BUSINESS",number:"01"},
-              {name:"Contact",type:"Partage de coordonnées",desc:"Facilitez l’échange de vos informations et l’enregistrement de vos coordonnées.",tone:"from-[#090b14] via-[#20243a] to-[#41415c]",chip:"CONTACT",number:"02"},
-              {name:"E-Service",type:"Services & accès rapides",desc:"Dirigez vos clients vers vos services, réservations, menus ou pages utiles.",tone:"from-[#075b69] via-[#087f8c] to-[#42b7b0]",chip:"E-SERVICE",number:"03"},
-              {name:"Avis Google",type:"Collecte d’avis clients",desc:"Invitez vos clients à découvrir votre page Google et à partager leur expérience.",tone:"from-[#26366f] via-[#4657a6] to-[#7785d8]",chip:"AVIS GOOGLE",number:"04"},
-              {name:"Personnalisée",type:"Logo personnalisé",desc:"Affichez votre propre logo au centre et créez une carte à l’image de votre marque.",tone:"from-[#765038] via-[#9b6b50] to-[#d0a47a]",chip:"VOTRE MARQUE",number:"05"}
+              {name:"Business",type:"Réseau professionnel",desc:"Présentez votre profil, vos coordonnées et tous vos liens professionnels en un seul geste.",tone:"metal",number:"01"},
+              {name:"Contact",type:"Partage de coordonnées",desc:"Facilitez l’échange de vos informations et l’enregistrement de vos coordonnées.",tone:"metal",number:"02"},
+              {name:"E-Service",type:"Services & accès rapides",desc:"Dirigez vos clients vers vos services, réservations, menus ou pages utiles.",tone:"metal",number:"03"},
+              {name:"Avis Google",type:"Collecte d’avis clients",desc:"Invitez vos clients à découvrir votre page Google et à partager leur expérience.",tone:"from-[#111827] via-[#202b50] to-[#394b8c]",number:"04"},
+              {name:"Personnalisée",type:"Logo personnalisé",desc:"Affichez votre propre logo au centre et créez une carte à l’image de votre marque.",tone:"from-[#171521] via-[#29233f] to-[#514078]",number:"05"}
             ].map((card,index) => (
               <motion.article key={card.name} initial="hidden" whileInView="visible" viewport={{ once:true, amount:.18 }} variants={reveal} transition={{ duration:.6, delay:index*.07 }} className="group">
                 <div className="relative mx-auto flex h-[245px] items-center justify-center [perspective:1100px]">
                   <div className="absolute bottom-5 h-9 w-[78%] rounded-[50%] bg-indigo-950/70 blur-2xl transition-all duration-500 group-hover:scale-90 group-hover:opacity-60" />
-                  <div className={"relative h-[190px] w-full max-w-[290px] overflow-hidden rounded-[1.35rem] border border-white/25 bg-gradient-to-br p-5 shadow-[0_28px_55px_-24px_rgba(25,28,70,.8)] transition-all duration-500 [transform:rotateY(-17deg)_rotateX(9deg)_rotateZ(-3deg)] group-hover:[transform:rotateY(-5deg)_rotateX(2deg)_rotateZ(0deg)_translateY(-10px)] group-hover:shadow-[0_38px_65px_-25px_rgba(99,102,241,.55)] " + card.tone}>
-                    <div className="pointer-events-none absolute -right-14 -top-20 h-52 w-52 rounded-full border border-white/20" />
-                    <div className="pointer-events-none absolute -right-6 -top-12 h-44 w-44 rounded-full border border-white/15" />
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-black/25" />
-                    <div className="relative flex items-center justify-between text-white">
-                      <span className="text-[9px] font-black tracking-[.25em]">TOUCHCARD</span>
-                      <span className="rounded-lg border border-white/25 bg-white/10 px-2 py-1 text-[7px] font-black tracking-[.14em]">{card.chip}</span>
+                  <div className={"relative h-[190px] w-full max-w-[290px] overflow-hidden rounded-[1.35rem] border p-5 shadow-[0_28px_55px_-24px_rgba(0,0,0,.8)] transition-all duration-500 [transform:rotateY(-17deg)_rotateX(9deg)_rotateZ(-3deg)] group-hover:[transform:rotateY(-5deg)_rotateX(2deg)_rotateZ(0deg)_translateY(-10px)] group-hover:shadow-[0_38px_65px_-25px_rgba(99,102,241,.5)] " + (card.tone === "metal" ? "border-white/20 bg-[#101114]" : "border-white/25 bg-gradient-to-br " + card.tone)}>
+                    {card.tone === "metal" && <div className="pointer-events-none absolute inset-0 opacity-80" style={{backgroundImage:"repeating-linear-gradient(90deg,rgba(255,255,255,.055) 0px,rgba(255,255,255,.012) 1px,transparent 2px,transparent 4px),linear-gradient(145deg,#25262a 0%,#090a0c 48%,#1b1c20 100%)"}} />}
+                    {card.tone !== "metal" && <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/35" />}
+                    <div className="relative flex h-full flex-col items-center justify-center text-white">
+                      <img src="/brand/touchcard-mark.svg" alt="Logo TouchCard" className="h-[68px] w-[68px] object-contain drop-shadow-[0_4px_12px_rgba(99,102,241,.45)]" />
+                      <span className="mt-4 text-[11px] font-extrabold uppercase tracking-[.22em] text-white">{card.name}</span>
                     </div>
-                    <div className="relative flex h-[92px] items-center justify-center">
-                      <div className="flex h-[76px] w-[76px] items-center justify-center rounded-2xl border border-white/30 bg-white/15 shadow-[0_8px_30px_rgba(0,0,0,.18)] backdrop-blur-md">
-                        <img src="/brand/touchcard-mark.svg" alt="Logo TouchCard" className="h-14 w-14 object-contain drop-shadow-[0_3px_8px_rgba(0,0,0,.25)]" />
-                      </div>
-                    </div>
-                    <div className="relative flex items-end justify-between text-white">
-                      <div><div className="text-[9px] font-extrabold tracking-[.16em]">TOUCHCARD BUSINESS</div><div className="mt-1 text-[7px] font-medium tracking-[.13em] text-white/75">{card.name.toUpperCase()}</div></div>
-                      <div className="flex items-center gap-1 text-[8px] font-bold tracking-[.14em]"><span className="text-sm">)))</span>NFC</div>
-                    </div>
-                    <div className="absolute bottom-3 left-5 h-1 w-9 rounded-full bg-white/45" />
+                    <div className="pointer-events-none absolute bottom-3 right-4 text-[7px] font-bold tracking-[.2em] text-white/40">NFC</div>
                   </div>
                 </div>
                 <div className="mt-5 flex items-center justify-between gap-2">
