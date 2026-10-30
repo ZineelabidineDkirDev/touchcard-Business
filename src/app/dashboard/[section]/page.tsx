@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 
 const sections: Record<string, { title: string; description: string; status: string }> = {
   cards: { title: "Cartes digitales", description: "Créez vos profils professionnels, personnalisez leur design et préparez vos liens NFC et QR.", status: "La gestion des cartes sera connectée à la base de données lors de la prochaine étape." },
@@ -10,6 +11,7 @@ const sections: Record<string, { title: string; description: string; status: str
 };
 
 export default async function DashboardSection({ params }: { params: Promise<{ section: string }> }) {
+  await connection();
   const { section } = await params;
   const content = sections[section];
   if (!content) notFound();
