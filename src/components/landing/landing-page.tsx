@@ -115,7 +115,7 @@ function DashboardPreview() {
       <div className="rounded-[2.25rem] border border-white/10 bg-[#10132c] p-3 shadow-[0_35px_100px_-30px_rgba(49,46,129,.55)] sm:p-4">
         <div className="flex items-center justify-between px-3 py-3">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 text-xs font-black text-white">T</span>
+            <img src="/brand/touchcard-mark.svg" alt="" className="h-8 w-8 object-contain" />
             <span className="text-sm font-bold tracking-tight text-white">TouchCard <span className="font-medium text-indigo-300">Business</span></span>
           </div>
           <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-semibold text-emerald-300">● Profil actif</span>
@@ -197,7 +197,7 @@ export function LandingPage() {
       <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/85 backdrop-blur-xl">
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-4 sm:px-8 lg:px-12">
           <Link href="/" className="group flex items-center gap-2.5">
-            <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 text-lg font-black text-white shadow-lg shadow-indigo-600/20 transition-transform group-hover:rotate-6">T</span>
+            <img src="/brand/touchcard-mark.svg" alt="TouchCard" className="h-11 w-11 object-contain transition-transform group-hover:rotate-3" />
             <span className="text-xl font-black tracking-tight text-slate-950">Touch<span className="text-indigo-600">Card</span><span className="ml-2 hidden rounded-md bg-indigo-50 px-2 py-1 align-middle text-[9px] font-extrabold tracking-[.18em] text-indigo-700 sm:inline-block">BUSINESS</span></span>
           </Link>
           <nav aria-label="Navigation principale" className="hidden items-center gap-6 text-sm font-semibold text-slate-600 xl:flex">
@@ -466,7 +466,7 @@ export function LandingPage() {
       <footer className="border-t border-slate-200 bg-[#0e1028] text-white">
         <div className="mx-auto grid max-w-[1440px] gap-12 px-5 py-16 sm:px-8 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:px-12 lg:py-20">
           <div>
-            <Link href="/" className="inline-flex items-center gap-2.5"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 text-lg font-black">T</span><span className="text-xl font-black">Touch<span className="text-indigo-300">Card</span><span className="ml-2 text-[9px] font-extrabold tracking-[.18em] text-indigo-300">BUSINESS</span></span></Link>
+            <Link href="/" className="inline-flex items-center gap-2.5"><img src="/brand/touchcard-mark.svg" alt="" className="h-11 w-11 object-contain" /><span className="text-xl font-black">Touch<span className="text-indigo-300">Card</span><span className="ml-2 text-[9px] font-extrabold tracking-[.18em] text-indigo-300">BUSINESS</span></span></Link>
             <p className="mt-5 max-w-sm text-sm leading-7 text-slate-400">La plateforme qui connecte votre identité professionnelle, vos contacts et votre relation client.</p>
             <Link href="/register" className="mt-7 inline-flex rounded-xl bg-indigo-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-400">Créer mon espace <Arrow /></Link>
           </div>
