@@ -198,7 +198,7 @@ export function LandingPage() {
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-5 py-4 sm:px-8 lg:px-12">
           <Link href="/" className="group flex items-center gap-2.5">
             <img src="/brand/touchcard-mark.svg" alt="TouchCard" className="h-11 w-11 object-contain transition-transform group-hover:rotate-3" />
-            <span className="text-xl font-black tracking-tight text-slate-950">Touch<span className="text-indigo-600">Card</span><span className="ml-2 hidden rounded-md bg-indigo-50 px-2 py-1 align-middle text-[9px] font-extrabold tracking-[.18em] text-indigo-700 sm:inline-block">BUSINESS</span></span>
+            <span className="text-xl font-black tracking-tight text-white">Touch<span className="text-indigo-300">Card</span><span className="ml-2 hidden rounded-md border border-white/15 bg-white/10 px-2 py-1 align-middle text-[9px] font-extrabold tracking-[.18em] text-indigo-200 sm:inline-block">BUSINESS</span></span>
           </Link>
           <nav aria-label="Navigation principale" className="hidden items-center gap-6 text-sm font-semibold text-slate-600 xl:flex">
             <details className="group relative">
