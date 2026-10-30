@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { AuthForm } from "@/components/auth/auth-form";
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ registered?: string }> }) {
+  await connection();
   const params = await searchParams;
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-5 py-12">
