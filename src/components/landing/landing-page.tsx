@@ -405,40 +405,59 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section id="secteurs" className="relative isolate overflow-hidden bg-[#f6f6ff] px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
-        <div className="pointer-events-none absolute -right-40 top-10 -z-10 h-[32rem] w-[32rem] rounded-full bg-violet-200/50 blur-[110px]" />
-        <div className="pointer-events-none absolute -bottom-48 -left-32 -z-10 h-[30rem] w-[30rem] rounded-full bg-indigo-200/50 blur-[110px]" />
-        <div className="mx-auto max-w-[1380px]">
+      <section id="secteurs" className="relative isolate overflow-hidden bg-[#080a1b] px-5 py-24 text-white sm:px-8 lg:px-12 lg:py-32">
+        <div className="pointer-events-none absolute -right-40 top-10 -z-10 h-[32rem] w-[32rem] rounded-full bg-violet-700/25 blur-[120px]" />
+        <div className="pointer-events-none absolute -bottom-48 -left-32 -z-10 h-[30rem] w-[30rem] rounded-full bg-indigo-700/25 blur-[120px]" />
+        <div className="mx-auto max-w-[1480px]">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={reveal} className="mx-auto max-w-3xl text-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-white/75 px-4 py-2 text-[10px] font-extrabold uppercase tracking-[.2em] text-indigo-700 shadow-sm"><span className="h-1.5 w-1.5 rounded-full bg-violet-500" /> Collection TouchCard NFC</span>
-            <h2 className="mt-6 text-4xl font-black tracking-[-.05em] text-slate-950 sm:text-5xl lg:text-6xl">Une solution pour chaque <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 bg-clip-text text-transparent">façon de travailler.</span></h2>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-500">Choisissez le style de carte qui représente votre activité. Un simple contact pour partager votre profil professionnel, vos liens et vos coordonnées.</p>
+            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-white/[.06] px-4 py-2 text-[10px] font-extrabold uppercase tracking-[.2em] text-indigo-200 shadow-sm"><span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400" /> Collection TouchCard NFC</span>
+            <h2 className="mt-6 text-4xl font-black tracking-[-.05em] text-white sm:text-5xl lg:text-6xl">Une carte pour chaque <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">usage professionnel.</span></h2>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-300">Découvrez nos cinq modèles NFC : partage professionnel, prise de contact, services digitaux, avis Google et identité personnalisée.</p>
           </motion.div>
-          <div className="mt-20 grid gap-x-7 gap-y-16 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-20 grid gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {[
-              {name:"Essential",type:"PVC · Minimaliste",desc:"La carte polyvalente pour les indépendants et les premiers échanges.",tone:"from-[#26366f] via-[#4657a6] to-[#7785d8]",chip:"ESSENTIAL",number:"01"},
-              {name:"Obsidian",type:"Noir mat · Premium",desc:"Une finition sobre et affirmée pour les profils qui veulent marquer les esprits.",tone:"from-[#090b14] via-[#20243a] to-[#41415c]",chip:"OBSIDIAN",number:"02"},
-              {name:"Titanium",type:"Métal · Élégance",desc:"Un look métallique raffiné pour les dirigeants et les professionnels exigeants.",tone:"from-[#7b8494] via-[#c5cad2] to-[#eef0f4]",chip:"TITANIUM",number:"03",dark:true},
-              {name:"Nature",type:"Effet bois · Éco-inspiré",desc:"Une esthétique chaleureuse pour les marques sensibles à leur identité et à leur univers.",tone:"from-[#765038] via-[#b78a5c] to-[#e0bd91]",chip:"NATURE",number:"04",dark:true}
+              {name:"Business",type:"Réseau professionnel",desc:"Présentez votre profil, vos coordonnées et tous vos liens professionnels en un seul geste.",tone:"from-[#172b72] via-[#343e9b] to-[#7651cf]",chip:"BUSINESS",number:"01"},
+              {name:"Contact",type:"Partage de coordonnées",desc:"Facilitez l’échange de vos informations et l’enregistrement de vos coordonnées.",tone:"from-[#090b14] via-[#20243a] to-[#41415c]",chip:"CONTACT",number:"02"},
+              {name:"E-Service",type:"Services & accès rapides",desc:"Dirigez vos clients vers vos services, réservations, menus ou pages utiles.",tone:"from-[#075b69] via-[#087f8c] to-[#42b7b0]",chip:"E-SERVICE",number:"03"},
+              {name:"Avis Google",type:"Collecte d’avis clients",desc:"Invitez vos clients à découvrir votre page Google et à partager leur expérience.",tone:"from-[#26366f] via-[#4657a6] to-[#7785d8]",chip:"AVIS GOOGLE",number:"04"},
+              {name:"Personnalisée",type:"Logo personnalisé",desc:"Affichez votre propre logo au centre et créez une carte à l’image de votre marque.",tone:"from-[#765038] via-[#9b6b50] to-[#d0a47a]",chip:"VOTRE MARQUE",number:"05"}
             ].map((card,index) => (
-              <motion.article key={card.name} initial="hidden" whileInView="visible" viewport={{ once:true, amount:.18 }} variants={reveal} transition={{ duration:.6, delay:index*.09 }} className="group">
+              <motion.article key={card.name} initial="hidden" whileInView="visible" viewport={{ once:true, amount:.18 }} variants={reveal} transition={{ duration:.6, delay:index*.07 }} className="group">
                 <div className="relative mx-auto flex h-[245px] items-center justify-center [perspective:1100px]">
-                  <div className="absolute bottom-5 h-9 w-[78%] rounded-[50%] bg-indigo-950/20 blur-2xl transition-all duration-500 group-hover:scale-90 group-hover:opacity-60" />
-                  <div className={`relative h-[190px] w-full max-w-[310px] overflow-hidden rounded-[1.35rem] border border-white/35 bg-gradient-to-br p-6 shadow-[0_28px_55px_-24px_rgba(25,28,70,.48)] transition-all duration-500 [transform:rotateY(-17deg)_rotateX(9deg)_rotateZ(-3deg)] group-hover:[transform:rotateY(-5deg)_rotateX(2deg)_rotateZ(0deg)_translateY(-10px)] group-hover:shadow-[0_38px_65px_-25px_rgba(79,70,229,.38)] ${card.tone}`}>
-                    <div className="pointer-events-none absolute -right-14 -top-20 h-52 w-52 rounded-full border border-white/20" /><div className="pointer-events-none absolute -right-6 -top-12 h-44 w-44 rounded-full border border-white/15" />
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-black/15" />
-                    <div className={`relative flex items-start justify-between ${card.dark ? "text-slate-900" : "text-white"}`}><div><div className="text-[9px] font-black tracking-[.28em] opacity-80">TOUCHCARD</div><div className="mt-1 text-[7px] font-semibold tracking-[.25em] opacity-60">BUSINESS</div></div><span className="rounded-lg border border-current/20 px-2 py-1 text-[8px] font-black tracking-[.18em]">{card.chip}</span></div>
-                    <div className={`relative mt-8 flex items-end justify-between ${card.dark ? "text-slate-900" : "text-white"}`}><div><div className="text-[21px] font-black tracking-[-.06em]">Alex Morgan</div><div className="mt-1 text-[9px] font-semibold tracking-[.12em] opacity-75">CREATIVE DIRECTOR</div></div><div className="flex h-11 w-11 items-center justify-center rounded-xl border border-current/25 bg-white/10 text-lg font-black">TC</div></div>
-                    <div className={`absolute bottom-3 right-5 flex items-center gap-1.5 text-[8px] font-bold tracking-[.16em] ${card.dark ? "text-slate-900" : "text-white"}`}><span className="text-sm">)))</span> NFC</div>
-                    <div className="absolute bottom-4 left-6 h-1 w-10 rounded-full bg-current/35" />
+                  <div className="absolute bottom-5 h-9 w-[78%] rounded-[50%] bg-indigo-950/70 blur-2xl transition-all duration-500 group-hover:scale-90 group-hover:opacity-60" />
+                  <div className={"relative h-[190px] w-full max-w-[290px] overflow-hidden rounded-[1.35rem] border border-white/25 bg-gradient-to-br p-5 shadow-[0_28px_55px_-24px_rgba(25,28,70,.8)] transition-all duration-500 [transform:rotateY(-17deg)_rotateX(9deg)_rotateZ(-3deg)] group-hover:[transform:rotateY(-5deg)_rotateX(2deg)_rotateZ(0deg)_translateY(-10px)] group-hover:shadow-[0_38px_65px_-25px_rgba(99,102,241,.55)] " + card.tone}>
+                    <div className="pointer-events-none absolute -right-14 -top-20 h-52 w-52 rounded-full border border-white/20" />
+                    <div className="pointer-events-none absolute -right-6 -top-12 h-44 w-44 rounded-full border border-white/15" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-black/25" />
+                    <div className="relative flex items-center justify-between text-white">
+                      <span className="text-[9px] font-black tracking-[.25em]">TOUCHCARD</span>
+                      <span className="rounded-lg border border-white/25 bg-white/10 px-2 py-1 text-[7px] font-black tracking-[.14em]">{card.chip}</span>
+                    </div>
+                    <div className="relative flex h-[92px] items-center justify-center">
+                      <div className="flex h-[76px] w-[76px] items-center justify-center rounded-2xl border border-white/30 bg-white/15 shadow-[0_8px_30px_rgba(0,0,0,.18)] backdrop-blur-md">
+                        <img src="/brand/touchcard-mark.svg" alt="Logo TouchCard" className="h-14 w-14 object-contain drop-shadow-[0_3px_8px_rgba(0,0,0,.25)]" />
+                      </div>
+                    </div>
+                    <div className="relative flex items-end justify-between text-white">
+                      <div><div className="text-[9px] font-extrabold tracking-[.16em]">TOUCHCARD BUSINESS</div><div className="mt-1 text-[7px] font-medium tracking-[.13em] text-white/75">{card.name.toUpperCase()}</div></div>
+                      <div className="flex items-center gap-1 text-[8px] font-bold tracking-[.14em]"><span className="text-sm">)))</span>NFC</div>
+                    </div>
+                    <div className="absolute bottom-3 left-5 h-1 w-9 rounded-full bg-white/45" />
                   </div>
                 </div>
-                <div className="mt-5 flex items-center justify-between gap-3"><div><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-indigo-600">{card.type}</p><h3 className="mt-2 text-xl font-black tracking-tight text-slate-950">{card.name}</h3></div><span className="text-xs font-black tracking-[.18em] text-slate-300">{card.number}</span></div>
-                <p className="mt-3 text-sm leading-7 text-slate-500">{card.desc}</p>
+                <div className="mt-5 flex items-center justify-between gap-2">
+                  <div><p className="text-[10px] font-extrabold uppercase tracking-[.16em] text-indigo-300">{card.type}</p><h3 className="mt-2 text-xl font-black tracking-tight text-white">{card.name}</h3></div>
+                  <span className="text-xs font-black tracking-[.18em] text-slate-500">{card.number}</span>
+                </div>
+                <p className="mt-3 text-sm leading-7 text-slate-400">{card.desc}</p>
+                {card.name === "Personnalisée" && <p className="mt-3 inline-flex rounded-full border border-fuchsia-400/25 bg-fuchsia-400/10 px-3 py-1.5 text-[10px] font-bold text-fuchsia-200">Votre logo au centre</p>}
               </motion.article>
             ))}
           </div>
-          <div className="mt-16 flex flex-col items-center justify-between gap-5 rounded-3xl border border-white/80 bg-white/75 p-6 shadow-[0_20px_60px_-45px_rgba(49,46,129,.3)] backdrop-blur sm:flex-row sm:p-8"><div><p className="text-sm font-extrabold text-slate-900">Votre identité, votre style.</p><p className="mt-1 text-sm text-slate-500">Chaque carte NFC renvoie vers votre profil digital personnalisable.</p></div><Link href="/register" className="inline-flex shrink-0 items-center gap-3 rounded-xl border border-indigo-200 bg-indigo-50 px-5 py-3.5 text-sm font-extrabold text-indigo-700 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-100">Créer ma carte <Arrow /></Link></div>
+          <div className="mt-16 flex flex-col items-center justify-between gap-5 rounded-3xl border border-white/10 bg-white/[.06] p-6 shadow-[0_20px_60px_-45px_rgba(49,46,129,.5)] backdrop-blur sm:flex-row sm:p-8">
+            <div><p className="text-sm font-extrabold text-white">Votre marque, au cœur de chaque rencontre.</p><p className="mt-1 text-sm text-slate-300">Choisissez votre modèle NFC et partagez votre univers en un simple geste.</p></div>
+            <Link href="/register" className="inline-flex shrink-0 items-center gap-3 rounded-xl border border-indigo-300/30 bg-indigo-500/20 px-5 py-3.5 text-sm font-extrabold text-indigo-100 transition hover:-translate-y-0.5 hover:bg-indigo-500/35">Créer ma carte <Arrow /></Link>
+          </div>
         </div>
       </section>
       <section id="tarifs" className="bg-[#f7f7ff] px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
