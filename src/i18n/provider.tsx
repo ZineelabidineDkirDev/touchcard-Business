@@ -112,7 +112,7 @@ export function useI18n() {
   return value;
 }
 
-export function LanguageSwitcher() {
+export function I18nText({ message }: { message: MessageKey }) {\n  const { t } = useI18n();\n  return <>{t(message)}</>;\n}\n\nexport function LanguageSwitcher() {
   const { locale, setLocale, t } = useI18n();
   return (
     <label className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm">
