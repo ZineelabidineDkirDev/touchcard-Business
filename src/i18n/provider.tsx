@@ -8,7 +8,7 @@ const messages = {
   fr: {
     language:"Langue", french:"Français", english:"English", arabic:"العربية",
     workspace:"Espace professionnel", logout:"Se déconnecter", overview:"Vue d’ensemble",
-    cards:"Cartes digitales", contacts:"Contacts & prospects", team:"Équipe",
+    cards:"Cartes digitales", yourProfiles:"Vos profils professionnels", newLeads:"Vos nouveaux prospects", contacts:"Contacts & prospects", team:"Équipe",
     analytics:"Statistiques", loyalty:"Fidélité", settings:"Paramètres",
     login:"Se connecter", register:"Créer un compte", fullName:"Nom complet",
     email:"Adresse e-mail", password:"Mot de passe", wait:"Patientez...",
@@ -33,7 +33,7 @@ const messages = {
   en: {
     language:"Language", french:"Français", english:"English", arabic:"العربية",
     workspace:"Business workspace", logout:"Log out", overview:"Overview",
-    cards:"Digital cards", contacts:"Contacts & leads", team:"Team",
+    cards:"Digital cards", yourProfiles:"Your professional profiles", newLeads:"Your new leads", contacts:"Contacts & leads", team:"Team",
     analytics:"Analytics", loyalty:"Loyalty", settings:"Settings",
     login:"Log in", register:"Create an account", fullName:"Full name",
     email:"Email address", password:"Password", wait:"Please wait...",
@@ -58,7 +58,7 @@ const messages = {
   ar: {
     language:"اللغة", french:"Français", english:"English", arabic:"العربية",
     workspace:"مساحة العمل", logout:"تسجيل الخروج", overview:"نظرة عامة",
-    cards:"البطاقات الرقمية", contacts:"جهات الاتصال والعملاء المحتملون", team:"الفريق",
+    cards:"البطاقات الرقمية", yourProfiles:"ملفاتك المهنية", newLeads:"عملاؤك المحتملون الجدد", contacts:"جهات الاتصال والعملاء المحتملون", team:"الفريق",
     analytics:"الإحصائيات", loyalty:"الولاء والمكافآت", settings:"الإعدادات",
     login:"تسجيل الدخول", register:"إنشاء حساب", fullName:"الاسم الكامل",
     email:"البريد الإلكتروني", password:"كلمة المرور", wait:"يرجى الانتظار...",
