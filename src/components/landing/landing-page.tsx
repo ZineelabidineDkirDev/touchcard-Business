@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useI18n } from "@/i18n/provider";
 import { motion, useReducedMotion } from "framer-motion";
-import { ContactRound, UsersRound, ChartNoAxesCombined, Gift, Users, ShoppingBag } from "lucide-react";
 
 const rise = {
   hidden: { opacity: 0, y: 28 },
@@ -12,6 +11,21 @@ const rise = {
 };
 
 
+
+
+function FeatureIcon({ name }: { name: string }) {
+  const common = { fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-7 w-7" {...common}>
+      {name === "contact" && <><rect x="3" y="4" width="18" height="16" rx="2.5" /><circle cx="9" cy="10" r="2.5" /><path d="M5.5 17c.8-2 2-3 3.5-3s2.7 1 3.5 3M15 9h3M15 13h3M15 17h2" /></>}
+      {name === "prospects" && <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></>}
+      {name === "analytics" && <><path d="M3 3v18h18" /><path d="m7 14 4-4 4 3 6-7" /><path d="M17 6h4v4" /></>}
+      {name === "loyalty" && <><path d="M20 12v8H4v-8M2 7h20v5H2zM12 7v13" /><path d="M12 7H7.5a2.5 2.5 0 1 1 2.2-3.7L12 7ZM12 7h4.5a2.5 2.5 0 1 0-2.2-3.7L12 7Z" /></>}
+      {name === "team" && <><circle cx="9" cy="8" r="3" /><circle cx="17" cy="9" r="2.5" /><path d="M3 20v-1a6 6 0 0 1 12 0v1M16 15a5 5 0 0 1 5 5" /></>}
+      {name === "shop" && <><path d="M3 8h18l-1.5 12h-15L3 8Z" /><path d="m5 8 2-5h10l2 5M9 11v2a3 3 0 0 0 6 0v-2" /></>}
+    </svg>
+  );
+}
 
 function Arrow() {
   return <span aria-hidden="true">↗</span>;
@@ -138,7 +152,7 @@ export function LandingPage() {
   const features = [
     {
       number: "01",
-      icon: ContactRound,
+      icon: "contact",
       title: t("feature1Title"),
       description:
         t("feature1Desc"),
@@ -146,7 +160,7 @@ export function LandingPage() {
     },
     {
       number: "02",
-      icon: UsersRound,
+      icon: "prospects",
       title: t("feature2Title"),
       description:
         t("feature2Desc"),
@@ -154,7 +168,7 @@ export function LandingPage() {
     },
     {
       number: "03",
-      icon: ChartNoAxesCombined,
+      icon: "analytics",
       title: t("feature3Title"),
       description:
         t("feature3Desc"),
@@ -162,7 +176,7 @@ export function LandingPage() {
     },
     {
       number: "04",
-      icon: Gift,
+      icon: "loyalty",
       title: t("feature4Title"),
       description:
         t("feature4Desc"),
@@ -170,7 +184,7 @@ export function LandingPage() {
     },
     {
       number: "05",
-      icon: Users,
+      icon: "team",
       title: t("feature5Title"),
       description:
         t("feature5Desc"),
@@ -178,7 +192,7 @@ export function LandingPage() {
     },
     {
       number: "06",
-      icon: ShoppingBag,
+      icon: "shop",
       title: t("feature6Title"),
       description:
         t("feature6Desc"),
@@ -404,7 +418,7 @@ export function LandingPage() {
               <motion.article key={feature.number} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.16 }} variants={reveal} transition={{ duration: 0.55, delay: index * 0.07 }} whileHover={reduceMotion ? undefined : { y: -8, scale: 1.012 }} className="group relative isolate overflow-hidden rounded-[1.65rem] border border-white/[.09] bg-white/[.045] p-7 shadow-[0_18px_55px_-35px_rgba(0,0,0,.8)] backdrop-blur-xl transition-all duration-300 hover:border-indigo-300/35 hover:bg-white/[.075] hover:shadow-[0_25px_70px_-35px_rgba(99,102,241,.35)] sm:p-8">
                 <div className="pointer-events-none absolute -right-16 -top-20 -z-10 h-48 w-48 rounded-full bg-indigo-500/0 blur-3xl transition-colors duration-500 group-hover:bg-indigo-500/20" />
                 <div className="relative flex items-center justify-between">
-                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-300/20 bg-gradient-to-br from-indigo-400/20 to-fuchsia-400/10 text-indigo-200 shadow-inner shadow-white/[.04] transition duration-300 group-hover:scale-110 group-hover:border-violet-300/40 group-hover:text-white"><feature.icon aria-hidden="true" className="h-7 w-7 stroke-[1.8] text-violet-300" /></span>
+                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-300/20 bg-gradient-to-br from-indigo-400/20 to-fuchsia-400/10 text-indigo-200 shadow-inner shadow-white/[.04] transition duration-300 group-hover:scale-110 group-hover:border-violet-300/40 group-hover:text-white"><FeatureIcon name={feature.icon} /></span>
                   <span className="rounded-full border border-white/10 px-3 py-1.5 text-[10px] font-bold tracking-[.18em] text-slate-500">{feature.number}</span>
                 </div>
                 <h3 className="relative mt-8 text-xl font-extrabold tracking-tight text-white transition-colors group-hover:text-indigo-100">{feature.title}</h3>
