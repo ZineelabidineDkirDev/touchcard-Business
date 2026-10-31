@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useI18n } from "@/i18n/provider";
 import { motion, useReducedMotion } from "framer-motion";
 
 const rise = {
@@ -13,57 +14,57 @@ const features = [
   {
     number: "01",
     icon: "⌁",
-    title: "Cartes NFC & QR",
+    title: t("feature1Title"),
     description:
-      "Partagez vos coordonnées en un geste. Une carte, un scan, et votre contact est enregistré.",
-    detail: "Profils personnalisables · QR unique · NFC",
+      t("feature1Desc"),
+    detail: t("feature1Detail"),
   },
   {
     number: "02",
     icon: "◎",
-    title: "CRM & prospects",
+    title: t("feature2Title"),
     description:
-      "Centralisez les contacts collectés, qualifiez vos prospects et gardez le fil de chaque opportunité.",
-    detail: "Contacts · Pipeline · Suivi commercial",
+      t("feature2Desc"),
+    detail: t("feature2Detail"),
   },
   {
     number: "03",
     icon: "↗",
-    title: "Analyses intelligentes",
+    title: t("feature3Title"),
     description:
-      "Suivez les vues, les scans et les clics pour mieux comprendre l’impact de votre présence.",
-    detail: "Statistiques · Interactions · Rapports",
+      t("feature3Desc"),
+    detail: t("feature3Detail"),
   },
   {
     number: "04",
     icon: "✳",
-    title: "Fidélité & récompenses",
+    title: t("feature4Title"),
     description:
-      "Faites revenir vos clients avec des programmes de points, des avantages et des campagnes.",
-    detail: "Points · Récompenses · Campagnes",
+      t("feature4Desc"),
+    detail: t("feature4Detail"),
   },
   {
     number: "05",
     icon: "▦",
-    title: "Équipes & organisations",
+    title: t("feature5Title"),
     description:
-      "Gérez les cartes de vos collaborateurs et gardez une identité cohérente pour toute l’entreprise.",
-    detail: "Membres · Rôles · Gestion centralisée",
+      t("feature5Desc"),
+    detail: t("feature5Detail"),
   },
   {
     number: "06",
     icon: "◇",
-    title: "Boutique & commandes",
+    title: t("feature6Title"),
     description:
-      "Préparez la vente de cartes NFC et de supports personnalisés depuis votre espace professionnel.",
-    detail: "Produits · Personnalisation · Commandes",
+      t("feature6Desc"),
+    detail: t("feature6Detail"),
   },
 ];
 
 const steps = [
-  ["01", "Créez votre carte", "Ajoutez votre identité, vos coordonnées et vos liens professionnels."],
-  ["02", "Partagez en un geste", "Présentez votre carte NFC, partagez votre QR code ou envoyez votre lien."],
-  ["03", "Transformez les échanges", "Retrouvez vos contacts et suivez les interactions depuis votre espace."],
+  ["01", t("step1Title"), t("step1Desc")],
+  ["02", t("step2Title"), t("step2Desc")],
+  ["03", t("step3Title"), t("step3Desc")],
 ];
 
 function Arrow() {
@@ -186,6 +187,7 @@ function DashboardPreview() {
 }
 
 export function LandingPage() {
+  const { t } = useI18n();
   const reduceMotion = useReducedMotion();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -210,21 +212,21 @@ export function LandingPage() {
           </Link>
           <nav aria-label="Navigation principale" className={`hidden items-center gap-6 text-sm font-semibold transition-colors duration-300 xl:flex text-white/90`}>
             <details className="group relative">
-              <summary className="flex cursor-pointer list-none items-center gap-2 transition hover:text-indigo-600 [&::-webkit-details-marker]:hidden">Solutions <span className="text-[10px] transition group-open:rotate-180">⌄</span></summary>
+              <summary className="flex cursor-pointer list-none items-center gap-2 transition hover:text-indigo-600 [&::-webkit-details-marker]:hidden">{t("navSolutions")} <span className="text-[10px] transition group-open:rotate-180">⌄</span></summary>
               <div className="absolute left-0 top-full z-50 mt-4 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-slate-950/10">
                 <a className="block rounded-xl px-4 py-3 hover:bg-indigo-50 hover:text-indigo-700" href="#solutions"><span className="block text-sm font-bold">Toutes les fonctionnalités</span><span className="mt-1 block text-xs font-normal text-slate-500">NFC, QR, CRM, fidélité et boutique</span></a>
                 <a className="block rounded-xl px-4 py-3 hover:bg-indigo-50 hover:text-indigo-700" href="#secteurs"><span className="block text-sm font-bold">Par secteur d’activité</span><span className="mt-1 block text-xs font-normal text-slate-500">Indépendants, commerces et équipes</span></a>
               </div>
             </details>
-            <a className="transition hover:text-indigo-600" href="#experience">Plateforme</a>
-            <a className="transition hover:text-indigo-600" href="#fonctionnement">Comment ça marche</a>
-            <a className="transition hover:text-indigo-600" href="#demo">Démo</a>
-            <a className="transition hover:text-indigo-600" href="#tarifs">Tarifs</a>
-            <a className="transition hover:text-indigo-600" href="#faq">FAQ</a>
+            <a className="transition hover:text-indigo-600" href="#experience">{t("navPlatform")}</a>
+            <a className="transition hover:text-indigo-600" href="#fonctionnement">{t("navHow")}</a>
+            <a className="transition hover:text-indigo-600" href="#demo">{t("navDemo")}</a>
+            <a className="transition hover:text-indigo-600" href="#tarifs">{t("navPricing")}</a>
+            <a className="transition hover:text-indigo-600" href="#faq">{t("navFaq")}</a>
           </nav>
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link href="/login" className={`hidden rounded-xl px-4 py-2.5 text-sm font-bold transition sm:inline-flex text-white hover:bg-white/10`}>Connexion</Link>
-            <Link href="/register" className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-700 sm:px-5">Créer mon espace <Arrow /></Link>
+            <Link href="/login" className={`hidden rounded-xl px-4 py-2.5 text-sm font-bold transition sm:inline-flex text-white hover:bg-white/10`}>{t("navLogin")}</Link>
+            <Link href="/register" className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-700 sm:px-5">{t("navCreate")} <Arrow /></Link>
             <button type="button" aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"} aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((open) => !open)} className={`inline-flex h-11 w-11 items-center justify-center rounded-xl border text-xl transition-colors xl:hidden border-white/20 bg-white/10 text-white`}>
               {mobileMenuOpen ? "×" : "☰"}
             </button>
@@ -237,8 +239,8 @@ export function LandingPage() {
                 <a key={href} href={href} onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-700">{label}</a>
               ))}
               <div className="mt-2 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
-                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-xl border border-slate-200 px-3 py-3 text-center text-sm font-bold text-slate-700">Connexion</Link>
-                <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="rounded-xl bg-indigo-600 px-3 py-3 text-center text-sm font-bold text-white">Créer un espace</Link>
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-xl border border-slate-200 px-3 py-3 text-center text-sm font-bold text-slate-700">{t("navLogin")}</Link>
+                <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="rounded-xl bg-indigo-600 px-3 py-3 text-center text-sm font-bold text-white">{t("navCreateShort")}</Link>
               </div>
             </div>
           </nav>
@@ -721,7 +723,7 @@ export function LandingPage() {
 
       <section id="faq" className="px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
         <div className="mx-auto grid max-w-[1180px] gap-12 lg:grid-cols-[.8fr_1.2fr]">
-          <div><p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">Questions fréquentes</p><h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl">Vous souhaitez en savoir <span className="text-indigo-600">plus ?</span></h2><p className="mt-6 text-base leading-8 text-slate-500">Voici quelques réponses pour mieux comprendre le fonctionnement de TouchCard Business.</p><Link href="/register" className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-indigo-700 hover:text-indigo-900">Créer mon espace <Arrow /></Link></div>
+          <div><p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">Questions fréquentes</p><h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl">Vous souhaitez en savoir <span className="text-indigo-600">plus ?</span></h2><p className="mt-6 text-base leading-8 text-slate-500">Voici quelques réponses pour mieux comprendre le fonctionnement de TouchCard Business.</p><Link href="/register" className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-indigo-700 hover:text-indigo-900">{t("navCreate")} <Arrow /></Link></div>
           <div className="space-y-3">
             {[
               ["Qu'est-ce qu'une carte de visite digitale ?", "C'est un profil professionnel en ligne qui rassemble vos coordonnées, vos liens et vos informations. Vous pouvez le partager par QR code, lien ou carte NFC compatible."],
@@ -794,13 +796,13 @@ export function LandingPage() {
           <div>
             <Link href="/" className="inline-flex items-center gap-2.5"><img src="/brand/touchcard-mark.svg" alt="" className="h-11 w-11 object-contain" /><span className="text-xl font-black">Touch<span className="text-indigo-300">Card</span><span className="ml-2 text-[9px] font-extrabold tracking-[.18em] text-indigo-300">BUSINESS</span></span></Link>
             <p className="mt-5 max-w-sm text-sm leading-7 text-slate-400">La plateforme qui connecte votre identité professionnelle, vos contacts et votre relation client.</p>
-            <Link href="/register" className="mt-7 inline-flex rounded-xl bg-indigo-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-400">Créer mon espace <Arrow /></Link>
+            <Link href="/register" className="mt-7 inline-flex rounded-xl bg-indigo-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-400">{t("navCreate")} <Arrow /></Link>
           </div>
-          <div><h3 className="text-sm font-extrabold">Plateforme</h3><ul className="mt-5 space-y-3 text-sm text-slate-400"><li><a className="hover:text-white" href="#solutions">Solutions</a></li><li><a className="hover:text-white" href="#experience">Fonctionnalités</a></li><li><a className="hover:text-white" href="#demo">Démonstration</a></li><li><a className="hover:text-white" href="#tarifs">Tarifs</a></li></ul></div>
-          <div><h3 className="text-sm font-extrabold">Découvrir</h3><ul className="mt-5 space-y-3 text-sm text-slate-400"><li><a className="hover:text-white" href="#fonctionnement">Comment ça marche</a></li><li><a className="hover:text-white" href="#faq">Questions fréquentes</a></li><li><Link className="hover:text-white" href="/register">Créer un compte</Link></li><li><Link className="hover:text-white" href="/login">Connexion</Link></li></ul></div>
+          <div><h3 className="text-sm font-extrabold">Plateforme</h3><ul className="mt-5 space-y-3 text-sm text-slate-400"><li><a className="hover:text-white" href="#solutions">Solutions</a></li><li><a className="hover:text-white" href="#experience">Fonctionnalités</a></li><li><a className="hover:text-white" href="#demo">Démonstration</a></li><li><a className="hover:text-white" href="#tarifs">{t("navPricing")}</a></li></ul></div>
+          <div><h3 className="text-sm font-extrabold">Découvrir</h3><ul className="mt-5 space-y-3 text-sm text-slate-400"><li><a className="hover:text-white" href="#fonctionnement">{t("navHow")}</a></li><li><a className="hover:text-white" href="#faq">Questions fréquentes</a></li><li><Link className="hover:text-white" href="/register">Créer un compte</Link></li><li><Link className="hover:text-white" href="/login">{t("navLogin")}</Link></li></ul></div>
           <div><h3 className="text-sm font-extrabold">Votre espace</h3><p className="mt-5 text-sm leading-7 text-slate-400">Prêt à donner une nouvelle dimension à vos échanges professionnels ?</p><Link href="/register" className="mt-4 inline-flex text-sm font-bold text-indigo-300 hover:text-white">Commencer maintenant ↗</Link></div>
         </div>
-        <div className="border-t border-white/10"><div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-5 py-6 text-xs text-slate-500 sm:px-8 md:flex-row md:items-center md:justify-between lg:px-12"><p>© 2026 TouchCard Business. Tous droits réservés.</p><p>Conçu pour connecter les opportunités.</p><div className="flex gap-5"><Link href="/login" className="hover:text-white">Connexion</Link><Link href="/register" className="hover:text-white">Inscription</Link></div></div></div>
+        <div className="border-t border-white/10"><div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-5 py-6 text-xs text-slate-500 sm:px-8 md:flex-row md:items-center md:justify-between lg:px-12"><p>© 2026 TouchCard Business. Tous droits réservés.</p><p>Conçu pour connecter les opportunités.</p><div className="flex gap-5"><Link href="/login" className="hover:text-white">{t("navLogin")}</Link><Link href="/register" className="hover:text-white">Inscription</Link></div></div></div>
       </footer>
     </main>
   );
