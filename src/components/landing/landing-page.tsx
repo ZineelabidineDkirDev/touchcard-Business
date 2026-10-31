@@ -227,13 +227,18 @@ export function LandingPage() {
           </nav>
           <div className="flex items-center gap-2 sm:gap-3">
             <Link href="/login" className={`hidden rounded-xl px-4 py-2.5 text-sm font-bold transition sm:inline-flex text-white hover:bg-white/10`}>{t("navLogin")}</Link>
-            <div role="group" aria-label={t("language")} className="inline-flex items-center gap-0.5 rounded-full border border-white/25 bg-transparent p-1">
-  {([["fr", "🇫🇷", "Fr"], ["ar", "🇲🇦", "Ar"], ["en", "🇬🇧", "Eng"]] as const).map(([code, flag, label]) => (
-    <button key={code} type="button" onClick={() => setLocale(code)} aria-pressed={locale === code}
-      className={`inline-flex items-center gap-1 rounded-full px-2 py-1.5 text-[11px] font-bold transition sm:px-2.5 ${locale === code ? "bg-white/20 text-white shadow-sm" : "text-white/75 hover:bg-white/10 hover:text-white"}`}>
-      <span aria-hidden="true">{flag}</span><span>{label}</span>
-    </button>
-  ))}
+            <div className="inline-flex items-center rounded-full border border-white/25 bg-transparent px-2.5 py-1.5 transition hover:bg-white/10">
+  <select
+    aria-label={t("language")}
+    value={locale}
+    onChange={(event) => setLocale(event.target.value as "fr" | "ar" | "en")}
+    className="cursor-pointer appearance-none bg-transparent pr-1 text-xs font-bold text-white outline-none"
+  >
+    <option value="fr" className="bg-[#17143b] text-white">🇫🇷 FR</option>
+    <option value="ar" className="bg-[#17143b] text-white">🇲🇦 AR</option>
+    <option value="en" className="bg-[#17143b] text-white">🇬🇧 ENG</option>
+  </select>
+  <span aria-hidden="true" className="pointer-events-none ml-1 text-[10px] text-white/70">▾</span>
 </div>
 <Link href="/register" className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-700 sm:px-5">{t("navCreate")} <Arrow /></Link>
             <button type="button" aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"} aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((open) => !open)} className={`inline-flex h-11 w-11 items-center justify-center rounded-xl border text-xl transition-colors xl:hidden border-white/20 bg-white/10 text-white`}>
