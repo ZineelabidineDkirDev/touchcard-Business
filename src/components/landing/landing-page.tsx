@@ -313,9 +313,9 @@ export function LandingPage() {
               <a href="#solutions" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/[.035] px-7 py-[1.125rem] text-base font-bold text-white/95 shadow-sm backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-indigo-200/50 hover:bg-white/[.09]">Explorer les solutions <span className="text-indigo-200">↓</span></a>
             </div>
             <div className="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-sm font-medium text-slate-300">
-              <span className="inline-flex items-center gap-2"><span className="text-emerald-500">✓</span> Sans application à installer</span>
+              <span className="inline-flex items-center gap-2"><span className="text-emerald-500">✓</span> {t("noAppInstall")}</span>
               <span className="inline-flex items-center gap-2"><span className="text-emerald-500">✓</span> NFC, QR code et lien</span>
-              <span className="inline-flex items-center gap-2"><span className="text-emerald-500">✓</span> Pour les équipes</span>
+              <span className="inline-flex items-center gap-2"><span className="text-emerald-500">✓</span> {t("forTeams")}</span>
             </div>
           </motion.div>
 
@@ -351,7 +351,7 @@ export function LandingPage() {
         </div>
         <div className="relative mx-auto max-w-[1440px]">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: .25 }} variants={reveal} className="mx-auto max-w-3xl text-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-white/[.06] px-4 py-2 text-[10px] font-extrabold uppercase tracking-[.2em] text-indigo-200"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> L’impact en un coup d’œil</span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-white/[.06] px-4 py-2 text-[10px] font-extrabold uppercase tracking-[.2em] text-indigo-200"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> {t("impactEyebrow")}</span>
             <h2 className="mt-6 text-4xl font-black tracking-[-.05em] sm:text-5xl lg:text-6xl">Les rencontres prennent de la valeur. <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">{t("impactSubtitle")}</span></h2>
             <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-400 sm:text-lg">{t("impactDesc")}</p>
           </motion.div>
@@ -368,7 +368,7 @@ export function LandingPage() {
                 <p className="relative mt-8 text-4xl font-black tracking-tight text-white">—</p>
                 <h3 className="relative mt-3 text-base font-extrabold text-white">{label}</h3>
                 <p className="relative mt-2 min-h-10 text-xs leading-5 text-slate-400">{description}</p>
-                <div className="relative mt-6 flex items-center gap-2 border-t border-white/10 pt-4 text-[10px] font-bold uppercase tracking-[.12em] text-slate-500"><span className="h-1.5 w-1.5 rounded-full bg-amber-400" /> Statistique bientôt disponible</div>
+                <div className="relative mt-6 flex items-center gap-2 border-t border-white/10 pt-4 text-[10px] font-bold uppercase tracking-[.12em] text-slate-500"><span className="h-1.5 w-1.5 rounded-full bg-amber-400" /> {t("metricComingSoon")}</div>
               </motion.article>
             ))}
           </div>
@@ -384,7 +384,7 @@ export function LandingPage() {
         </div>
         <div className="relative mx-auto max-w-[1440px]">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={reveal} transition={{ duration: 0.65}} className="mx-auto max-w-3xl text-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-indigo-400/[.08] px-4 py-2 text-[10px] font-extrabold uppercase tracking-[.2em] text-indigo-200"><span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400" /> L’écosystème TouchCard</span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-indigo-400/[.08] px-4 py-2 text-[10px] font-extrabold uppercase tracking-[.2em] text-indigo-200"><span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400" /> {t("ecosystemEyebrow")}</span>
             <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-.045em] text-white sm:text-5xl lg:text-6xl"><span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">{t("ecosystemTitle")}</span></h2>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-400">{t("ecosystemDesc")}</p>
           </motion.div>
@@ -484,7 +484,7 @@ export function LandingPage() {
         <div className="relative mx-auto grid max-w-[1440px] items-center gap-16 px-5 sm:px-8 lg:grid-cols-2 lg:px-12">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={reveal} transition={{ duration: 0.65 }}>
             <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-300">{t("connectedActivity")}</p>
-            <h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl lg:text-6xl">Une expérience fluide. <span className="text-indigo-300">{t("growingNetwork")}</span></h2>
+            <h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl lg:text-6xl">{t("smoothExperienceTitle")} <span className="text-indigo-300">{t("growingNetwork")}</span></h2>
             <p className="mt-7 max-w-xl text-lg leading-8 text-slate-300">{t("connectedDesc")}</p>
             <div className="mt-10 space-y-5">
               {[
@@ -556,7 +556,7 @@ export function LandingPage() {
         <div className="relative mx-auto max-w-[1440px]">
           <motion.div initial="hidden" whileInView="visible" viewport={{once:true,amount:.25}} variants={reveal} className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-white/[.06] px-4 py-2 text-[10px] font-black uppercase tracking-[.22em] text-indigo-200 backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400 shadow-[0_0_12px_rgba(232,121,249,.9)]" /> L’expérience TouchCard
+              <span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400 shadow-[0_0_12px_rgba(232,121,249,.9)]" /> {t("touchcardExperience")}
             </span>
             <h2 className="mt-7 text-4xl font-black leading-[1.04] tracking-[-.055em] sm:text-5xl lg:text-6xl">
               De la rencontre à la <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">connexion.</span>
@@ -677,7 +677,7 @@ export function LandingPage() {
           </div>
           <div className="mt-16 flex flex-col items-center justify-between gap-5 rounded-3xl border border-white/10 bg-white/[.06] p-6 shadow-[0_20px_60px_-45px_rgba(49,46,129,.5)] backdrop-blur sm:flex-row sm:p-8">
             <div><p className="text-sm font-extrabold text-white">{t("brandAtCenter")}</p><p className="mt-1 text-sm text-slate-300">{t("nfcDescShort")}</p></div>
-            <Link href="/register" className="inline-flex shrink-0 items-center gap-3 rounded-xl border border-indigo-300/30 bg-indigo-500/20 px-5 py-3.5 text-sm font-extrabold text-indigo-100 transition hover:-translate-y-0.5 hover:bg-indigo-500/35">Créer ma carte <Arrow /></Link>
+            <Link href="/register" className="inline-flex shrink-0 items-center gap-3 rounded-xl border border-indigo-300/30 bg-indigo-500/20 px-5 py-3.5 text-sm font-extrabold text-indigo-100 transition hover:-translate-y-0.5 hover:bg-indigo-500/35">{t("createMyCard")} <Arrow /></Link>
           </div>
         </div>
       </section>
@@ -796,7 +796,7 @@ export function LandingPage() {
             <p className="mx-auto mt-7 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">{t("finalDesc")}</p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <motion.div whileHover={reduceMotion ? undefined : { scale: 1.045, y: -4 }} whileTap={reduceMotion ? undefined : { scale: .97 }}>
-                <Link href="/register" className="group/cta inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 px-8 py-4 text-sm font-extrabold text-white shadow-[0_12px_40px_rgba(99,102,241,.4)] transition-shadow hover:shadow-[0_16px_55px_rgba(168,85,247,.55)]">Créer mon compte <span className="text-lg transition-transform duration-300 group-hover/cta:translate-x-1 group-hover/cta:-translate-y-1"><Arrow /></span></Link>
+                <Link href="/register" className="group/cta inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 px-8 py-4 text-sm font-extrabold text-white shadow-[0_12px_40px_rgba(99,102,241,.4)] transition-shadow hover:shadow-[0_16px_55px_rgba(168,85,247,.55)]">{t("createMyAccountLabel")} <span className="text-lg transition-transform duration-300 group-hover/cta:translate-x-1 group-hover/cta:-translate-y-1"><Arrow /></span></Link>
               </motion.div>
               <a href="#fonctionnement" className="rounded-2xl border border-white/15 bg-white/[.06] px-7 py-4 text-sm font-bold text-slate-200 backdrop-blur transition hover:border-white/30 hover:bg-white/10">{t("howItWorks")}</a>
             </div>
