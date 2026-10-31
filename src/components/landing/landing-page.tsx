@@ -65,7 +65,7 @@ function DashboardPreview() {
             <img src="/brand/touchcard-mark.svg" alt="" className="h-8 w-8 object-contain" />
             <span className="text-sm font-bold tracking-tight text-white">TouchCard <span className="font-medium text-indigo-300">Business</span></span>
           </div>
-          <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-semibold text-emerald-300">● Profil actif</span>
+          <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-semibold text-emerald-300">{t("mockProfileActive")}</span>
         </div>
 
         <div className="grid gap-3 md:grid-cols-[1.05fr_.95fr]">
@@ -78,7 +78,7 @@ function DashboardPreview() {
             </div>
             <div className="relative mt-12">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/15 text-xl font-black">JD</div>
-              <p className="mt-5 text-2xl font-bold tracking-tight">Jean Dupont</p>
+              <p className="mt-5 text-2xl font-bold tracking-tight">{t("mockPersonName")}</p>
               <p className="mt-1 text-sm text-indigo-100">{t("mockDirector")}</p>
             </div>
             <div className="relative mt-7 grid grid-cols-2 gap-2">
@@ -86,7 +86,7 @@ function DashboardPreview() {
                 <div key={item} className="rounded-xl border border-white/15 bg-white/10 px-3 py-2.5 text-xs text-white/90">{item} <span className="float-right">↗</span></div>
               ))}
             </div>
-            <p className="mt-7 text-[10px] font-semibold tracking-[.2em] text-indigo-200">TOUCHCARD · CONNECTER AUTREMENT</p>
+            <p className="mt-7 text-[10px] font-semibold tracking-[.2em] text-indigo-200">{t("mockBrandLine")}</p>
           </div>
 
           <div className="grid gap-3">
@@ -103,7 +103,7 @@ function DashboardPreview() {
               <div className="mt-3 flex justify-between text-[10px] text-slate-400"><span>{t("mockActivity")}</span><span>{t("mockInterface")}</span></div>
             </div>
             <div className="flex items-center justify-between rounded-[1.7rem] bg-[#f0edff] p-5">
-              <div><p className="text-xs font-bold text-indigo-700">{t("mockInstantShare")}</p><p className="mt-1 text-sm text-slate-600">{t("mockProfileEverywhere")}</p><p className="mt-4 text-[10px] font-semibold tracking-[.16em] text-indigo-500">SCAN · CONNECT · GROW</p></div>
+              <div><p className="text-xs font-bold text-indigo-700">{t("mockInstantShare")}</p><p className="mt-1 text-sm text-slate-600">{t("mockProfileEverywhere")}</p><p className="mt-4 text-[10px] font-semibold tracking-[.16em] text-indigo-500">{t("mockScanLine")}</p></div>
               <QrPattern />
             </div>
           </div>
@@ -125,7 +125,7 @@ function DashboardPreview() {
       >
         <div className="flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-lg text-violet-600">⌁</span>
-          <div><p className="text-xs font-bold text-slate-900">NFC + QR code</p><p className="mt-1 text-[11px] text-slate-500">{t("mockShareWays")}</p></div>
+          <div><p className="text-xs font-bold text-slate-900">{t("mockNfcQr")}</p><p className="mt-1 text-[11px] text-slate-500">{t("mockShareWays")}</p></div>
         </div>
       </motion.div>
     </div>
@@ -353,7 +353,7 @@ export function LandingPage() {
         <div className="relative mx-auto max-w-[1440px]">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: .25 }} variants={reveal} className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-white/[.06] px-4 py-2 text-[10px] font-extrabold uppercase tracking-[.2em] text-indigo-200"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> {t("impactEyebrow")}</span>
-            <h2 className="mt-6 text-4xl font-black tracking-[-.05em] sm:text-5xl lg:text-6xl">Les rencontres prennent de la valeur. <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">{t("impactSubtitle")}</span></h2>
+            <h2 className="mt-6 text-4xl font-black tracking-[-.05em] sm:text-5xl lg:text-6xl">{t("impactTitle")} <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">{t("impactSubtitle")}</span></h2>
             <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-400 sm:text-lg">{t("impactDesc")}</p>
           </motion.div>
           <div className="mt-16 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -560,7 +560,7 @@ export function LandingPage() {
               <span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400 shadow-[0_0_12px_rgba(232,121,249,.9)]" /> {t("touchcardExperience")}
             </span>
             <h2 className="mt-7 text-4xl font-black leading-[1.04] tracking-[-.055em] sm:text-5xl lg:text-6xl">
-              De la rencontre à la <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">connexion.</span>
+              De la rencontre à la <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">{t("journeyEnd")}</span>
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-400 sm:text-lg">
               Un geste. Une connexion. Une relation qui continue. Découvrez un parcours professionnel pensé pour être simple, rapide et mémorable.
@@ -574,7 +574,7 @@ export function LandingPage() {
                 <motion.article key={number} initial={{opacity:0,y:35,rotateX:8}} whileInView={{opacity:1,y:0,rotateX:0}} viewport={{once:true,amount:.2}} transition={{duration:.75,delay:index*.16,ease:[.22,1,.36,1]}} whileHover={reduceMotion?undefined:{y:-10,rotateY:index===1?0:index===0?3:-3,scale:1.02}} style={{transformPerspective:1200}} className="group relative overflow-hidden rounded-[1.8rem] border border-white/10 bg-gradient-to-b from-white/[.09] to-white/[.025] p-7 shadow-[0_25px_70px_-45px_rgba(99,102,241,.65)] backdrop-blur-xl transition-all duration-500 hover:border-indigo-300/35 hover:shadow-[0_35px_80px_-40px_rgba(124,58,237,.55)] sm:p-8">
                   <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-indigo-500/10 blur-3xl transition-colors duration-500 group-hover:bg-fuchsia-500/20" />
                   <div className="relative flex items-center justify-between">
-                    <span className="text-[11px] font-black tracking-[.24em] text-slate-500">ÉTAPE {number}</span>
+                    <span className="text-[11px] font-black tracking-[.24em] text-slate-500">{t("stepLabel")} {number}</span>
                     <motion.div whileHover={reduceMotion?undefined:{rotate:12,scale:1.08}} className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-300/25 bg-gradient-to-br from-indigo-500/20 to-fuchsia-500/10 text-xl font-black text-indigo-100 shadow-[0_0_35px_-12px_rgba(129,140,248,.65)]">
                       {index===0?"◈":index===1?"⌁":"◎"}
                       <span className="absolute -inset-1 rounded-[1.1rem] border border-indigo-300/10" />
@@ -651,7 +651,7 @@ export function LandingPage() {
               {name:"Contact",type:t("cardContactType"),desc:t("cardContactDesc"),price:"149 DH",tone:"metal",number:"02"},
               {name:"E-Service",type:t("cardServiceType"),desc:t("cardServiceDesc"),price:"399 DH",tone:"metal",number:"03"},
               {name:"Avis Google",type:t("cardGoogleType"),desc:t("cardGoogleDesc"),price:"199 DH",tone:"from-[#111827] via-[#202b50] to-[#394b8c]",number:"04"},
-              {name:"Personnalisée",type:t("cardCustomType"),desc:t("cardCustomDesc"),price:"499 DH",tone:"from-[#171521] via-[#29233f] to-[#514078]",number:"05"}
+              {name:t("customCardName"),type:t("cardCustomType"),desc:t("cardCustomDesc"),price:"499 DH",tone:"from-[#171521] via-[#29233f] to-[#514078]",number:"05"}
             ].map((card,index) => (
               <motion.article key={card.name} initial="hidden" whileInView="visible" viewport={{ once:true, amount:.18 }} variants={reveal} transition={{ duration:.6, delay:index*.07 }} className="group">
                 <div className="relative mx-auto flex h-[245px] items-center justify-center [perspective:1100px]">
@@ -686,7 +686,7 @@ export function LandingPage() {
         <div className="mx-auto max-w-[1440px]">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">{t("nfcPricing")}</p>
-            <h2 className="mt-5 text-4xl font-black tracking-[-.045em] text-[#11132d] sm:text-5xl">Choisissez la carte qui <span className="text-indigo-600">{t("chooseCard")}</span></h2>
+            <h2 className="mt-5 text-4xl font-black tracking-[-.045em] text-[#11132d] sm:text-5xl">{t("pricingTitle")} <span className="text-indigo-600">{t("chooseCard")}</span></h2>
             <p className="mt-5 text-lg leading-8 text-slate-500">{t("cardPriceDesc")}</p>
           </div>
           <div className="mt-16 grid items-stretch gap-7 sm:grid-cols-2 xl:grid-cols-5">
@@ -813,7 +813,7 @@ export function LandingPage() {
             <p className="mt-5 max-w-sm text-sm leading-7 text-slate-400">{t("footerDesc")}</p>
             <Link href="/register" className="mt-7 inline-flex rounded-xl bg-indigo-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-400">{t("navCreate")} <Arrow /></Link>
           </div>
-          <div><h3 className="text-sm font-extrabold">{t("footerPlatformHeading")}</h3><ul className="mt-5 space-y-3 text-sm text-slate-400"><li><a className="hover:text-white" href="#solutions">Solutions</a></li><li><a className="hover:text-white" href="#experience">{t("footerFeatures")}</a></li><li><a className="hover:text-white" href="#demo">{t("footerDemo")}</a></li><li><a className="hover:text-white" href="#tarifs">{t("navPricing")}</a></li></ul></div>
+          <div><h3 className="text-sm font-extrabold">{t("footerPlatformHeading")}</h3><ul className="mt-5 space-y-3 text-sm text-slate-400"><li><a className="hover:text-white" href="#solutions">{t("footerSolutions")}</a></li><li><a className="hover:text-white" href="#experience">{t("footerFeatures")}</a></li><li><a className="hover:text-white" href="#demo">{t("footerDemo")}</a></li><li><a className="hover:text-white" href="#tarifs">{t("navPricing")}</a></li></ul></div>
           <div><h3 className="text-sm font-extrabold">{t("footerDiscover")}</h3><ul className="mt-5 space-y-3 text-sm text-slate-400"><li><a className="hover:text-white" href="#fonctionnement">{t("navHow")}</a></li><li><a className="hover:text-white" href="#faq">{t("faqTitle")}</a></li><li><Link className="hover:text-white" href="/register">{t("footerSignup")}</Link></li><li><Link className="hover:text-white" href="/login">{t("navLogin")}</Link></li></ul></div>
           <div><h3 className="text-sm font-extrabold">{t("footerWorkspace")}</h3><p className="mt-5 text-sm leading-7 text-slate-400">{t("footerCTA")}</p><Link href="/register" className="mt-4 inline-flex text-sm font-bold text-indigo-300 hover:text-white">{t("footerStart")}</Link></div>
         </div>
