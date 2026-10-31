@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { signOut } from "@/app/actions/auth";
 import { createClient } from "@/lib/supabase/server";
+import { LanguageSwitcher } from "@/i18n/provider";
 
 const navigation = [
   ["Vue d’ensemble", "/dashboard"],
@@ -39,7 +40,7 @@ async function AuthenticatedDashboard({ children }: Readonly<{ children: React.R
     <div className="min-h-screen bg-slate-50 lg:flex">
       <aside className="w-full border-b border-slate-200 bg-white p-5 lg:fixed lg:inset-y-0 lg:w-64 lg:border-b-0 lg:border-r">
         <Link href="/" className="text-2xl font-black tracking-tight text-slate-950">Touch<span className="text-indigo-600">Card</span></Link>
-        <p className="mt-1 text-xs text-slate-400">BUSINESS WORKSPACE</p>
+        <p className="mt-1 text-xs text-slate-400">BUSINESS WORKSPACE</p>\n        <div className="mt-4"><LanguageSwitcher /></div>
         <nav className="mt-8 flex gap-2 overflow-x-auto lg:flex-col">
           {navigation.map(([label, href]) => <Link key={href} href={href} className="whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-indigo-50 hover:text-indigo-700">{label}</Link>)}
         </nav>
