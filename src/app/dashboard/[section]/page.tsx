@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { I18nProvider } from "@/i18n/provider";
 
 const sections: Record<string, { title: string; description: string; status: string }> = {
   cards: { title: "Cartes digitales", description: "Créez vos profils professionnels, personnalisez leur design et préparez vos liens NFC et QR.", status: "La gestion des cartes sera connectée à la base de données lors de la prochaine étape." },
