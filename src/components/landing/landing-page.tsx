@@ -215,7 +215,7 @@ export function LandingPage() {
             <details className="group relative">
               <summary className="flex cursor-pointer list-none items-center gap-2 transition hover:text-indigo-600 [&::-webkit-details-marker]:hidden">{t("navSolutions")} <span className="text-[10px] transition group-open:rotate-180">⌄</span></summary>
               <div className="absolute left-0 top-full z-50 mt-4 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-slate-950/10">
-                <a className="block rounded-xl px-4 py-3 hover:bg-indigo-50 hover:text-indigo-700" href="#solutions"><span className="block text-sm font-bold">{t("navFeatures")}</span><span className="mt-1 block text-xs font-normal text-slate-500">NFC, QR, CRM, fidélité et boutique</span></a>
+                <a className="block rounded-xl px-4 py-3 hover:bg-indigo-50 hover:text-indigo-700" href="#solutions"><span className="block text-sm font-bold">{t("navFeatures")}</span><span className="mt-1 block text-xs font-normal text-slate-500">{t("allToolsTag")}</span></a>
                 <a className="block rounded-xl px-4 py-3 hover:bg-indigo-50 hover:text-indigo-700" href="#secteurs"><span className="block text-sm font-bold">{t("navBySector")}</span><span className="mt-1 block text-xs font-normal text-slate-500">{t("navSectorDesc")}</span></a>
               </div>
             </details>
