@@ -392,7 +392,41 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section id="experience" className="relative overflow-hidden bg-[#11132d] py-24 text-white lg:py-32">
+      <section id="experience" className="relative isolate overflow-hidden bg-[#11132d] py-24 text-white lg:py-32">
+        {/* Animated atmosphere: flowing waves, soft orbits and light particles */}
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
+          <motion.div
+            className="absolute -left-[12%] top-[8%] h-[26rem] w-[26rem] rounded-full border border-indigo-300/[.10]"
+            animate={{ x: [0, 34, 0], y: [0, 22, 0], rotate: [0, 90, 180] }}
+            transition={{ duration: 32, repeat: Infinity, ease: "linear" }}
+          />
+          <motion.div
+            className="absolute -right-[8%] top-[12%] h-[34rem] w-[34rem] rounded-full border border-violet-300/[.12]"
+            animate={{ x: [0, -28, 0], y: [0, 24, 0], rotate: [0, -90, -180] }}
+            transition={{ duration: 38, repeat: Infinity, ease: "linear" }}
+          />
+          <motion.svg
+            viewBox="0 0 1600 360"
+            preserveAspectRatio="none"
+            className="absolute -bottom-2 left-0 h-[48%] w-[200%] min-w-[1200px] opacity-35"
+            animate={{ x: ["-8%", "0%", "-8%"] }}
+            transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <path d="M0 150 C180 70 300 230 500 150 S820 70 1000 150 S1320 230 1600 130" fill="none" stroke="#818cf8" strokeWidth="2" />
+            <path d="M0 205 C190 125 310 285 520 205 S830 125 1040 205 S1350 285 1600 185" fill="none" stroke="#a78bfa" strokeWidth="1.5" />
+            <path d="M0 260 C180 180 330 340 540 260 S850 180 1060 260 S1370 340 1600 240" fill="none" stroke="#c084fc" strokeWidth="1" />
+          </motion.svg>
+          <motion.div
+            className="absolute left-[12%] top-[24%] h-2 w-2 rounded-full bg-indigo-300 shadow-[0_0_22px_5px_rgba(129,140,248,.45)]"
+            animate={{ y: [0, -22, 0], opacity: [0.35, 1, 0.35], scale: [0.8, 1.25, 0.8] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          />
+          <motion.div
+            className="absolute right-[18%] bottom-[22%] h-1.5 w-1.5 rounded-full bg-fuchsia-300 shadow-[0_0_20px_5px_rgba(216,180,254,.4)]"
+            animate={{ y: [0, 18, 0], opacity: [0.25, 1, 0.25] }}
+            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          />
+        </div>
         <div className="absolute -right-48 top-0 h-[35rem] w-[35rem] rounded-full bg-indigo-600/20 blur-[110px]" />
         <div className="absolute -bottom-48 -left-40 h-[30rem] w-[30rem] rounded-full bg-violet-600/20 blur-[100px]" />
         <div className="relative mx-auto grid max-w-[1440px] items-center gap-16 px-5 sm:px-8 lg:grid-cols-2 lg:px-12">
