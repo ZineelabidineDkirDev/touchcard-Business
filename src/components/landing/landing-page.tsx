@@ -291,12 +291,56 @@ export function LandingPage() {
             <DashboardPreview />
           </motion.div>
         </div>
-        <div className="border-t border-white/10 bg-[#0d1025]/90">
-          <div className="mx-auto grid max-w-[1440px] grid-cols-2 gap-5 px-5 py-7 text-center sm:grid-cols-4 sm:px-8 lg:px-12">
-            {[["01", "Une identité digitale"], ["02", "Un partage instantané"], ["03", "Des contacts organisés"], ["04", "Une relation durable"]].map(([n, label]) => (
-              <div key={n} className="flex items-center justify-center gap-3"><span className="text-xs font-black text-indigo-500">{n}</span><span className="text-xs font-bold text-slate-300 sm:text-sm">{label}</span></div>
+        <div className="relative border-t border-white/10 bg-gradient-to-r from-[#0c1025] via-[#15143a] to-[#0c1025]">
+          <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-3 px-5 py-8 sm:grid-cols-2 sm:px-8 lg:grid-cols-4 lg:px-12">
+            {[
+              ["01", "Une identité digitale", "Votre univers professionnel, toujours à jour.", "◈"],
+              ["02", "Un partage instantané", "Un geste NFC, un scan QR, le contact est créé.", "⌁"],
+              ["03", "Des contacts organisés", "Chaque rencontre devient une opportunité suivie.", "◎"],
+              ["04", "Une relation durable", "Entretenez le lien et fidélisez vos clients.", "✳"],
+            ].map(([n, label, detail, symbol], index) => (
+              <motion.div key={n} initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .4 }} transition={{ duration: .55, delay: index * .1 }} whileHover={reduceMotion ? undefined : { y: -5 }} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[.045] p-5 backdrop-blur-sm">
+                <div className="absolute -right-8 -top-10 h-24 w-24 rounded-full bg-indigo-500/10 blur-2xl transition group-hover:bg-fuchsia-500/20" />
+                <div className="relative flex items-center justify-between"><span className="text-[10px] font-black tracking-[.2em] text-indigo-300">{n}</span><span className="flex h-9 w-9 items-center justify-center rounded-xl border border-indigo-300/20 bg-indigo-400/10 text-lg text-indigo-200">{symbol}</span></div>
+                <h3 className="relative mt-5 text-sm font-extrabold text-white">{label}</h3>
+                <p className="relative mt-2 text-xs leading-5 text-slate-400">{detail}</p>
+                <motion.div className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400" initial={{ width: "0%" }} whileInView={{ width: "100%" }} viewport={{ once: true }} transition={{ duration: 1, delay: .2 + index * .12 }} />
+              </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section id="chiffres" className="relative isolate overflow-hidden bg-[#090b1b] px-5 py-24 text-white sm:px-8 lg:px-12 lg:py-32">
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute -left-40 top-0 h-96 w-96 rounded-full bg-indigo-600/20 blur-[120px]" />
+          <div className="absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-fuchsia-600/15 blur-[120px]" />
+          <div className="absolute inset-0 opacity-[.07]" style={{ backgroundImage: "radial-gradient(#a5b4fc 1px, transparent 1px)", backgroundSize: "26px 26px" }} />
+        </div>
+        <div className="relative mx-auto max-w-[1440px]">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: .25 }} variants={reveal} className="mx-auto max-w-3xl text-center">
+            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-white/[.06] px-4 py-2 text-[10px] font-extrabold uppercase tracking-[.2em] text-indigo-200"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> L’impact en un coup d’œil</span>
+            <h2 className="mt-6 text-4xl font-black tracking-[-.05em] sm:text-5xl lg:text-6xl">Les rencontres prennent de la valeur. <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">Les chiffres le raconteront.</span></h2>
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-400 sm:text-lg">Un tableau de bord pour mesurer l’adoption de TouchCard et suivre l’activité de votre réseau, en toute transparence.</p>
+          </motion.div>
+          <div className="mt-16 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {[
+              ["Utilisateurs actifs", "Profils professionnels qui utilisent la plateforme", "01", "◎"],
+              ["Cartes digitales créées", "Cartes NFC et profils QR configurés", "02", "▣"],
+              ["Interactions enregistrées", "Scans, vues et clics sur les profils", "03", "↗"],
+              ["Contacts collectés", "Nouveaux contacts ajoutés au réseau", "04", "✳"],
+            ].map(([label, description, number, symbol], index) => (
+              <motion.article key={number} initial={{ opacity: 0, y: 28, scale: .97 }} whileInView={{ opacity: 1, y: 0, scale: 1 }} viewport={{ once: true, amount: .25 }} transition={{ duration: .65, delay: index * .1 }} whileHover={reduceMotion ? undefined : { y: -7 }} className="group relative overflow-hidden rounded-[1.7rem] border border-white/10 bg-gradient-to-br from-white/[.09] to-white/[.025] p-7 shadow-[0_25px_70px_-45px_rgba(99,102,241,.5)] backdrop-blur-xl">
+                <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-indigo-500/10 blur-3xl transition-colors group-hover:bg-fuchsia-500/20" />
+                <div className="relative flex items-center justify-between"><span className="text-[10px] font-black tracking-[.2em] text-indigo-300">{number}</span><span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-indigo-300/20 bg-indigo-400/10 text-xl text-indigo-200">{symbol}</span></div>
+                <p className="relative mt-8 text-4xl font-black tracking-tight text-white">—</p>
+                <h3 className="relative mt-3 text-base font-extrabold text-white">{label}</h3>
+                <p className="relative mt-2 min-h-10 text-xs leading-5 text-slate-400">{description}</p>
+                <div className="relative mt-6 flex items-center gap-2 border-t border-white/10 pt-4 text-[10px] font-bold uppercase tracking-[.12em] text-slate-500"><span className="h-1.5 w-1.5 rounded-full bg-amber-400" /> Statistique bientôt disponible</div>
+              </motion.article>
+            ))}
+          </div>
+          <p className="mt-7 text-center text-xs text-slate-500">Les compteurs seront alimentés par les données réelles de la plateforme après son lancement. Aucun chiffre fictif n’est affiché.</p>
         </div>
       </section>
 
