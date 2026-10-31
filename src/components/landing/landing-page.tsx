@@ -52,8 +52,8 @@ function DashboardPreview() {
         <div className="flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-lg text-emerald-600">✓</span>
           <div>
-            <p className="text-xs font-bold text-slate-900">Contact enregistré</p>
-            <p className="mt-1 text-[11px] text-slate-500">Nouveau prospect · À l’instant</p>
+            <p className="text-xs font-bold text-slate-900">{t("mockContactSaved")}</p>
+            <p className="mt-1 text-[11px] text-slate-500">{t("mockNewLead")}</p>
           </div>
         </div>
       </motion.div>
@@ -72,16 +72,16 @@ function DashboardPreview() {
             <div className="absolute -right-16 -top-16 h-52 w-52 rounded-full border border-white/10" />
             <div className="absolute -right-8 -top-8 h-36 w-36 rounded-full border border-white/10" />
             <div className="relative flex items-center justify-between">
-              <span className="rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-[10px] font-bold tracking-[.18em]">VOTRE CARTE DIGITALE</span>
+              <span className="rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-[10px] font-bold tracking-[.18em]">{t("mockCardLabel")}</span>
               <span className="text-xl text-indigo-100">✳</span>
             </div>
             <div className="relative mt-12">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white/15 text-xl font-black">JD</div>
               <p className="mt-5 text-2xl font-bold tracking-tight">Jean Dupont</p>
-              <p className="mt-1 text-sm text-indigo-100">Directeur · Studio Créatif</p>
+              <p className="mt-1 text-sm text-indigo-100">{t("mockDirector")}</p>
             </div>
             <div className="relative mt-7 grid grid-cols-2 gap-2">
-              {["Téléphone", "E-mail", "Site web", "LinkedIn"].map((item) => (
+              {["{t("mockPhone")}", "{t("mockEmail")}", "{t("mockWebsite")}", "{t("mockLinkedin")}"].map((item) => (
                 <div key={item} className="rounded-xl border border-white/15 bg-white/10 px-3 py-2.5 text-xs text-white/90">{item} <span className="float-right">↗</span></div>
               ))}
             </div>
@@ -91,7 +91,7 @@ function DashboardPreview() {
           <div className="grid gap-3">
             <div className="rounded-[1.7rem] bg-white p-5">
               <div className="flex items-center justify-between">
-                <div><p className="text-xs font-semibold text-slate-500">Aperçu des interactions</p><p className="mt-1 text-2xl font-black tracking-tight text-slate-950">En un coup d’œil</p></div>
+                <div><p className="text-xs font-semibold text-slate-500">{t("mockInteractions")}</p><p className="mt-1 text-2xl font-black tracking-tight text-slate-950">{t("mockAtGlance")}</p></div>
                 <span className="rounded-xl bg-indigo-50 p-2.5 text-lg text-indigo-600">↗</span>
               </div>
               <div className="mt-6 flex h-24 items-end gap-2">
@@ -99,16 +99,16 @@ function DashboardPreview() {
                   <span key={i} style={{ height: `${height}%` }} className={`flex-1 rounded-t-md ${i === 9 ? "bg-violet-500" : "bg-indigo-100"}`} />
                 ))}
               </div>
-              <div className="mt-3 flex justify-between text-[10px] text-slate-400"><span>Activité</span><span>Exemple d’interface</span></div>
+              <div className="mt-3 flex justify-between text-[10px] text-slate-400"><span>{t("mockActivity")}</span><span>{t("mockInterface")}</span></div>
             </div>
             <div className="flex items-center justify-between rounded-[1.7rem] bg-[#f0edff] p-5">
-              <div><p className="text-xs font-bold text-indigo-700">Partage instantané</p><p className="mt-1 text-sm text-slate-600">Votre profil, partout.</p><p className="mt-4 text-[10px] font-semibold tracking-[.16em] text-indigo-500">SCAN · CONNECT · GROW</p></div>
+              <div><p className="text-xs font-bold text-indigo-700">{t("mockInstantShare")}</p><p className="mt-1 text-sm text-slate-600">{t("mockProfileEverywhere")}</p><p className="mt-4 text-[10px] font-semibold tracking-[.16em] text-indigo-500">SCAN · CONNECT · GROW</p></div>
               <QrPattern />
             </div>
           </div>
         </div>
         <div className="mt-3 grid grid-cols-3 gap-2">
-          {["Cartes & profils", "Contacts & CRM", "Fidélité client"].map((label, i) => (
+          {["{t("mockCardsProfiles")}", "{t("mockContactsCRM")}", "{t("mockLoyalty")}"].map((label, i) => (
             <div key={label} className="rounded-xl border border-white/10 bg-white/[.06] px-2 py-3 text-center text-[10px] font-medium text-slate-300 sm:text-xs">
               <span className="mb-1 block text-sm text-indigo-300">{["▣", "◎", "✳"][i]}</span>{label}
             </div>
@@ -124,7 +124,7 @@ function DashboardPreview() {
       >
         <div className="flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-lg text-violet-600">⌁</span>
-          <div><p className="text-xs font-bold text-slate-900">NFC + QR code</p><p className="mt-1 text-[11px] text-slate-500">Un partage, plusieurs possibilités</p></div>
+          <div><p className="text-xs font-bold text-slate-900">NFC + QR code</p><p className="mt-1 text-[11px] text-slate-500">{t("mockShareWays")}</p></div>
         </div>
       </motion.div>
     </div>
@@ -770,10 +770,10 @@ export function LandingPage() {
             <motion.div className="absolute left-[12%] top-[24%] h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_24px_8px_rgba(103,232,249,.35)]" animate={reduceMotion ? undefined : { y: [0, -18, 0], opacity: [.45, 1, .45] }} transition={{ duration: 4, repeat: Infinity }} />
             <motion.div className="absolute right-[14%] bottom-[22%] h-3 w-3 rounded-full bg-fuchsia-300 shadow-[0_0_28px_8px_rgba(232,121,249,.35)]" animate={reduceMotion ? undefined : { y: [0, 16, 0], opacity: [.5, 1, .5] }} transition={{ duration: 5, repeat: Infinity }} />
             <motion.div className="absolute left-[8%] bottom-[18%] hidden rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-left backdrop-blur-md md:block" animate={reduceMotion ? undefined : { y: [0, -10, 0], rotate: [-3, 0, -3] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}>
-              <span className="block text-[10px] font-bold uppercase tracking-[.18em] text-indigo-200">NFC connecté</span><span className="mt-1 block text-sm font-semibold text-white">Un geste. Un contact.</span>
+              <span className="block text-[10px] font-bold uppercase tracking-[.18em] text-indigo-200">{t("mockNfc")}</span><span className="mt-1 block text-sm font-semibold text-white">{t("mockOneTap")}</span>
             </motion.div>
             <motion.div className="absolute right-[8%] top-[18%] hidden rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-left backdrop-blur-md md:block" animate={reduceMotion ? undefined : { y: [0, 12, 0], rotate: [3, 0, 3] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}>
-              <span className="block text-[10px] font-bold uppercase tracking-[.18em] text-fuchsia-200">Nouvelle opportunité</span><span className="mt-1 block text-sm font-semibold text-white">Relation activée <span className="text-emerald-300">↗</span></span>
+              <span className="block text-[10px] font-bold uppercase tracking-[.18em] text-fuchsia-200">{t("mockOpportunity")}</span><span className="mt-1 block text-sm font-semibold text-white">{t("mockRelation")} <span className="text-emerald-300">↗</span></span>
             </motion.div>
           </div>
           <motion.div
@@ -807,7 +807,7 @@ export function LandingPage() {
             <p className="mt-5 max-w-sm text-sm leading-7 text-slate-400">{t("footerDesc")}</p>
             <Link href="/register" className="mt-7 inline-flex rounded-xl bg-indigo-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-400">{t("navCreate")} <Arrow /></Link>
           </div>
-          <div><h3 className="text-sm font-extrabold">Plateforme</h3><ul className="mt-5 space-y-3 text-sm text-slate-400"><li><a className="hover:text-white" href="#solutions">Solutions</a></li><li><a className="hover:text-white" href="#experience">{t("footerFeatures")}</a></li><li><a className="hover:text-white" href="#demo">{t("footerDemo")}</a></li><li><a className="hover:text-white" href="#tarifs">{t("navPricing")}</a></li></ul></div>
+          <div>{t("<h3 className="text-sm font-extrabold">{t("footerPlatformHeading")}</h3>")}<ul className="mt-5 space-y-3 text-sm text-slate-400"><li><a className="hover:text-white" href="#solutions">Solutions</a></li><li><a className="hover:text-white" href="#experience">{t("footerFeatures")}</a></li><li><a className="hover:text-white" href="#demo">{t("footerDemo")}</a></li><li><a className="hover:text-white" href="#tarifs">{t("navPricing")}</a></li></ul></div>
           <div><h3 className="text-sm font-extrabold">{t("footerDiscover")}</h3><ul className="mt-5 space-y-3 text-sm text-slate-400"><li><a className="hover:text-white" href="#fonctionnement">{t("navHow")}</a></li><li><a className="hover:text-white" href="#faq">{t("faqTitle")}</a></li><li><Link className="hover:text-white" href="/register">{t("footerSignup")}</Link></li><li><Link className="hover:text-white" href="/login">{t("navLogin")}</Link></li></ul></div>
           <div><h3 className="text-sm font-extrabold">{t("footerWorkspace")}</h3><p className="mt-5 text-sm leading-7 text-slate-400">{t("footerCTA")}</p><Link href="/register" className="mt-4 inline-flex text-sm font-bold text-indigo-300 hover:text-white">{t("footerStart")}</Link></div>
         </div>
