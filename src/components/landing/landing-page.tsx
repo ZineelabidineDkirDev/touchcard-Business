@@ -10,62 +10,7 @@ const rise = {
   visible: { opacity: 1, y: 0 },
 };
 
-const features = [
-  {
-    number: "01",
-    icon: "⌁",
-    title: t("feature1Title"),
-    description:
-      t("feature1Desc"),
-    detail: t("feature1Detail"),
-  },
-  {
-    number: "02",
-    icon: "◎",
-    title: t("feature2Title"),
-    description:
-      t("feature2Desc"),
-    detail: t("feature2Detail"),
-  },
-  {
-    number: "03",
-    icon: "↗",
-    title: t("feature3Title"),
-    description:
-      t("feature3Desc"),
-    detail: t("feature3Detail"),
-  },
-  {
-    number: "04",
-    icon: "✳",
-    title: t("feature4Title"),
-    description:
-      t("feature4Desc"),
-    detail: t("feature4Detail"),
-  },
-  {
-    number: "05",
-    icon: "▦",
-    title: t("feature5Title"),
-    description:
-      t("feature5Desc"),
-    detail: t("feature5Detail"),
-  },
-  {
-    number: "06",
-    icon: "◇",
-    title: t("feature6Title"),
-    description:
-      t("feature6Desc"),
-    detail: t("feature6Detail"),
-  },
-];
 
-const steps = [
-  ["01", t("step1Title"), t("step1Desc")],
-  ["02", t("step2Title"), t("step2Desc")],
-  ["03", t("step3Title"), t("step3Desc")],
-];
 
 function Arrow() {
   return <span aria-hidden="true">↗</span>;
@@ -188,6 +133,62 @@ function DashboardPreview() {
 
 export function LandingPage() {
   const { t } = useI18n();
+  const features = [
+    {
+      number: "01",
+      icon: "⌁",
+      title: t("feature1Title"),
+      description:
+        t("feature1Desc"),
+      detail: t("feature1Detail"),
+    },
+    {
+      number: "02",
+      icon: "◎",
+      title: t("feature2Title"),
+      description:
+        t("feature2Desc"),
+      detail: t("feature2Detail"),
+    },
+    {
+      number: "03",
+      icon: "↗",
+      title: t("feature3Title"),
+      description:
+        t("feature3Desc"),
+      detail: t("feature3Detail"),
+    },
+    {
+      number: "04",
+      icon: "✳",
+      title: t("feature4Title"),
+      description:
+        t("feature4Desc"),
+      detail: t("feature4Detail"),
+    },
+    {
+      number: "05",
+      icon: "▦",
+      title: t("feature5Title"),
+      description:
+        t("feature5Desc"),
+      detail: t("feature5Detail"),
+    },
+    {
+      number: "06",
+      icon: "◇",
+      title: t("feature6Title"),
+      description:
+        t("feature6Desc"),
+      detail: t("feature6Detail"),
+    },
+  ];
+  
+  const steps = [
+    ["01", t("step1Title"), t("step1Desc")],
+    ["02", t("step2Title"), t("step2Desc")],
+    ["03", t("step3Title"), t("step3Desc")],
+  ];
   const reduceMotion = useReducedMotion();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
