@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { AuthForm } from "@/components/auth/auth-form";
+import { I18nText } from "@/i18n/provider";
 
 export default function LoginPage({
   searchParams,
@@ -31,15 +32,15 @@ async function LoginContent({
           <span className="text-xl font-black tracking-tight text-slate-950">Touch<span className="text-indigo-600">Card</span><span className="ml-2 text-[9px] font-extrabold tracking-[.18em] text-indigo-600">BUSINESS</span></span>
         </Link>
         <p className="mt-8 text-sm font-semibold uppercase tracking-[.18em] text-indigo-600">
-          Espace professionnel
+          <I18nText message="workspace" />
         </p>
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">Bon retour.</h1>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950"><I18nText message="welcome" /></h1>
         <p className="mt-2 text-slate-500">
-          Connectez-vous pour gérer votre présence digitale.
+          <I18nText message="loginIntro" />
         </p>
         {params.registered === "1" && (
           <p className="mt-5 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700">
-            Compte créé. Vérifiez votre e-mail si une confirmation est demandée.
+            <I18nText message="created" />
           </p>
         )}
         <AuthForm mode="login" />
