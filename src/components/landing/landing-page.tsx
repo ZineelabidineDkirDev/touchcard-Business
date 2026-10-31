@@ -215,8 +215,8 @@ export function LandingPage() {
             <details className="group relative">
               <summary className="flex cursor-pointer list-none items-center gap-2 transition hover:text-indigo-600 [&::-webkit-details-marker]:hidden">{t("navSolutions")} <span className="text-[10px] transition group-open:rotate-180">⌄</span></summary>
               <div className="absolute left-0 top-full z-50 mt-4 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-slate-950/10">
-                <a className="block rounded-xl px-4 py-3 hover:bg-indigo-50 hover:text-indigo-700" href="#solutions"><span className="block text-sm font-bold">Toutes les fonctionnalités</span><span className="mt-1 block text-xs font-normal text-slate-500">NFC, QR, CRM, fidélité et boutique</span></a>
-                <a className="block rounded-xl px-4 py-3 hover:bg-indigo-50 hover:text-indigo-700" href="#secteurs"><span className="block text-sm font-bold">Par secteur d’activité</span><span className="mt-1 block text-xs font-normal text-slate-500">Indépendants, commerces et équipes</span></a>
+                <a className="block rounded-xl px-4 py-3 hover:bg-indigo-50 hover:text-indigo-700" href="#solutions"><span className="block text-sm font-bold">{t("navFeatures")}</span><span className="mt-1 block text-xs font-normal text-slate-500">NFC, QR, CRM, fidélité et boutique</span></a>
+                <a className="block rounded-xl px-4 py-3 hover:bg-indigo-50 hover:text-indigo-700" href="#secteurs"><span className="block text-sm font-bold">{t("navBySector")}</span><span className="mt-1 block text-xs font-normal text-slate-500">{t("navSectorDesc")}</span></a>
               </div>
             </details>
             <a className="transition hover:text-indigo-600" href="#experience">{t("navPlatform")}</a>
@@ -236,7 +236,7 @@ export function LandingPage() {
         {mobileMenuOpen && (
           <nav aria-label="Navigation mobile" className="border-t border-white/10 bg-gradient-to-r from-[#090b1b] via-[#17143b] to-[#090b1b] px-5 py-4 text-white shadow-xl xl:hidden">
             <div className="mx-auto grid max-w-[1440px] gap-1">
-              {[["Solutions", "#solutions"], ["La plateforme", "#experience"], ["Démonstration", "#demo"], ["Comment ça marche", "#fonctionnement"], ["Tarifs", "#tarifs"], ["FAQ", "#faq"]].map(([label, href]) => (
+              {[[t("navSolutions"), "#solutions"], [t("navPlatform"), "#experience"], [t("navDemo"), "#demo"], [t("navHow"), "#fonctionnement"], [t("navPricing"), "#tarifs"], [t("navFaq"), "#faq"]].map(([label, href]) => (
                 <a key={href} href={href} onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-700">{label}</a>
               ))}
               <div className="mt-2 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
