@@ -282,9 +282,9 @@ export function LandingPage() {
               <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" /></span>
               La nouvelle génération de cartes professionnelles
             </div>
-            <h1 className="mt-8 max-w-3xl text-[clamp(3.25rem,4.5vw,4.4rem)] font-black leading-[.99] tracking-[-.065em] text-white">
+            <h2 className="mt-8 max-w-3xl text-[clamp(3.25rem,4.5vw,4.4rem)] font-black leading-[.99] tracking-[-.065em] text-white">
               Chaque rencontre peut devenir <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent">une opportunité.</span>
-            </h1>
+            </h2>
             <p className="mt-8 max-w-xl text-lg leading-8 text-slate-300 sm:text-xl sm:leading-9">
               Bien plus qu’une carte de visite. Créez votre identité digitale, partagez-la avec NFC ou QR code, développez vos contacts et fidélisez vos clients depuis une seule plateforme.
             </p>
