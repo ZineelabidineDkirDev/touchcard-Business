@@ -426,6 +426,42 @@ export function LandingPage() {
             animate={{ y: [0, 18, 0], opacity: [0.25, 1, 0.25] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
           />
+
+          {/* Floating 3D digital business cards */}
+          <motion.div
+            className="absolute right-[4%] top-[12%] hidden w-52 rounded-[1.35rem] border border-white/20 bg-gradient-to-br from-[#29265a]/95 via-[#171936]/95 to-[#101226]/95 p-4 shadow-[0_24px_80px_rgba(79,70,229,.28)] backdrop-blur-xl lg:block"
+            style={{ perspective: 900, rotateY: -18, rotateX: 8 }}
+            animate={{ y: [0, -18, 0], rotateZ: [-5, -1, -5], rotateY: [-18, -12, -18] }}
+            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-400 to-fuchsia-500 text-lg font-black text-white shadow-lg shadow-indigo-500/30">T</div>
+              <div><p className="text-xs font-bold text-white">TouchCard</p><p className="mt-1 text-[9px] tracking-widest text-indigo-200">BUSINESS PROFILE</p></div>
+            </div>
+            <div className="mt-5 h-px bg-gradient-to-r from-indigo-300/60 to-transparent" />
+            <div className="mt-4 space-y-2"><div className="h-1.5 w-3/4 rounded-full bg-white/45" /><div className="h-1.5 w-1/2 rounded-full bg-white/20" /></div>
+            <div className="mt-5 flex items-center justify-between"><span className="text-[9px] font-semibold text-indigo-200">TAP • CONNECT • GROW</span><span className="text-xl text-violet-200">⌁</span></div>
+          </motion.div>
+
+          <motion.div
+            className="absolute bottom-[9%] left-[42%] hidden w-44 rounded-[1.25rem] border border-violet-200/20 bg-gradient-to-br from-[#34245d]/90 to-[#15152f]/95 p-4 shadow-[0_22px_65px_rgba(168,85,247,.22)] backdrop-blur-xl lg:block"
+            style={{ rotateY: 16, rotateX: -7 }}
+            animate={{ y: [0, 15, 0], rotateZ: [7, 3, 7], rotateY: [16, 10, 16] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
+          >
+            <div className="flex items-center justify-between"><span className="text-[9px] font-bold tracking-widest text-violet-200">NEW CONTACT</span><span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_12px_3px_rgba(110,231,183,.35)]" /></div>
+            <div className="mt-4 flex items-center gap-3"><div className="h-9 w-9 rounded-full bg-gradient-to-br from-fuchsia-300 to-indigo-400" /><div className="space-y-1.5"><div className="h-1.5 w-20 rounded-full bg-white/50" /><div className="h-1 w-14 rounded-full bg-white/20" /></div></div>
+            <div className="mt-4 rounded-lg border border-white/10 bg-white/[.06] px-3 py-2 text-[9px] text-violet-100">Contact ajouté avec succès</div>
+          </motion.div>
+
+          <motion.div
+            className="absolute bottom-[16%] right-[3%] hidden w-36 rounded-[1.1rem] border border-indigo-200/20 bg-[#11152f]/90 p-3 shadow-[0_20px_55px_rgba(99,102,241,.2)] backdrop-blur-xl lg:block"
+            animate={{ y: [0, -12, 0], rotateZ: [-7, -3, -7] }}
+            transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut", delay: 1.4 }}
+          >
+            <div className="flex h-16 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500/20 to-violet-500/20"><div className="grid grid-cols-5 gap-1">{Array.from({ length: 25 }, (_, i) => <span key={i} className={`h-1.5 w-1.5 rounded-[2px] ${[0, 2, 6, 8, 12, 16, 18, 20, 22, 24].includes(i) ? "bg-indigo-200" : "bg-white/35"}`} />)}</div></div>
+            <p className="mt-2 text-center text-[9px] font-bold tracking-widest text-indigo-200">SCAN & CONNECT</p>
+          </motion.div>
         </div>
         <div className="absolute -right-48 top-0 h-[35rem] w-[35rem] rounded-full bg-indigo-600/20 blur-[110px]" />
         <div className="absolute -bottom-48 -left-40 h-[30rem] w-[30rem] rounded-full bg-violet-600/20 blur-[100px]" />
