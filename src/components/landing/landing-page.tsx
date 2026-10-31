@@ -246,10 +246,21 @@ export function LandingPage() {
       </header>
 
       <section className="relative isolate overflow-hidden bg-[#090b1b] text-white">
-        <div className="absolute inset-0 -z-10 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
           <div className="absolute -right-48 -top-56 h-[42rem] w-[42rem] rounded-full bg-indigo-600/30 blur-[120px]" />
           <div className="absolute -bottom-64 -left-40 h-[34rem] w-[34rem] rounded-full bg-violet-700/25 blur-[120px]" />
-          <div className="absolute inset-0 opacity-[.16]" style={{ backgroundImage: "radial-gradient(#a5b4fc 1px, transparent 1px)", backgroundSize: "30px 30px" }} />
+          <div className="absolute inset-0 opacity-[.13]" style={{ backgroundImage: "radial-gradient(#a5b4fc 1px, transparent 1px)", backgroundSize: "30px 30px" }} />
+          <motion.div aria-hidden="true" className="absolute -right-24 top-24 h-[34rem] w-[34rem] rounded-full border border-indigo-300/20" animate={reduceMotion ? undefined : { rotate: 360 }} transition={{ duration: 70, repeat: Infinity, ease: "linear" }} />
+          <motion.div aria-hidden="true" className="absolute -right-8 top-40 h-[22rem] w-[22rem] rounded-full border border-violet-300/20" animate={reduceMotion ? undefined : { rotate: -360 }} transition={{ duration: 52, repeat: Infinity, ease: "linear" }}>
+            <span className="absolute left-1/2 top-0 h-3 w-3 -translate-x-1/2 rounded-full bg-fuchsia-300 shadow-[0_0_24px_rgba(232,121,249,.9)]" />
+          </motion.div>
+          <motion.div aria-hidden="true" className="absolute right-[13%] top-[22%] h-3 w-3 rounded-full bg-indigo-300 shadow-[0_0_28px_rgba(129,140,248,.95)]" animate={reduceMotion ? undefined : { y: [0, -22, 0], x: [0, 12, 0], opacity: [.45, 1, .45] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }} />
+          <motion.div aria-hidden="true" className="absolute bottom-[22%] right-[42%] h-2 w-2 rounded-full bg-fuchsia-300 shadow-[0_0_22px_rgba(232,121,249,.9)]" animate={reduceMotion ? undefined : { y: [0, 18, 0], opacity: [.35, 1, .35] }} transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: .7 }} />
+          <motion.div aria-hidden="true" className="absolute right-[7%] top-[34%] hidden rounded-2xl border border-white/10 bg-white/[.045] p-3 text-[10px] font-bold tracking-[.18em] text-indigo-100/70 backdrop-blur-sm lg:block" animate={reduceMotion ? undefined : { y: [0, -12, 0], rotate: [3, 0, 3] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}>NFC · CONNECT</motion.div>
+          <motion.div aria-hidden="true" className="absolute bottom-[18%] right-[8%] hidden h-16 w-16 rotate-12 rounded-2xl border border-fuchsia-300/20 bg-gradient-to-br from-indigo-400/10 to-fuchsia-400/10 backdrop-blur-sm lg:block" animate={reduceMotion ? undefined : { y: [0, 14, 0], rotate: [12, 24, 12] }} transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: .4 }}>
+            <span className="absolute inset-3 rounded-xl border border-white/15" />
+          </motion.div>
+          <motion.div aria-hidden="true" className="absolute left-[5%] top-[23%] hidden h-20 w-20 rounded-full border border-indigo-300/15 lg:block" animate={reduceMotion ? undefined : { scale: [1, 1.16, 1], opacity: [.25, .65, .25] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} />
         </div>
         <div className="mx-auto grid min-h-[760px] max-w-[1440px] items-center gap-16 px-5 py-20 sm:px-8 lg:grid-cols-[1fr_1.08fr] lg:px-12 lg:py-28">
           <motion.div initial="hidden" animate="visible" variants={reveal} transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}>
