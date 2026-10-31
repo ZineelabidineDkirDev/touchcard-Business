@@ -529,52 +529,64 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section id="fonctionnement" className="relative isolate overflow-hidden bg-[#f7f7ff] px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
+      <section id="fonctionnement" className="relative isolate overflow-hidden bg-[#090b1b] px-5 py-24 text-white sm:px-8 lg:px-12 lg:py-32">
         <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute -left-40 top-10 h-96 w-96 rounded-full bg-indigo-200/35 blur-[100px]" />
-          <div className="absolute -right-40 bottom-0 h-[30rem] w-[30rem] rounded-full bg-fuchsia-200/30 blur-[110px]" />
-          <motion.div aria-hidden="true" className="absolute -right-24 top-16 h-[34rem] w-[34rem] rounded-full border border-indigo-200/60" animate={reduceMotion ? undefined : { rotate: 360 }} transition={{ duration: 80, repeat: Infinity, ease: "linear" }} />
-          <motion.div aria-hidden="true" className="absolute -right-10 top-32 h-[26rem] w-[26rem] rounded-full border border-dashed border-violet-200/70" animate={reduceMotion ? undefined : { rotate: -360 }} transition={{ duration: 65, repeat: Infinity, ease: "linear" }} />
+          <div className="absolute -left-40 top-0 h-[34rem] w-[34rem] rounded-full bg-indigo-700/20 blur-[130px]" />
+          <div className="absolute -right-40 bottom-0 h-[34rem] w-[34rem] rounded-full bg-fuchsia-700/15 blur-[130px]" />
+          <div className="absolute inset-0 opacity-[.12]" style={{backgroundImage:"linear-gradient(rgba(148,163,184,.22) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.22) 1px,transparent 1px)",backgroundSize:"54px 54px"}} />
+          <motion.div className="absolute -right-28 top-12 h-[38rem] w-[38rem] rounded-full border border-indigo-300/10" animate={reduceMotion ? undefined : {rotate:360}} transition={{duration:90,repeat:Infinity,ease:"linear"}} />
+          <motion.div className="absolute -right-4 top-36 h-[26rem] w-[26rem] rounded-full border border-dashed border-violet-300/15" animate={reduceMotion ? undefined : {rotate:-360}} transition={{duration:75,repeat:Infinity,ease:"linear"}} />
         </div>
-        <div className="relative mx-auto grid max-w-[1440px] items-center gap-14 lg:grid-cols-[.85fr_1.15fr] lg:gap-20">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={reveal} transition={{ duration: 0.7 }} className="relative">
-            <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: .6 }} className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-white/80 px-4 py-2 text-[10px] font-black uppercase tracking-[.2em] text-indigo-700 shadow-sm backdrop-blur">
-              <motion.span className="h-2 w-2 rounded-full bg-emerald-500" animate={reduceMotion ? undefined : { scale: [1, 1.45, 1], opacity: [1, .55, 1] }} transition={{ duration: 2, repeat: Infinity }} />
-              Une expérience en trois étapes
-            </motion.div>
-            <h2 className="mt-7 max-w-xl text-4xl font-black leading-[1.04] tracking-[-.055em] text-[#11132d] sm:text-5xl lg:text-6xl">
-              De la rencontre à la <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 bg-clip-text text-transparent">connexion.</span>
+        <div className="relative mx-auto max-w-[1440px]">
+          <motion.div initial="hidden" whileInView="visible" viewport={{once:true,amount:.25}} variants={reveal} className="mx-auto max-w-3xl text-center">
+            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-white/[.06] px-4 py-2 text-[10px] font-black uppercase tracking-[.22em] text-indigo-200 backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400 shadow-[0_0_12px_rgba(232,121,249,.9)]" /> L’expérience TouchCard
+            </span>
+            <h2 className="mt-7 text-4xl font-black leading-[1.04] tracking-[-.055em] sm:text-5xl lg:text-6xl">
+              De la rencontre à la <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">connexion.</span>
             </h2>
-            <p className="mt-7 max-w-md text-base leading-8 text-slate-600 sm:text-lg">
-              Un simple geste suffit pour partager votre univers professionnel, créer un lien et transformer chaque échange en opportunité.
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-400 sm:text-lg">
+              Un geste. Une connexion. Une relation qui continue. Découvrez un parcours professionnel pensé pour être simple, rapide et mémorable.
             </p>
-            <motion.div className="mt-10 inline-flex" whileHover={reduceMotion ? undefined : { y: -4, scale: 1.025 }} whileTap={reduceMotion ? undefined : { scale: .97 }}>
-              <Link href="/register" className="group relative inline-flex items-center gap-4 overflow-hidden rounded-2xl bg-gradient-to-r from-[#4f46e5] via-[#6d45df] to-[#9333ea] px-7 py-4 text-sm font-extrabold text-white shadow-[0_18px_45px_-16px_rgba(79,70,229,.65)] ring-1 ring-white/30 transition-shadow duration-300 hover:shadow-[0_24px_55px_-14px_rgba(124,58,237,.7)]">
-                <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
-                <span className="relative">Créer mon espace</span>
-                <motion.span className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-white/15" animate={reduceMotion ? undefined : { x: [0, 4, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}><Arrow /></motion.span>
-              </Link>
-            </motion.div>
-            <div className="mt-7 flex items-center gap-3 text-xs font-semibold text-slate-500">
-              <span className="flex -space-x-2"><span className="h-7 w-7 rounded-full border-2 border-[#f7f7ff] bg-gradient-to-br from-indigo-400 to-violet-600" /><span className="h-7 w-7 rounded-full border-2 border-[#f7f7ff] bg-gradient-to-br from-fuchsia-400 to-pink-600" /><span className="h-7 w-7 rounded-full border-2 border-[#f7f7ff] bg-gradient-to-br from-cyan-400 to-blue-600" /></span>
-              NFC · QR code · Réseau professionnel
-            </div>
           </motion.div>
-          <div className="relative">
-            <div className="absolute -inset-5 rounded-[2.4rem] bg-gradient-to-br from-indigo-200/60 via-violet-100/40 to-fuchsia-200/60 blur-2xl" />
-            <div className="relative space-y-4">
-              {steps.map(([number, title, description], index) => (
-                <motion.article key={number} initial={{ opacity: 0, x: 42, rotateX: -7 }} whileInView={{ opacity: 1, x: 0, rotateX: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: .7, delay: index * .16, ease: [0.22, 1, 0.36, 1] }} whileHover={reduceMotion ? undefined : { y: -7, rotateX: 2, rotateY: -2, scale: 1.012 }} style={{ transformPerspective: 1000 }} className="group relative flex gap-5 overflow-hidden rounded-[1.6rem] border border-white/80 bg-white/85 p-6 shadow-[0_18px_55px_-35px_rgba(49,46,129,.35)] backdrop-blur-xl transition-shadow duration-500 hover:shadow-[0_28px_70px_-35px_rgba(79,70,229,.48)] sm:gap-7 sm:p-8">
-                  <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-indigo-500 via-violet-500 to-fuchsia-500 opacity-70 transition-all duration-300 group-hover:w-1.5 group-hover:opacity-100" />
-                  <div className="absolute -right-16 -top-20 h-44 w-44 rounded-full bg-indigo-400/10 blur-3xl transition-colors duration-500 group-hover:bg-fuchsia-400/20" />
-                  <motion.span className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-50 to-violet-100 text-sm font-black text-indigo-700 ring-1 ring-indigo-100 transition-all duration-300 group-hover:from-indigo-600 group-hover:to-violet-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-indigo-500/25" whileHover={reduceMotion ? undefined : { rotate: 8, scale: 1.08 }}>{number}</motion.span>
-                  <div className="relative min-w-0 flex-1 pt-1"><h3 className="text-lg font-extrabold tracking-tight text-[#11132d]">{title}</h3><p className="mt-2 text-sm leading-7 text-slate-500">{description}</p></div>
-                  <motion.span className="relative ml-auto hidden self-center text-xl font-semibold text-indigo-300 transition-colors group-hover:text-indigo-600 sm:block" animate={reduceMotion ? undefined : { x: [0, 4, 0] }} transition={{ duration: 2.2, repeat: Infinity, delay: index * .2 }}>↗</motion.span>
-                  <motion.div className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500" initial={{ width: "0%" }} whileInView={{ width: "100%" }} viewport={{ once: true }} transition={{ duration: 1.1, delay: .35 + index * .15 }} />
+          <div className="relative mt-20">
+            <div className="absolute left-[12%] right-[12%] top-[3.15rem] hidden h-px bg-gradient-to-r from-indigo-500/10 via-violet-400/80 to-fuchsia-500/10 lg:block" />
+            <motion.div className="absolute left-[12%] right-[12%] top-[3.15rem] hidden h-px origin-left bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 lg:block" initial={{scaleX:0}} whileInView={{scaleX:1}} viewport={{once:true}} transition={{duration:1.8,ease:"easeOut",delay:.3}} />
+            <div className="grid gap-5 md:grid-cols-3">
+              {steps.map(([number,title,description],index)=>(
+                <motion.article key={number} initial={{opacity:0,y:35,rotateX:8}} whileInView={{opacity:1,y:0,rotateX:0}} viewport={{once:true,amount:.2}} transition={{duration:.75,delay:index*.16,ease:[.22,1,.36,1]}} whileHover={reduceMotion?undefined:{y:-10,rotateY:index===1?0:index===0?3:-3,scale:1.02}} style={{transformPerspective:1200}} className="group relative overflow-hidden rounded-[1.8rem] border border-white/10 bg-gradient-to-b from-white/[.09] to-white/[.025] p-7 shadow-[0_25px_70px_-45px_rgba(99,102,241,.65)] backdrop-blur-xl transition-all duration-500 hover:border-indigo-300/35 hover:shadow-[0_35px_80px_-40px_rgba(124,58,237,.55)] sm:p-8">
+                  <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-indigo-500/10 blur-3xl transition-colors duration-500 group-hover:bg-fuchsia-500/20" />
+                  <div className="relative flex items-center justify-between">
+                    <span className="text-[11px] font-black tracking-[.24em] text-slate-500">ÉTAPE {number}</span>
+                    <motion.div whileHover={reduceMotion?undefined:{rotate:12,scale:1.08}} className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-300/25 bg-gradient-to-br from-indigo-500/20 to-fuchsia-500/10 text-xl font-black text-indigo-100 shadow-[0_0_35px_-12px_rgba(129,140,248,.65)]">
+                      {index===0?"◈":index===1?"⌁":"◎"}
+                      <span className="absolute -inset-1 rounded-[1.1rem] border border-indigo-300/10" />
+                    </motion.div>
+                  </div>
+                  <div className="relative mt-9">
+                    <h3 className="text-xl font-extrabold tracking-tight text-white sm:text-2xl">{title}</h3>
+                    <p className="mt-3 min-h-[3.5rem] text-sm leading-7 text-slate-400">{description}</p>
+                  </div>
+                  <div className="relative mt-8 flex items-center justify-between border-t border-white/10 pt-5">
+                    <span className="text-[10px] font-bold uppercase tracking-[.18em] text-indigo-200/70">TouchCard Business</span>
+                    <motion.span className="text-lg text-indigo-300" animate={reduceMotion?undefined:{x:[0,5,0]}} transition={{duration:2,repeat:Infinity,delay:index*.3}}>↗</motion.span>
+                  </div>
+                  <motion.div className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400" initial={{width:"0%"}} whileInView={{width:"100%"}} viewport={{once:true}} transition={{duration:1.2,delay:.4+index*.15}} />
                 </motion.article>
               ))}
             </div>
           </div>
+          <motion.div initial={{opacity:0,y:18}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:.65,delay:.25}} className="mt-12 flex flex-col items-center justify-between gap-6 rounded-[1.7rem] border border-indigo-300/15 bg-gradient-to-r from-indigo-500/[.12] via-violet-500/[.10] to-fuchsia-500/[.12] p-6 backdrop-blur-xl sm:flex-row sm:px-9 sm:py-7">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/[.08]"><img src="/brand/touchcard-mark.svg" alt="" className="h-8 w-8 object-contain" /></div>
+              <div><p className="text-base font-extrabold text-white">Prêt à créer votre prochaine connexion ?</p><p className="mt-1 text-sm text-slate-400">Votre identité digitale commence ici.</p></div>
+            </div>
+            <motion.div whileHover={reduceMotion?undefined:{y:-3,scale:1.025}} whileTap={reduceMotion?undefined:{scale:.97}}>
+              <Link href="/register" className="group inline-flex items-center gap-4 rounded-xl bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 px-6 py-4 text-sm font-extrabold text-white shadow-[0_15px_40px_-15px_rgba(139,92,246,.8)] ring-1 ring-white/20 transition-shadow hover:shadow-[0_20px_50px_-15px_rgba(217,70,239,.65)]">
+                Créer mon espace <span className="transition-transform duration-300 group-hover:translate-x-1"><Arrow /></span>
+              </Link>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
