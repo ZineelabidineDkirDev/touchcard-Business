@@ -483,8 +483,32 @@ export function LandingPage() {
               ))}
             </div>
           </motion.div>
-          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.7 }} className="relative">
-            <div className="rounded-[2rem] border border-white/10 bg-white/[.06] p-5 shadow-2xl shadow-black/20 backdrop-blur sm:p-7">
+          <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.7 }} className="relative isolate px-3 pb-12 pt-10 sm:px-6 lg:px-8">
+            {/* Visible 3D cards layered over the product preview */}
+            <motion.div
+              className="absolute -right-1 top-0 z-20 w-44 rounded-2xl border border-indigo-200/30 bg-gradient-to-br from-[#34306d] via-[#1d2048] to-[#11132d] p-4 shadow-[0_24px_65px_rgba(79,70,229,.42)] sm:-right-2 sm:w-52"
+              style={{ transformPerspective: 900 }}
+              animate={{ y: [0, -16, 0], rotateY: [-14, -5, -14], rotateZ: [5, 1, 5] }}
+              transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <div className="flex items-center gap-2.5">
+                <img src="/brand/touchcard-mark.svg" alt="" className="h-9 w-9 rounded-xl" />
+                <div><p className="text-xs font-extrabold text-white">TouchCard</p><p className="text-[8px] tracking-[.18em] text-indigo-200">BUSINESS</p></div>
+              </div>
+              <div className="mt-4 h-px bg-gradient-to-r from-indigo-200/70 to-transparent" />
+              <p className="mt-3 text-[9px] font-semibold tracking-widest text-indigo-100">TAP TO CONNECT</p>
+              <div className="mt-3 flex gap-1"><span className="h-1 w-10 rounded-full bg-white/50" /><span className="h-1 w-6 rounded-full bg-white/20" /></div>
+            </motion.div>
+            <motion.div
+              className="absolute -bottom-1 -left-1 z-20 w-40 rounded-2xl border border-fuchsia-200/25 bg-gradient-to-br from-[#49285f] to-[#171633] p-3.5 shadow-[0_22px_60px_rgba(192,132,252,.35)] sm:-left-3 sm:w-48"
+              animate={{ y: [0, 13, 0], rotateY: [12, 4, 12], rotateZ: [-6, -2, -6] }}
+              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
+            >
+              <div className="flex items-center justify-between"><span className="text-[9px] font-bold tracking-widest text-fuchsia-100">NOUVEAU CONTACT</span><span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_12px_3px_rgba(110,231,183,.4)]" /></div>
+              <div className="mt-3 flex items-center gap-2"><span className="h-8 w-8 rounded-full bg-gradient-to-br from-fuchsia-300 to-indigo-400" /><div className="space-y-1"><div className="h-1.5 w-16 rounded-full bg-white/60" /><div className="h-1 w-11 rounded-full bg-white/25" /></div></div>
+              <p className="mt-3 rounded-lg border border-white/10 bg-white/[.07] px-2 py-1.5 text-[9px] text-fuchsia-100">Contact enregistré ✓</p>
+            </motion.div>
+            <div className="relative z-10 rounded-[2rem] border border-white/10 bg-white/[.06] p-5 shadow-2xl shadow-black/20 backdrop-blur sm:p-7">
               <div className="flex items-center justify-between border-b border-white/10 pb-5">
                 <div><p className="text-xs font-semibold text-slate-400">ESPACE PROFESSIONNEL</p><p className="mt-1 text-lg font-bold">Votre activité en un endroit</p></div>
                 <span className="rounded-xl bg-indigo-400/15 px-3 py-2 text-xs font-bold text-indigo-200">TouchCard</span>
