@@ -29,7 +29,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       {state.error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{state.error}</p>}
       <button disabled={pending} className="btn-primary w-full">{pending ? t("wait") : mode === "login" ? t("login") : t("createAccount")}</button>
       <p className="text-center text-sm text-slate-500">
-        {mode === "login" ? {t("noAccount")} : {t("hasAccount")}}{" "}
+        {mode === "login" ? t("noAccount") : t("hasAccount")}{" "}
         <Link className="font-semibold text-indigo-600" href={mode === "login" ? "/register" : "/login"}>
           {mode === "login" ? t("register") : t("login")}
         </Link>
