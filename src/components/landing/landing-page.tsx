@@ -13,6 +13,17 @@ const rise = {
 
 
 
+function JourneyStepIcon({ step }: { step: number }) {
+  const common = { fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-7 w-7" {...common}>
+      {step === 0 && <><rect x="3" y="4" width="18" height="16" rx="2.5" /><circle cx="9" cy="10" r="2.5" /><path d="M5.5 17c.8-2 2-3 3.5-3s2.7 1 3.5 3M15 9h3M15 13h3M15 17h2" /></>}
+      {step === 1 && <><rect x="7" y="2.5" width="10" height="19" rx="2" /><path d="M11 18.5h2M19.5 8.5a4 4 0 0 1 0 7M21.5 6a7.5 7.5 0 0 1 0 12" /></>}
+      {step === 2 && <><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="m16 11 2 2 4-4M16 4.5a4 4 0 0 1 3 3.9" /></>}
+    </svg>
+  );
+}
+
 function FeatureIcon({ name }: { name: string }) {
   const common = { fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
   return (
@@ -600,7 +611,7 @@ export function LandingPage() {
                   <div className="relative flex items-center justify-between">
                     <span className="text-[11px] font-black tracking-[.24em] text-slate-500">{t("stepLabel")} {number}</span>
                     <motion.div whileHover={reduceMotion?undefined:{rotate:12,scale:1.08}} className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-300/25 bg-gradient-to-br from-indigo-500/20 to-fuchsia-500/10 text-xl font-black text-indigo-100 shadow-[0_0_35px_-12px_rgba(129,140,248,.65)]">
-                      {index===0?"◈":index===1?"⌁":"◎"}
+                      <JourneyStepIcon step={index} />
                       <span className="absolute -inset-1 rounded-[1.1rem] border border-indigo-300/10" />
                     </motion.div>
                   </div>
