@@ -625,28 +625,56 @@ export function LandingPage() {
         </div>
       </section>
       <section id="tarifs" className="bg-[#f7f7ff] px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
-        <div className="mx-auto max-w-[1280px]">
+        <div className="mx-auto max-w-[1440px]">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">Des offres adaptées à vos ambitions</p>
-            <h2 className="mt-5 text-4xl font-black tracking-[-.045em] sm:text-5xl">Choisissez votre <span className="text-indigo-600">prochaine étape.</span></h2>
-            <p className="mt-5 text-lg leading-8 text-slate-500">Des formules pensées pour démarrer seul, développer votre activité ou équiper toute une organisation.</p>
+            <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">Nos cartes NFC & leurs tarifs</p>
+            <h2 className="mt-5 text-4xl font-black tracking-[-.045em] text-[#11132d] sm:text-5xl">Choisissez la carte qui <span className="text-indigo-600">vous correspond.</span></h2>
+            <p className="mt-5 text-lg leading-8 text-slate-500">Chaque modèle possède son propre design, son usage et son tarif. Retrouvez la carte correspondante en haut de chaque offre.</p>
           </div>
-          <div className="mt-14 grid items-stretch gap-5 lg:grid-cols-3">
+          <div className="mt-16 grid items-stretch gap-7 sm:grid-cols-2 xl:grid-cols-5">
             {[
-              {name:"Starter",tag:"Pour démarrer",desc:"L'essentiel pour créer votre présence professionnelle.",items:["Profil digital personnalisé","Partage par QR code et lien","Coordonnées et liens professionnels","Accès à votre espace personnel"]},
-              {name:"Business",tag:"Pour développer",desc:"Les outils pour gérer vos contacts et développer votre réseau.",items:["Tout Starter","Gestion des contacts et prospects","Statistiques des interactions","Campagnes et fidélisation","Personnalisation avancée"],featured:true},
-              {name:"Entreprise",tag:"Pour vos équipes",desc:"Une gestion centralisée pour votre organisation.",items:["Tout Business","Gestion des collaborateurs","Rôles et accès par équipe","Vue centralisée de l'organisation","Accompagnement de déploiement"]}
-            ].map((plan) => <article key={plan.name} className={`relative flex flex-col rounded-[2rem] border p-7 sm:p-8 ${plan.featured ? "border-indigo-500 bg-[#11132d] text-white shadow-2xl shadow-indigo-900/20 lg:-translate-y-3" : "border-slate-200 bg-white text-slate-950"}`}>
-              {plan.featured && <span className="absolute -top-3 left-7 rounded-full bg-indigo-500 px-4 py-1.5 text-[10px] font-black uppercase tracking-[.15em] text-white">Offre recommandée</span>}
-              <p className={`text-xs font-bold uppercase tracking-[.16em] ${plan.featured ? "text-indigo-300" : "text-indigo-600"}`}>{plan.tag}</p>
-              <h3 className="mt-4 text-3xl font-black">{plan.name}</h3>
-              <p className={`mt-3 min-h-12 text-sm leading-6 ${plan.featured ? "text-slate-300" : "text-slate-500"}`}>{plan.desc}</p>
-              <div className={`mt-7 border-y py-5 ${plan.featured ? "border-white/10" : "border-slate-100"}`}><p className="text-2xl font-black">Tarif à définir</p><p className={`mt-1 text-xs ${plan.featured ? "text-slate-400" : "text-slate-400"}`}>Contactez-nous pour les conditions de l'offre</p></div>
-              <ul className="mt-7 flex-1 space-y-4">{plan.items.map((item) => <li key={item} className={`flex gap-3 text-sm ${plan.featured ? "text-slate-200" : "text-slate-600"}`}><span className="font-black text-emerald-500">✓</span>{item}</li>)}</ul>
-              <Link href="/register" className={`mt-9 inline-flex items-center justify-center gap-2 rounded-xl px-5 py-4 text-sm font-bold transition hover:-translate-y-0.5 ${plan.featured ? "bg-white text-indigo-700 hover:bg-indigo-50" : "bg-indigo-600 text-white hover:bg-indigo-700"}`}>Choisir {plan.name} <Arrow /></Link>
-            </article>)}
+              {name:"Business",type:"Réseau professionnel",desc:"Présentez votre profil, vos coordonnées et tous vos liens professionnels en un seul geste.",price:"399 DH",tone:"metal",number:"01",features:["Profil professionnel complet","Coordonnées et liens","Partage NFC et QR code"]},
+              {name:"Contact",type:"Partage de coordonnées",desc:"Facilitez l’échange de vos informations et l’enregistrement de vos coordonnées.",price:"249 DH",tone:"metal",number:"02",features:["Coordonnées de contact","Partage rapide","Enregistrement simplifié"]},
+              {name:"E-Service",type:"Services & accès rapides",desc:"Dirigez vos clients vers vos services, réservations, menus ou pages utiles.",price:"399 DH",tone:"metal",number:"03",features:["Accès à vos services","Liens personnalisés","Partage NFC et QR code"]},
+              {name:"Avis Google",type:"Collecte d’avis clients",desc:"Invitez vos clients à découvrir votre page Google et à partager leur expérience.",price:"199 DH",tone:"google",number:"04",features:["Accès à votre page Google","Partage en un geste","Facilite la demande d’avis"]},
+              {name:"Personnalisée",type:"Logo personnalisé",desc:"Affichez votre propre logo au centre et créez une carte à l’image de votre marque.",price:"499 DH",tone:"custom",number:"05",features:["Votre logo au centre","Design personnalisé","Carte à votre image"]}
+            ].map((card,index) => (
+              <motion.article key={card.name} initial={{opacity:0,y:28}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.12}} transition={{duration:.55,delay:index*.06}} className="group flex flex-col rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_-35px_rgba(30,41,90,.35)] transition duration-300 hover:-translate-y-2 hover:shadow-[0_28px_60px_-32px_rgba(79,70,229,.35)] sm:p-6">
+                <div className="relative mx-auto mb-7 flex h-[172px] w-full items-center justify-center [perspective:1000px]">
+                  <motion.div
+                    className="absolute bottom-1 h-7 w-[78%] rounded-[50%] bg-indigo-950/20 blur-xl"
+                    animate={{scaleX:[1,.88,1],opacity:[.45,.25,.45]}}
+                    transition={{duration:4,repeat:Infinity,ease:"easeInOut",delay:index*.2}}
+                  />
+                  <motion.div
+                    className={`relative flex h-[132px] w-full max-w-[220px] flex-col items-center justify-center overflow-hidden rounded-[1.15rem] border p-4 text-white shadow-[0_24px_38px_-18px_rgba(15,23,42,.55)] ${card.tone==="metal"?"border-white/25 bg-gradient-to-br from-[#34363c] via-[#101114] to-[#25272c]":card.tone==="google"?"border-white/30 bg-gradient-to-br from-[#1b263e] via-[#243d70] to-[#111827]":"border-white/30 bg-gradient-to-br from-[#43315f] via-[#211a35] to-[#11101c]"}`}
+                    animate={{y:[0,-7,0],rotateY:[-13,-7,-13],rotateX:[8,4,8],rotateZ:[-2,0,-2]}}
+                    transition={{duration:5+index*.45,repeat:Infinity,ease:"easeInOut",delay:index*.18}}
+                    whileHover={{scale:1.07,rotateY:0,rotateX:0,rotateZ:0}}
+                  >
+                    <div className="pointer-events-none absolute inset-0 opacity-70" style={{backgroundImage:"linear-gradient(125deg,rgba(255,255,255,.18),transparent 34%,transparent 68%,rgba(255,255,255,.08))"}} />
+                    <img src="/brand/touchcard-mark.svg" alt="Logo TouchCard" className="relative h-12 w-12 object-contain drop-shadow-[0_4px_12px_rgba(129,140,248,.45)]" />
+                    <span className="relative mt-2 text-[9px] font-extrabold uppercase tracking-[.22em]">{card.name}</span>
+                    <span className="absolute bottom-2 right-3 text-[6px] font-bold tracking-[.2em] text-white/45">NFC</span>
+                  </motion.div>
+                </div>
+                <div className="flex items-start justify-between gap-2">
+                  <div><p className="text-[9px] font-extrabold uppercase tracking-[.14em] text-indigo-600">{card.type}</p><h3 className="mt-2 text-xl font-black tracking-tight text-[#11132d]">{card.name}</h3></div>
+                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[9px] font-black text-slate-500">{card.number}</span>
+                </div>
+                <p className="mt-3 min-h-[88px] text-sm leading-6 text-slate-500">{card.desc}</p>
+                <div className="mt-4 border-y border-slate-100 py-5">
+                  <p className="text-3xl font-black tracking-tight text-[#11132d]">{card.price}</p>
+                  <p className="mt-1 text-[10px] font-medium text-slate-400">Prix de la carte</p>
+                </div>
+                <ul className="mt-5 flex-1 space-y-3">
+                  {card.features.map((feature)=><li key={feature} className="flex gap-2.5 text-xs leading-5 text-slate-600"><span className="font-black text-emerald-500">✓</span>{feature}</li>)}
+                </ul>
+                <Link href="/register" className="mt-7 inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3.5 text-xs font-extrabold text-white transition hover:-translate-y-0.5 hover:bg-indigo-700">Choisir {card.name} <Arrow /></Link>
+              </motion.article>
+            ))}
           </div>
-          <p className="mt-8 text-center text-xs leading-6 text-slate-500">Les tarifs définitifs, les limites d'utilisation et les options seront précisés avant l'ouverture commerciale.</p>
+          <p className="mt-8 text-center text-xs leading-6 text-slate-500">Les tarifs affichés concernent les modèles de cartes NFC. Les options et conditions de personnalisation seront précisées lors de la commande.</p>
         </div>
       </section>
 
