@@ -348,8 +348,8 @@ export function LandingPage() {
               ["04", t("lastingRelationship"), t("buildLoyalty"), "relationship"],
             ].map(([n, label, detail, symbol], index) => (
               <motion.div key={n} initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .4 }} transition={{ duration: .55, delay: index * .1 }} whileHover={reduceMotion ? undefined : { y: -6 }} className="group relative flex min-h-[265px] flex-col items-start overflow-hidden rounded-2xl border border-white/10 bg-transparent p-6 sm:p-7">
-                <div aria-hidden="true" className="pointer-events-none absolute -left-10 top-1/2 z-0 h-[240px] w-[58%] -translate-y-1/2 overflow-hidden text-transparent transition duration-500 group-hover:scale-105 sm:-left-12 sm:h-[290px]">
-                  <svg viewBox="0 0 120 120" preserveAspectRatio="xMidYMid meet" className="h-full w-full scale-[1.55] sm:scale-[1.8]" fill="none" stroke={`url(#feature-icon-gradient-${n})`} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <div aria-hidden="true" className="pointer-events-none absolute -left-8 top-0 z-0 h-[170px] w-[48%] overflow-hidden text-transparent transition duration-500 group-hover:scale-105 sm:-left-10 sm:h-[180px]">
+                  <svg viewBox="0 0 120 120" preserveAspectRatio="xMidYMid meet" className="h-full w-full" fill="none" stroke={`url(#feature-icon-gradient-${n})`} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                     <defs><linearGradient id={`feature-icon-gradient-${n}`} x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#67e8f9"/><stop offset="52%" stopColor="#818cf8"/><stop offset="100%" stopColor="#e879f9"/></linearGradient></defs>
                     {symbol === "identity" && <><rect x="19" y="27" width="82" height="66" rx="10"/><circle cx="43" cy="51" r="10"/><path d="M28 78c3-10 27-10 30 0M69 47h19M69 61h19M69 75h12"/></>}
                     {symbol === "nfc" && <><rect x="43" y="17" width="34" height="86" rx="8"/><path d="M55 91h10M34 42c-8 10-8 26 0 36M86 42c8 10 8 26 0 36M24 31c-15 17-15 41 0 58M96 31c15 17 15 41 0 58"/></>}
