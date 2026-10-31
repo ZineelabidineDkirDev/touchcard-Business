@@ -241,7 +241,7 @@ export function LandingPage() {
   <span aria-hidden="true" className="pointer-events-none ml-1 text-[10px] text-white/70">▾</span>
 </div>
 <Link href="/register" className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-700 sm:px-5">{t("navCreate")} <Arrow /></Link>
-            <button type="button" aria-label={mobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"} aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((open) => !open)} className={`inline-flex h-11 w-11 items-center justify-center rounded-xl border text-xl transition-colors xl:hidden border-white/20 bg-white/10 text-white`}>
+            <button type="button" aria-label={mobileMenuOpen ? t("menuClose") : t("menuOpen")} aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((open) => !open)} className={`inline-flex h-11 w-11 items-center justify-center rounded-xl border text-xl transition-colors xl:hidden border-white/20 bg-white/10 text-white`}>
               {mobileMenuOpen ? "×" : "☰"}
             </button>
           </div>
@@ -326,10 +326,10 @@ export function LandingPage() {
         <div className="relative z-10 border-t border-white/10 bg-gradient-to-r from-[#0c1025] via-[#15143a] to-[#0c1025]">
           <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-3 px-5 py-8 sm:grid-cols-2 sm:px-8 lg:grid-cols-4 lg:px-12">
             {[
-              ["01", "Une identité digitale", "Votre univers professionnel, toujours à jour.", "◈"],
-              ["02", "Un partage instantané", "Un geste NFC, un scan QR, le contact est créé.", "⌁"],
-              ["03", "Des contacts organisés", "Chaque rencontre devient une opportunité suivie.", "◎"],
-              ["04", "Une relation durable", "Entretenez le lien et fidélisez vos clients.", "✳"],
+              ["01", t("identityDigital"), t("identityUpdated"), "◈"],
+              ["02", t("instantShare"), t("nfcTapContact"), "⌁"],
+              ["03", t("organizedContacts"), t("trackedOpportunity"), "◎"],
+              ["04", t("lastingRelationship"), t("buildLoyalty"), "✳"],
             ].map(([n, label, detail, symbol], index) => (
               <motion.div key={n} initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .4 }} transition={{ duration: .55, delay: index * .1 }} whileHover={reduceMotion ? undefined : { y: -5 }} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[.045] p-5 backdrop-blur-sm">
                 <div className="absolute -right-8 -top-10 h-24 w-24 rounded-full bg-indigo-500/10 blur-2xl transition group-hover:bg-fuchsia-500/20" />
@@ -357,10 +357,10 @@ export function LandingPage() {
           </motion.div>
           <div className="mt-16 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {[
-              ["Utilisateurs actifs", "Profils professionnels qui utilisent la plateforme", "01", "◎"],
-              ["Cartes digitales créées", "Cartes NFC et profils QR configurés", "02", "▣"],
-              ["Interactions enregistrées", "Scans, vues et clics sur les profils", "03", "↗"],
-              ["Contacts collectés", "Nouveaux contacts ajoutés au réseau", "04", "✳"],
+              ["Utilisateurs actifs", t("profilesUsing"), "01", "◎"],
+              [t("digitalCardsCreated"), t("nfcProfilesConfigured"), "02", "▣"],
+              [t("interactionsRecorded"), t("profileActivityStats"), "03", "↗"],
+              [t("contactsCollected"), t("newNetworkContacts"), "04", "✳"],
             ].map(([label, description, number, symbol], index) => (
               <motion.article key={number} initial={{ opacity: 0, y: 28, scale: .97 }} whileInView={{ opacity: 1, y: 0, scale: 1 }} viewport={{ once: true, amount: .25 }} transition={{ duration: .65, delay: index * .1 }} whileHover={reduceMotion ? undefined : { y: -7 }} className="group relative overflow-hidden rounded-[1.7rem] border border-white/10 bg-gradient-to-br from-white/[.09] to-white/[.025] p-7 shadow-[0_25px_70px_-45px_rgba(99,102,241,.5)] backdrop-blur-xl">
                 <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-indigo-500/10 blur-3xl transition-colors group-hover:bg-fuchsia-500/20" />
@@ -488,9 +488,9 @@ export function LandingPage() {
             <p className="mt-7 max-w-xl text-lg leading-8 text-slate-300">{t("connectedDesc")}</p>
             <div className="mt-10 space-y-5">
               {[
-                ["Une seule présence", "Toutes vos informations professionnelles réunies sur un profil."],
-                ["Une gestion centralisée", "Retrouvez cartes, collaborateurs et contacts dans votre espace."],
-                ["Des décisions plus claires", "Consultez vos interactions et identifiez ce qui suscite l’intérêt."],
+                [t("onePresence"), t("allInfoProfile")],
+                [t("centralizedManagement"), t("manageEverything")],
+                [t("clearerDecisions"), t("reviewInteractions")],
               ].map(([title, description]) => (
                 <div key={title} className="flex gap-4">
                   <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-indigo-400/15 text-sm text-indigo-300">✓</span>
@@ -530,7 +530,7 @@ export function LandingPage() {
                 <span className="rounded-xl bg-indigo-400/15 px-3 py-2 text-xs font-bold text-indigo-200">TouchCard</span>
               </div>
               <div className="mt-6 grid grid-cols-2 gap-3">
-                {[["Cartes digitales", "Votre identité"], ["Contacts", "Vos opportunités"], ["Équipe", "Vos collaborateurs"], ["Fidélité", "Vos clients"]].map(([title, sub], i) => (
+                {[["Cartes digitales", t("yourIdentityLabel")], ["Contacts", t("yourOpportunities")], [t("teamLabel"), "Vos collaborateurs"], [t("loyaltyLabel"), "Vos clients"]].map(([title, sub], i) => (
                   <div key={title} className="rounded-2xl border border-white/10 bg-[#1b1e3e] p-4 sm:p-5">
                     <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-400/15 text-lg text-indigo-200">{["▣", "◎", "♧", "✳"][i]}</span>
                     <p className="mt-5 text-sm font-bold">{title}</p><p className="mt-1 text-xs text-slate-400">{sub}</p>
@@ -614,7 +614,7 @@ export function LandingPage() {
             <h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl">{t("betterShowcase")}</h2>
             <p className="mt-6 text-lg leading-8 text-slate-600">{t("betterShowcaseDesc")}</p>
             <ul className="mt-8 space-y-4 text-sm font-semibold text-slate-700">
-              {["Un profil professionnel accessible en un scan", "Un espace centralisé pour vos contacts et votre équipe", "Des indicateurs pour suivre vos interactions"].map((item) => <li key={item} className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">✓</span>{item}</li>)}
+              {[t("profileOneScan"), t("centralizedContactsTeam"), t("interactionInsights")].map((item) => <li key={item} className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">✓</span>{item}</li>)}
             </ul>
             <Link href="/register" className="mt-9 inline-flex rounded-xl bg-indigo-600 px-6 py-4 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-1 hover:bg-indigo-700">Essayer la plateforme <Arrow /></Link>
           </div>
@@ -690,11 +690,11 @@ export function LandingPage() {
           </div>
           <div className="mt-16 grid items-stretch gap-7 sm:grid-cols-2 xl:grid-cols-5">
             {[
-              {name:"Business",type:t("t("cardBusinessType")"),desc:t("t("cardBusinessDesc")"),price:"399 DH",tone:"metal",number:"01",features:["Profil professionnel complet","Coordonnées et liens","Partage NFC et QR code"]},
-              {name:"Contact",type:t("t("cardContactType")"),desc:t("t("cardContactDesc")"),price:"149 DH",tone:"metal",number:"02",features:["Coordonnées de contact","Partage rapide","Enregistrement simplifié"]},
-              {name:"E-Service",type:t("t("cardServiceType")"),desc:t("t("cardServiceDesc")"),price:"399 DH",tone:"metal",number:"03",features:["Accès à vos services","Liens personnalisés","Partage NFC et QR code"]},
-              {name:"Avis Google",type:t("t("cardGoogleType")"),desc:t("t("cardGoogleDesc")"),price:"199 DH",tone:"google",number:"04",features:["Accès à votre page Google","Partage en un geste","Facilite la demande d’avis"]},
-              {name:"Personnalisée",type:t("t("cardCustomType")"),desc:"Une solution adaptée à votre activité : identité visuelle, carte NFC et service digital personnalisé selon votre besoin.",price:"499 DH",tone:"custom",number:"05",features:["Votre logo et design personnalisés","Configuration d’un service digital sur mesure","Expérience adaptée à votre activité","Carte NFC personnalisée"]}
+              {name:"Business",type:t("t("cardBusinessType")"),desc:t("t("cardBusinessDesc")"),price:"399 DH",tone:"metal",number:"01",features:["Profil professionnel complet",t("contactDetailsLinks"),"Partage NFC et QR code"]},
+              {name:"Contact",type:t("t("cardContactType")"),desc:t("t("cardContactDesc")"),price:"149 DH",tone:"metal",number:"02",features:["Coordonnées de contact","Partage rapide",t("easySaving")]},
+              {name:"E-Service",type:t("t("cardServiceType")"),desc:t("t("cardServiceDesc")"),price:"399 DH",tone:"metal",number:"03",features:["Accès à vos services",t("customLinks"),"Partage NFC et QR code"]},
+              {name:"Avis Google",type:t("t("cardGoogleType")"),desc:t("t("cardGoogleDesc")"),price:"199 DH",tone:"google",number:"04",features:["Accès à votre page Google","Partage en un geste",t("reviewRequests")]},
+              {name:"Personnalisée",type:t("t("cardCustomType")"),desc:"Une solution adaptée à votre activité : identité visuelle, carte NFC et service digital personnalisé selon votre besoin.",price:"499 DH",tone:"custom",number:"05",features:["Votre logo et design personnalisés",t("tailoredDigitalService"),t("businessTailoredExperience"),t("customNfcCard")]}
             ].map((card,index) => (
               <motion.article key={card.name} initial={{opacity:0,y:28}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.12}} transition={{duration:.55,delay:index*.06}} className="group flex flex-col rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_-35px_rgba(30,41,90,.35)] transition duration-300 hover:-translate-y-2 hover:shadow-[0_28px_60px_-32px_rgba(79,70,229,.35)] sm:p-6">
                 <div className="relative mx-auto mb-7 flex h-[172px] w-full items-center justify-center [perspective:1000px]">
