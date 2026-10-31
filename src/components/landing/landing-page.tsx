@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useI18n } from "@/i18n/provider";
 import { motion, useReducedMotion } from "framer-motion";
+import { ContactRound, UsersRound, ChartNoAxesCombined, Gift, Users, ShoppingBag } from "lucide-react";
 
 const rise = {
   hidden: { opacity: 0, y: 28 },
@@ -137,7 +138,7 @@ export function LandingPage() {
   const features = [
     {
       number: "01",
-      icon: "⌁",
+      icon: ContactRound,
       title: t("feature1Title"),
       description:
         t("feature1Desc"),
@@ -145,7 +146,7 @@ export function LandingPage() {
     },
     {
       number: "02",
-      icon: "◎",
+      icon: UsersRound,
       title: t("feature2Title"),
       description:
         t("feature2Desc"),
@@ -153,7 +154,7 @@ export function LandingPage() {
     },
     {
       number: "03",
-      icon: "↗",
+      icon: ChartNoAxesCombined,
       title: t("feature3Title"),
       description:
         t("feature3Desc"),
@@ -161,7 +162,7 @@ export function LandingPage() {
     },
     {
       number: "04",
-      icon: "✳",
+      icon: Gift,
       title: t("feature4Title"),
       description:
         t("feature4Desc"),
@@ -169,7 +170,7 @@ export function LandingPage() {
     },
     {
       number: "05",
-      icon: "▦",
+      icon: Users,
       title: t("feature5Title"),
       description:
         t("feature5Desc"),
@@ -177,7 +178,7 @@ export function LandingPage() {
     },
     {
       number: "06",
-      icon: "◇",
+      icon: ShoppingBag,
       title: t("feature6Title"),
       description:
         t("feature6Desc"),
@@ -403,7 +404,7 @@ export function LandingPage() {
               <motion.article key={feature.number} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.16 }} variants={reveal} transition={{ duration: 0.55, delay: index * 0.07 }} whileHover={reduceMotion ? undefined : { y: -8, scale: 1.012 }} className="group relative isolate overflow-hidden rounded-[1.65rem] border border-white/[.09] bg-white/[.045] p-7 shadow-[0_18px_55px_-35px_rgba(0,0,0,.8)] backdrop-blur-xl transition-all duration-300 hover:border-indigo-300/35 hover:bg-white/[.075] hover:shadow-[0_25px_70px_-35px_rgba(99,102,241,.35)] sm:p-8">
                 <div className="pointer-events-none absolute -right-16 -top-20 -z-10 h-48 w-48 rounded-full bg-indigo-500/0 blur-3xl transition-colors duration-500 group-hover:bg-indigo-500/20" />
                 <div className="relative flex items-center justify-between">
-                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-300/20 bg-gradient-to-br from-indigo-400/20 to-fuchsia-400/10 text-2xl font-semibold text-indigo-200 shadow-inner shadow-white/[.04] transition duration-300 group-hover:scale-110 group-hover:border-violet-300/40 group-hover:text-white">{feature.icon}</span>
+                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-300/20 bg-gradient-to-br from-indigo-400/20 to-fuchsia-400/10 text-indigo-200 shadow-inner shadow-white/[.04] transition duration-300 group-hover:scale-110 group-hover:border-violet-300/40 group-hover:text-white"><feature.icon aria-hidden="true" className="h-7 w-7 stroke-[1.8] text-violet-300" /></span>
                   <span className="rounded-full border border-white/10 px-3 py-1.5 text-[10px] font-bold tracking-[.18em] text-slate-500">{feature.number}</span>
                 </div>
                 <h3 className="relative mt-8 text-xl font-extrabold tracking-tight text-white transition-colors group-hover:text-indigo-100">{feature.title}</h3>
