@@ -332,20 +332,19 @@ export function LandingPage() {
               ["03", t("organizedContacts"), t("trackedOpportunity"), "contacts"],
               ["04", t("lastingRelationship"), t("buildLoyalty"), "relationship"],
             ].map(([n, label, detail, symbol], index) => (
-              <motion.div key={n} initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .4 }} transition={{ duration: .55, delay: index * .1 }} whileHover={reduceMotion ? undefined : { y: -6 }} className="group relative flex min-h-[205px] items-center overflow-hidden rounded-2xl border border-white/10 bg-transparent py-6">
-                <div aria-hidden="true" className="flex w-[40%] shrink-0 items-center justify-center px-3 text-indigo-200 transition duration-500 group-hover:scale-110 group-hover:text-fuchsia-200 sm:w-[42%]">
-                  <svg viewBox="0 0 120 120" className="h-24 w-24 drop-shadow-[0_0_22px_rgba(129,140,248,.24)] sm:h-32 sm:w-32" fill="none" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+              <motion.div key={n} initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .4 }} transition={{ duration: .55, delay: index * .1 }} whileHover={reduceMotion ? undefined : { y: -6 }} className="group relative flex min-h-[265px] flex-col items-start overflow-hidden rounded-2xl border border-white/10 bg-transparent p-6 sm:p-7">
+                <div aria-hidden="true" className="mb-5 flex items-start justify-start text-transparent transition duration-500 group-hover:scale-105">
+                  <svg viewBox="0 0 120 120" className="h-28 w-28 sm:h-32 sm:w-32" fill="none" stroke={`url(#feature-icon-gradient-${n})`} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+                    <defs><linearGradient id={`feature-icon-gradient-${n}`} x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#67e8f9"/><stop offset="52%" stopColor="#818cf8"/><stop offset="100%" stopColor="#e879f9"/></linearGradient></defs>
                     {symbol === "identity" && <><rect x="19" y="27" width="82" height="66" rx="10"/><circle cx="43" cy="51" r="10"/><path d="M28 78c3-10 27-10 30 0M69 47h19M69 61h19M69 75h12"/></>}
                     {symbol === "nfc" && <><rect x="43" y="17" width="34" height="86" rx="8"/><path d="M55 91h10M34 42c-8 10-8 26 0 36M86 42c8 10 8 26 0 36M24 31c-15 17-15 41 0 58M96 31c15 17 15 41 0 58"/></>}
                     {symbol === "contacts" && <><circle cx="60" cy="39" r="13"/><circle cx="28" cy="49" r="9"/><circle cx="92" cy="49" r="9"/><path d="M35 94c2-19 13-29 25-29s23 10 25 29M8 91c2-14 9-22 20-22 5 0 9 2 13 6M112 91c-2-14-9-22-20-22-5 0-9 2-13 6"/></>}
                     {symbol === "relationship" && <><path d="M15 48l22-20 22 17-16 17-28-14zM105 48L83 28 61 45l16 17 28-14z"/><path d="M39 62l18 18c3 3 8 3 11 0l14-14M48 71l-7 8c-3 3-3 8 0 11s8 3 11 0l5-5M61 80l-5 5c-3 3-3 8 0 11s8 3 11 0l7-7M75 74l-4 4c-3 3-3 8 0 11s8 3 11 0l9-10M37 28l-9-9M83 28l9-9"/></>}
                   </svg>
                 </div>
-                <div className="min-w-0 flex-1 py-3 ltr:pl-2 ltr:pr-5 rtl:pl-5 rtl:pr-2">
-                  <span className="text-[10px] font-black tracking-[.2em] text-indigo-300/70">{n}</span>
-                  <h3 className="mt-2 text-base font-extrabold leading-snug text-white sm:text-lg">{label}</h3>
-                  <p className="mt-3 text-sm leading-6 text-slate-300">{detail}</p>
-                </div>
+                <span className="text-[10px] font-black tracking-[.2em] text-indigo-300/70">{n}</span>
+                <h3 className="mt-2 text-base font-extrabold leading-snug text-white sm:text-lg">{label}</h3>
+                <p className="mt-3 text-sm leading-6 text-slate-300">{detail}</p>
                 <motion.div className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400" initial={{ width: "0%" }} whileInView={{ width: "100%" }} viewport={{ once: true }} transition={{ duration: 1, delay: .2 + index * .12 }} />
               </motion.div>
             ))}
