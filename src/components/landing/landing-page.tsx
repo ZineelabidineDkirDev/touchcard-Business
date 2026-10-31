@@ -246,18 +246,20 @@ export function LandingPage() {
       </header>
 
       <section className="relative isolate overflow-hidden bg-[#090b1b] text-white">
-        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
           {/* Vidéo d'ambiance NFC : les motifs Framer Motion ci-dessous restent inchangés. */}
           <video
-            className="absolute inset-0 h-full w-full object-cover opacity-45"
+            className="absolute inset-0 h-full w-full object-cover opacity-55"
             autoPlay
             muted
             loop
             playsInline
-            preload="metadata"
+            preload="auto"
             aria-hidden="true"
+            poster="https://images.pexels.com/videos/5101679/free-video-5101679.jpg?auto=compress&cs=tinysrgb&w=1920"
           >
             <source src="https://videos.pexels.com/video-files/5101679/5101679-hd_1920_1080_25fps.mp4" type="video/mp4" />
+            <source src="https://videos.pexels.com/video-files/4109600/4109600-hd_1920_1080_25fps.mp4" type="video/mp4" />
           </video>
           <div className="absolute inset-0 bg-gradient-to-br from-[#090b1b]/95 via-[#17143b]/85 to-[#090b1b]/95" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#090b1b]/70 via-indigo-950/35 to-violet-950/55" />
@@ -276,7 +278,7 @@ export function LandingPage() {
           </motion.div>
           <motion.div aria-hidden="true" className="absolute left-[5%] top-[23%] hidden h-20 w-20 rounded-full border border-indigo-300/15 lg:block" animate={reduceMotion ? undefined : { scale: [1, 1.16, 1], opacity: [.25, .65, .25] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} />
         </div>
-        <div className="mx-auto grid min-h-[760px] max-w-[1440px] items-center gap-16 px-5 py-20 sm:px-8 lg:grid-cols-[1fr_1.08fr] lg:px-12 lg:py-28">
+        <div className="relative z-10 mx-auto grid min-h-[760px] max-w-[1440px] items-center gap-16 px-5 py-20 sm:px-8 lg:grid-cols-[1fr_1.08fr] lg:px-12 lg:py-28">
           <motion.div initial="hidden" animate="visible" variants={reveal} transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}>
             <div className="inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-white/[.06] px-4 py-2 text-[11px] font-extrabold uppercase tracking-[.16em] text-indigo-200 shadow-sm backdrop-blur">
               <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" /></span>
@@ -305,7 +307,7 @@ export function LandingPage() {
             <DashboardPreview />
           </motion.div>
         </div>
-        <div className="relative border-t border-white/10 bg-gradient-to-r from-[#0c1025] via-[#15143a] to-[#0c1025]">
+        <div className="relative z-10 border-t border-white/10 bg-gradient-to-r from-[#0c1025] via-[#15143a] to-[#0c1025]">
           <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-3 px-5 py-8 sm:grid-cols-2 sm:px-8 lg:grid-cols-4 lg:px-12">
             {[
               ["01", "Une identité digitale", "Votre univers professionnel, toujours à jour.", "◈"],
