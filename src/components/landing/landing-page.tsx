@@ -529,22 +529,51 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section id="fonctionnement" className="mx-auto max-w-[1440px] px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
-        <div className="grid gap-12 lg:grid-cols-[.85fr_1.15fr]">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={reveal} transition={{ duration: 0.6 }}>
-            <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">Trois étapes, tout simplement</p>
-            <h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl">De la rencontre à la <span className="text-indigo-600">connexion.</span></h2>
-            <p className="mt-6 max-w-md text-lg leading-8 text-slate-500">Pas de parcours compliqué. Votre carte digitale est prête à être partagée en quelques étapes.</p>
-            <Link href="/register" className="mt-9 inline-flex items-center gap-3 rounded-xl bg-indigo-600 px-6 py-4 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-1 hover:bg-indigo-700">Créer mon espace <Arrow /></Link>
+      <section id="fonctionnement" className="relative isolate overflow-hidden bg-[#f7f7ff] px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute -left-40 top-10 h-96 w-96 rounded-full bg-indigo-200/35 blur-[100px]" />
+          <div className="absolute -right-40 bottom-0 h-[30rem] w-[30rem] rounded-full bg-fuchsia-200/30 blur-[110px]" />
+          <motion.div aria-hidden="true" className="absolute -right-24 top-16 h-[34rem] w-[34rem] rounded-full border border-indigo-200/60" animate={reduceMotion ? undefined : { rotate: 360 }} transition={{ duration: 80, repeat: Infinity, ease: "linear" }} />
+          <motion.div aria-hidden="true" className="absolute -right-10 top-32 h-[26rem] w-[26rem] rounded-full border border-dashed border-violet-200/70" animate={reduceMotion ? undefined : { rotate: -360 }} transition={{ duration: 65, repeat: Infinity, ease: "linear" }} />
+        </div>
+        <div className="relative mx-auto grid max-w-[1440px] items-center gap-14 lg:grid-cols-[.85fr_1.15fr] lg:gap-20">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={reveal} transition={{ duration: 0.7 }} className="relative">
+            <motion.div initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: .6 }} className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-white/80 px-4 py-2 text-[10px] font-black uppercase tracking-[.2em] text-indigo-700 shadow-sm backdrop-blur">
+              <motion.span className="h-2 w-2 rounded-full bg-emerald-500" animate={reduceMotion ? undefined : { scale: [1, 1.45, 1], opacity: [1, .55, 1] }} transition={{ duration: 2, repeat: Infinity }} />
+              Une expérience en trois étapes
+            </motion.div>
+            <h2 className="mt-7 max-w-xl text-4xl font-black leading-[1.04] tracking-[-.055em] text-[#11132d] sm:text-5xl lg:text-6xl">
+              De la rencontre à la <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 bg-clip-text text-transparent">connexion.</span>
+            </h2>
+            <p className="mt-7 max-w-md text-base leading-8 text-slate-600 sm:text-lg">
+              Un simple geste suffit pour partager votre univers professionnel, créer un lien et transformer chaque échange en opportunité.
+            </p>
+            <motion.div className="mt-10 inline-flex" whileHover={reduceMotion ? undefined : { y: -4, scale: 1.025 }} whileTap={reduceMotion ? undefined : { scale: .97 }}>
+              <Link href="/register" className="group relative inline-flex items-center gap-4 overflow-hidden rounded-2xl bg-gradient-to-r from-[#4f46e5] via-[#6d45df] to-[#9333ea] px-7 py-4 text-sm font-extrabold text-white shadow-[0_18px_45px_-16px_rgba(79,70,229,.65)] ring-1 ring-white/30 transition-shadow duration-300 hover:shadow-[0_24px_55px_-14px_rgba(124,58,237,.7)]">
+                <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+                <span className="relative">Créer mon espace</span>
+                <motion.span className="relative flex h-8 w-8 items-center justify-center rounded-xl bg-white/15" animate={reduceMotion ? undefined : { x: [0, 4, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}><Arrow /></motion.span>
+              </Link>
+            </motion.div>
+            <div className="mt-7 flex items-center gap-3 text-xs font-semibold text-slate-500">
+              <span className="flex -space-x-2"><span className="h-7 w-7 rounded-full border-2 border-[#f7f7ff] bg-gradient-to-br from-indigo-400 to-violet-600" /><span className="h-7 w-7 rounded-full border-2 border-[#f7f7ff] bg-gradient-to-br from-fuchsia-400 to-pink-600" /><span className="h-7 w-7 rounded-full border-2 border-[#f7f7ff] bg-gradient-to-br from-cyan-400 to-blue-600" /></span>
+              NFC · QR code · Réseau professionnel
+            </div>
           </motion.div>
-          <div className="space-y-4">
-            {steps.map(([number, title, description], index) => (
-              <motion.div key={number} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={reveal} transition={{ duration: 0.55, delay: index * 0.1 }} className="group flex gap-5 rounded-[1.6rem] border border-slate-200 bg-white p-6 transition hover:border-indigo-200 hover:bg-indigo-50/30 sm:gap-7 sm:p-8">
-                <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-sm font-black text-indigo-700 transition group-hover:bg-indigo-600 group-hover:text-white">{number}</span>
-                <div className="pt-1"><h3 className="text-lg font-extrabold text-slate-950">{title}</h3><p className="mt-2 text-sm leading-7 text-slate-500">{description}</p></div>
-                <span className="ml-auto hidden self-center text-xl text-slate-300 transition group-hover:translate-x-1 group-hover:text-indigo-600 sm:block">→</span>
-              </motion.div>
-            ))}
+          <div className="relative">
+            <div className="absolute -inset-5 rounded-[2.4rem] bg-gradient-to-br from-indigo-200/60 via-violet-100/40 to-fuchsia-200/60 blur-2xl" />
+            <div className="relative space-y-4">
+              {steps.map(([number, title, description], index) => (
+                <motion.article key={number} initial={{ opacity: 0, x: 42, rotateX: -7 }} whileInView={{ opacity: 1, x: 0, rotateX: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: .7, delay: index * .16, ease: [0.22, 1, 0.36, 1] }} whileHover={reduceMotion ? undefined : { y: -7, rotateX: 2, rotateY: -2, scale: 1.012 }} style={{ transformPerspective: 1000 }} className="group relative flex gap-5 overflow-hidden rounded-[1.6rem] border border-white/80 bg-white/85 p-6 shadow-[0_18px_55px_-35px_rgba(49,46,129,.35)] backdrop-blur-xl transition-shadow duration-500 hover:shadow-[0_28px_70px_-35px_rgba(79,70,229,.48)] sm:gap-7 sm:p-8">
+                  <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-indigo-500 via-violet-500 to-fuchsia-500 opacity-70 transition-all duration-300 group-hover:w-1.5 group-hover:opacity-100" />
+                  <div className="absolute -right-16 -top-20 h-44 w-44 rounded-full bg-indigo-400/10 blur-3xl transition-colors duration-500 group-hover:bg-fuchsia-400/20" />
+                  <motion.span className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-50 to-violet-100 text-sm font-black text-indigo-700 ring-1 ring-indigo-100 transition-all duration-300 group-hover:from-indigo-600 group-hover:to-violet-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-indigo-500/25" whileHover={reduceMotion ? undefined : { rotate: 8, scale: 1.08 }}>{number}</motion.span>
+                  <div className="relative min-w-0 flex-1 pt-1"><h3 className="text-lg font-extrabold tracking-tight text-[#11132d]">{title}</h3><p className="mt-2 text-sm leading-7 text-slate-500">{description}</p></div>
+                  <motion.span className="relative ml-auto hidden self-center text-xl font-semibold text-indigo-300 transition-colors group-hover:text-indigo-600 sm:block" animate={reduceMotion ? undefined : { x: [0, 4, 0] }} transition={{ duration: 2.2, repeat: Infinity, delay: index * .2 }}>↗</motion.span>
+                  <motion.div className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500" initial={{ width: "0%" }} whileInView={{ width: "100%" }} viewport={{ once: true }} transition={{ duration: 1.1, delay: .35 + index * .15 }} />
+                </motion.article>
+              ))}
+            </div>
           </div>
         </div>
       </section>
