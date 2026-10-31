@@ -590,7 +590,7 @@ export function LandingPage() {
           <div className="mt-20 grid gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {[
               {name:"Business",type:"Réseau professionnel",desc:"Présentez votre profil, vos coordonnées et tous vos liens professionnels en un seul geste.",price:"399 DH",tone:"metal",number:"01"},
-              {name:"Contact",type:"Partage de coordonnées",desc:"Facilitez l’échange de vos informations et l’enregistrement de vos coordonnées.",price:"249 DH",tone:"metal",number:"02"},
+              {name:"Contact",type:"Partage de coordonnées",desc:"Facilitez l’échange de vos informations et l’enregistrement de vos coordonnées.",price:"149 DH",tone:"metal",number:"02"},
               {name:"E-Service",type:"Services & accès rapides",desc:"Dirigez vos clients vers vos services, réservations, menus ou pages utiles.",price:"399 DH",tone:"metal",number:"03"},
               {name:"Avis Google",type:"Collecte d’avis clients",desc:"Invitez vos clients à découvrir votre page Google et à partager leur expérience.",price:"199 DH",tone:"from-[#111827] via-[#202b50] to-[#394b8c]",number:"04"},
               {name:"Personnalisée",type:"Logo personnalisé",desc:"Affichez votre propre logo au centre et créez une carte à l’image de votre marque.",price:"499 DH",tone:"from-[#171521] via-[#29233f] to-[#514078]",number:"05"}
@@ -634,7 +634,7 @@ export function LandingPage() {
           <div className="mt-16 grid items-stretch gap-7 sm:grid-cols-2 xl:grid-cols-5">
             {[
               {name:"Business",type:"Réseau professionnel",desc:"Présentez votre profil, vos coordonnées et tous vos liens professionnels en un seul geste.",price:"399 DH",tone:"metal",number:"01",features:["Profil professionnel complet","Coordonnées et liens","Partage NFC et QR code"]},
-              {name:"Contact",type:"Partage de coordonnées",desc:"Facilitez l’échange de vos informations et l’enregistrement de vos coordonnées.",price:"249 DH",tone:"metal",number:"02",features:["Coordonnées de contact","Partage rapide","Enregistrement simplifié"]},
+              {name:"Contact",type:"Partage de coordonnées",desc:"Facilitez l’échange de vos informations et l’enregistrement de vos coordonnées.",price:"149 DH",tone:"metal",number:"02",features:["Coordonnées de contact","Partage rapide","Enregistrement simplifié"]},
               {name:"E-Service",type:"Services & accès rapides",desc:"Dirigez vos clients vers vos services, réservations, menus ou pages utiles.",price:"399 DH",tone:"metal",number:"03",features:["Accès à vos services","Liens personnalisés","Partage NFC et QR code"]},
               {name:"Avis Google",type:"Collecte d’avis clients",desc:"Invitez vos clients à découvrir votre page Google et à partager leur expérience.",price:"199 DH",tone:"google",number:"04",features:["Accès à votre page Google","Partage en un geste","Facilite la demande d’avis"]},
               {name:"Personnalisée",type:"Logo personnalisé",desc:"Affichez votre propre logo au centre et créez une carte à l’image de votre marque.",price:"499 DH",tone:"custom",number:"05",features:["Votre logo au centre","Design personnalisé","Carte à votre image"]}
