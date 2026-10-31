@@ -648,9 +648,9 @@ export function LandingPage() {
           <div className="mt-20 grid gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {[
               {name:"Business",type:t("cardBusinessType"),desc:t("cardBusinessDesc"),price:"399 DH",tone:"metal",number:"01"},
-              {name:"Contact",type:t("cardContactType"),desc:t("cardContactDesc"),price:"149 DH",tone:"metal",number:"02"},
-              {name:"E-Service",type:t("cardServiceType"),desc:t("cardServiceDesc"),price:"399 DH",tone:"metal",number:"03"},
-              {name:"Avis Google",type:t("cardGoogleType"),desc:t("cardGoogleDesc"),price:"199 DH",tone:"from-[#111827] via-[#202b50] to-[#394b8c]",number:"04"},
+              {name:t("cardContactName"),type:t("cardContactType"),desc:t("cardContactDesc"),price:"149 DH",tone:"metal",number:"02"},
+              {name:t("cardServiceName"),type:t("cardServiceType"),desc:t("cardServiceDesc"),price:"399 DH",tone:"metal",number:"03"},
+              {name:t("cardGoogleName"),type:t("cardGoogleType"),desc:t("cardGoogleDesc"),price:"199 DH",tone:"from-[#111827] via-[#202b50] to-[#394b8c]",number:"04"},
               {name:t("customCardName"),type:t("cardCustomType"),desc:t("cardCustomDesc"),price:"499 DH",tone:"from-[#171521] via-[#29233f] to-[#514078]",number:"05"}
             ].map((card,index) => (
               <motion.article key={card.name} initial="hidden" whileInView="visible" viewport={{ once:true, amount:.18 }} variants={reveal} transition={{ duration:.6, delay:index*.07 }} className="group">
@@ -672,7 +672,7 @@ export function LandingPage() {
                 </div>
                 <p className="mt-3 text-sm leading-7 text-slate-400">{card.desc}</p>
                 <p className="mt-4 text-2xl font-black tracking-tight text-white">{card.price}</p>
-                {card.name === "Personnalisée" && <p className="mt-3 inline-flex rounded-full border border-fuchsia-400/25 bg-fuchsia-400/10 px-3 py-1.5 text-[10px] font-bold text-fuchsia-200">{t("logoCenter")}</p>}
+                {card.name === t("customCardName") && <p className="mt-3 inline-flex rounded-full border border-fuchsia-400/25 bg-fuchsia-400/10 px-3 py-1.5 text-[10px] font-bold text-fuchsia-200">{t("logoCenter")}</p>}
               </motion.article>
             ))}
           </div>
@@ -692,10 +692,10 @@ export function LandingPage() {
           <div className="mt-16 grid items-stretch gap-7 sm:grid-cols-2 xl:grid-cols-5">
             {[
               {name:"Business",type:t("cardBusinessType"),desc:t("cardBusinessDesc"),price:"399 DH",tone:"metal",number:"01",features:["Profil professionnel complet",t("contactDetailsLinks"),"Partage NFC et QR code"]},
-              {name:"Contact",type:t("cardContactType"),desc:t("cardContactDesc"),price:"149 DH",tone:"metal",number:"02",features:["Coordonnées de contact","Partage rapide",t("easySaving")]},
-              {name:"E-Service",type:t("cardServiceType"),desc:t("cardServiceDesc"),price:"399 DH",tone:"metal",number:"03",features:["Accès à vos services",t("customLinks"),"Partage NFC et QR code"]},
-              {name:"Avis Google",type:t("cardGoogleType"),desc:t("cardGoogleDesc"),price:"199 DH",tone:"google",number:"04",features:["Accès à votre page Google","Partage en un geste",t("reviewRequests")]},
-              {name:"Personnalisée",type:t("cardCustomType"),desc:"Une solution adaptée à votre activité : identité visuelle, carte NFC et service digital personnalisé selon votre besoin.",price:"499 DH",tone:"custom",number:"05",features:["Votre logo et design personnalisés",t("tailoredDigitalService"),t("businessTailoredExperience"),t("customNfcCard")]}
+              {name:"Contact",type:t("cardContactType"),desc:t("cardContactDesc"),price:"149 DH",tone:"metal",number:"02",features:[t("contactDetails"),t("quickSharing"),t("easySaving")]},
+              {name:"E-Service",type:t("cardServiceType"),desc:t("cardServiceDesc"),price:"399 DH",tone:"metal",number:"03",features:[t("serviceAccess"),t("customLinks"),t("nfcQrSharing")]},
+              {name:"Avis Google",type:t("cardGoogleType"),desc:t("cardGoogleDesc"),price:"199 DH",tone:"google",number:"04",features:[t("googlePageAccess"),t("oneTapSharing"),t("reviewRequests")]},
+              {name:t("customCardName"),type:t("cardCustomType"),desc:t("customCardDescription"),price:"499 DH",tone:"custom",number:"05",features:[t("customLogoDesign"),t("tailoredDigitalService"),t("businessTailoredExperience"),t("customNfcCard")]}
             ].map((card,index) => (
               <motion.article key={card.name} initial={{opacity:0,y:28}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.12}} transition={{duration:.55,delay:index*.06}} className="group flex flex-col rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_-35px_rgba(30,41,90,.35)] transition duration-300 hover:-translate-y-2 hover:shadow-[0_28px_60px_-32px_rgba(79,70,229,.35)] sm:p-6">
                 <div className="relative mx-auto mb-7 flex h-[172px] w-full items-center justify-center [perspective:1000px]">
