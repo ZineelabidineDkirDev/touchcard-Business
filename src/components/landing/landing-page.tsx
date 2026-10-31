@@ -557,16 +557,57 @@ export function LandingPage() {
       </section>
 
       <section className="px-5 pb-24 sm:px-8 lg:px-12 lg:pb-32">
-        <div className="relative mx-auto max-w-[1440px] overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-800 px-6 py-16 text-center text-white shadow-2xl shadow-indigo-900/20 sm:px-12 sm:py-20">
-          <div className="absolute -right-20 -top-40 h-96 w-96 rounded-full border border-white/10" />
-          <div className="absolute -bottom-48 -left-20 h-96 w-96 rounded-full border border-white/10" />
-          <div className="relative mx-auto max-w-3xl">
-            <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-100">Prêt à faire évoluer vos échanges ?</p>
-            <h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl lg:text-6xl">Votre prochain contact commence ici.</h2>
-            <p className="mx-auto mt-6 max-w-xl text-base leading-8 text-indigo-100 sm:text-lg">Créez votre espace TouchCard et donnez une nouvelle dimension à votre présence professionnelle.</p>
-            <Link href="/register" className="mt-9 inline-flex items-center gap-3 rounded-2xl bg-white px-7 py-4 text-sm font-extrabold text-indigo-700 shadow-xl transition hover:-translate-y-1 hover:bg-indigo-50">Créer mon compte <Arrow /></Link>
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, y: 42, scale: 0.97 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: true, amount: 0.25 }}
+          transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+          className="group relative mx-auto max-w-[1440px] overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#090b1b] px-6 py-20 text-center text-white shadow-[0_35px_100px_-35px_rgba(79,70,229,.65)] sm:px-12 sm:py-24 lg:py-28"
+        >
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,rgba(99,102,241,.34),transparent_55%),radial-gradient(ellipse_at_0%_100%,rgba(217,70,239,.16),transparent_42%)]" />
+            <div className="absolute inset-0 opacity-[.12] [background-image:linear-gradient(rgba(255,255,255,.18)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.18)_1px,transparent_1px)] [background-size:54px_54px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
+            <motion.div
+              className="absolute left-1/2 top-1/2 h-[540px] w-[540px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-indigo-300/20"
+              animate={reduceMotion ? undefined : { rotate: 360, scale: [1, 1.06, 1] }}
+              transition={{ duration: 32, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.div
+              className="absolute left-1/2 top-1/2 h-[390px] w-[390px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-dashed border-fuchsia-300/25"
+              animate={reduceMotion ? undefined : { rotate: -360 }}
+              transition={{ duration: 42, repeat: Infinity, ease: "linear" }}
+            />
+            <motion.div className="absolute left-[12%] top-[24%] h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_24px_8px_rgba(103,232,249,.35)]" animate={reduceMotion ? undefined : { y: [0, -18, 0], opacity: [.45, 1, .45] }} transition={{ duration: 4, repeat: Infinity }} />
+            <motion.div className="absolute right-[14%] bottom-[22%] h-3 w-3 rounded-full bg-fuchsia-300 shadow-[0_0_28px_8px_rgba(232,121,249,.35)]" animate={reduceMotion ? undefined : { y: [0, 16, 0], opacity: [.5, 1, .5] }} transition={{ duration: 5, repeat: Infinity }} />
+            <motion.div className="absolute left-[8%] bottom-[18%] hidden rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-left backdrop-blur-md md:block" animate={reduceMotion ? undefined : { y: [0, -10, 0], rotate: [-3, 0, -3] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}>
+              <span className="block text-[10px] font-bold uppercase tracking-[.18em] text-indigo-200">NFC connecté</span><span className="mt-1 block text-sm font-semibold text-white">Un geste. Un contact.</span>
+            </motion.div>
+            <motion.div className="absolute right-[8%] top-[18%] hidden rounded-2xl border border-white/10 bg-white/[.06] px-4 py-3 text-left backdrop-blur-md md:block" animate={reduceMotion ? undefined : { y: [0, 12, 0], rotate: [3, 0, 3] }} transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}>
+              <span className="block text-[10px] font-bold uppercase tracking-[.18em] text-fuchsia-200">Nouvelle opportunité</span><span className="mt-1 block text-sm font-semibold text-white">Relation activée <span className="text-emerald-300">↗</span></span>
+            </motion.div>
           </div>
-        </div>
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, y: 22 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.15, duration: 0.7 }}
+            className="relative z-10 mx-auto max-w-4xl"
+          >
+            <motion.div className="mx-auto mb-7 flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-300/30 bg-indigo-400/10 text-2xl text-indigo-200 shadow-[0_0_45px_rgba(129,140,248,.22)]" animate={reduceMotion ? undefined : { y: [0, -7, 0], rotate: [0, 4, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>✳</motion.div>
+            <p className="text-xs font-black uppercase tracking-[.24em] text-indigo-200">Le prochain échange peut tout changer</p>
+            <h2 className="mt-6 text-4xl font-black leading-[1.08] tracking-[-.055em] sm:text-5xl lg:text-7xl">
+              Votre prochain contact<br className="hidden sm:block" /> commence <span className="bg-gradient-to-r from-cyan-200 via-indigo-200 to-fuchsia-300 bg-clip-text text-transparent">ici.</span>
+            </h2>
+            <p className="mx-auto mt-7 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">Une identité qui vous ressemble. Un partage sans friction. Des relations professionnelles qui durent.</p>
+            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <motion.div whileHover={reduceMotion ? undefined : { scale: 1.045, y: -4 }} whileTap={reduceMotion ? undefined : { scale: .97 }}>
+                <Link href="/register" className="group/cta inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 px-8 py-4 text-sm font-extrabold text-white shadow-[0_12px_40px_rgba(99,102,241,.4)] transition-shadow hover:shadow-[0_16px_55px_rgba(168,85,247,.55)]">Créer mon compte <span className="text-lg transition-transform duration-300 group-hover/cta:translate-x-1 group-hover/cta:-translate-y-1"><Arrow /></span></Link>
+              </motion.div>
+              <a href="#fonctionnement" className="rounded-2xl border border-white/15 bg-white/[.06] px-7 py-4 text-sm font-bold text-slate-200 backdrop-blur transition hover:border-white/30 hover:bg-white/10">Découvrir comment ça marche</a>
+            </div>
+            <p className="mt-7 text-xs font-medium tracking-wide text-slate-400">Prêt en quelques minutes · Aucun téléchargement pour vos contacts</p>
+          </motion.div>
+        </motion.div>
       </section>
 
       <footer className="border-t border-slate-200 bg-[#0e1028] text-white">
