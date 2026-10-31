@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { I18nText } from "@/i18n/provider";
 
 export default function PublicCardPage({
   params,
@@ -50,19 +51,19 @@ async function PublicCardContent({
           {card.bio && <p className="mt-5 text-sm leading-6 text-slate-600">{card.bio}</p>}
           <div className="mt-7 grid gap-3">
             {card.phone && (
-              <a className="btn-primary text-center" href={"tel:" + card.phone}>Appeler</a>
+              <a className="btn-primary text-center" href={"tel:" + card.phone}><I18nText message="call" /></a>
             )}
             {card.email && (
-              <a className="btn-secondary text-center" href={"mailto:" + card.email}>E-mail</a>
+              <a className="btn-secondary text-center" href={"mailto:" + card.email}><I18nText message="email" /></a>
             )}
             {card.website && (
               <a className="btn-secondary text-center" href={card.website} target="_blank" rel="noreferrer">
-                Site web
+                <I18nText message="website" />
               </a>
             )}
           </div>
           <p className="mt-8 text-center text-xs text-slate-400">
-            Carte digitale propulsée par TouchCard
+            <I18nText message="powered" />
           </p>
         </div>
       </article>
