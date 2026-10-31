@@ -247,6 +247,20 @@ export function LandingPage() {
 
       <section className="relative isolate overflow-hidden bg-[#090b1b] text-white">
         <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          {/* Vidéo d'ambiance NFC : les motifs Framer Motion ci-dessous restent inchangés. */}
+          <video
+            className="absolute inset-0 h-full w-full object-cover opacity-45"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-hidden="true"
+          >
+            <source src="https://videos.pexels.com/video-files/5101679/5101679-hd_1920_1080_25fps.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-br from-[#090b1b]/95 via-[#17143b]/85 to-[#090b1b]/95" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#090b1b]/70 via-indigo-950/35 to-violet-950/55" />
           <div className="absolute -right-48 -top-56 h-[42rem] w-[42rem] rounded-full bg-indigo-600/30 blur-[120px]" />
           <div className="absolute -bottom-64 -left-40 h-[34rem] w-[34rem] rounded-full bg-violet-700/25 blur-[120px]" />
           <div className="absolute inset-0 opacity-[.13]" style={{ backgroundImage: "radial-gradient(#a5b4fc 1px, transparent 1px)", backgroundSize: "30px 30px" }} />
