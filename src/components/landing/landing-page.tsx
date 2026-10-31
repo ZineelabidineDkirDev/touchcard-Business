@@ -333,8 +333,8 @@ export function LandingPage() {
               ["04", t("lastingRelationship"), t("buildLoyalty"), "relationship"],
             ].map(([n, label, detail, symbol], index) => (
               <motion.div key={n} initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .4 }} transition={{ duration: .55, delay: index * .1 }} whileHover={reduceMotion ? undefined : { y: -6 }} className="group relative flex min-h-[265px] flex-col items-start overflow-hidden rounded-2xl border border-white/10 bg-transparent p-6 sm:p-7">
-                <div aria-hidden="true" className="mb-5 flex items-start justify-start text-transparent transition duration-500 group-hover:scale-105">
-                  <svg viewBox="0 0 120 120" className="h-28 w-28 sm:h-32 sm:w-32" fill="none" stroke={`url(#feature-icon-gradient-${n})`} strokeWidth="3.2" strokeLinecap="round" strokeLinejoin="round">
+                <div aria-hidden="true" className="pointer-events-none absolute -left-10 top-1/2 z-0 h-[240px] w-[58%] -translate-y-1/2 overflow-hidden text-transparent transition duration-500 group-hover:scale-105 sm:-left-12 sm:h-[290px]">
+                  <svg viewBox="0 0 120 120" preserveAspectRatio="xMidYMid meet" className="h-full w-full scale-[1.55] sm:scale-[1.8]" fill="none" stroke={`url(#feature-icon-gradient-${n})`} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                     <defs><linearGradient id={`feature-icon-gradient-${n}`} x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#67e8f9"/><stop offset="52%" stopColor="#818cf8"/><stop offset="100%" stopColor="#e879f9"/></linearGradient></defs>
                     {symbol === "identity" && <><rect x="19" y="27" width="82" height="66" rx="10"/><circle cx="43" cy="51" r="10"/><path d="M28 78c3-10 27-10 30 0M69 47h19M69 61h19M69 75h12"/></>}
                     {symbol === "nfc" && <><rect x="43" y="17" width="34" height="86" rx="8"/><path d="M55 91h10M34 42c-8 10-8 26 0 36M86 42c8 10 8 26 0 36M24 31c-15 17-15 41 0 58M96 31c15 17 15 41 0 58"/></>}
@@ -342,6 +342,7 @@ export function LandingPage() {
                     {symbol === "relationship" && <><path d="M15 48l22-20 22 17-16 17-28-14zM105 48L83 28 61 45l16 17 28-14z"/><path d="M39 62l18 18c3 3 8 3 11 0l14-14M48 71l-7 8c-3 3-3 8 0 11s8 3 11 0l5-5M61 80l-5 5c-3 3-3 8 0 11s8 3 11 0l7-7M75 74l-4 4c-3 3-3 8 0 11s8 3 11 0l9-10M37 28l-9-9M83 28l9-9"/></>}
                   </svg>
                 </div>
+                <div aria-hidden="true" className="mb-5 h-28 w-28 shrink-0 sm:h-32 sm:w-32" />
                 <span className="text-[10px] font-black tracking-[.2em] text-indigo-300/70">{n}</span>
                 <h3 className="mt-2 text-base font-extrabold leading-snug text-white sm:text-lg">{label}</h3>
                 <p className="mt-3 text-sm leading-6 text-slate-300">{detail}</p>
