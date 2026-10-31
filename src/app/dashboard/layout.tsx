@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { signOut } from "@/app/actions/auth";
 import { createClient } from "@/lib/supabase/server";
 import { LanguageSwitcher } from "@/i18n/provider";
+import { DashboardNavigation, DashboardLogoutLabel } from "@/components/dashboard/dashboard-navigation";
 
 const navigation = [
   ["Vue d’ensemble", "/dashboard"],
@@ -42,13 +43,11 @@ async function AuthenticatedDashboard({ children }: Readonly<{ children: React.R
         <Link href="/" className="text-2xl font-black tracking-tight text-slate-950">Touch<span className="text-indigo-600">Card</span></Link>
         <p className="mt-1 text-xs text-slate-400">BUSINESS WORKSPACE</p>
         <div className="mt-4"><LanguageSwitcher /></div>
-        <nav className="mt-8 flex gap-2 overflow-x-auto lg:flex-col">
-          {navigation.map(([label, href]) => <Link key={href} href={href} className="whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-indigo-50 hover:text-indigo-700">{label}</Link>)}
-        </nav>
+        <DashboardNavigation />
         <div className="mt-8 border-t border-slate-100 pt-5 lg:absolute lg:inset-x-5 lg:bottom-6">
           <p className="truncate text-sm font-semibold text-slate-800">{String(user.user_metadata.full_name || user.email)}</p>
           <p className="mt-1 truncate text-xs text-slate-400">{user.email}</p>
-          <form action={signOut}><button className="mt-4 text-sm font-semibold text-rose-600">Se déconnecter</button></form>
+          <form action={signOut}><button className="mt-4 text-sm font-semibold text-rose-600"><DashboardLogoutLabel /></button></form>
         </div>
       </aside>
       <main className="min-w-0 flex-1 p-5 sm:p-8 lg:ml-64">{children}</main>
