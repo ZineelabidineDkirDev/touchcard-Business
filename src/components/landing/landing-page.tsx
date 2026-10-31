@@ -646,11 +646,11 @@ export function LandingPage() {
           </motion.div>
           <div className="mt-20 grid gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {[
-              {name:"Business",type:"Réseau professionnel",desc:"Présentez votre profil, vos coordonnées et tous vos liens professionnels en un seul geste.",price:"399 DH",tone:"metal",number:"01"},
-              {name:"Contact",type:"Partage de coordonnées",desc:"Facilitez l’échange de vos informations et l’enregistrement de vos coordonnées.",price:"149 DH",tone:"metal",number:"02"},
-              {name:"E-Service",type:"Services & accès rapides",desc:"Dirigez vos clients vers vos services, réservations, menus ou pages utiles.",price:"399 DH",tone:"metal",number:"03"},
-              {name:"Avis Google",type:"Collecte d’avis clients",desc:"Invitez vos clients à découvrir votre page Google et à partager leur expérience.",price:"199 DH",tone:"from-[#111827] via-[#202b50] to-[#394b8c]",number:"04"},
-              {name:"Personnalisée",type:"Carte & service sur mesure",desc:"Une carte NFC à votre image, accompagnée d’un service digital conçu et configuré selon vos besoins.",price:"499 DH",tone:"from-[#171521] via-[#29233f] to-[#514078]",number:"05"}
+              {name:"Business",type:t("t("cardBusinessType")"),desc:t("t("cardBusinessDesc")"),price:"399 DH",tone:"metal",number:"01"},
+              {name:"Contact",type:t("t("cardContactType")"),desc:t("t("cardContactDesc")"),price:"149 DH",tone:"metal",number:"02"},
+              {name:"E-Service",type:t("t("cardServiceType")"),desc:t("t("cardServiceDesc")"),price:"399 DH",tone:"metal",number:"03"},
+              {name:"Avis Google",type:t("t("cardGoogleType")"),desc:t("t("cardGoogleDesc")"),price:"199 DH",tone:"from-[#111827] via-[#202b50] to-[#394b8c]",number:"04"},
+              {name:"Personnalisée",type:t("t("cardCustomType")"),desc:t("t("cardCustomDesc")"),price:"499 DH",tone:"from-[#171521] via-[#29233f] to-[#514078]",number:"05"}
             ].map((card,index) => (
               <motion.article key={card.name} initial="hidden" whileInView="visible" viewport={{ once:true, amount:.18 }} variants={reveal} transition={{ duration:.6, delay:index*.07 }} className="group">
                 <div className="relative mx-auto flex h-[245px] items-center justify-center [perspective:1100px]">
@@ -690,11 +690,11 @@ export function LandingPage() {
           </div>
           <div className="mt-16 grid items-stretch gap-7 sm:grid-cols-2 xl:grid-cols-5">
             {[
-              {name:"Business",type:"Réseau professionnel",desc:"Présentez votre profil, vos coordonnées et tous vos liens professionnels en un seul geste.",price:"399 DH",tone:"metal",number:"01",features:["Profil professionnel complet","Coordonnées et liens","Partage NFC et QR code"]},
-              {name:"Contact",type:"Partage de coordonnées",desc:"Facilitez l’échange de vos informations et l’enregistrement de vos coordonnées.",price:"149 DH",tone:"metal",number:"02",features:["Coordonnées de contact","Partage rapide","Enregistrement simplifié"]},
-              {name:"E-Service",type:"Services & accès rapides",desc:"Dirigez vos clients vers vos services, réservations, menus ou pages utiles.",price:"399 DH",tone:"metal",number:"03",features:["Accès à vos services","Liens personnalisés","Partage NFC et QR code"]},
-              {name:"Avis Google",type:"Collecte d’avis clients",desc:"Invitez vos clients à découvrir votre page Google et à partager leur expérience.",price:"199 DH",tone:"google",number:"04",features:["Accès à votre page Google","Partage en un geste","Facilite la demande d’avis"]},
-              {name:"Personnalisée",type:"Carte & service sur mesure",desc:"Une solution adaptée à votre activité : identité visuelle, carte NFC et service digital personnalisé selon votre besoin.",price:"499 DH",tone:"custom",number:"05",features:["Votre logo et design personnalisés","Configuration d’un service digital sur mesure","Expérience adaptée à votre activité","Carte NFC personnalisée"]}
+              {name:"Business",type:t("t("cardBusinessType")"),desc:t("t("cardBusinessDesc")"),price:"399 DH",tone:"metal",number:"01",features:["Profil professionnel complet","Coordonnées et liens","Partage NFC et QR code"]},
+              {name:"Contact",type:t("t("cardContactType")"),desc:t("t("cardContactDesc")"),price:"149 DH",tone:"metal",number:"02",features:["Coordonnées de contact","Partage rapide","Enregistrement simplifié"]},
+              {name:"E-Service",type:t("t("cardServiceType")"),desc:t("t("cardServiceDesc")"),price:"399 DH",tone:"metal",number:"03",features:["Accès à vos services","Liens personnalisés","Partage NFC et QR code"]},
+              {name:"Avis Google",type:t("t("cardGoogleType")"),desc:t("t("cardGoogleDesc")"),price:"199 DH",tone:"google",number:"04",features:["Accès à votre page Google","Partage en un geste","Facilite la demande d’avis"]},
+              {name:"Personnalisée",type:t("t("cardCustomType")"),desc:"Une solution adaptée à votre activité : identité visuelle, carte NFC et service digital personnalisé selon votre besoin.",price:"499 DH",tone:"custom",number:"05",features:["Votre logo et design personnalisés","Configuration d’un service digital sur mesure","Expérience adaptée à votre activité","Carte NFC personnalisée"]}
             ].map((card,index) => (
               <motion.article key={card.name} initial={{opacity:0,y:28}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.12}} transition={{duration:.55,delay:index*.06}} className="group flex flex-col rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_-35px_rgba(30,41,90,.35)] transition duration-300 hover:-translate-y-2 hover:shadow-[0_28px_60px_-32px_rgba(79,70,229,.35)] sm:p-6">
                 <div className="relative mx-auto mb-7 flex h-[172px] w-full items-center justify-center [perspective:1000px]">
@@ -740,12 +740,12 @@ export function LandingPage() {
           <div><p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">{t("faqTitle")}</p><h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl">{t("faqSubtitle")}</h2><p className="mt-6 text-base leading-8 text-slate-500">{t("faqDesc")}</p><Link href="/register" className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-indigo-700 hover:text-indigo-900">{t("navCreate")} <Arrow /></Link></div>
           <div className="space-y-3">
             {[
-              ["Qu'est-ce qu'une carte de visite digitale ?", "C'est un profil professionnel en ligne qui rassemble vos coordonnées, vos liens et vos informations. Vous pouvez le partager par QR code, lien ou carte NFC compatible."],
-              ["Le destinataire doit-il installer une application ?", "Non. Le profil public s'ouvre dans le navigateur du téléphone. Le destinataire n'a pas besoin d'installer une application pour consulter vos informations."],
-              ["Puis-je gérer plusieurs collaborateurs ?", "La formule Entreprise est pensée pour centraliser les profils et les accès des membres d'une organisation."],
-              ["Puis-je modifier mes informations après création ?", "Oui. Les informations de votre profil sont gérées depuis votre espace professionnel et peuvent être mises à jour."],
-              ["Les cartes NFC sont-elles incluses ?", "La plateforme prend en charge le partage via NFC et QR code. La fourniture et le prix des supports physiques seront précisés dans les offres commerciales."],
-              ["Comment connaître les tarifs ?", "Les tarifs définitifs sont en cours de définition. Vous pouvez créer votre espace ou nous contacter pour discuter de votre besoin."]
+              [t("faqQ1"), t("faqA1")],
+              [t("faqQ2"), t("faqA2")],
+              [t("faqQ3"), t("faqA3")],
+              [t("faqQ4"), t("faqA4")],
+              [t("faqQ5"), t("faqA5")],
+              [t("faqQ6"), t("faqA6")]
             ].map(([question, answer]) => <details key={question} className="group rounded-2xl border border-slate-200 bg-white p-5 open:border-indigo-200 open:bg-indigo-50/40 sm:p-6"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-extrabold text-slate-900 [&::-webkit-details-marker]:hidden">{question}<span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-lg text-indigo-700 transition group-open:rotate-45">+</span></summary><p className="mt-4 max-w-2xl pr-8 text-sm leading-7 text-slate-600">{answer}</p></details>)}
           </div>
         </div>
