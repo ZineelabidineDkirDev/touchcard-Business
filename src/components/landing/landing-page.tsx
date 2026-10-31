@@ -763,7 +763,7 @@ export function LandingPage() {
                 <ul className="mt-5 flex-1 space-y-3">
                   {card.features.map((feature)=><li key={feature} className="flex gap-2.5 text-xs leading-5 text-slate-600"><span className="font-black text-emerald-500">✓</span>{feature}</li>)}
                 </ul>
-                <Link href="/register" className="mt-7 inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3.5 text-xs font-extrabold text-white transition hover:-translate-y-0.5 hover:bg-indigo-700">Choisir {card.name} <Arrow /></Link>
+                <Link href="/register" className="mt-7 inline-flex items-center justify-center gap-2 rounded-xl border border-indigo-400/50 bg-gradient-to-r from-indigo-500/10 via-violet-500/10 to-fuchsia-500/10 px-4 py-3.5 text-xs font-extrabold text-indigo-700 shadow-[inset_0_1px_0_rgba(255,255,255,.7)] backdrop-blur-md transition duration-300 hover:-translate-y-0.5 hover:border-violet-400/70 hover:from-indigo-500/20 hover:via-violet-500/20 hover:to-fuchsia-500/20 hover:shadow-[0_10px_28px_-16px_rgba(124,58,237,.55)]">Choisir {card.name} <Arrow /></Link>
               </motion.article>
             ))}
           </div>
