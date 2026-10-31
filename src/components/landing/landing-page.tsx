@@ -81,7 +81,7 @@ function DashboardPreview() {
               <p className="mt-1 text-sm text-indigo-100">{t("mockDirector")}</p>
             </div>
             <div className="relative mt-7 grid grid-cols-2 gap-2">
-              {["{t("mockPhone")}", "{t("mockEmail")}", "{t("mockWebsite")}", "{t("mockLinkedin")}"].map((item) => (
+              {[t("mockPhone"), t("mockEmail"), t("mockWebsite"), t("mockLinkedin")].map((item) => (
                 <div key={item} className="rounded-xl border border-white/15 bg-white/10 px-3 py-2.5 text-xs text-white/90">{item} <span className="float-right">↗</span></div>
               ))}
             </div>
@@ -108,7 +108,7 @@ function DashboardPreview() {
           </div>
         </div>
         <div className="mt-3 grid grid-cols-3 gap-2">
-          {["{t("mockCardsProfiles")}", "{t("mockContactsCRM")}", "{t("mockLoyalty")}"].map((label, i) => (
+          {[t("mockCardsProfiles"), t("mockContactsCRM"), t("mockLoyalty")].map((label, i) => (
             <div key={label} className="rounded-xl border border-white/10 bg-white/[.06] px-2 py-3 text-center text-[10px] font-medium text-slate-300 sm:text-xs">
               <span className="mb-1 block text-sm text-indigo-300">{["▣", "◎", "✳"][i]}</span>{label}
             </div>
