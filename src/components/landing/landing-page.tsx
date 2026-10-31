@@ -251,10 +251,10 @@ export function LandingPage() {
           <nav aria-label="Navigation mobile" className="border-t border-white/10 bg-gradient-to-r from-[#090b1b] via-[#17143b] to-[#090b1b] px-5 py-4 text-white shadow-xl xl:hidden">
             <div className="mx-auto grid max-w-[1440px] gap-1">
               {[[t("navSolutions"), "#solutions"], [t("navPlatform"), "#experience"], [t("navDemo"), "#demo"], [t("navHow"), "#fonctionnement"], [t("navPricing"), "#tarifs"], [t("navFaq"), "#faq"]].map(([label, href]) => (
-                <a key={href} href={href} onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-indigo-50 hover:text-indigo-700">{label}</a>
+                <a key={href} href={href} onClick={() => setMobileMenuOpen(false)} className="rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 hover:text-white">{label}</a>
               ))}
               <div className="mt-2 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
-                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-xl border border-slate-200 px-3 py-3 text-center text-sm font-bold text-slate-700">{t("navLogin")}</Link>
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-xl border border-white/20 px-3 py-3 text-center text-sm font-bold text-white transition hover:bg-white/10 hover:text-white">{t("navLogin")}</Link>
                 <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="rounded-xl bg-indigo-600 px-3 py-3 text-center text-sm font-bold text-white">{t("navCreateShort")}</Link>
               </div>
             </div>
@@ -332,11 +332,16 @@ export function LandingPage() {
               ["03", t("organizedContacts"), t("trackedOpportunity"), "◎"],
               ["04", t("lastingRelationship"), t("buildLoyalty"), "✳"],
             ].map(([n, label, detail, symbol], index) => (
-              <motion.div key={n} initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .4 }} transition={{ duration: .55, delay: index * .1 }} whileHover={reduceMotion ? undefined : { y: -5 }} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[.045] p-5 backdrop-blur-sm">
-                <div className="absolute -right-8 -top-10 h-24 w-24 rounded-full bg-indigo-500/10 blur-2xl transition group-hover:bg-fuchsia-500/20" />
-                <div className="relative flex items-center justify-between"><span className="text-[10px] font-black tracking-[.2em] text-indigo-300">{n}</span><span className="flex h-9 w-9 items-center justify-center rounded-xl border border-indigo-300/20 bg-indigo-400/10 text-lg text-indigo-200">{symbol}</span></div>
-                <h3 className="relative mt-5 text-sm font-extrabold text-white">{label}</h3>
-                <p className="relative mt-2 text-xs leading-5 text-slate-400">{detail}</p>
+              <motion.div key={n} initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .4 }} transition={{ duration: .55, delay: index * .1 }} whileHover={reduceMotion ? undefined : { y: -5 }} className="group relative flex min-h-[150px] overflow-hidden rounded-2xl border border-white/10 bg-white/[.045] backdrop-blur-sm">
+                <div className="pointer-events-none absolute inset-y-0 w-[34%] overflow-hidden border-indigo-300/10 bg-gradient-to-br from-indigo-500/20 via-violet-500/10 to-fuchsia-500/15 ltr:left-0 ltr:border-r rtl:right-0 rtl:border-l">
+                  <span aria-hidden="true" className="absolute inset-0 flex items-center justify-center text-[5.5rem] font-black text-indigo-100/[.16] transition duration-500 group-hover:scale-110 group-hover:text-fuchsia-100/25">{symbol}</span>
+                  <span className="absolute bottom-3 text-[10px] font-black tracking-[.2em] text-indigo-200/70 ltr:left-4 rtl:right-4">{n}</span>
+                </div>
+                <div className="relative z-10 my-auto py-5 ltr:pl-[39%] ltr:pr-4 rtl:pl-4 rtl:pr-[39%]">
+                  <h3 className="text-sm font-extrabold text-white">{label}</h3>
+                  <p className="mt-2 text-xs leading-5 text-slate-300">{detail}</p>
+                </div>
+                <div className="pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full bg-indigo-500/10 blur-2xl transition group-hover:bg-fuchsia-500/20" />
                 <motion.div className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400" initial={{ width: "0%" }} whileInView={{ width: "100%" }} viewport={{ once: true }} transition={{ duration: 1, delay: .2 + index * .12 }} />
               </motion.div>
             ))}
