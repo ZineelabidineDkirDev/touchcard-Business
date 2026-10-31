@@ -380,7 +380,7 @@ export function LandingPage() {
         <div className="relative mx-auto max-w-[1440px]">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={reveal} transition={{ duration: 0.65}} className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-indigo-400/[.08] px-4 py-2 text-[10px] font-extrabold uppercase tracking-[.2em] text-indigo-200"><span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400" /> L’écosystème TouchCard</span>
-            <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-.045em] text-white sm:text-5xl lg:text-6xl">Tous vos outils pour <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">{t("ecosystemTitle")}</span></h2>
+            <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-.045em] text-white sm:text-5xl lg:text-6xl"><span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">{t("ecosystemTitle")}</span></h2>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-400">{t("ecosystemDesc")}</p>
           </motion.div>
           <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -606,7 +606,7 @@ export function LandingPage() {
         <div className="mx-auto grid max-w-[1280px] items-center gap-14 lg:grid-cols-[.85fr_1.15fr]">
           <div>
             <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">{t("discoverTouch")}</p>
-            <h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl">Votre activité mérite une <span className="text-indigo-600">{t("betterShowcase")}</span></h2>
+            <h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl">{t("betterShowcase")}</h2>
             <p className="mt-6 text-lg leading-8 text-slate-600">{t("betterShowcaseDesc")}</p>
             <ul className="mt-8 space-y-4 text-sm font-semibold text-slate-700">
               {["Un profil professionnel accessible en un scan", "Un espace centralisé pour vos contacts et votre équipe", "Des indicateurs pour suivre vos interactions"].map((item) => <li key={item} className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">✓</span>{item}</li>)}
@@ -636,7 +636,7 @@ export function LandingPage() {
         <div className="mx-auto max-w-[1480px]">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={reveal} className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-white/[.06] px-4 py-2 text-[10px] font-extrabold uppercase tracking-[.2em] text-indigo-200 shadow-sm"><span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400" /> Collection TouchCard NFC</span>
-            <h2 className="mt-6 text-4xl font-black tracking-[-.05em] text-white sm:text-5xl lg:text-6xl">Une carte pour chaque <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">{t("nfcTitle")}</span></h2>
+            <h2 className="mt-6 text-4xl font-black tracking-[-.05em] text-white sm:text-5xl lg:text-6xl"><span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">{t("nfcTitle")}</span></h2>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-300">{t("nfcDesc")}</p>
           </motion.div>
           <div className="mt-20 grid gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
@@ -732,7 +732,7 @@ export function LandingPage() {
 
       <section id="faq" className="px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
         <div className="mx-auto grid max-w-[1180px] gap-12 lg:grid-cols-[.8fr_1.2fr]">
-          <div><p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">{t("faqTitle")}</p><h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl">Vous souhaitez en savoir <span className="text-indigo-600">{t("faqSubtitle")}</span></h2><p className="mt-6 text-base leading-8 text-slate-500">{t("faqDesc")}</p><Link href="/register" className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-indigo-700 hover:text-indigo-900">{t("navCreate")} <Arrow /></Link></div>
+          <div><p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">{t("faqTitle")}</p><h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl">{t("faqSubtitle")}</h2><p className="mt-6 text-base leading-8 text-slate-500">{t("faqDesc")}</p><Link href="/register" className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-indigo-700 hover:text-indigo-900">{t("navCreate")} <Arrow /></Link></div>
           <div className="space-y-3">
             {[
               ["Qu'est-ce qu'une carte de visite digitale ?", "C'est un profil professionnel en ligne qui rassemble vos coordonnées, vos liens et vos informations. Vous pouvez le partager par QR code, lien ou carte NFC compatible."],
