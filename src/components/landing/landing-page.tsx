@@ -41,6 +41,7 @@ function QrPattern() {
 }
 
 function DashboardPreview() {
+  const { t } = useI18n();
   return (
     <div className="relative mx-auto w-full max-w-[610px]">
       <motion.div
