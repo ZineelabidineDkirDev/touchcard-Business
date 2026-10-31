@@ -296,7 +296,7 @@ export function LandingPage() {
               La nouvelle génération de cartes professionnelles
             </div>
             <h2 className="mt-8 max-w-3xl text-[clamp(3.25rem,4.5vw,4.4rem)] font-black leading-[.99] tracking-[-.065em] text-white">
-              Chaque rencontre peut devenir <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent">une opportunité.</span>
+              Chaque rencontre peut devenir <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent">{t("heroLead")}</span>
             </h2>
             <p className="mt-8 max-w-xl text-lg leading-8 text-slate-300 sm:text-xl sm:leading-9">
               Bien plus qu’une carte de visite. Créez votre identité digitale, partagez-la avec NFC ou QR code, développez vos contacts et fidélisez vos clients depuis une seule plateforme.
@@ -347,8 +347,8 @@ export function LandingPage() {
         <div className="relative mx-auto max-w-[1440px]">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: .25 }} variants={reveal} className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-white/[.06] px-4 py-2 text-[10px] font-extrabold uppercase tracking-[.2em] text-indigo-200"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> L’impact en un coup d’œil</span>
-            <h2 className="mt-6 text-4xl font-black tracking-[-.05em] sm:text-5xl lg:text-6xl">Les rencontres prennent de la valeur. <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">Les chiffres le raconteront.</span></h2>
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-400 sm:text-lg">Un tableau de bord pour mesurer l’adoption de TouchCard et suivre l’activité de votre réseau, en toute transparence.</p>
+            <h2 className="mt-6 text-4xl font-black tracking-[-.05em] sm:text-5xl lg:text-6xl">Les rencontres prennent de la valeur. <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">{t("impactSubtitle")}</span></h2>
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-400 sm:text-lg">{t("impactDesc")}</p>
           </motion.div>
           <div className="mt-16 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {[
@@ -367,7 +367,7 @@ export function LandingPage() {
               </motion.article>
             ))}
           </div>
-          <p className="mt-7 text-center text-xs text-slate-500">Les compteurs seront alimentés par les données réelles de la plateforme après son lancement. Aucun chiffre fictif n’est affiché.</p>
+          <p className="mt-7 text-center text-xs text-slate-500">{t("metricNote")}</p>
         </div>
       </section>
 
@@ -380,8 +380,8 @@ export function LandingPage() {
         <div className="relative mx-auto max-w-[1440px]">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={reveal} transition={{ duration: 0.65}} className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-indigo-400/[.08] px-4 py-2 text-[10px] font-extrabold uppercase tracking-[.2em] text-indigo-200"><span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400" /> L’écosystème TouchCard</span>
-            <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-.045em] text-white sm:text-5xl lg:text-6xl">Tous vos outils pour <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">développer votre réseau.</span></h2>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-400">De la première prise de contact à la fidélisation, une suite professionnelle conçue pour transformer chaque échange en opportunité.</p>
+            <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-.045em] text-white sm:text-5xl lg:text-6xl">Tous vos outils pour <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">{t("ecosystemTitle")}</span></h2>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-400">{t("ecosystemDesc")}</p>
           </motion.div>
           <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature, index) => (
@@ -462,7 +462,7 @@ export function LandingPage() {
           >
             <div className="flex items-center justify-between"><span className="text-[9px] font-bold tracking-widest text-violet-200">NEW CONTACT</span><span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_12px_3px_rgba(110,231,183,.35)]" /></div>
             <div className="mt-4 flex items-center gap-3"><div className="h-9 w-9 rounded-full bg-gradient-to-br from-fuchsia-300 to-indigo-400" /><div className="space-y-1.5"><div className="h-1.5 w-20 rounded-full bg-white/50" /><div className="h-1 w-14 rounded-full bg-white/20" /></div></div>
-            <div className="mt-4 rounded-lg border border-white/10 bg-white/[.06] px-3 py-2 text-[9px] text-violet-100">Contact ajouté avec succès</div>
+            <div className="mt-4 rounded-lg border border-white/10 bg-white/[.06] px-3 py-2 text-[9px] text-violet-100">{t("contactSuccess")}</div>
           </motion.div>
 
           <motion.div
@@ -478,9 +478,9 @@ export function LandingPage() {
         <div className="absolute -bottom-48 -left-40 h-[30rem] w-[30rem] rounded-full bg-violet-600/20 blur-[100px]" />
         <div className="relative mx-auto grid max-w-[1440px] items-center gap-16 px-5 sm:px-8 lg:grid-cols-2 lg:px-12">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={reveal} transition={{ duration: 0.65 }}>
-            <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-300">Votre activité, mieux connectée</p>
-            <h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl lg:text-6xl">Une expérience fluide. <span className="text-indigo-300">Un réseau qui grandit.</span></h2>
-            <p className="mt-7 max-w-xl text-lg leading-8 text-slate-300">Votre profil professionnel devient le point de départ d’une expérience complète : partage, collecte de contacts, suivi commercial et fidélisation.</p>
+            <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-300">{t("connectedActivity")}</p>
+            <h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl lg:text-6xl">Une expérience fluide. <span className="text-indigo-300">{t("growingNetwork")}</span></h2>
+            <p className="mt-7 max-w-xl text-lg leading-8 text-slate-300">{t("connectedDesc")}</p>
             <div className="mt-10 space-y-5">
               {[
                 ["Une seule présence", "Toutes vos informations professionnelles réunies sur un profil."],
@@ -515,13 +515,13 @@ export function LandingPage() {
               animate={{ y: [0, 13, 0], rotateY: [12, 4, 12], rotateZ: [-6, -2, -6] }}
               transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 0.6 }}
             >
-              <div className="flex items-center justify-between"><span className="text-[9px] font-bold tracking-widest text-fuchsia-100">NOUVEAU CONTACT</span><span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_12px_3px_rgba(110,231,183,.4)]" /></div>
+              <div className="flex items-center justify-between"><span className="text-[9px] font-bold tracking-widest text-fuchsia-100">{t("newContact")}</span><span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_12px_3px_rgba(110,231,183,.4)]" /></div>
               <div className="mt-3 flex items-center gap-2"><span className="h-8 w-8 rounded-full bg-gradient-to-br from-fuchsia-300 to-indigo-400" /><div className="space-y-1"><div className="h-1.5 w-16 rounded-full bg-white/60" /><div className="h-1 w-11 rounded-full bg-white/25" /></div></div>
-              <p className="mt-3 rounded-lg border border-white/10 bg-white/[.07] px-2 py-1.5 text-[9px] text-fuchsia-100">Contact enregistré ✓</p>
+              <p className="mt-3 rounded-lg border border-white/10 bg-white/[.07] px-2 py-1.5 text-[9px] text-fuchsia-100">{t("savedContact")}</p>
             </motion.div>
             <div className="relative z-10 rounded-[2rem] border border-white/10 bg-white/[.06] p-5 shadow-2xl shadow-black/20 backdrop-blur sm:p-7">
               <div className="flex items-center justify-between border-b border-white/10 pb-5">
-                <div><p className="text-xs font-semibold text-slate-400">ESPACE PROFESSIONNEL</p><p className="mt-1 text-lg font-bold">Votre activité en un endroit</p></div>
+                <div><p className="text-xs font-semibold text-slate-400">{t("workspacePreview")}</p><p className="mt-1 text-lg font-bold">{t("activityOnePlace")}</p></div>
                 <span className="rounded-xl bg-indigo-400/15 px-3 py-2 text-xs font-bold text-indigo-200">TouchCard</span>
               </div>
               <div className="mt-6 grid grid-cols-2 gap-3">
@@ -533,7 +533,7 @@ export function LandingPage() {
                 ))}
               </div>
               <div className="mt-3 rounded-2xl border border-indigo-300/15 bg-gradient-to-r from-indigo-500/15 to-violet-500/10 p-5">
-                <div className="flex items-center justify-between"><div><p className="text-xs font-semibold text-indigo-200">Une plateforme évolutive</p><p className="mt-1 text-sm font-bold">Construisez votre présence digitale</p></div><span className="text-2xl text-indigo-200">✦</span></div>
+                <div className="flex items-center justify-between"><div><p className="text-xs font-semibold text-indigo-200">{t("evolvingPlatform")}</p><p className="mt-1 text-sm font-bold">{t("buildPresence")}</p></div><span className="text-2xl text-indigo-200">✦</span></div>
               </div>
             </div>
           </motion.div>
@@ -590,7 +590,7 @@ export function LandingPage() {
           <motion.div initial={{opacity:0,y:18}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:.65,delay:.25}} className="mt-12 flex flex-col items-center justify-between gap-6 rounded-[1.7rem] border border-indigo-300/15 bg-gradient-to-r from-indigo-500/[.12] via-violet-500/[.10] to-fuchsia-500/[.12] p-6 backdrop-blur-xl sm:flex-row sm:px-9 sm:py-7">
             <div className="flex items-center gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/15 bg-white/[.08]"><img src="/brand/touchcard-mark.svg" alt="" className="h-8 w-8 object-contain" /></div>
-              <div><p className="text-base font-extrabold text-white">Prêt à créer votre prochaine connexion ?</p><p className="mt-1 text-sm text-slate-400">Votre identité digitale commence ici.</p></div>
+              <div><p className="text-base font-extrabold text-white">{t("nextConnection")}</p><p className="mt-1 text-sm text-slate-400">{t("digitalIdentity")}</p></div>
             </div>
             <motion.div whileHover={reduceMotion?undefined:{y:-3,scale:1.025}} whileTap={reduceMotion?undefined:{scale:.97}}>
               <Link href="/register" className="group inline-flex items-center gap-4 rounded-xl bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 px-6 py-4 text-sm font-extrabold text-white shadow-[0_15px_40px_-15px_rgba(139,92,246,.8)] ring-1 ring-white/20 transition-shadow hover:shadow-[0_20px_50px_-15px_rgba(217,70,239,.65)]">
@@ -605,9 +605,9 @@ export function LandingPage() {
       <section id="demo" className="bg-[#f7f7ff] px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
         <div className="mx-auto grid max-w-[1280px] items-center gap-14 lg:grid-cols-[.85fr_1.15fr]">
           <div>
-            <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">Découvrez TouchCard</p>
-            <h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl">Votre activité mérite une <span className="text-indigo-600">meilleure vitrine.</span></h2>
-            <p className="mt-6 text-lg leading-8 text-slate-600">Découvrez comment une carte digitale peut simplifier le partage de vos coordonnées, organiser vos prospects et renforcer votre relation client.</p>
+            <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">{t("discoverTouch")}</p>
+            <h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl">Votre activité mérite une <span className="text-indigo-600">{t("betterShowcase")}</span></h2>
+            <p className="mt-6 text-lg leading-8 text-slate-600">{t("betterShowcaseDesc")}</p>
             <ul className="mt-8 space-y-4 text-sm font-semibold text-slate-700">
               {["Un profil professionnel accessible en un scan", "Un espace centralisé pour vos contacts et votre équipe", "Des indicateurs pour suivre vos interactions"].map((item) => <li key={item} className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">✓</span>{item}</li>)}
             </ul>
@@ -616,15 +616,15 @@ export function LandingPage() {
           <div className="relative">
             <div className="absolute -inset-5 rounded-[2.5rem] bg-gradient-to-br from-indigo-200/70 to-violet-200/70 blur-2xl" />
             <div className="relative overflow-hidden rounded-[2rem] border border-white bg-[#11132d] p-3 shadow-2xl shadow-indigo-950/20 sm:p-5">
-              <div className="flex items-center gap-2 px-3 py-3"><span className="h-2.5 w-2.5 rounded-full bg-rose-400"/><span className="h-2.5 w-2.5 rounded-full bg-amber-300"/><span className="h-2.5 w-2.5 rounded-full bg-emerald-400"/><span className="ml-3 text-xs font-semibold text-slate-400">Présentation de la plateforme</span></div>
+              <div className="flex items-center gap-2 px-3 py-3"><span className="h-2.5 w-2.5 rounded-full bg-rose-400"/><span className="h-2.5 w-2.5 rounded-full bg-amber-300"/><span className="h-2.5 w-2.5 rounded-full bg-emerald-400"/><span className="ml-3 text-xs font-semibold text-slate-400">{t("platformPresentation")}</span></div>
               <div className="relative flex min-h-[290px] flex-col items-center justify-center overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-indigo-600 via-[#3530a2] to-violet-800 px-6 py-10 text-center sm:min-h-[390px]">
                 <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full border border-white/10"/><div className="absolute -bottom-28 -right-16 h-80 w-80 rounded-full border border-white/10"/>
                 <div className="relative flex h-20 w-20 items-center justify-center rounded-3xl border border-white/20 bg-white/15 text-4xl text-white shadow-xl backdrop-blur">▶</div>
                 <p className="relative mt-7 text-2xl font-black text-white sm:text-3xl">TouchCard Business</p>
-                <p className="relative mt-3 max-w-md text-sm leading-6 text-indigo-100">Un aperçu visuel de votre futur espace de gestion. La vidéo de présentation sera intégrée ici dès que son fichier ou son lien sera disponible.</p>
-                <span className="relative mt-6 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[.18em] text-white/90">Espace vidéo · prêt à intégrer</span>
+                <p className="relative mt-3 max-w-md text-sm leading-6 text-indigo-100">{t("videoIntro")}</p>
+                <span className="relative mt-6 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[.18em] text-white/90">{t("videoReady")}</span>
               </div>
-              <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-4 text-xs text-slate-400"><span>Cartes · CRM · Fidélité · Analyses</span><span className="font-semibold text-indigo-200">Une seule plateforme</span></div>
+              <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-4 text-xs text-slate-400"><span>{t("platformModules")}</span><span className="font-semibold text-indigo-200">{t("onePlatform")}</span></div>
             </div>
           </div>
         </div>
@@ -636,8 +636,8 @@ export function LandingPage() {
         <div className="mx-auto max-w-[1480px]">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={reveal} className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-white/[.06] px-4 py-2 text-[10px] font-extrabold uppercase tracking-[.2em] text-indigo-200 shadow-sm"><span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400" /> Collection TouchCard NFC</span>
-            <h2 className="mt-6 text-4xl font-black tracking-[-.05em] text-white sm:text-5xl lg:text-6xl">Une carte pour chaque <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">usage professionnel.</span></h2>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-300">Découvrez nos cinq modèles NFC : partage professionnel, prise de contact, services digitaux, avis Google et identité personnalisée.</p>
+            <h2 className="mt-6 text-4xl font-black tracking-[-.05em] text-white sm:text-5xl lg:text-6xl">Une carte pour chaque <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">{t("nfcTitle")}</span></h2>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-300">{t("nfcDesc")}</p>
           </motion.div>
           <div className="mt-20 grid gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             {[
@@ -666,12 +666,12 @@ export function LandingPage() {
                 </div>
                 <p className="mt-3 text-sm leading-7 text-slate-400">{card.desc}</p>
                 <p className="mt-4 text-2xl font-black tracking-tight text-white">{card.price}</p>
-                {card.name === "Personnalisée" && <p className="mt-3 inline-flex rounded-full border border-fuchsia-400/25 bg-fuchsia-400/10 px-3 py-1.5 text-[10px] font-bold text-fuchsia-200">Votre logo au centre</p>}
+                {card.name === "Personnalisée" && <p className="mt-3 inline-flex rounded-full border border-fuchsia-400/25 bg-fuchsia-400/10 px-3 py-1.5 text-[10px] font-bold text-fuchsia-200">{t("logoCenter")}</p>}
               </motion.article>
             ))}
           </div>
           <div className="mt-16 flex flex-col items-center justify-between gap-5 rounded-3xl border border-white/10 bg-white/[.06] p-6 shadow-[0_20px_60px_-45px_rgba(49,46,129,.5)] backdrop-blur sm:flex-row sm:p-8">
-            <div><p className="text-sm font-extrabold text-white">Votre marque, au cœur de chaque rencontre.</p><p className="mt-1 text-sm text-slate-300">Choisissez votre modèle NFC et partagez votre univers en un simple geste.</p></div>
+            <div><p className="text-sm font-extrabold text-white">{t("brandAtCenter")}</p><p className="mt-1 text-sm text-slate-300">{t("nfcDescShort")}</p></div>
             <Link href="/register" className="inline-flex shrink-0 items-center gap-3 rounded-xl border border-indigo-300/30 bg-indigo-500/20 px-5 py-3.5 text-sm font-extrabold text-indigo-100 transition hover:-translate-y-0.5 hover:bg-indigo-500/35">Créer ma carte <Arrow /></Link>
           </div>
         </div>
@@ -679,9 +679,9 @@ export function LandingPage() {
       <section id="tarifs" className="bg-[#f7f7ff] px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
         <div className="mx-auto max-w-[1440px]">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">Nos cartes NFC & leurs tarifs</p>
-            <h2 className="mt-5 text-4xl font-black tracking-[-.045em] text-[#11132d] sm:text-5xl">Choisissez la carte qui <span className="text-indigo-600">vous correspond.</span></h2>
-            <p className="mt-5 text-lg leading-8 text-slate-500">Chaque modèle possède son propre design, son usage et son tarif. Retrouvez la carte correspondante en haut de chaque offre.</p>
+            <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">{t("nfcPricing")}</p>
+            <h2 className="mt-5 text-4xl font-black tracking-[-.045em] text-[#11132d] sm:text-5xl">Choisissez la carte qui <span className="text-indigo-600">{t("chooseCard")}</span></h2>
+            <p className="mt-5 text-lg leading-8 text-slate-500">{t("cardPriceDesc")}</p>
           </div>
           <div className="mt-16 grid items-stretch gap-7 sm:grid-cols-2 xl:grid-cols-5">
             {[
@@ -717,7 +717,7 @@ export function LandingPage() {
                 <p className="mt-3 min-h-[88px] text-sm leading-6 text-slate-500">{card.desc}</p>
                 <div className="mt-4 border-y border-slate-100 py-5">
                   <p className="text-3xl font-black tracking-tight text-[#11132d]">{card.price}</p>
-                  <p className="mt-1 text-[10px] font-medium text-slate-400">Prix de la carte</p>
+                  <p className="mt-1 text-[10px] font-medium text-slate-400">{t("cardPrice")}</p>
                 </div>
                 <ul className="mt-5 flex-1 space-y-3">
                   {card.features.map((feature)=><li key={feature} className="flex gap-2.5 text-xs leading-5 text-slate-600"><span className="font-black text-emerald-500">✓</span>{feature}</li>)}
@@ -726,13 +726,13 @@ export function LandingPage() {
               </motion.article>
             ))}
           </div>
-          <p className="mt-8 text-center text-xs leading-6 text-slate-500">Les tarifs affichés concernent les modèles de cartes NFC. Les options et conditions de personnalisation seront précisées lors de la commande.</p>
+          <p className="mt-8 text-center text-xs leading-6 text-slate-500">{t("pricingNote")}</p>
         </div>
       </section>
 
       <section id="faq" className="px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
         <div className="mx-auto grid max-w-[1180px] gap-12 lg:grid-cols-[.8fr_1.2fr]">
-          <div><p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">Questions fréquentes</p><h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl">Vous souhaitez en savoir <span className="text-indigo-600">plus ?</span></h2><p className="mt-6 text-base leading-8 text-slate-500">Voici quelques réponses pour mieux comprendre le fonctionnement de TouchCard Business.</p><Link href="/register" className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-indigo-700 hover:text-indigo-900">{t("navCreate")} <Arrow /></Link></div>
+          <div><p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">{t("faqTitle")}</p><h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl">Vous souhaitez en savoir <span className="text-indigo-600">{t("faqSubtitle")}</span></h2><p className="mt-6 text-base leading-8 text-slate-500">{t("faqDesc")}</p><Link href="/register" className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-indigo-700 hover:text-indigo-900">{t("navCreate")} <Arrow /></Link></div>
           <div className="space-y-3">
             {[
               ["Qu'est-ce qu'une carte de visite digitale ?", "C'est un profil professionnel en ligne qui rassemble vos coordonnées, vos liens et vos informations. Vous pouvez le partager par QR code, lien ou carte NFC compatible."],
@@ -784,18 +784,18 @@ export function LandingPage() {
             className="relative z-10 mx-auto max-w-4xl"
           >
             <motion.div className="mx-auto mb-7 flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-300/30 bg-indigo-400/10 text-2xl text-indigo-200 shadow-[0_0_45px_rgba(129,140,248,.22)]" animate={reduceMotion ? undefined : { y: [0, -7, 0], rotate: [0, 4, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>✳</motion.div>
-            <p className="text-xs font-black uppercase tracking-[.24em] text-indigo-200">Le prochain échange peut tout changer</p>
+            <p className="text-xs font-black uppercase tracking-[.24em] text-indigo-200">{t("finalTitle")}</p>
             <h2 className="mt-6 text-4xl font-black leading-[1.08] tracking-[-.055em] sm:text-5xl lg:text-7xl">
-              Votre prochain contact<br className="hidden sm:block" /> commence <span className="bg-gradient-to-r from-cyan-200 via-indigo-200 to-fuchsia-300 bg-clip-text text-transparent">ici.</span>
+              Votre prochain contact<br className="hidden sm:block" /> commence <span className="bg-gradient-to-r from-cyan-200 via-indigo-200 to-fuchsia-300 bg-clip-text text-transparent">{t("finalLead")}</span>
             </h2>
-            <p className="mx-auto mt-7 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">Une identité qui vous ressemble. Un partage sans friction. Des relations professionnelles qui durent.</p>
+            <p className="mx-auto mt-7 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">{t("finalDesc")}</p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <motion.div whileHover={reduceMotion ? undefined : { scale: 1.045, y: -4 }} whileTap={reduceMotion ? undefined : { scale: .97 }}>
                 <Link href="/register" className="group/cta inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 px-8 py-4 text-sm font-extrabold text-white shadow-[0_12px_40px_rgba(99,102,241,.4)] transition-shadow hover:shadow-[0_16px_55px_rgba(168,85,247,.55)]">Créer mon compte <span className="text-lg transition-transform duration-300 group-hover/cta:translate-x-1 group-hover/cta:-translate-y-1"><Arrow /></span></Link>
               </motion.div>
-              <a href="#fonctionnement" className="rounded-2xl border border-white/15 bg-white/[.06] px-7 py-4 text-sm font-bold text-slate-200 backdrop-blur transition hover:border-white/30 hover:bg-white/10">Découvrir comment ça marche</a>
+              <a href="#fonctionnement" className="rounded-2xl border border-white/15 bg-white/[.06] px-7 py-4 text-sm font-bold text-slate-200 backdrop-blur transition hover:border-white/30 hover:bg-white/10">{t("howItWorks")}</a>
             </div>
-            <p className="mt-7 text-xs font-medium tracking-wide text-slate-400">Prêt en quelques minutes · Aucun téléchargement pour vos contacts</p>
+            <p className="mt-7 text-xs font-medium tracking-wide text-slate-400">{t("quickStart")}</p>
           </motion.div>
         </motion.div>
       </section>
@@ -804,14 +804,14 @@ export function LandingPage() {
         <div className="mx-auto grid max-w-[1440px] gap-12 px-5 py-16 sm:px-8 md:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:px-12 lg:py-20">
           <div>
             <Link href="/" className="inline-flex items-center gap-2.5"><img src="/brand/touchcard-mark.svg" alt="" className="h-11 w-11 object-contain" /><span className="text-xl font-black">Touch<span className="text-indigo-300">Card</span><span className="ml-2 text-[9px] font-extrabold tracking-[.18em] text-indigo-300">BUSINESS</span></span></Link>
-            <p className="mt-5 max-w-sm text-sm leading-7 text-slate-400">La plateforme qui connecte votre identité professionnelle, vos contacts et votre relation client.</p>
+            <p className="mt-5 max-w-sm text-sm leading-7 text-slate-400">{t("footerDesc")}</p>
             <Link href="/register" className="mt-7 inline-flex rounded-xl bg-indigo-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-400">{t("navCreate")} <Arrow /></Link>
           </div>
-          <div><h3 className="text-sm font-extrabold">Plateforme</h3><ul className="mt-5 space-y-3 text-sm text-slate-400"><li><a className="hover:text-white" href="#solutions">Solutions</a></li><li><a className="hover:text-white" href="#experience">Fonctionnalités</a></li><li><a className="hover:text-white" href="#demo">Démonstration</a></li><li><a className="hover:text-white" href="#tarifs">{t("navPricing")}</a></li></ul></div>
-          <div><h3 className="text-sm font-extrabold">Découvrir</h3><ul className="mt-5 space-y-3 text-sm text-slate-400"><li><a className="hover:text-white" href="#fonctionnement">{t("navHow")}</a></li><li><a className="hover:text-white" href="#faq">Questions fréquentes</a></li><li><Link className="hover:text-white" href="/register">Créer un compte</Link></li><li><Link className="hover:text-white" href="/login">{t("navLogin")}</Link></li></ul></div>
-          <div><h3 className="text-sm font-extrabold">Votre espace</h3><p className="mt-5 text-sm leading-7 text-slate-400">Prêt à donner une nouvelle dimension à vos échanges professionnels ?</p><Link href="/register" className="mt-4 inline-flex text-sm font-bold text-indigo-300 hover:text-white">Commencer maintenant ↗</Link></div>
+          <div><h3 className="text-sm font-extrabold">Plateforme</h3><ul className="mt-5 space-y-3 text-sm text-slate-400"><li><a className="hover:text-white" href="#solutions">Solutions</a></li><li><a className="hover:text-white" href="#experience">{t("footerFeatures")}</a></li><li><a className="hover:text-white" href="#demo">{t("footerDemo")}</a></li><li><a className="hover:text-white" href="#tarifs">{t("navPricing")}</a></li></ul></div>
+          <div><h3 className="text-sm font-extrabold">{t("footerDiscover")}</h3><ul className="mt-5 space-y-3 text-sm text-slate-400"><li><a className="hover:text-white" href="#fonctionnement">{t("navHow")}</a></li><li><a className="hover:text-white" href="#faq">{t("faqTitle")}</a></li><li><Link className="hover:text-white" href="/register">{t("footerSignup")}</Link></li><li><Link className="hover:text-white" href="/login">{t("navLogin")}</Link></li></ul></div>
+          <div><h3 className="text-sm font-extrabold">{t("footerWorkspace")}</h3><p className="mt-5 text-sm leading-7 text-slate-400">{t("footerCTA")}</p><Link href="/register" className="mt-4 inline-flex text-sm font-bold text-indigo-300 hover:text-white">{t("footerStart")}</Link></div>
         </div>
-        <div className="border-t border-white/10"><div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-5 py-6 text-xs text-slate-500 sm:px-8 md:flex-row md:items-center md:justify-between lg:px-12"><p>© 2026 TouchCard Business. Tous droits réservés.</p><p>Conçu pour connecter les opportunités.</p><div className="flex gap-5"><Link href="/login" className="hover:text-white">{t("navLogin")}</Link><Link href="/register" className="hover:text-white">Inscription</Link></div></div></div>
+        <div className="border-t border-white/10"><div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-5 py-6 text-xs text-slate-500 sm:px-8 md:flex-row md:items-center md:justify-between lg:px-12"><p>{t("copyright")}</p><p>{t("footerTagline")}</p><div className="flex gap-5"><Link href="/login" className="hover:text-white">{t("navLogin")}</Link><Link href="/register" className="hover:text-white">{t("signup")}</Link></div></div></div>
       </footer>
     </main>
   );
