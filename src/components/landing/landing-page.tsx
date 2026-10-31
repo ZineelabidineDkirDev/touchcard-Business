@@ -299,13 +299,13 @@ export function LandingPage() {
           <motion.div initial="hidden" animate="visible" variants={reveal} transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}>
             <div className="inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-white/[.06] px-4 py-2 text-[11px] font-extrabold uppercase tracking-[.16em] text-indigo-200 shadow-sm backdrop-blur">
               <span className="relative flex h-2 w-2"><span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60" /><span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" /></span>
-              La nouvelle génération de cartes professionnelles
+              {t("heroEyebrow")}
             </div>
             <h2 className="mt-8 max-w-3xl text-[clamp(3.25rem,4.5vw,4.4rem)] font-black leading-[.99] tracking-[-.065em] text-white">
-              Chaque rencontre peut devenir <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent">{t("heroLead")}</span>
+              {t("heroStart")} <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-500 bg-clip-text text-transparent">{t("heroLead")}</span>
             </h2>
             <p className="mt-8 max-w-xl text-lg leading-8 text-slate-300 sm:text-xl sm:leading-9">
-              Bien plus qu’une carte de visite. Créez votre identité digitale, partagez-la avec NFC ou QR code, développez vos contacts et fidélisez vos clients depuis une seule plateforme.
+              {t("heroDescription")}
             </p>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
               <Link href="/register" className="group inline-flex items-center justify-center gap-3 rounded-2xl border border-white/25 bg-gradient-to-r from-indigo-500/35 via-violet-500/30 to-fuchsia-500/25 px-7 py-[1.125rem] text-base font-bold text-white shadow-[0_12px_40px_-18px_rgba(99,102,241,.8)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-white/40 hover:from-indigo-500/55 hover:to-violet-500/45">
@@ -560,10 +560,10 @@ export function LandingPage() {
               <span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400 shadow-[0_0_12px_rgba(232,121,249,.9)]" /> {t("touchcardExperience")}
             </span>
             <h2 className="mt-7 text-4xl font-black leading-[1.04] tracking-[-.055em] sm:text-5xl lg:text-6xl">
-              De la rencontre à la <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">{t("journeyEnd")}</span>
+              {t("journeyTitle")} <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">{t("journeyEnd")}</span>
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-400 sm:text-lg">
-              Un geste. Une connexion. Une relation qui continue. Découvrez un parcours professionnel pensé pour être simple, rapide et mémorable.
+              {t("journeyIntro")}
             </p>
           </motion.div>
           <div className="relative mt-20">
@@ -600,7 +600,7 @@ export function LandingPage() {
             </div>
             <motion.div whileHover={reduceMotion?undefined:{y:-3,scale:1.025}} whileTap={reduceMotion?undefined:{scale:.97}}>
               <Link href="/register" className="group inline-flex items-center gap-4 rounded-xl bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 px-6 py-4 text-sm font-extrabold text-white shadow-[0_15px_40px_-15px_rgba(139,92,246,.8)] ring-1 ring-white/20 transition-shadow hover:shadow-[0_20px_50px_-15px_rgba(217,70,239,.65)]">
-                Créer mon espace <span className="transition-transform duration-300 group-hover:translate-x-1"><Arrow /></span>
+                {t("createWorkspaceCta")} <span className="transition-transform duration-300 group-hover:translate-x-1"><Arrow /></span>
               </Link>
             </motion.div>
           </motion.div>
@@ -792,7 +792,7 @@ export function LandingPage() {
             <motion.div className="mx-auto mb-7 flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-300/30 bg-indigo-400/10 text-2xl text-indigo-200 shadow-[0_0_45px_rgba(129,140,248,.22)]" animate={reduceMotion ? undefined : { y: [0, -7, 0], rotate: [0, 4, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>✳</motion.div>
             <p className="text-xs font-black uppercase tracking-[.24em] text-indigo-200">{t("finalTitle")}</p>
             <h2 className="mt-6 text-4xl font-black leading-[1.08] tracking-[-.055em] sm:text-5xl lg:text-7xl">
-              Votre prochain contact<br className="hidden sm:block" /> commence <span className="bg-gradient-to-r from-cyan-200 via-indigo-200 to-fuchsia-300 bg-clip-text text-transparent">{t("finalLead")}</span>
+              {t("finalTitle")}<br className="hidden sm:block" /> commence <span className="bg-gradient-to-r from-cyan-200 via-indigo-200 to-fuchsia-300 bg-clip-text text-transparent">{t("finalLead")}</span>
             </h2>
             <p className="mx-auto mt-7 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">{t("finalDesc")}</p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
