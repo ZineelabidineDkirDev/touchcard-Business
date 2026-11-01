@@ -401,7 +401,7 @@ export function LandingPage() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, scale: 0.94, x: 30 }} animate={{ opacity: 1, scale: 1, x: 0 }} transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }} className="py-8 lg:py-0">
-            <div className="mx-auto flex min-h-[420px] max-w-[560px] items-center justify-center px-4"><InteractiveNfcCard title="E-BUSINESS · NFC" size="hero" /></div>
+            <div className="mx-auto flex min-h-[420px] max-w-[560px] items-center justify-center px-4"><div className="h-[340px] w-full max-w-[430px]"><InteractiveNfcCard title="E-BUSINESS · NFC" size="hero" /></div></div>
           </motion.div>
         </div>
 
@@ -650,7 +650,7 @@ export function LandingPage() {
             <button type="button" aria-label="Précédent" onClick={() => setPricingIndex((v) => Math.max(0, v - 1))} className="h-11 w-11 rounded-full border border-indigo-200 bg-white text-indigo-700">←</button>
             <button type="button" aria-label="Suivant" onClick={() => setPricingIndex((v) => Math.min(1, v + 1))} className="h-11 w-11 rounded-full border border-indigo-200 bg-white text-indigo-700">→</button>
           </div>
-          <div className="mt-5 overflow-hidden" onMouseEnter={() => setPricingPaused(true)} onMouseLeave={() => setPricingPaused(false)}><div className="flex items-stretch gap-6 transition-transform duration-700 ease-in-out" style={{ transform: `translateX(-${pricingIndex * 34}%)` }}>
+          <div className="mt-5 overflow-hidden" onMouseEnter={() => setPricingPaused(true)} onMouseLeave={() => setPricingPaused(false)}><div className="flex items-stretch gap-6 transition-transform duration-700 ease-in-out" style={{ transform: `translateX(-${pricingIndex * 25}%)` }}>
             {[
               {name:t("eBusinessName"),type:t("eBusinessType"),desc:t("eBusinessDesc"),price:"399 DH",tone:"metal",number:"01",features:["Profil professionnel complet","Coordonnées, liens et services digitaux","Partage NFC et QR code"]},
               {name:t("cardContactName"),type:t("cardContactType"),desc:t("cardContactDesc"),price:"149 DH",tone:"metal",number:"02",features:[t("contactDetails"),t("quickSharing"),t("easySaving")]},
