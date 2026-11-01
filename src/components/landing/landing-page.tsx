@@ -91,6 +91,7 @@ function InteractiveNfcCard({ title, size = "pricing" }: { title: string; size?:
       <motion.div
         className="h-full w-full [transform-style:preserve-3d]"
         animate={{ rotateX: tilt.x, rotateY: tilt.y }}
+        whileHover={{ scale: 1.035 }}
         transition={{ type: "spring", stiffness: 180, damping: 18, mass: 0.6 }}
       >
         <motion.div
@@ -268,11 +269,27 @@ export function LandingPage() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [pricingIndex, setPricingIndex] = useState(0);
   const [pricingPaused, setPricingPaused] = useState(false);
+  const [pricingSlidesToShow, setPricingSlidesToShow] = useState(3);
+  const pricingMaxIndex = Math.max(0, 4 - pricingSlidesToShow);
+
+  useEffect(() => {
+    const updateSlidesToShow = () => {
+      const nextCount = window.innerWidth >= 1280 ? 3 : window.innerWidth >= 640 ? 2 : 1;
+      setPricingSlidesToShow(nextCount);
+      setPricingIndex((current) => Math.min(current, Math.max(0, 4 - nextCount)));
+    };
+    updateSlidesToShow();
+    window.addEventListener("resize", updateSlidesToShow, { passive: true });
+    return () => window.removeEventListener("resize", updateSlidesToShow);
+  }, []);
+
   useEffect(() => {
     if (pricingPaused || reduceMotion) return;
-    const timer = window.setInterval(() => setPricingIndex((current) => (current + 1) % 2), 4200);
+    const timer = window.setInterval(() => {
+      setPricingIndex((current) => current >= pricingMaxIndex ? 0 : current + 1);
+    }, 4200);
     return () => window.clearInterval(timer);
-  }, [pricingPaused, reduceMotion]);
+  }, [pricingPaused, pricingMaxIndex, reduceMotion]);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 24);
@@ -648,7 +665,7 @@ export function LandingPage() {
           </div>
           <div className="mt-14 flex justify-end gap-3">
             <button type="button" aria-label="Précédent" onClick={() => setPricingIndex((v) => Math.max(0, v - 1))} className="h-11 w-11 rounded-full border border-indigo-200 bg-white text-indigo-700">←</button>
-            <button type="button" aria-label="Suivant" onClick={() => setPricingIndex((v) => Math.min(1, v + 1))} className="h-11 w-11 rounded-full border border-indigo-200 bg-white text-indigo-700">→</button>
+            <button type="button" aria-label="Suivant" onClick={() => setPricingIndex((v) => Math.min(pricingMaxIndex, v + 1))} className="h-11 w-11 rounded-full border border-indigo-200 bg-white text-indigo-700">→</button>
           </div>
           <div className="mt-5 overflow-hidden" onMouseEnter={() => setPricingPaused(true)} onMouseLeave={() => setPricingPaused(false)}><div className="flex items-stretch gap-6 transition-transform duration-700 ease-in-out" style={{ transform: `translateX(-${pricingIndex * 25}%)` }}>
             {[
@@ -657,7 +674,7 @@ export function LandingPage() {
               {name:t("cardGoogleName"),type:t("cardGoogleType"),desc:t("cardGoogleDesc"),price:"199 DH",tone:"google",number:"03",features:[t("googlePageAccess"),t("oneTapSharing"),t("reviewRequests")]},
               {name:t("customCardName"),type:t("cardCustomType"),desc:t("customCardDescription"),price:"499 DH",tone:"custom",number:"04",features:[t("customLogoDesign"),t("tailoredDigitalService"),t("businessTailoredExperience"),t("customNfcCard")]}
             ].map((card,index) => (
-              <motion.article key={card.name} className="w-full shrink-0 sm:w-[calc(50%-12px)] xl:w-[calc(33.333%-16px)]">
+              <motion.article key={card.name} whileHover={reduceMotion ? undefined : { y: -8 }} transition={{ type: "spring", stiffness: 260, damping: 22 }} className="w-full shrink-0 sm:w-[calc(50%-12px)] xl:w-[calc(33.333%-16px)]">
                 <div className="mb-6 h-[190px] w-full"><InteractiveNfcCard title={card.name} size="pricing" /></div>
                 <p className="text-[9px] font-extrabold uppercase tracking-widest text-indigo-600">{card.type}</p><h3 className="mt-2 text-xl font-black text-[#11132d]">{card.name}</h3><p className="mt-3 min-h-[90px] text-sm leading-6 text-slate-500">{card.desc}</p><p className="mt-4 text-3xl font-black text-[#11132d]">{card.price}</p>
                 <ul className="mt-4 space-y-2">{card.features.map((feature) => <li key={feature} className="text-xs text-slate-600">✓ {feature}</li>)}</ul>
