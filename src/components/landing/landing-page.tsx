@@ -594,49 +594,30 @@ export function LandingPage() {
             <h2 className="mt-5 text-4xl font-black tracking-[-.045em] text-[#11132d] sm:text-5xl">{t("pricingTitle")} <span className="text-indigo-600">{t("chooseCard")}</span></h2>
             <p className="mt-5 text-lg leading-8 text-slate-500">{t("cardPriceDesc")}</p>
           </div>
-          <div className="mt-16 grid items-stretch gap-7 sm:grid-cols-2 xl:grid-cols-5">
+          <div className="mt-14 flex justify-end gap-3">
+            <button type="button" aria-label="Précédent" onClick={() => setPricingIndex((v) => Math.max(0, v - 1))} className="h-11 w-11 rounded-full border border-indigo-200 bg-white text-indigo-700">←</button>
+            <button type="button" aria-label="Suivant" onClick={() => setPricingIndex((v) => Math.min(1, v + 1))} className="h-11 w-11 rounded-full border border-indigo-200 bg-white text-indigo-700">→</button>
+          </div>
+          <div className="mt-5 overflow-hidden"><div className="flex items-stretch gap-6 transition-transform duration-500" style={{ transform: `translateX(-${pricingIndex * 34}%)` }}>
             {[
-              {name:"Business",type:t("cardBusinessType"),desc:t("cardBusinessDesc"),price:"399 DH",tone:"metal",number:"01",features:["Profil professionnel complet",t("contactDetailsLinks"),"Partage NFC et QR code"]},
-              {name:"Contact",type:t("cardContactType"),desc:t("cardContactDesc"),price:"149 DH",tone:"metal",number:"02",features:[t("contactDetails"),t("quickSharing"),t("easySaving")]},
-              {name:"E-Service",type:t("cardServiceType"),desc:t("cardServiceDesc"),price:"399 DH",tone:"metal",number:"03",features:[t("serviceAccess"),t("customLinks"),t("nfcQrSharing")]},
-              {name:"Avis Google",type:t("cardGoogleType"),desc:t("cardGoogleDesc"),price:"199 DH",tone:"google",number:"04",features:[t("googlePageAccess"),t("oneTapSharing"),t("reviewRequests")]},
-              {name:t("customCardName"),type:t("cardCustomType"),desc:t("customCardDescription"),price:"499 DH",tone:"custom",number:"05",features:[t("customLogoDesign"),t("tailoredDigitalService"),t("businessTailoredExperience"),t("customNfcCard")]}
+              {name:"E-Business",type:"Carte professionnelle tout-en-un",desc:"Carte de visite et services digitaux réunis : profil, coordonnées, liens et prestations.",price:"399 DH",tone:"metal",number:"01",features:["Profil professionnel complet","Coordonnées, liens et services digitaux","Partage NFC et QR code"]},
+              {name:t("cardContactName"),type:t("cardContactType"),desc:t("cardContactDesc"),price:"149 DH",tone:"metal",number:"02",features:[t("contactDetails"),t("quickSharing"),t("easySaving")]},
+              {name:t("cardGoogleName"),type:t("cardGoogleType"),desc:t("cardGoogleDesc"),price:"199 DH",tone:"google",number:"03",features:[t("googlePageAccess"),t("oneTapSharing"),t("reviewRequests")]},
+              {name:t("customCardName"),type:t("cardCustomType"),desc:t("customCardDescription"),price:"499 DH",tone:"custom",number:"04",features:[t("customLogoDesign"),t("tailoredDigitalService"),t("businessTailoredExperience"),t("customNfcCard")]}
             ].map((card,index) => (
-              <motion.article key={card.name} initial={{opacity:0,y:28}} whileInView={{opacity:1,y:0}} viewport={{once:true,amount:.12}} transition={{duration:.55,delay:index*.06}} className="group flex flex-col rounded-[1.8rem] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_-35px_rgba(30,41,90,.35)] transition duration-300 hover:-translate-y-2 hover:shadow-[0_28px_60px_-32px_rgba(79,70,229,.35)] sm:p-6">
-                <div className="relative mx-auto mb-7 flex h-[172px] w-full items-center justify-center [perspective:1000px]">
-                  <motion.div
-                    className="absolute bottom-1 h-7 w-[78%] rounded-[50%] bg-indigo-950/20 blur-xl"
-                    animate={{scaleX:[1,.88,1],opacity:[.45,.25,.45]}}
-                    transition={{duration:4,repeat:Infinity,ease:"easeInOut",delay:index*.2}}
-                  />
-                  <motion.div
-                    className={`relative flex h-[132px] w-full max-w-[220px] flex-col items-center justify-center overflow-hidden rounded-[1.15rem] border p-4 text-white shadow-[0_24px_38px_-18px_rgba(15,23,42,.55)] ${card.tone==="metal"?"border-white/25 bg-gradient-to-br from-[#34363c] via-[#101114] to-[#25272c]":card.tone==="google"?"border-white/30 bg-gradient-to-br from-[#1b263e] via-[#243d70] to-[#111827]":"border-white/30 bg-gradient-to-br from-[#43315f] via-[#211a35] to-[#11101c]"}`}
-                    animate={{y:[0,-7,0],rotateY:[-13,-7,-13],rotateX:[8,4,8],rotateZ:[-2,0,-2]}}
-                    transition={{duration:5+index*.45,repeat:Infinity,ease:"easeInOut",delay:index*.18}}
-                    whileHover={{scale:1.07,rotateY:0,rotateX:0,rotateZ:0}}
-                  >
-                    <div className="pointer-events-none absolute inset-0 opacity-70" style={{backgroundImage:"linear-gradient(125deg,rgba(255,255,255,.18),transparent 34%,transparent 68%,rgba(255,255,255,.08))"}} />
-                    <img src="/brand/touchcard-mark.svg" alt="Logo TouchCard" className="relative h-12 w-12 object-contain drop-shadow-[0_4px_12px_rgba(129,140,248,.45)]" />
-                    <span className="relative mt-2 text-[9px] font-extrabold uppercase tracking-[.22em]">{card.name}</span>
-                    <span className="absolute bottom-2 right-3 text-[6px] font-bold tracking-[.2em] text-white/45">NFC</span>
+              <motion.article key={card.name} className="w-full shrink-0 sm:w-[calc(50%-12px)] xl:w-[calc(33.333%-16px)]">
+                <button type="button" onClick={() => setFlippedPricingCard(flippedPricingCard === index ? -1 : index)} className="mb-6 block h-[190px] w-full [perspective:1000px]" aria-label="Retourner la carte pour voir le QR code">
+                  <motion.div className="relative h-full w-full [transform-style:preserve-3d]" animate={{rotateY:flippedPricingCard === index ? 180 : 0}} transition={{duration:.6}}>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-white/20 bg-gradient-to-br from-[#34315f] via-[#171936] to-[#090b1b] text-white [backface-visibility:hidden]"><img src="/brand/touchcard-mark.svg" alt="TouchCard" className="h-12 w-12"/><span className="mt-3 text-xs font-black uppercase tracking-widest">{card.name}</span></div>
+                    <div className="absolute inset-0 flex flex-col items-center justify-between rounded-2xl border border-indigo-200/30 bg-[#11132d] p-3 text-white [backface-visibility:hidden] [transform:rotateY(180deg)]"><div className="flex w-full items-center justify-between text-[9px] text-indigo-200"><span>APERÇU QR</span><img src="/brand/touchcard-mark.svg" alt="" className="h-7 w-7"/></div><div className="scale-[.68]"><QrPattern /></div><span className="text-[8px] text-slate-300">QR de démonstration à connecter au profil</span></div>
                   </motion.div>
-                </div>
-                <div className="flex items-start justify-between gap-2">
-                  <div><p className="text-[9px] font-extrabold uppercase tracking-[.14em] text-indigo-600">{card.type}</p><h3 className="mt-2 text-xl font-black tracking-tight text-[#11132d]">{card.name}</h3></div>
-                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[9px] font-black text-slate-500">{card.number}</span>
-                </div>
-                <p className="mt-3 min-h-[88px] text-sm leading-6 text-slate-500">{card.desc}</p>
-                <div className="mt-4 border-y border-slate-100 py-5">
-                  <p className="text-3xl font-black tracking-tight text-[#11132d]">{card.price}</p>
-                  <p className="mt-1 text-[10px] font-medium text-slate-400">{t("cardPrice")}</p>
-                </div>
-                <ul className="mt-5 flex-1 space-y-3">
-                  {card.features.map((feature)=><li key={feature} className="flex gap-2.5 text-xs leading-5 text-slate-600"><span className="font-black text-emerald-500">✓</span>{feature}</li>)}
-                </ul>
-                <Link href="/register" className="mt-7 inline-flex items-center justify-center gap-2 rounded-xl border border-indigo-400/50 bg-gradient-to-r from-indigo-500/10 via-violet-500/10 to-fuchsia-500/10 px-4 py-3.5 text-xs font-extrabold text-indigo-700 shadow-[inset_0_1px_0_rgba(255,255,255,.7)] backdrop-blur-md transition duration-300 hover:-translate-y-0.5 hover:border-violet-400/70 hover:from-indigo-500/20 hover:via-violet-500/20 hover:to-fuchsia-500/20 hover:shadow-[0_10px_28px_-16px_rgba(124,58,237,.55)]">Choisir {card.name} <Arrow /></Link>
+                </button>
+                <p className="text-[9px] font-extrabold uppercase tracking-widest text-indigo-600">{card.type}</p><h3 className="mt-2 text-xl font-black text-[#11132d]">{card.name}</h3><p className="mt-3 min-h-[90px] text-sm leading-6 text-slate-500">{card.desc}</p><p className="mt-4 text-3xl font-black text-[#11132d]">{card.price}</p>
+                <ul className="mt-4 space-y-2">{card.features.map((feature) => <li key={feature} className="text-xs text-slate-600">✓ {feature}</li>)}</ul>
+                <Link href="/register" className="mt-6 inline-flex w-full justify-center rounded-xl border border-indigo-300 bg-indigo-50 px-4 py-3 text-xs font-extrabold text-indigo-700">Choisir {card.name} <Arrow /></Link>
               </motion.article>
             ))}
-          </div>
+          </div></div>
           <p className="mt-8 text-center text-xs leading-6 text-slate-500">{t("pricingNote")}</p>
         </div>
       </section>
