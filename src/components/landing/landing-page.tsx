@@ -66,6 +66,53 @@ function QrPattern() {
   );
 }
 
+function InteractiveNfcCard({ title, size = "pricing" }: { title: string; size?: "pricing" | "hero" }) {
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [flipped, setFlipped] = useState(false);
+  const handleMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - rect.left) / rect.width - 0.5;
+    const y = (event.clientY - rect.top) / rect.height - 0.5;
+    setTilt({ x: -y * 20, y: x * 24 });
+  };
+  const hero = size === "hero";
+  return (
+    <div
+      className={`h-full w-full [perspective:1200px] ${hero ? "max-w-[430px]" : ""}`}
+      onMouseMove={handleMove}
+      onMouseEnter={() => setFlipped(true)}
+      onMouseLeave={() => { setTilt({ x: 0, y: 0 }); setFlipped(false); }}
+      onClick={() => setFlipped((value) => !value)}
+      role="button"
+      tabIndex={0}
+      aria-label={`Carte NFC ${title}, survoler pour afficher le QR code`}
+      onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setFlipped((value) => !value); }}
+    >
+      <motion.div
+        className="h-full w-full [transform-style:preserve-3d]"
+        animate={{ rotateX: tilt.x, rotateY: tilt.y }}
+        transition={{ type: "spring", stiffness: 180, damping: 18, mass: 0.6 }}
+      >
+        <motion.div
+          className="relative h-full w-full [transform-style:preserve-3d]"
+          animate={{ rotateY: flipped ? 180 : 0 }}
+          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <div className={`absolute inset-0 flex flex-col justify-between overflow-hidden rounded-[1.7rem] border border-white/20 bg-gradient-to-br from-[#45417c] via-[#171936] to-[#080a19] text-white shadow-[0_30px_70px_-25px_rgba(79,70,229,.7)] [backface-visibility:hidden] ${hero ? "p-8 sm:p-10" : "items-center p-5 text-center"}`}>
+            <div className="flex items-center justify-between"><img src="/brand/touchcard-mark.svg" alt="TouchCard" className={hero ? "h-12 w-12" : "h-9 w-9"}/><span className="text-[10px] font-bold tracking-[.18em] text-indigo-200">{hero ? "E-BUSINESS · NFC" : "TOUCHCARD · NFC"}</span></div>
+            <div><h3 className={hero ? "text-3xl font-black sm:text-4xl" : "text-lg font-black"}>{hero ? "Votre identité." : title}</h3>{hero && <p className="mt-2 text-2xl font-bold text-indigo-200">Tous vos services.</p>}<div className="mt-6 h-1.5 w-2/3 rounded-full bg-white/30"/><p className="mt-4 text-[10px] font-semibold tracking-[.2em] text-white/55">TAP · SCAN · CONNECT</p></div>
+          </div>
+          <div className="absolute inset-0 flex flex-col items-center justify-between rounded-[1.7rem] border border-indigo-200/30 bg-gradient-to-br from-[#171936] to-[#080a19] p-4 text-white shadow-[0_30px_70px_-25px_rgba(79,70,229,.7)] [backface-visibility:hidden] [transform:rotateY(180deg)]">
+            <div className="flex w-full items-center justify-between"><span className="text-[10px] font-bold tracking-[.2em] text-indigo-200">SCAN · CONNECT</span><img src="/brand/touchcard-mark.svg" alt="TouchCard" className="h-7 w-7"/></div>
+            <div className={hero ? "scale-100" : "scale-[.82]"}><QrPattern /></div>
+            <span className="text-[9px] text-slate-300">QR de démonstration</span>
+          </div>
+        </motion.div>
+      </motion.div>
+    </div>
+  );
+}
+
 function DashboardPreview() {
   const { t } = useI18n();
   return (
@@ -220,7 +267,12 @@ export function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [pricingIndex, setPricingIndex] = useState(0);
-  const [flippedPricingCard, setFlippedPricingCard] = useState(-1);
+  const [pricingPaused, setPricingPaused] = useState(false);
+  useEffect(() => {
+    if (pricingPaused || reduceMotion) return;
+    const timer = window.setInterval(() => setPricingIndex((current) => (current + 1) % 2), 4200);
+    return () => window.clearInterval(timer);
+  }, [pricingPaused, reduceMotion]);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 24);
@@ -349,7 +401,7 @@ export function LandingPage() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, scale: 0.94, x: 30 }} animate={{ opacity: 1, scale: 1, x: 0 }} transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }} className="py-8 lg:py-0">
-            <div className="mx-auto flex min-h-[420px] max-w-[560px] items-center justify-center"><div className="w-full max-w-[430px] rounded-[2rem] border border-white/20 bg-gradient-to-br from-[#34315f] via-[#171936] to-[#090b1b] p-8 shadow-2xl shadow-indigo-950/50 [transform:perspective(1000px)_rotateY(-14deg)_rotateX(7deg)]"><div className="flex items-center justify-between"><img src="/brand/touchcard-mark.svg" alt="TouchCard" className="h-12 w-12"/><span className="text-xs font-bold tracking-widest text-indigo-200">E-BUSINESS · NFC</span></div><h3 className="mt-14 text-3xl font-black text-white">Votre identité.</h3><p className="mt-2 text-2xl font-bold text-indigo-200">Tous vos services.</p><div className="mt-8 h-1.5 w-2/3 rounded-full bg-white/30"/><p className="mt-5 text-xs tracking-widest text-white/50">TAP · SCAN · CONNECT</p></div></div>
+            <div className="mx-auto flex min-h-[420px] max-w-[560px] items-center justify-center px-4"><InteractiveNfcCard title="E-BUSINESS · NFC" size="hero" /></div>
           </motion.div>
         </div>
 
@@ -598,7 +650,7 @@ export function LandingPage() {
             <button type="button" aria-label="Précédent" onClick={() => setPricingIndex((v) => Math.max(0, v - 1))} className="h-11 w-11 rounded-full border border-indigo-200 bg-white text-indigo-700">←</button>
             <button type="button" aria-label="Suivant" onClick={() => setPricingIndex((v) => Math.min(1, v + 1))} className="h-11 w-11 rounded-full border border-indigo-200 bg-white text-indigo-700">→</button>
           </div>
-          <div className="mt-5 overflow-hidden"><div className="flex items-stretch gap-6 transition-transform duration-500" style={{ transform: `translateX(-${pricingIndex * 34}%)` }}>
+          <div className="mt-5 overflow-hidden" onMouseEnter={() => setPricingPaused(true)} onMouseLeave={() => setPricingPaused(false)}><div className="flex items-stretch gap-6 transition-transform duration-700 ease-in-out" style={{ transform: `translateX(-${pricingIndex * 34}%)` }}>
             {[
               {name:t("eBusinessName"),type:t("eBusinessType"),desc:t("eBusinessDesc"),price:"399 DH",tone:"metal",number:"01",features:["Profil professionnel complet","Coordonnées, liens et services digitaux","Partage NFC et QR code"]},
               {name:t("cardContactName"),type:t("cardContactType"),desc:t("cardContactDesc"),price:"149 DH",tone:"metal",number:"02",features:[t("contactDetails"),t("quickSharing"),t("easySaving")]},
@@ -606,12 +658,7 @@ export function LandingPage() {
               {name:t("customCardName"),type:t("cardCustomType"),desc:t("customCardDescription"),price:"499 DH",tone:"custom",number:"04",features:[t("customLogoDesign"),t("tailoredDigitalService"),t("businessTailoredExperience"),t("customNfcCard")]}
             ].map((card,index) => (
               <motion.article key={card.name} className="w-full shrink-0 sm:w-[calc(50%-12px)] xl:w-[calc(33.333%-16px)]">
-                <button type="button" onClick={() => setFlippedPricingCard(flippedPricingCard === index ? -1 : index)} className="mb-6 block h-[190px] w-full [perspective:1000px]" aria-label="Retourner la carte pour voir le QR code">
-                  <motion.div className="relative h-full w-full [transform-style:preserve-3d]" animate={{rotateY:flippedPricingCard === index ? 180 : 0}} transition={{duration:.6}}>
-                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl border border-white/20 bg-gradient-to-br from-[#34315f] via-[#171936] to-[#090b1b] text-white [backface-visibility:hidden]"><img src="/brand/touchcard-mark.svg" alt="TouchCard" className="h-12 w-12"/><span className="mt-3 text-xs font-black uppercase tracking-widest">{card.name}</span></div>
-                    <div className="absolute inset-0 flex flex-col items-center justify-between rounded-2xl border border-indigo-200/30 bg-[#11132d] p-3 text-white [backface-visibility:hidden] [transform:rotateY(180deg)]"><div className="flex w-full items-center justify-between text-[9px] text-indigo-200"><span>APERÇU QR</span><img src="/brand/touchcard-mark.svg" alt="" className="h-7 w-7"/></div><div className="scale-[.68]"><QrPattern /></div><span className="text-[8px] text-slate-300">QR de démonstration à connecter au profil</span></div>
-                  </motion.div>
-                </button>
+                <div className="mb-6 h-[190px] w-full"><InteractiveNfcCard title={card.name} size="pricing" /></div>
                 <p className="text-[9px] font-extrabold uppercase tracking-widest text-indigo-600">{card.type}</p><h3 className="mt-2 text-xl font-black text-[#11132d]">{card.name}</h3><p className="mt-3 min-h-[90px] text-sm leading-6 text-slate-500">{card.desc}</p><p className="mt-4 text-3xl font-black text-[#11132d]">{card.price}</p>
                 <ul className="mt-4 space-y-2">{card.features.map((feature) => <li key={feature} className="text-xs text-slate-600">✓ {feature}</li>)}</ul>
                 <Link href="/register" className="mt-6 inline-flex w-full justify-center rounded-xl border border-indigo-300 bg-indigo-50 px-4 py-3 text-xs font-extrabold text-indigo-700">Choisir {card.name} <Arrow /></Link>
