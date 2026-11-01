@@ -219,6 +219,8 @@ export function LandingPage() {
   const reduceMotion = useReducedMotion();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [pricingIndex, setPricingIndex] = useState(0);
+  const [flippedPricingCard, setFlippedPricingCard] = useState(-1);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 24);
@@ -243,7 +245,7 @@ export function LandingPage() {
               <summary className="flex cursor-pointer list-none items-center gap-2 transition hover:text-indigo-600 [&::-webkit-details-marker]:hidden">{t("navSolutions")} <span className="text-[10px] transition group-open:rotate-180">⌄</span></summary>
               <div className="absolute left-0 top-full z-50 mt-4 w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-slate-950/10">
                 <a className="block rounded-xl px-4 py-3 hover:bg-indigo-50 hover:text-indigo-700" href="#solutions"><span className="block text-sm font-bold">{t("navFeatures")}</span><span className="mt-1 block text-xs font-normal text-slate-500">{t("allToolsTag")}</span></a>
-                <a className="block rounded-xl px-4 py-3 hover:bg-indigo-50 hover:text-indigo-700" href="#secteurs"><span className="block text-sm font-bold">{t("navBySector")}</span><span className="mt-1 block text-xs font-normal text-slate-500">{t("navSectorDesc")}</span></a>
+                <a className="block rounded-xl px-4 py-3 hover:bg-indigo-50 hover:text-indigo-700" href="#tarifs"><span className="block text-sm font-bold">{t("navBySector")}</span><span className="mt-1 block text-xs font-normal text-slate-500">{t("navSectorDesc")}</span></a>
               </div>
             </details>
             <a className="transition hover:text-indigo-600" href="#experience">{t("navPlatform")}</a>
@@ -347,101 +349,10 @@ export function LandingPage() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, scale: 0.94, x: 30 }} animate={{ opacity: 1, scale: 1, x: 0 }} transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }} className="py-8 lg:py-0">
-            <DashboardPreview />
+            <div className="mx-auto flex min-h-[420px] max-w-[560px] items-center justify-center"><div className="w-full max-w-[430px] rounded-[2rem] border border-white/20 bg-gradient-to-br from-[#34315f] via-[#171936] to-[#090b1b] p-8 shadow-2xl shadow-indigo-950/50 [transform:perspective(1000px)_rotateY(-14deg)_rotateX(7deg)]"><div className="flex items-center justify-between"><img src="/brand/touchcard-mark.svg" alt="TouchCard" className="h-12 w-12"/><span className="text-xs font-bold tracking-widest text-indigo-200">E-BUSINESS · NFC</span></div><h3 className="mt-14 text-3xl font-black text-white">Votre identité.</h3><p className="mt-2 text-2xl font-bold text-indigo-200">Tous vos services.</p><div className="mt-8 h-1.5 w-2/3 rounded-full bg-white/30"/><p className="mt-5 text-xs tracking-widest text-white/50">TAP · SCAN · CONNECT</p></div></div>
           </motion.div>
         </div>
-        <div className="relative z-10 border-t border-white/10 bg-gradient-to-r from-[#0c1025] via-[#15143a] to-[#0c1025]">
-          <div className="mx-auto grid max-w-[1440px] grid-cols-1 gap-3 px-5 py-8 sm:grid-cols-2 sm:px-8 lg:grid-cols-4 lg:px-12">
-            {[
-              ["01", t("identityDigital"), t("identityUpdated"), "identity"],
-              ["02", t("instantShare"), t("nfcTapContact"), "nfc"],
-              ["03", t("organizedContacts"), t("trackedOpportunity"), "contacts"],
-              ["04", t("lastingRelationship"), t("buildLoyalty"), "relationship"],
-            ].map(([n, label, detail, symbol], index) => (
-              <motion.div key={n} initial={{ opacity: 0, y: 22 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .4 }} transition={{ duration: .55, delay: index * .1 }} whileHover={reduceMotion ? undefined : { y: -6 }} className="group relative flex min-h-[265px] flex-col items-start overflow-hidden rounded-2xl border border-white/10 bg-transparent p-6 sm:p-7">
-                <div aria-hidden="true" className="pointer-events-none absolute -left-8 top-0 z-0 h-[170px] w-[48%] overflow-hidden text-transparent transition duration-500 group-hover:scale-105 sm:-left-10 sm:h-[180px]">
-                  <svg viewBox="0 0 120 120" preserveAspectRatio="xMidYMid meet" className="h-full w-full" fill="none" stroke={`url(#feature-icon-gradient-${n})`} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                    <defs><linearGradient id={`feature-icon-gradient-${n}`} x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stopColor="#67e8f9"/><stop offset="52%" stopColor="#818cf8"/><stop offset="100%" stopColor="#e879f9"/></linearGradient></defs>
-                    {symbol === "identity" && <><rect x="19" y="27" width="82" height="66" rx="10"/><circle cx="43" cy="51" r="10"/><path d="M28 78c3-10 27-10 30 0M69 47h19M69 61h19M69 75h12"/></>}
-                    {symbol === "nfc" && <><rect x="43" y="17" width="34" height="86" rx="8"/><path d="M55 91h10M34 42c-8 10-8 26 0 36M86 42c8 10 8 26 0 36M24 31c-15 17-15 41 0 58M96 31c15 17 15 41 0 58"/></>}
-                    {symbol === "contacts" && <><circle cx="60" cy="39" r="13"/><circle cx="28" cy="49" r="9"/><circle cx="92" cy="49" r="9"/><path d="M35 94c2-19 13-29 25-29s23 10 25 29M8 91c2-14 9-22 20-22 5 0 9 2 13 6M112 91c-2-14-9-22-20-22-5 0-9 2-13 6"/></>}
-                    {symbol === "relationship" && <><path d="M15 48l22-20 22 17-16 17-28-14zM105 48L83 28 61 45l16 17 28-14z"/><path d="M39 62l18 18c3 3 8 3 11 0l14-14M48 71l-7 8c-3 3-3 8 0 11s8 3 11 0l5-5M61 80l-5 5c-3 3-3 8 0 11s8 3 11 0l7-7M75 74l-4 4c-3 3-3 8 0 11s8 3 11 0l9-10M37 28l-9-9M83 28l9-9"/></>}
-                  </svg>
-                </div>
-                <div aria-hidden="true" className="mb-5 h-28 w-28 shrink-0 sm:h-32 sm:w-32" />
-                <span className="text-[10px] font-black tracking-[.2em] text-indigo-300/70">{n}</span>
-                <h3 className="mt-2 text-base font-extrabold leading-snug text-white sm:text-lg">{label}</h3>
-                <p className="mt-3 text-sm leading-6 text-slate-300">{detail}</p>
-                <motion.div className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400" initial={{ width: "0%" }} whileInView={{ width: "100%" }} viewport={{ once: true }} transition={{ duration: 1, delay: .2 + index * .12 }} />
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      <section id="chiffres" className="relative isolate overflow-hidden bg-[#090b1b] px-5 py-24 text-white sm:px-8 lg:px-12 lg:py-32">
-        <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute -left-40 top-0 h-96 w-96 rounded-full bg-indigo-600/20 blur-[120px]" />
-          <div className="absolute -right-40 bottom-0 h-96 w-96 rounded-full bg-fuchsia-600/15 blur-[120px]" />
-          <div className="absolute inset-0 opacity-[.07]" style={{ backgroundImage: "radial-gradient(#a5b4fc 1px, transparent 1px)", backgroundSize: "26px 26px" }} />
-        </div>
-        <div className="relative mx-auto max-w-[1440px]">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: .25 }} variants={reveal} className="mx-auto max-w-3xl text-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-white/[.06] px-4 py-2 text-[10px] font-extrabold uppercase tracking-[.2em] text-indigo-200"><span className="h-1.5 w-1.5 rounded-full bg-emerald-400" /> {t("impactEyebrow")}</span>
-            <h2 className="mt-6 text-4xl font-black tracking-[-.05em] sm:text-5xl lg:text-6xl">{t("impactTitle")} <span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">{t("impactSubtitle")}</span></h2>
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-slate-400 sm:text-lg">{t("impactDesc")}</p>
-          </motion.div>
-          <div className="mt-16 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {[
-              ["Utilisateurs actifs", t("profilesUsing"), "01", "◎"],
-              [t("digitalCardsCreated"), t("nfcProfilesConfigured"), "02", "▣"],
-              [t("interactionsRecorded"), t("profileActivityStats"), "03", "↗"],
-              [t("contactsCollected"), t("newNetworkContacts"), "04", "✳"],
-            ].map(([label, description, number, symbol], index) => (
-              <motion.article key={number} initial={{ opacity: 0, y: 28, scale: .97 }} whileInView={{ opacity: 1, y: 0, scale: 1 }} viewport={{ once: true, amount: .25 }} transition={{ duration: .65, delay: index * .1 }} whileHover={reduceMotion ? undefined : { y: -7 }} className="group relative overflow-hidden rounded-[1.7rem] border border-white/10 bg-gradient-to-br from-white/[.09] to-white/[.025] p-7 shadow-[0_25px_70px_-45px_rgba(99,102,241,.5)] backdrop-blur-xl">
-                <div className="absolute -right-12 -top-12 h-36 w-36 rounded-full bg-indigo-500/10 blur-3xl transition-colors group-hover:bg-fuchsia-500/20" />
-                <div className="relative flex items-center justify-between"><span className="text-[10px] font-black tracking-[.2em] text-indigo-300">{number}</span><span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-indigo-300/20 bg-indigo-400/10 text-xl text-indigo-200">{symbol}</span></div>
-                <p className="relative mt-8 text-4xl font-black tracking-tight text-white">—</p>
-                <h3 className="relative mt-3 text-base font-extrabold text-white">{label}</h3>
-                <p className="relative mt-2 min-h-10 text-xs leading-5 text-slate-400">{description}</p>
-                <div className="relative mt-6 flex items-center gap-2 border-t border-white/10 pt-4 text-[10px] font-bold uppercase tracking-[.12em] text-slate-500"><span className="h-1.5 w-1.5 rounded-full bg-amber-400" /> {t("metricComingSoon")}</div>
-              </motion.article>
-            ))}
-          </div>
-          <p className="mt-7 text-center text-xs text-slate-500">{t("metricNote")}</p>
-        </div>
-      </section>
-
-      <section id="solutions" className="relative isolate overflow-hidden bg-[#0b0d20] px-5 py-24 text-white sm:px-8 lg:px-12 lg:py-32">
-        <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute -right-40 top-0 h-[34rem] w-[34rem] rounded-full bg-indigo-600/15 blur-[120px]" />
-          <div className="absolute -bottom-48 -left-32 h-[30rem] w-[30rem] rounded-full bg-fuchsia-600/10 blur-[120px]" />
-          <div className="absolute inset-0 opacity-[.08]" style={{ backgroundImage: "linear-gradient(rgba(165,180,252,.35) 1px, transparent 1px), linear-gradient(90deg, rgba(165,180,252,.35) 1px, transparent 1px)", backgroundSize: "52px 52px" }} />
-        </div>
-        <div className="relative mx-auto max-w-[1440px]">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={reveal} transition={{ duration: 0.65}} className="mx-auto max-w-3xl text-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-indigo-400/[.08] px-4 py-2 text-[10px] font-extrabold uppercase tracking-[.2em] text-indigo-200"><span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400" /> {t("ecosystemEyebrow")}</span>
-            <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-.045em] text-white sm:text-5xl lg:text-6xl"><span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">{t("ecosystemTitle")}</span></h2>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-400">{t("ecosystemDesc")}</p>
-          </motion.div>
-          <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((feature, index) => (
-              <motion.article key={feature.number} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.16 }} variants={reveal} transition={{ duration: 0.55, delay: index * 0.07 }} whileHover={reduceMotion ? undefined : { y: -8, scale: 1.012 }} className="group relative isolate overflow-hidden rounded-[1.65rem] border border-white/[.09] bg-white/[.045] p-7 shadow-[0_18px_55px_-35px_rgba(0,0,0,.8)] backdrop-blur-xl transition-all duration-300 hover:border-indigo-300/35 hover:bg-white/[.075] hover:shadow-[0_25px_70px_-35px_rgba(99,102,241,.35)] sm:p-8">
-                <div className="pointer-events-none absolute -right-16 -top-20 -z-10 h-48 w-48 rounded-full bg-indigo-500/0 blur-3xl transition-colors duration-500 group-hover:bg-indigo-500/20" />
-                <div className="relative flex items-center justify-between">
-                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-300/20 bg-gradient-to-br from-indigo-400/20 to-fuchsia-400/10 text-indigo-200 shadow-inner shadow-white/[.04] transition duration-300 group-hover:scale-110 group-hover:border-violet-300/40 group-hover:text-white"><FeatureIcon name={feature.icon} /></span>
-                  <span className="rounded-full border border-white/10 px-3 py-1.5 text-[10px] font-bold tracking-[.18em] text-slate-500">{feature.number}</span>
-                </div>
-                <h3 className="relative mt-8 text-xl font-extrabold tracking-tight text-white transition-colors group-hover:text-indigo-100">{feature.title}</h3>
-                <p className="relative mt-3 min-h-[76px] text-sm leading-7 text-slate-400">{feature.description}</p>
-                <div className="relative mt-7 flex items-center justify-between gap-3 border-t border-white/[.09] pt-5">
-                  <p className="text-[10px] font-bold leading-5 tracking-wide text-indigo-200/80">{feature.detail}</p>
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 text-sm text-slate-400 transition-all group-hover:translate-x-1 group-hover:border-indigo-300/40 group-hover:bg-indigo-400/10 group-hover:text-indigo-200">↗</span>
-                </div>
-              </motion.article>
-            ))}
-          </div>
-        </div>
       </section>
 
       <section id="experience" className="relative isolate overflow-hidden bg-[#11132d] py-24 text-white lg:py-32">
@@ -581,6 +492,39 @@ export function LandingPage() {
         </div>
       </section>
 
+      
+<section id="solutions" className="relative isolate overflow-hidden bg-[#0b0d20] px-5 py-24 text-white sm:px-8 lg:px-12 lg:py-32">
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute -right-40 top-0 h-[34rem] w-[34rem] rounded-full bg-indigo-600/15 blur-[120px]" />
+          <div className="absolute -bottom-48 -left-32 h-[30rem] w-[30rem] rounded-full bg-fuchsia-600/10 blur-[120px]" />
+          <div className="absolute inset-0 opacity-[.08]" style={{ backgroundImage: "linear-gradient(rgba(165,180,252,.35) 1px, transparent 1px), linear-gradient(90deg, rgba(165,180,252,.35) 1px, transparent 1px)", backgroundSize: "52px 52px" }} />
+        </div>
+        <div className="relative mx-auto max-w-[1440px]">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={reveal} transition={{ duration: 0.65}} className="mx-auto max-w-3xl text-center">
+            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-300/20 bg-indigo-400/[.08] px-4 py-2 text-[10px] font-extrabold uppercase tracking-[.2em] text-indigo-200"><span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400" /> {t("ecosystemEyebrow")}</span>
+            <h2 className="mt-6 text-4xl font-black leading-tight tracking-[-.045em] text-white sm:text-5xl lg:text-6xl"><span className="bg-gradient-to-r from-indigo-300 via-violet-300 to-fuchsia-300 bg-clip-text text-transparent">{t("ecosystemTitle")}</span></h2>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-400">{t("ecosystemDesc")}</p>
+          </motion.div>
+          <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {features.map((feature, index) => (
+              <motion.article key={feature.number} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.16 }} variants={reveal} transition={{ duration: 0.55, delay: index * 0.07 }} whileHover={reduceMotion ? undefined : { y: -8, scale: 1.012 }} className="group relative isolate overflow-hidden rounded-[1.65rem] border border-white/[.09] bg-white/[.045] p-7 shadow-[0_18px_55px_-35px_rgba(0,0,0,.8)] backdrop-blur-xl transition-all duration-300 hover:border-indigo-300/35 hover:bg-white/[.075] hover:shadow-[0_25px_70px_-35px_rgba(99,102,241,.35)] sm:p-8">
+                <div className="pointer-events-none absolute -right-16 -top-20 -z-10 h-48 w-48 rounded-full bg-indigo-500/0 blur-3xl transition-colors duration-500 group-hover:bg-indigo-500/20" />
+                <div className="relative flex items-center justify-between">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-300/20 bg-gradient-to-br from-indigo-400/20 to-fuchsia-400/10 text-indigo-200 shadow-inner shadow-white/[.04] transition duration-300 group-hover:scale-110 group-hover:border-violet-300/40 group-hover:text-white"><FeatureIcon name={feature.icon} /></span>
+                  <span className="rounded-full border border-white/10 px-3 py-1.5 text-[10px] font-bold tracking-[.18em] text-slate-500">{feature.number}</span>
+                </div>
+                <h3 className="relative mt-8 text-xl font-extrabold tracking-tight text-white transition-colors group-hover:text-indigo-100">{feature.title}</h3>
+                <p className="relative mt-3 min-h-[76px] text-sm leading-7 text-slate-400">{feature.description}</p>
+                <div className="relative mt-7 flex items-center justify-between gap-3 border-t border-white/[.09] pt-5">
+                  <p className="text-[10px] font-bold leading-5 tracking-wide text-indigo-200/80">{feature.detail}</p>
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 text-sm text-slate-400 transition-all group-hover:translate-x-1 group-hover:border-indigo-300/40 group-hover:bg-indigo-400/10 group-hover:text-indigo-200">↗</span>
+                </div>
+              </motion.article>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section id="fonctionnement" className="relative isolate overflow-hidden bg-[#090b1b] px-5 py-24 text-white sm:px-8 lg:px-12 lg:py-32">
         <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
           <div className="absolute -left-40 top-0 h-[34rem] w-[34rem] rounded-full bg-indigo-700/20 blur-[130px]" />
@@ -643,80 +587,6 @@ export function LandingPage() {
       </section>
 
 
-      <section id="demo" className="bg-[#f7f7ff] px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
-        <div className="mx-auto grid max-w-[1280px] items-center gap-14 lg:grid-cols-[.85fr_1.15fr]">
-          <div>
-            <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">{t("discoverTouch")}</p>
-            <h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl">{t("betterShowcase")}</h2>
-            <p className="mt-6 text-lg leading-8 text-slate-600">{t("betterShowcaseDesc")}</p>
-            <ul className="mt-8 space-y-4 text-sm font-semibold text-slate-700">
-              {[t("profileOneScan"), t("centralizedContactsTeam"), t("interactionInsights")].map((item) => <li key={item} className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">✓</span>{item}</li>)}
-            </ul>
-            <Link href="/register" className="mt-9 inline-flex rounded-xl bg-indigo-600 px-6 py-4 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-1 hover:bg-indigo-700">Essayer la plateforme <Arrow /></Link>
-          </div>
-          <div className="relative">
-            <div className="absolute -inset-5 rounded-[2.5rem] bg-gradient-to-br from-indigo-200/70 to-violet-200/70 blur-2xl" />
-            <div className="relative overflow-hidden rounded-[2rem] border border-white bg-[#11132d] p-3 shadow-2xl shadow-indigo-950/20 sm:p-5">
-              <div className="flex items-center gap-2 px-3 py-3"><span className="h-2.5 w-2.5 rounded-full bg-rose-400"/><span className="h-2.5 w-2.5 rounded-full bg-amber-300"/><span className="h-2.5 w-2.5 rounded-full bg-emerald-400"/><span className="ml-3 text-xs font-semibold text-slate-400">{t("platformPresentation")}</span></div>
-              <div className="relative flex min-h-[290px] flex-col items-center justify-center overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-indigo-600 via-[#3530a2] to-violet-800 px-6 py-10 text-center sm:min-h-[390px]">
-                <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full border border-white/10"/><div className="absolute -bottom-28 -right-16 h-80 w-80 rounded-full border border-white/10"/>
-                <div className="relative flex h-20 w-20 items-center justify-center rounded-3xl border border-white/20 bg-white/15 text-4xl text-white shadow-xl backdrop-blur">▶</div>
-                <p className="relative mt-7 text-2xl font-black text-white sm:text-3xl">TouchCard Business</p>
-                <p className="relative mt-3 max-w-md text-sm leading-6 text-indigo-100">{t("videoIntro")}</p>
-                <span className="relative mt-6 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[.18em] text-white/90">{t("videoReady")}</span>
-              </div>
-              <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-4 text-xs text-slate-400"><span>{t("platformModules")}</span><span className="font-semibold text-indigo-200">{t("onePlatform")}</span></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="secteurs" className="relative isolate overflow-hidden bg-[#080a1b] px-5 py-24 text-white sm:px-8 lg:px-12 lg:py-32">
-        <div className="pointer-events-none absolute -right-40 top-10 -z-10 h-[32rem] w-[32rem] rounded-full bg-violet-700/25 blur-[120px]" />
-        <div className="pointer-events-none absolute -bottom-48 -left-32 -z-10 h-[30rem] w-[30rem] rounded-full bg-indigo-700/25 blur-[120px]" />
-        <div className="mx-auto max-w-[1480px]">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={reveal} className="mx-auto max-w-3xl text-center">
-            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-400/30 bg-white/[.06] px-4 py-2 text-[10px] font-extrabold uppercase tracking-[.2em] text-indigo-200 shadow-sm"><span className="h-1.5 w-1.5 rounded-full bg-fuchsia-400" /> Collection TouchCard NFC</span>
-            <h2 className="mt-6 text-4xl font-black tracking-[-.05em] text-white sm:text-5xl lg:text-6xl"><span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">{t("nfcTitle")}</span></h2>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-300">{t("nfcDesc")}</p>
-          </motion.div>
-          <div className="mt-20 grid gap-x-6 gap-y-16 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-            {[
-              {name:"Business",type:t("cardBusinessType"),desc:t("cardBusinessDesc"),price:"399 DH",tone:"metal",number:"01"},
-              {name:t("cardContactName"),type:t("cardContactType"),desc:t("cardContactDesc"),price:"149 DH",tone:"metal",number:"02"},
-              {name:t("cardServiceName"),type:t("cardServiceType"),desc:t("cardServiceDesc"),price:"399 DH",tone:"metal",number:"03"},
-              {name:t("cardGoogleName"),type:t("cardGoogleType"),desc:t("cardGoogleDesc"),price:"199 DH",tone:"from-[#111827] via-[#202b50] to-[#394b8c]",number:"04"},
-              {name:t("customCardName"),type:t("cardCustomType"),desc:t("cardCustomDesc"),price:"499 DH",tone:"from-[#171521] via-[#29233f] to-[#514078]",number:"05"}
-            ].map((card,index) => (
-              <motion.article key={card.name} initial="hidden" whileInView="visible" viewport={{ once:true, amount:.18 }} variants={reveal} transition={{ duration:.6, delay:index*.07 }} className="group">
-                <div className="relative mx-auto flex h-[245px] items-center justify-center [perspective:1100px]">
-                  <div className="absolute bottom-5 h-9 w-[78%] rounded-[50%] bg-indigo-950/70 blur-2xl transition-all duration-500 group-hover:scale-90 group-hover:opacity-60" />
-                  <div className={"relative h-[190px] w-full max-w-[290px] overflow-hidden rounded-[1.35rem] border p-5 shadow-[0_28px_55px_-24px_rgba(0,0,0,.8)] transition-all duration-500 [transform:rotateY(-17deg)_rotateX(9deg)_rotateZ(-3deg)] group-hover:[transform:rotateY(-5deg)_rotateX(2deg)_rotateZ(0deg)_translateY(-10px)] group-hover:shadow-[0_38px_65px_-25px_rgba(99,102,241,.5)] " + (card.tone === "metal" ? "border-white/20 bg-[#101114]" : "border-white/25 bg-gradient-to-br " + card.tone)}>
-                    {card.tone === "metal" && <div className="pointer-events-none absolute inset-0 opacity-80" style={{backgroundImage:"repeating-linear-gradient(90deg,rgba(255,255,255,.055) 0px,rgba(255,255,255,.012) 1px,transparent 2px,transparent 4px),linear-gradient(145deg,#25262a 0%,#090a0c 48%,#1b1c20 100%)"}} />}
-                    {card.tone !== "metal" && <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/35" />}
-                    <div className="relative flex h-full flex-col items-center justify-center text-white">
-                      <img src="/brand/touchcard-mark.svg" alt="Logo TouchCard" className="h-[68px] w-[68px] object-contain drop-shadow-[0_4px_12px_rgba(99,102,241,.45)]" />
-                      <span className="mt-4 text-[11px] font-extrabold uppercase tracking-[.22em] text-white">{card.name}</span>
-                    </div>
-                    <div className="pointer-events-none absolute bottom-3 right-4 text-[7px] font-bold tracking-[.2em] text-white/40">NFC</div>
-                  </div>
-                </div>
-                <div className="mt-5 flex items-center justify-between gap-2">
-                  <div><p className="text-[10px] font-extrabold uppercase tracking-[.16em] text-indigo-300">{card.type}</p><h3 className="mt-2 text-xl font-black tracking-tight text-white">{card.name}</h3></div>
-                  <span className="text-xs font-black tracking-[.18em] text-slate-500">{card.number}</span>
-                </div>
-                <p className="mt-3 text-sm leading-7 text-slate-400">{card.desc}</p>
-                <p className="mt-4 text-2xl font-black tracking-tight text-white">{card.price}</p>
-                {card.name === t("customCardName") && <p className="mt-3 inline-flex rounded-full border border-fuchsia-400/25 bg-fuchsia-400/10 px-3 py-1.5 text-[10px] font-bold text-fuchsia-200">{t("logoCenter")}</p>}
-              </motion.article>
-            ))}
-          </div>
-          <div className="mt-16 flex flex-col items-center justify-between gap-5 rounded-3xl border border-white/10 bg-white/[.06] p-6 shadow-[0_20px_60px_-45px_rgba(49,46,129,.5)] backdrop-blur sm:flex-row sm:p-8">
-            <div><p className="text-sm font-extrabold text-white">{t("brandAtCenter")}</p><p className="mt-1 text-sm text-slate-300">{t("nfcDescShort")}</p></div>
-            <Link href="/register" className="inline-flex shrink-0 items-center gap-3 rounded-xl border border-indigo-300/30 bg-indigo-500/20 px-5 py-3.5 text-sm font-extrabold text-indigo-100 transition hover:-translate-y-0.5 hover:bg-indigo-500/35">{t("createMyCard")} <Arrow /></Link>
-          </div>
-        </div>
-      </section>
       <section id="tarifs" className="bg-[#f7f7ff] px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
         <div className="mx-auto max-w-[1440px]">
           <div className="mx-auto max-w-3xl text-center">
@@ -787,6 +657,35 @@ export function LandingPage() {
         </div>
       </section>
 
+<section id="demo" className="bg-[#f7f7ff] px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
+        <div className="mx-auto grid max-w-[1280px] items-center gap-14 lg:grid-cols-[.85fr_1.15fr]">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">{t("discoverTouch")}</p>
+            <h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl">{t("betterShowcase")}</h2>
+            <p className="mt-6 text-lg leading-8 text-slate-600">{t("betterShowcaseDesc")}</p>
+            <ul className="mt-8 space-y-4 text-sm font-semibold text-slate-700">
+              {[t("profileOneScan"), t("centralizedContactsTeam"), t("interactionInsights")].map((item) => <li key={item} className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">✓</span>{item}</li>)}
+            </ul>
+            <Link href="/register" className="mt-9 inline-flex rounded-xl bg-indigo-600 px-6 py-4 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-1 hover:bg-indigo-700">Essayer la plateforme <Arrow /></Link>
+          </div>
+          <div className="relative">
+            <div className="absolute -inset-5 rounded-[2.5rem] bg-gradient-to-br from-indigo-200/70 to-violet-200/70 blur-2xl" />
+            <div className="relative overflow-hidden rounded-[2rem] border border-white bg-[#11132d] p-3 shadow-2xl shadow-indigo-950/20 sm:p-5">
+              <div className="flex items-center gap-2 px-3 py-3"><span className="h-2.5 w-2.5 rounded-full bg-rose-400"/><span className="h-2.5 w-2.5 rounded-full bg-amber-300"/><span className="h-2.5 w-2.5 rounded-full bg-emerald-400"/><span className="ml-3 text-xs font-semibold text-slate-400">{t("platformPresentation")}</span></div>
+              <div className="relative flex min-h-[290px] flex-col items-center justify-center overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-indigo-600 via-[#3530a2] to-violet-800 px-6 py-10 text-center sm:min-h-[390px]">
+                <div className="absolute -left-20 -top-20 h-64 w-64 rounded-full border border-white/10"/><div className="absolute -bottom-28 -right-16 h-80 w-80 rounded-full border border-white/10"/>
+                <div className="relative flex h-20 w-20 items-center justify-center rounded-3xl border border-white/20 bg-white/15 text-4xl text-white shadow-xl backdrop-blur">▶</div>
+                <p className="relative mt-7 text-2xl font-black text-white sm:text-3xl">TouchCard Business</p>
+                <p className="relative mt-3 max-w-md text-sm leading-6 text-indigo-100">{t("videoIntro")}</p>
+                <span className="relative mt-6 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[.18em] text-white/90">{t("videoReady")}</span>
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-4 text-xs text-slate-400"><span>{t("platformModules")}</span><span className="font-semibold text-indigo-200">{t("onePlatform")}</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      
       <section className="px-5 pb-24 sm:px-8 lg:px-12 lg:pb-32">
         <motion.div
           initial={reduceMotion ? false : { opacity: 0, y: 42, scale: 0.97 }}
