@@ -600,7 +600,7 @@ export function LandingPage() {
           </div>
           <div className="mt-5 overflow-hidden"><div className="flex items-stretch gap-6 transition-transform duration-500" style={{ transform: `translateX(-${pricingIndex * 34}%)` }}>
             {[
-              {name:"E-Business",type:"Carte professionnelle tout-en-un",desc:"Carte de visite et services digitaux réunis : profil, coordonnées, liens et prestations.",price:"399 DH",tone:"metal",number:"01",features:["Profil professionnel complet","Coordonnées, liens et services digitaux","Partage NFC et QR code"]},
+              {name:t("eBusinessName"),type:t("eBusinessType"),desc:t("eBusinessDesc"),price:"399 DH",tone:"metal",number:"01",features:["Profil professionnel complet","Coordonnées, liens et services digitaux","Partage NFC et QR code"]},
               {name:t("cardContactName"),type:t("cardContactType"),desc:t("cardContactDesc"),price:"149 DH",tone:"metal",number:"02",features:[t("contactDetails"),t("quickSharing"),t("easySaving")]},
               {name:t("cardGoogleName"),type:t("cardGoogleType"),desc:t("cardGoogleDesc"),price:"199 DH",tone:"google",number:"03",features:[t("googlePageAccess"),t("oneTapSharing"),t("reviewRequests")]},
               {name:t("customCardName"),type:t("cardCustomType"),desc:t("customCardDescription"),price:"499 DH",tone:"custom",number:"04",features:[t("customLogoDesign"),t("tailoredDigitalService"),t("businessTailoredExperience"),t("customNfcCard")]}
