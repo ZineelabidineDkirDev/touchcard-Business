@@ -710,13 +710,9 @@ export function LandingPage() {
               {t("finalTitle")}<br className="hidden sm:block" /> commence <span className="bg-gradient-to-r from-cyan-200 via-indigo-200 to-fuchsia-300 bg-clip-text text-transparent">{t("finalLead")}</span>
             </h2>
             <p className="mx-auto mt-7 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">{t("finalDesc")}</p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <motion.div whileHover={reduceMotion ? undefined : { scale: 1.045, y: -4 }} whileTap={reduceMotion ? undefined : { scale: .97 }}>
-                <Link href="/register" className="group/cta inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 px-8 py-4 text-sm font-extrabold text-white shadow-[0_12px_40px_rgba(99,102,241,.4)] transition-shadow hover:shadow-[0_16px_55px_rgba(168,85,247,.55)]">{t("createMyAccountLabel")} <span className="text-lg transition-transform duration-300 group-hover/cta:translate-x-1 group-hover/cta:-translate-y-1"><Arrow /></span></Link>
-              </motion.div>
-              <a href="#fonctionnement" className="rounded-2xl border border-white/15 bg-white/[.06] px-7 py-4 text-sm font-bold text-slate-200 backdrop-blur transition hover:border-white/30 hover:bg-white/10">{t("howItWorks")}</a>
-            </div>
-            <p className="mt-7 text-xs font-medium tracking-wide text-slate-400">{t("quickStart")}</p>
+            <p className="mx-auto mt-7 max-w-2xl text-base leading-8 text-slate-300">Découvrez les retours et expériences de nos clients.</p>
+            <div className="mt-10 grid gap-5 text-left md:grid-cols-3">{[1,2,3].map((video)=><div key={video} className="flex aspect-video items-center justify-center rounded-2xl border border-white/15 bg-white/[.045] text-center text-xs text-slate-400"><span>Vidéo client {video}<br/><span className="font-normal text-slate-500">Emplacement vidéo à connecter</span></span></div>)}</div>
+            <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" className="mt-7 inline-flex rounded-2xl border border-white/20 bg-white/[.07] px-7 py-4 text-sm font-bold text-white transition hover:bg-white/10">Ce que nos clients pensent de nous ↗</a>
           </motion.div>
         </motion.div>
       </section>
