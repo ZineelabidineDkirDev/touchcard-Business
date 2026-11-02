@@ -80,7 +80,7 @@ function CardWaveMotif({ position }: { position: "top-right" | "bottom-left" }) 
           d={`M ${112 + index * 8} -12 C ${82 + index * 7} 34, ${145 + index * 5} 83, 252 ${82 + index * 7}`}
           stroke="currentColor"
           strokeWidth="1"
-          opacity={0.72 - index * 0.025}
+          opacity={0.4}
         />
       ))}
     </svg>
