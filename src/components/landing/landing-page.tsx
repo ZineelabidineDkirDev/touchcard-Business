@@ -66,6 +66,27 @@ function QrPattern() {
   );
 }
 
+function CardWaveMotif({ position }: { position: "top-right" | "bottom-left" }) {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 240 160"
+      fill="none"
+      className={`pointer-events-none absolute z-0 w-[43%] text-white/90 ${position === "top-right" ? "right-0 top-0" : "bottom-0 left-0 rotate-180"}`}
+    >
+      {Array.from({ length: 10 }, (_, index) => (
+        <path
+          key={index}
+          d={`M ${112 + index * 8} -12 C ${82 + index * 7} 34, ${145 + index * 5} 83, 252 ${82 + index * 7}`}
+          stroke="currentColor"
+          strokeWidth="1"
+          opacity={0.72 - index * 0.025}
+        />
+      ))}
+    </svg>
+  );
+}
+
 function InteractiveNfcCard({ title, size = "pricing" }: { title: string; size?: "pricing" | "hero" }) {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [flipped, setFlipped] = useState(false);
@@ -100,11 +121,15 @@ function InteractiveNfcCard({ title, size = "pricing" }: { title: string; size?:
           transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
         >
           <div className={`absolute inset-0 flex flex-col justify-between overflow-hidden rounded-[1.7rem] border border-white/20 bg-gradient-to-br from-[#45417c] via-[#171936] to-[#080a19] text-white shadow-[0_30px_70px_-25px_rgba(79,70,229,.7)] [backface-visibility:hidden] ${hero ? "p-8 sm:p-10" : "items-center p-5 text-center"}`}>
-            <div className="flex items-center justify-between"><img src="/brand/touchcard-mark.svg" alt="TouchCard" className={hero ? "h-12 w-12" : "h-9 w-9"}/><span className="text-[10px] font-bold tracking-[.18em] text-indigo-200">{hero ? "E-BUSINESS · NFC" : "TOUCHCARD · NFC"}</span></div>
-            <div><h3 className={hero ? "text-3xl font-black sm:text-4xl" : "text-lg font-black"}>{hero ? "Votre identité." : title}</h3>{hero && <p className="mt-2 text-2xl font-bold text-indigo-200">Tous vos services.</p>}<div className="mt-6 h-1.5 w-2/3 rounded-full bg-white/30"/><p className="mt-4 text-[10px] font-semibold tracking-[.2em] text-white/55">TAP · SCAN · CONNECT</p></div>
+            <CardWaveMotif position="top-right" />
+            <CardWaveMotif position="bottom-left" />
+            <div className="relative z-10 flex items-center justify-between"><img src="/brand/touchcard-mark.svg" alt="TouchCard" className={hero ? "h-12 w-12" : "h-9 w-9"}/><span className="text-[10px] font-bold tracking-[.18em] text-indigo-200">{hero ? "E-BUSINESS · NFC" : "TOUCHCARD · NFC"}</span></div>
+            <div className="relative z-10"><h3 className={hero ? "text-3xl font-black sm:text-4xl" : "text-lg font-black"}>{hero ? "Votre identité." : title}</h3>{hero && <p className="mt-2 text-2xl font-bold text-indigo-200">Tous vos services.</p>}<div className="mt-6 h-1.5 w-2/3 rounded-full bg-white/30"/><p className="mt-4 text-[10px] font-semibold tracking-[.2em] text-white/55">TAP · SCAN · CONNECT</p></div>
           </div>
-          <div className="absolute inset-0 flex flex-col items-center justify-between rounded-[1.7rem] border border-indigo-200/30 bg-gradient-to-br from-[#171936] to-[#080a19] p-4 text-white shadow-[0_30px_70px_-25px_rgba(79,70,229,.7)] [backface-visibility:hidden] [transform:rotateY(180deg)]">
-            <div className="flex w-full items-center justify-between"><span className="text-[10px] font-bold tracking-[.2em] text-indigo-200">SCAN · CONNECT</span><img src="/brand/touchcard-mark.svg" alt="TouchCard" className="h-7 w-7"/></div>
+          <div className="absolute inset-0 flex flex-col items-center justify-between overflow-hidden rounded-[1.7rem] border border-indigo-200/30 bg-gradient-to-br from-[#171936] to-[#080a19] p-4 text-white shadow-[0_30px_70px_-25px_rgba(79,70,229,.7)] [backface-visibility:hidden] [transform:rotateY(180deg)]">
+            <CardWaveMotif position="top-right" />
+            <CardWaveMotif position="bottom-left" />
+            <div className="relative z-10 flex w-full items-center justify-between"><span className="text-[10px] font-bold tracking-[.2em] text-indigo-200">SCAN · CONNECT</span><img src="/brand/touchcard-mark.svg" alt="TouchCard" className="h-7 w-7"/></div>
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none">
               <div className={hero ? "h-28 w-28" : "h-[88px] w-[88px]"}><QrPattern /></div>
               <span className="whitespace-nowrap text-[8px] leading-none text-slate-300">QR de démonstration</span>
