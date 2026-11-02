@@ -55,11 +55,11 @@ function QrPattern() {
     1, 1, 1, 0, 1, 0, 1, 1, 1,
   ];
   return (
-    <div className="grid aspect-square w-full grid-cols-9 gap-[3px] rounded-xl bg-white p-2.5 shadow-sm">
+    <div className="grid aspect-square w-full grid-cols-9 gap-[3px] rounded-xl border border-white/90 bg-transparent p-2.5 shadow-[0_0_14px_rgba(255,255,255,.12)]">
       {cells.map((cell, index) => (
         <span
           key={index}
-          className={`aspect-square rounded-[2px] ${cell ? "bg-slate-950" : "bg-white"}`}
+          className={`aspect-square rounded-[2px] ${cell ? "bg-white" : "bg-transparent"}`}
         />
       ))}
     </div>
