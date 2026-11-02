@@ -55,7 +55,7 @@ function QrPattern() {
     1, 1, 1, 0, 1, 0, 1, 1, 1,
   ];
   return (
-    <div className="grid grid-cols-9 gap-[3px] rounded-xl bg-white p-2.5 shadow-sm">
+    <div className="grid aspect-square w-full grid-cols-9 gap-[3px] rounded-xl bg-white p-2.5 shadow-sm">
       {cells.map((cell, index) => (
         <span
           key={index}
@@ -105,9 +105,9 @@ function InteractiveNfcCard({ title, size = "pricing" }: { title: string; size?:
           </div>
           <div className="absolute inset-0 flex flex-col items-center justify-between rounded-[1.7rem] border border-indigo-200/30 bg-gradient-to-br from-[#171936] to-[#080a19] p-4 text-white shadow-[0_30px_70px_-25px_rgba(79,70,229,.7)] [backface-visibility:hidden] [transform:rotateY(180deg)]">
             <div className="flex w-full items-center justify-between"><span className="text-[10px] font-bold tracking-[.2em] text-indigo-200">SCAN · CONNECT</span><img src="/brand/touchcard-mark.svg" alt="TouchCard" className="h-7 w-7"/></div>
-            <div className="mt-auto flex w-full flex-col items-center gap-2 pb-1">
-              <span className="text-[9px] text-slate-300">QR de démonstration</span>
-              <div className={hero ? "scale-100" : "scale-[.88]"}><QrPattern /></div>
+            <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 flex-col items-center gap-1">
+              <span className="whitespace-nowrap text-[8px] leading-none text-slate-300">QR de démonstration</span>
+              <div className={hero ? "h-28 w-28" : "h-[88px] w-[88px]"}><QrPattern /></div>
             </div>
           </div>
         </motion.div>
