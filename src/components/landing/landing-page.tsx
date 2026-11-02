@@ -667,18 +667,18 @@ export function LandingPage() {
             <button type="button" aria-label="Précédent" onClick={() => setPricingIndex((v) => Math.max(0, v - 1))} className="h-11 w-11 rounded-full border border-indigo-200 bg-white text-indigo-700">←</button>
             <button type="button" aria-label="Suivant" onClick={() => setPricingIndex((v) => Math.min(pricingMaxIndex, v + 1))} className="h-11 w-11 rounded-full border border-indigo-200 bg-white text-indigo-700">→</button>
           </div>
-          <div className="mt-5 overflow-hidden" onMouseEnter={() => setPricingPaused(true)} onMouseLeave={() => setPricingPaused(false)}><div className="flex items-stretch gap-6 transition-transform duration-700 ease-in-out" style={{ transform: `translateX(-${pricingIndex * 25}%)` }}>
+          <div className="mt-8 w-full overflow-hidden" onMouseEnter={() => setPricingPaused(true)} onMouseLeave={() => setPricingPaused(false)}><div className="flex w-full items-stretch gap-6 transition-transform duration-700 ease-in-out" style={{ transform: `translateX(-${pricingIndex * (100 / pricingSlidesToShow)}%)` }}>
             {[
               {name:t("eBusinessName"),type:t("eBusinessType"),desc:t("eBusinessDesc"),price:"399 DH",tone:"metal",number:"01",features:["Profil professionnel complet","Coordonnées, liens et services digitaux","Partage NFC et QR code"]},
               {name:t("cardContactName"),type:t("cardContactType"),desc:t("cardContactDesc"),price:"149 DH",tone:"metal",number:"02",features:[t("contactDetails"),t("quickSharing"),t("easySaving")]},
               {name:t("cardGoogleName"),type:t("cardGoogleType"),desc:t("cardGoogleDesc"),price:"199 DH",tone:"google",number:"03",features:[t("googlePageAccess"),t("oneTapSharing"),t("reviewRequests")]},
               {name:t("customCardName"),type:t("cardCustomType"),desc:t("customCardDescription"),price:"499 DH",tone:"custom",number:"04",features:[t("customLogoDesign"),t("tailoredDigitalService"),t("businessTailoredExperience"),t("customNfcCard")]}
             ].map((card,index) => (
-              <motion.article key={card.name} whileHover={reduceMotion ? undefined : { y: -8 }} transition={{ type: "spring", stiffness: 260, damping: 22 }} className="w-full shrink-0 sm:w-[calc(50%-12px)] xl:w-[calc(33.333%-16px)]">
-                <div className="mb-6 h-[190px] w-full"><InteractiveNfcCard title={card.name} size="pricing" /></div>
-                <p className="text-[9px] font-extrabold uppercase tracking-widest text-indigo-600">{card.type}</p><h3 className="mt-2 text-xl font-black text-[#11132d]">{card.name}</h3><p className="mt-3 min-h-[90px] text-sm leading-6 text-slate-500">{card.desc}</p><p className="mt-4 text-3xl font-black text-[#11132d]">{card.price}</p>
+              <motion.article key={card.name} whileHover={reduceMotion ? undefined : { y: -8 }} transition={{ type: "spring", stiffness: 260, damping: 22 }} className="w-full shrink-0 sm:w-[calc((100%-24px)/2)] xl:w-[calc((100%-48px)/3)]">
+                <div className="mx-auto mb-7 aspect-[1.586/1] w-full max-w-[310px]"><InteractiveNfcCard title={card.name} size="pricing" /></div>
+                <div className="mx-auto max-w-[310px]"><p className="text-[9px] font-extrabold uppercase tracking-widest text-indigo-600">{card.type}</p><h3 className="mt-2 text-xl font-black text-[#11132d]">{card.name}</h3><p className="mt-3 min-h-[90px] text-sm leading-6 text-slate-500">{card.desc}</p><p className="mt-4 text-3xl font-black text-[#11132d]">{card.price}</p>
                 <ul className="mt-4 space-y-2">{card.features.map((feature) => <li key={feature} className="text-xs text-slate-600">✓ {feature}</li>)}</ul>
-                <Link href="/register" className="mt-6 inline-flex w-full justify-center rounded-xl border border-indigo-300 bg-indigo-50 px-4 py-3 text-xs font-extrabold text-indigo-700">Choisir {card.name} <Arrow /></Link>
+                <Link href="/register" className="mt-6 inline-flex w-full justify-center rounded-xl border border-indigo-300 bg-indigo-50 px-4 py-3 text-xs font-extrabold text-indigo-700">Choisir {card.name} <Arrow /></Link></div>
               </motion.article>
             ))}
           </div></div>
