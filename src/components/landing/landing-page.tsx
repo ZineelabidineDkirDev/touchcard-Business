@@ -105,7 +105,7 @@ function InteractiveNfcCard({ title, size = "pricing" }: { title: string; size?:
           </div>
           <div className="absolute inset-0 flex flex-col items-center justify-between rounded-[1.7rem] border border-indigo-200/30 bg-gradient-to-br from-[#171936] to-[#080a19] p-4 text-white shadow-[0_30px_70px_-25px_rgba(79,70,229,.7)] [backface-visibility:hidden] [transform:rotateY(180deg)]">
             <div className="flex w-full items-center justify-between"><span className="text-[10px] font-bold tracking-[.2em] text-indigo-200">SCAN · CONNECT</span><img src="/brand/touchcard-mark.svg" alt="TouchCard" className="h-7 w-7"/></div>
-            <div className={hero ? "scale-100" : "scale-[.82]"}><QrPattern /></div>
+            <div className={hero ? "mt-auto mb-2 scale-100" : "mt-auto mb-1 scale-[.72]"}><QrPattern /></div>
             <span className="text-[9px] text-slate-300">QR de démonstration</span>
           </div>
         </motion.div>
