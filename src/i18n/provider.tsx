@@ -92,7 +92,7 @@ const messages = {
     heroNoApp:"Sans application à installer",
     heroNfc:"NFC, QR code et lien",
     heroTeams:"Pour les équipes",
-    impactTitle:"L’impact en un coup d’œil",
+
     impactLead:"Les rencontres prennent de la valeur.",
     impactSubtitle:"Les chiffres le raconteront.",
     impactDesc:"Un tableau de bord pour mesurer l’adoption de TouchCard et suivre l’activité de votre réseau, en toute transparence.",
@@ -139,7 +139,7 @@ const messages = {
     faqTitle:"Questions fréquentes",
     faqSubtitle:"Vous souhaitez en savoir plus ?",
     faqDesc:"Voici quelques réponses pour mieux comprendre le fonctionnement de TouchCard Business.",
-    finalTitle:"Le prochain échange peut tout changer",
+
     finalLead:"commence ici.",
     finalDesc:"Une identité qui vous ressemble. Un partage sans friction. Des relations professionnelles qui durent.",
     createMyAccount:"Créer mon compte",
@@ -147,7 +147,7 @@ const messages = {
     quickStart:"Prêt en quelques minutes · Aucun téléchargement pour vos contacts",
     footerDesc:"La plateforme qui connecte votre identité professionnelle, vos contacts et votre relation client.",
     footerPlatform:"Plateforme",
-    footerSolutions:"Solutions",
+
     footerFeatures:"Fonctionnalités",
     footerDemo:"Démonstration",
     footerDiscover:"Découvrir",
@@ -340,7 +340,7 @@ const messages = {
     heroNoApp:"No app to install",
     heroNfc:"NFC, QR code and link",
     heroTeams:"For teams",
-    impactTitle:"The impact at a glance",
+
     impactLead:"Every connection creates value.",
     impactSubtitle:"The numbers will tell the story.",
     impactDesc:"A dashboard to measure TouchCard adoption and transparently track your network activity.",
@@ -387,7 +387,7 @@ const messages = {
     faqTitle:"Frequently asked questions",
     faqSubtitle:"Would you like to know more?",
     faqDesc:"Here are a few answers to help you understand how TouchCard Business works.",
-    finalTitle:"Your next connection could change everything",
+
     finalLead:"starts here.",
     finalDesc:"An identity that feels like you. Effortless sharing. Professional relationships that last.",
     createMyAccount:"Create my account",
@@ -395,7 +395,7 @@ const messages = {
     quickStart:"Ready in minutes · No download required for your contacts",
     footerDesc:"The platform connecting your professional identity, contacts and customer relationships.",
     footerPlatform:"Platform",
-    footerSolutions:"Solutions",
+
     footerFeatures:"Features",
     footerDemo:"Demo",
     footerDiscover:"Discover",
@@ -588,7 +588,7 @@ const messages = {
     heroNoApp:"دون الحاجة إلى تثبيت تطبيق",
     heroNfc:"NFC ورمز QR ورابط",
     heroTeams:"للفرق",
-    impactTitle:"الأثر في لمحة",
+
     impactLead:"كل تواصل يصنع قيمة.",
     impactSubtitle:"الأرقام ستروي القصة.",
     impactDesc:"لوحة لقياس اعتماد TouchCard ومتابعة نشاط شبكتك بشفافية.",
@@ -635,7 +635,7 @@ const messages = {
     faqTitle:"الأسئلة الشائعة",
     faqSubtitle:"هل ترغب في معرفة المزيد؟",
     faqDesc:"إليك بعض الإجابات لفهم طريقة عمل TouchCard Business.",
-    finalTitle:"قد يغيّر تواصلك القادم كل شيء",
+
     finalLead:"ويبدأ من هنا.",
     finalDesc:"هوية تعبّر عنك، ومشاركة سهلة، وعلاقات مهنية تدوم.",
     createMyAccount:"إنشاء حسابي",
@@ -643,7 +643,7 @@ const messages = {
     quickStart:"جاهز خلال دقائق · لا يحتاج جهات اتصالك إلى تحميل تطبيق",
     footerDesc:"منصة تربط هويتك المهنية وجهات اتصالك وعلاقاتك مع العملاء.",
     footerPlatform:"المنصة",
-    footerSolutions:"الحلول",
+
     footerFeatures:"الميزات",
     footerDemo:"عرض توضيحي",
     footerDiscover:"اكتشف",
