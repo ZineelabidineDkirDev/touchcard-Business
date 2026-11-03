@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
 
 export type ProspectInput = {
   fullName: string;
@@ -79,5 +80,6 @@ export async function updateProspectStatus(formData: FormData) {
     .maybeSingle();
   if (!membership) return;
 
-  await supabase.from("prospect_requests").update({ status, updated_at: new Date().toISOString() }).eq("id", id);
+  const { error } = await supabase.from("prospect_requests").update({ status, updated_at: new Date().toISOString() }).eq("id", id);
+  if (!error) revalidatePath("/dashboard/prospects");
 }
