@@ -18,7 +18,7 @@ export type ProspectInput = {
   businessPhone: string;
 };
 
-export async function submitProspectRequest(input: ProspectInput) {
+export async function submitProspectRequest(input: ProspectInput, requestId: string) {
   const fullName = input.fullName.trim();
   const email = input.email.trim().toLowerCase();
   const phone = input.phone.trim();
@@ -35,6 +35,7 @@ export async function submitProspectRequest(input: ProspectInput) {
   const { data, error } = await supabase
     .from("prospect_requests")
     .insert({
+      id: requestId,
       full_name: fullName,
       city: input.city.trim(),
       activity_sector: input.sector === "Autre" ? input.sectorOther.trim() || "Autre" : input.sector,
@@ -49,16 +50,14 @@ export async function submitProspectRequest(input: ProspectInput) {
       business_phone: input.customRequested ? input.businessPhone.trim() || null : null,
       user_id: user?.id ?? null,
       status: "new",
-    })
-    .select("id")
-    .single();
+    });
 
-  if (error || !data) {
+  if (error) {
     console.error("Prospect request insert failed", error);
     return { ok: false as const, error: "Votre demande n'a pas pu être enregistrée. Veuillez réessayer." };
   }
 
-  return { ok: true as const, requestId: data.id, email };
+  return { ok: true as const, requestId, email };
 }
 
 export async function updateProspectStatus(formData: FormData) {
