@@ -39,6 +39,7 @@ create policy prospect_requests_public_insert
     length(trim(full_name)) between 2 and 160
     and length(trim(email)) between 5 and 254
     and length(trim(phone)) between 6 and 40
+    and (user_id is null or user_id = (select auth.uid()))
   );
 
 drop policy if exists prospect_requests_owner_read on public.prospect_requests;
