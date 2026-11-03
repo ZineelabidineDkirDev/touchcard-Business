@@ -82,7 +82,7 @@ export async function signOut() {
 
 export async function sendMagicLink(_state: AuthState, formData: FormData): Promise<AuthState> {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+  if (!email || !email.includes("@") || !email.split("@")[1]?.includes(".")) {
     return { error: "Saisissez une adresse e-mail valide." };
   }
 
