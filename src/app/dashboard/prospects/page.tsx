@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { updateProspectStatus } from "@/app/actions/prospects";
+import { createProspectCustomer, updateProspectStatus } from "@/app/actions/prospects";
 
 const statuses = [
   ["new", "Nouveau"], ["to_contact", "À contacter"], ["in_discussion", "En discussion"],
@@ -29,7 +29,7 @@ export default async function ProspectsPage() {
 
   const { data: prospects, error } = await supabase
     .from("prospect_requests")
-    .select("id, full_name, city, activity_sector, email, phone, card_type, reason, customization_requested, brand_name, logo_url, business_address, business_phone, status, admin_notes, created_at")
+    .select("id, user_id, full_name, city, activity_sector, email, phone, card_type, reason, customization_requested, brand_name, logo_url, business_address, business_phone, status, admin_notes, created_at")
     .order("created_at", { ascending: false });
 
   return (
@@ -58,11 +58,20 @@ export default async function ProspectsPage() {
             </div>
             <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
               <p className="text-xs text-slate-400">Reçue le {new Date(p.created_at).toLocaleString("fr-FR")}</p>
-              <form action={updateProspectStatus} className="flex flex-wrap gap-2">
-                <input type="hidden" name="id" value={p.id}/>
-                <select name="status" defaultValue={p.status} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">{statuses.map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select>
-                <button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-500">Enregistrer</button>
-              </form>
+              <div className="flex flex-wrap gap-2">
+                <form action={updateProspectStatus} className="flex flex-wrap gap-2">
+                  <input type="hidden" name="id" value={p.id}/>
+                  <select name="status" defaultValue={p.status} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">{statuses.map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select>
+                  <button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-500">Enregistrer</button>
+                </form>
+                {p.status === "approved" && !p.user_id && (
+                  <form action={createProspectCustomer}>
+                    <input type="hidden" name="id" value={p.id}/>
+                    <button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-500">Créer le compte client</button>
+                  </form>
+                )}
+                {p.user_id && <span className="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">Compte client créé</span>}
+              </div>
             </div>
           </article>
         ))}
