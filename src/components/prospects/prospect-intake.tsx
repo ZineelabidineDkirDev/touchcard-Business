@@ -65,7 +65,8 @@ export function ProspectIntake() {
     if (step < 6) { setStep((value) => value + 1); return; }
 
     setBusy(true);
-    const result = await submitProspectRequest(form);
+    const requestId = crypto.randomUUID();
+    const result = await submitProspectRequest(form, requestId);
     if (!result.ok) { setError(result.error); setBusy(false); return; }
 
     // Request is saved first. Account access is offered via a Supabase email magic link.
