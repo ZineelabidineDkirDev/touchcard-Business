@@ -27,6 +27,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         <input id="password" name="password" type="password" required minLength={8} autoComplete={mode === "login" ? "current-password" : "new-password"} className="field" placeholder={t("minPassword")} />
       </div>
       {state.error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{state.error}</p>}
+      {state.success && <p role="status" className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{state.success}</p>}
       <button disabled={pending} className="btn-primary w-full">{pending ? t("wait") : mode === "login" ? t("login") : t("createAccount")}</button>
       <p className="text-center text-sm text-slate-500">
         {mode === "login" ? t("noAccount") : t("hasAccount")}{" "}
