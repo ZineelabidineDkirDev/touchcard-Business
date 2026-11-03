@@ -18,6 +18,10 @@ export type ProspectInput = {
   businessAddress: string;
   businessPhone: string;
   socialLinks: { platform: string; url: string }[];
+  projectNeeds: string[];
+  reservationMode: string;
+  reservationChannels: string[];
+  managementNeeds: string[];
 };
 
 export async function submitProspectRequest(input: ProspectInput, requestId: string) {
@@ -51,6 +55,7 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
       business_address: input.customRequested ? input.businessAddress.trim() || null : null,
       business_phone: input.customRequested ? input.businessPhone.trim() || null : null,
       social_links: (input.socialLinks ?? []).filter((item) => item.url.trim()).map((item) => ({ platform: item.platform, url: item.url.trim() })),
+      project_needs: { selected: input.projectNeeds ?? [], reservation_mode: input.reservationMode || null, reservation_channels: input.reservationChannels ?? [], management_needs: input.managementNeeds ?? [] },
       user_id: user?.id ?? null,
       status: "new",
     });
