@@ -87,7 +87,7 @@ function CardWaveMotif({ position }: { position: "top-right" | "bottom-left" }) 
   );
 }
 
-function InteractiveNfcCard({ title, size = "pricing" }: { title: string; size?: "pricing" | "hero" }) {
+export function InteractiveNfcCard({ title, size = "pricing" }: { title: string; size?: "pricing" | "hero" }) {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [flipped, setFlipped] = useState(false);
   const handleMove = (event: React.MouseEvent<HTMLDivElement>) => {
