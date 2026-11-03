@@ -365,7 +365,7 @@ export function LandingPage({ userName }: { userName?: string | null }) {
   </select>
   <span aria-hidden="true" className="pointer-events-none ml-1 text-[10px] text-white/70">▾</span>
 </div>
-<Link href={userName ? "/dashboard" : "/register"} title={userName || t("navCreate")} className="inline-flex max-w-[190px] items-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-700 sm:px-5"><span className="truncate">{userName || t("navCreate")}</span>{userName ? <span aria-hidden="true">⌄</span> : <Arrow />}</Link>
+<Link href={userName ? "/dashboard" : "/demande"} title={userName || t("navCreate")} className="inline-flex max-w-[190px] items-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-700 sm:px-5"><span className="truncate">{userName || t("navCreate")}</span>{userName ? <span aria-hidden="true">⌄</span> : <Arrow />}</Link>
             <button type="button" aria-label={mobileMenuOpen ? t("menuClose") : t("menuOpen")} aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((open) => !open)} className={`inline-flex h-11 w-11 items-center justify-center rounded-xl border text-xl transition-colors xl:hidden border-white/20 bg-white/10 text-white`}>
               {mobileMenuOpen ? "×" : "☰"}
             </button>
@@ -379,7 +379,7 @@ export function LandingPage({ userName }: { userName?: string | null }) {
               ))}
               <div className="mt-2 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
                 {!userName && <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-xl border border-white/20 px-3 py-3 text-center text-sm font-bold text-white transition hover:bg-white/10 hover:text-white">{t("navLogin")}</Link>}
-                <Link href={userName ? "/dashboard" : "/register"} onClick={() => setMobileMenuOpen(false)} className="col-span-2 truncate rounded-xl bg-indigo-600 px-3 py-3 text-center text-sm font-bold text-white">{userName || t("navCreateShort")}</Link>
+                <Link href={userName ? "/dashboard" : "/demande"} onClick={() => setMobileMenuOpen(false)} className="col-span-2 truncate rounded-xl bg-indigo-600 px-3 py-3 text-center text-sm font-bold text-white">{userName || t("navCreateShort")}</Link>
               </div>
             </div>
           </nav>
