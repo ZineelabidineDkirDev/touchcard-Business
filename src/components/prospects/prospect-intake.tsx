@@ -111,7 +111,7 @@ export function ProspectIntake() {
   }
 
   const titles = ["Faisons connaissance", "Votre localisation", "Votre activité", "Vos coordonnées", "Votre choix", "Votre projet & vos besoins", "Vos réseaux & pages", "Votre personnalisation", "Récapitulatif"];
-  const subtitles = ["Comment pouvons-nous vous appeler ?", "Dans quelle ville exercez-vous ?", "Quel est votre secteur d'activité ?", "Comment pouvons-nous vous joindre ?", "Quelle solution correspond à votre besoin ?", "Où peut-on découvrir votre activité en ligne ?", "Souhaitez-vous une carte personnalisée ?", "Vérifiez votre demande avant de l'envoyer."];
+  const subtitles = ["Comment pouvons-nous vous appeler ?", "Dans quelle ville exercez-vous ?", "Quel est votre domaine professionnel ?", "Comment pouvons-nous vous joindre ?", "Quelle solution correspond à votre besoin ?", "Décrivez les fonctionnalités utiles à votre activité.", "Où peut-on découvrir votre activité en ligne ?", "Souhaitez-vous une carte personnalisée ?", "Relisez votre demande avant de l’envoyer."];
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#080a19] px-4 py-10 text-slate-900 sm:px-6 sm:py-14">
