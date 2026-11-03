@@ -24,7 +24,6 @@ export function ProspectIntake() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
   const [logoName, setLogoName] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const progress = useMemo(() => ((step + 1) / 7) * 100, [step]);
@@ -84,22 +83,7 @@ export function ProspectIntake() {
     const result = await submitProspectRequest(requestData, requestId);
     if (!result.ok) { setError(result.error); setBusy(false); return; }
 
-    // Request is saved first. Account access is offered via a Supabase email magic link.
-    try {
-      const supabase = createClient();
-      const origin = window.location.origin;
-      const { error: authError } = await supabase.auth.signInWithOtp({
-        email: result.email,
-        options: {
-          emailRedirectTo: `${origin}/auth/callback?next=/dashboard&request_id=${result.requestId}`,
-          shouldCreateUser: true,
-          data: { full_name: form.fullName },
-        },
-      });
-      if (!authError) setEmailSent(true);
-    } catch {
-      // The prospect request remains safely stored even if email delivery is unavailable.
-    }
+    // Aucun compte n’est créé à cette étape : la demande attend la validation de l’administrateur.
     setDone(true);
     setBusy(false);
   }
@@ -115,7 +99,7 @@ export function ProspectIntake() {
           <p className="mx-auto mt-5 max-w-lg leading-8 text-slate-300">Votre demande a bien été transmise à notre équipe. Nous allons étudier votre besoin et vous contacter pour confirmer les détails.</p>
           <div className="mt-8 rounded-2xl border border-white/10 bg-black/20 p-5 text-left">
             <p className="font-bold">Votre demande est enregistrée.</p>
-            <p className="mt-2 text-sm text-slate-300">{emailSent ? "Un lien sécurisé d'accès à votre espace vous a été envoyé par e-mail." : "Votre dossier est conservé. Vous pourrez accéder à votre espace après vérification de votre adresse e-mail."}</p>
+            <p className="mt-2 text-sm text-slate-300">"Notre équipe étudiera votre demande. Si elle est validée, un compte client sera créé et vous recevrez une invitation par e-mail."</p>
           </div>
           <Link href="/" className="mt-8 inline-flex rounded-xl bg-indigo-500 px-7 py-4 font-bold text-white transition hover:bg-indigo-400">Retour à l'accueil</Link>
         </div>
