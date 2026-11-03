@@ -2,7 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": Deno.env.get("SITE_URL") ?? "*",
+  "Access-Control-Allow-Origin": Deno.env.get("SITE_URL") ?? "https://touchcard-three.vercel.app",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
@@ -26,8 +26,7 @@ Deno.serve(async (req: Request) => {
     const url = Deno.env.get("SUPABASE_URL")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const siteUrl = Deno.env.get("SITE_URL");
-    if (!siteUrl) throw new Error("SITE_URL is not configured");
+    const siteUrl = Deno.env.get("SITE_URL") ?? "https://touchcard-three.vercel.app";
 
     const userClient = createClient(url, anonKey, {
       global: { headers: { Authorization: authorization } },
