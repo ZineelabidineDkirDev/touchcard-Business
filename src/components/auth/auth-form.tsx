@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import Link from "next/link";
-import { signIn, signUp, type AuthState } from "@/app/actions/auth";
+import { signIn, signUp, sendMagicLink, type AuthState } from "@/app/actions/auth";
 import { useI18n } from "@/i18n/provider";
 
 const initialState: AuthState = {};
@@ -11,8 +11,10 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const { t } = useI18n();
   const action = mode === "login" ? signIn : signUp;
   const [state, formAction, pending] = useActionState(action, initialState);
+  const [magicState, magicAction, magicPending] = useActionState(sendMagicLink, initialState);
 
   return (
+    <>
     <form action={formAction} className="mt-8 space-y-5">
       {mode === "register" && <div>
         <label htmlFor="fullName" className="mb-2 block text-sm font-medium text-slate-700">{t("fullName")}</label>
@@ -36,5 +38,16 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         </Link>
       </p>
     </form>
+    {mode === "login" && (
+      <form action={magicAction} className="mt-5 space-y-3 border-t border-slate-100 pt-5">
+        <p className="text-center text-xs font-semibold text-slate-500">Vous préférez recevoir un lien de connexion ?</p>
+        <label htmlFor="magicEmail" className="block text-sm font-medium text-slate-700">Adresse e-mail</label>
+        <input id="magicEmail" name="email" type="email" required autoComplete="email" className="field" placeholder={t("emailPlaceholder")} />
+        {magicState.error && <p role="alert" className="text-sm text-red-700">{magicState.error}</p>}
+        {magicState.success && <p role="status" className="text-sm text-emerald-700">{magicState.success}</p>}
+        <button disabled={magicPending} className="btn-secondary w-full">{magicPending ? "Envoi..." : "Recevoir un lien sécurisé"}</button>
+      </form>
+    )}
+    </>
   );
 }

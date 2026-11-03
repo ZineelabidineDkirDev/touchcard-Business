@@ -365,7 +365,7 @@ export function LandingPage({ userName }: { userName?: string | null }) {
   </select>
   <span aria-hidden="true" className="pointer-events-none ml-1 text-[10px] text-white/70">▾</span>
 </div>
-<Link href={userName ? "/dashboard" : "/register"} title={userName || t("navCreate")} className="inline-flex max-w-[190px] items-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-700 sm:px-5"><span className="truncate">{userName || t("navCreate")}</span>{userName ? <span aria-hidden="true">⌄</span> : <Arrow />}</Link>
+<Link href={userName ? "/dashboard" : "/demande"} title={userName || t("navCreate")} className="inline-flex max-w-[190px] items-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-700 sm:px-5"><span className="truncate">{userName || t("navCreate")}</span>{userName ? <span aria-hidden="true">⌄</span> : <Arrow />}</Link>
             <button type="button" aria-label={mobileMenuOpen ? t("menuClose") : t("menuOpen")} aria-expanded={mobileMenuOpen} onClick={() => setMobileMenuOpen((open) => !open)} className={`inline-flex h-11 w-11 items-center justify-center rounded-xl border text-xl transition-colors xl:hidden border-white/20 bg-white/10 text-white`}>
               {mobileMenuOpen ? "×" : "☰"}
             </button>
@@ -379,7 +379,7 @@ export function LandingPage({ userName }: { userName?: string | null }) {
               ))}
               <div className="mt-2 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
                 {!userName && <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-xl border border-white/20 px-3 py-3 text-center text-sm font-bold text-white transition hover:bg-white/10 hover:text-white">{t("navLogin")}</Link>}
-                <Link href={userName ? "/dashboard" : "/register"} onClick={() => setMobileMenuOpen(false)} className="col-span-2 truncate rounded-xl bg-indigo-600 px-3 py-3 text-center text-sm font-bold text-white">{userName || t("navCreateShort")}</Link>
+                <Link href={userName ? "/dashboard" : "/demande"} onClick={() => setMobileMenuOpen(false)} className="col-span-2 truncate rounded-xl bg-indigo-600 px-3 py-3 text-center text-sm font-bold text-white">{userName || t("navCreateShort")}</Link>
               </div>
             </div>
           </nav>
@@ -432,8 +432,8 @@ export function LandingPage({ userName }: { userName?: string | null }) {
               {t("heroDescription")}
             </p>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <Link href="/register" className="group inline-flex items-center justify-center gap-3 rounded-2xl border border-white/25 bg-gradient-to-r from-indigo-500/35 via-violet-500/30 to-fuchsia-500/25 px-7 py-[1.125rem] text-base font-bold text-white shadow-[0_12px_40px_-18px_rgba(99,102,241,.8)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-white/40 hover:from-indigo-500/55 hover:to-violet-500/45">
-                Commencer maintenant <span className="transition-transform group-hover:translate-x-1">→</span>
+              <Link href="/demande" className="group inline-flex items-center justify-center gap-3 rounded-2xl border border-white/25 bg-gradient-to-r from-indigo-500/35 via-violet-500/30 to-fuchsia-500/25 px-7 py-[1.125rem] text-base font-bold text-white shadow-[0_12px_40px_-18px_rgba(99,102,241,.8)] backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-white/40 hover:from-indigo-500/55 hover:to-violet-500/45">
+                Créer votre carte <span className="transition-transform group-hover:translate-x-1">→</span>
               </Link>
               <a href="#solutions" className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/[.035] px-7 py-[1.125rem] text-base font-bold text-white/95 shadow-sm backdrop-blur-xl transition duration-300 hover:-translate-y-1 hover:border-indigo-200/50 hover:bg-white/[.09]">Explorer les solutions <span className="text-indigo-200">↓</span></a>
             </div>
@@ -674,7 +674,7 @@ export function LandingPage({ userName }: { userName?: string | null }) {
               <div><p className="text-base font-extrabold text-white">{t("nextConnection")}</p><p className="mt-1 text-sm text-slate-400">{t("digitalIdentity")}</p></div>
             </div>
             <motion.div whileHover={reduceMotion?undefined:{y:-3,scale:1.025}} whileTap={reduceMotion?undefined:{scale:.97}}>
-              <Link href="/register" className="group inline-flex items-center gap-4 rounded-xl bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 px-6 py-4 text-sm font-extrabold text-white shadow-[0_15px_40px_-15px_rgba(139,92,246,.8)] ring-1 ring-white/20 transition-shadow hover:shadow-[0_20px_50px_-15px_rgba(217,70,239,.65)]">
+              <Link href="/demande" className="group inline-flex items-center gap-4 rounded-xl bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 px-6 py-4 text-sm font-extrabold text-white shadow-[0_15px_40px_-15px_rgba(139,92,246,.8)] ring-1 ring-white/20 transition-shadow hover:shadow-[0_20px_50px_-15px_rgba(217,70,239,.65)]">
                 {t("createWorkspaceCta")} <span className="transition-transform duration-300 group-hover:translate-x-1"><Arrow /></span>
               </Link>
             </motion.div>
@@ -705,7 +705,7 @@ export function LandingPage({ userName }: { userName?: string | null }) {
                 <div className="mx-auto mb-7 aspect-[1.586/1] w-full max-w-[310px]"><InteractiveNfcCard title={card.name} size="pricing" /></div>
                 <div className="mx-auto max-w-[310px]"><p className="text-[9px] font-extrabold uppercase tracking-widest text-indigo-600">{card.type}</p><h3 className="mt-2 text-xl font-black text-[#11132d]">{card.name}</h3><p className="mt-3 min-h-[90px] text-sm leading-6 text-slate-500">{card.desc}</p><p className="mt-4 text-3xl font-black text-[#11132d]">{card.price}</p>
                 <ul className="mt-4 space-y-2">{card.features.map((feature) => <li key={feature} className="text-xs text-slate-600">✓ {feature}</li>)}</ul>
-                <Link href="/register" className="mt-6 inline-flex w-full justify-center rounded-xl border border-indigo-300 bg-indigo-50 px-4 py-3 text-xs font-extrabold text-indigo-700">Choisir {card.name} <Arrow /></Link></div>
+                <Link href="/demande" className="mt-6 inline-flex w-full justify-center rounded-xl border border-indigo-300 bg-indigo-50 px-4 py-3 text-xs font-extrabold text-indigo-700">Choisir {card.name} <Arrow /></Link></div>
               </motion.article>
             ))}
           </div></div>
@@ -715,7 +715,7 @@ export function LandingPage({ userName }: { userName?: string | null }) {
 
       <section id="faq" className="px-5 py-24 sm:px-8 lg:px-12 lg:py-32">
         <div className="mx-auto grid max-w-[1180px] gap-12 lg:grid-cols-[.8fr_1.2fr]">
-          <div><p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">{t("faqTitle")}</p><h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl">{t("faqSubtitle")}</h2><p className="mt-6 text-base leading-8 text-slate-500">{t("faqDesc")}</p><Link href="/register" className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-indigo-700 hover:text-indigo-900">{t("navCreate")} <Arrow /></Link></div>
+          <div><p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">{t("faqTitle")}</p><h2 className="mt-5 text-4xl font-black leading-tight tracking-[-.045em] sm:text-5xl">{t("faqSubtitle")}</h2><p className="mt-6 text-base leading-8 text-slate-500">{t("faqDesc")}</p><Link href="/demande" className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-indigo-700 hover:text-indigo-900">Créer votre carte <Arrow /></Link></div>
           <div className="space-y-3">
             {[
               [t("faqQ1"), t("faqA1")],
@@ -738,7 +738,7 @@ export function LandingPage({ userName }: { userName?: string | null }) {
             <ul className="mt-8 space-y-4 text-sm font-semibold text-slate-700">
               {[t("profileOneScan"), t("centralizedContactsTeam"), t("interactionInsights")].map((item) => <li key={item} className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">✓</span>{item}</li>)}
             </ul>
-            <Link href="/register" className="mt-9 inline-flex rounded-xl bg-indigo-600 px-6 py-4 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-1 hover:bg-indigo-700">Essayer la plateforme <Arrow /></Link>
+            <Link href="/demande" className="mt-9 inline-flex rounded-xl bg-indigo-600 px-6 py-4 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-1 hover:bg-indigo-700">Essayer la plateforme <Arrow /></Link>
           </div>
           <div className="relative">
             <div className="absolute -inset-5 rounded-[2.5rem] bg-gradient-to-br from-indigo-200/70 to-violet-200/70 blur-2xl" />
@@ -813,13 +813,13 @@ export function LandingPage({ userName }: { userName?: string | null }) {
           <div>
             <Link href="/" className="inline-flex items-center gap-2.5"><img src="/brand/touchcard-mark.svg" alt="" className="h-11 w-11 object-contain" /><span className="text-xl font-black">Touch<span className="text-indigo-300">Card</span><span className="ml-2 text-[9px] font-extrabold tracking-[.18em] text-indigo-300">BUSINESS</span></span></Link>
             <p className="mt-5 max-w-sm text-sm leading-7 text-slate-400">{t("footerDesc")}</p>
-            <Link href="/register" className="mt-7 inline-flex rounded-xl bg-indigo-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-400">{t("navCreate")} <Arrow /></Link>
+            <Link href="/demande" className="mt-7 inline-flex rounded-xl bg-indigo-500 px-5 py-3 text-sm font-bold text-white transition hover:bg-indigo-400">Créer votre carte <Arrow /></Link>
           </div>
           <div><h3 className="text-sm font-extrabold">{t("footerPlatformHeading")}</h3><ul className="mt-5 space-y-3 text-sm text-slate-400"><li><a className="hover:text-white" href="#solutions">{t("footerSolutions")}</a></li><li><a className="hover:text-white" href="#experience">{t("footerFeatures")}</a></li><li><a className="hover:text-white" href="#demo">{t("footerDemo")}</a></li><li><a className="hover:text-white" href="#tarifs">{t("navPricing")}</a></li></ul></div>
-          <div><h3 className="text-sm font-extrabold">{t("footerDiscover")}</h3><ul className="mt-5 space-y-3 text-sm text-slate-400"><li><a className="hover:text-white" href="#fonctionnement">{t("navHow")}</a></li><li><a className="hover:text-white" href="#faq">{t("faqTitle")}</a></li><li><Link className="hover:text-white" href="/register">{t("footerSignup")}</Link></li><li><Link className="hover:text-white" href="/login">{t("navLogin")}</Link></li></ul></div>
-          <div><h3 className="text-sm font-extrabold">{t("footerWorkspace")}</h3><p className="mt-5 text-sm leading-7 text-slate-400">{t("footerCTA")}</p><Link href="/register" className="mt-4 inline-flex text-sm font-bold text-indigo-300 hover:text-white">{t("footerStart")}</Link></div>
+          <div><h3 className="text-sm font-extrabold">{t("footerDiscover")}</h3><ul className="mt-5 space-y-3 text-sm text-slate-400"><li><a className="hover:text-white" href="#fonctionnement">{t("navHow")}</a></li><li><a className="hover:text-white" href="#faq">{t("faqTitle")}</a></li><li><Link className="hover:text-white" href="/demande">{t("footerSignup")}</Link></li><li><Link className="hover:text-white" href="/login">{t("navLogin")}</Link></li></ul></div>
+          <div><h3 className="text-sm font-extrabold">{t("footerWorkspace")}</h3><p className="mt-5 text-sm leading-7 text-slate-400">{t("footerCTA")}</p><Link href="/demande" className="mt-4 inline-flex text-sm font-bold text-indigo-300 hover:text-white">{t("footerStart")}</Link></div>
         </div>
-        <div className="border-t border-white/10"><div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-5 py-6 text-xs text-slate-500 sm:px-8 md:flex-row md:items-center md:justify-between lg:px-12"><p>{t("copyright")}</p><p>{t("footerTagline")}</p><div className="flex gap-5"><Link href="/login" className="hover:text-white">{t("navLogin")}</Link><Link href="/register" className="hover:text-white">{t("signup")}</Link></div></div></div>
+        <div className="border-t border-white/10"><div className="mx-auto flex max-w-[1440px] flex-col gap-3 px-5 py-6 text-xs text-slate-500 sm:px-8 md:flex-row md:items-center md:justify-between lg:px-12"><p>{t("copyright")}</p><p>{t("footerTagline")}</p><div className="flex gap-5"><Link href="/login" className="hover:text-white">{t("navLogin")}</Link><Link href="/demande" className="hover:text-white">{t("signup")}</Link></div></div></div>
       </footer>
     </main>
   );

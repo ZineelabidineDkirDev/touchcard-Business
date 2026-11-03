@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
 export type AuthState = { error?: string; success?: string };
@@ -77,4 +78,28 @@ export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/");
+}
+
+export async function sendMagicLink(_state: AuthState, formData: FormData): Promise<AuthState> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  if (!email || !email.includes("@") || !email.split("@")[1]?.includes(".")) {
+    return { error: "Saisissez une adresse e-mail valide." };
+  }
+
+  try {
+    const supabase = await createClient();
+    const requestHeaders = await headers();
+    const host = requestHeaders.get("x-forwarded-host") || requestHeaders.get("host");
+    const protocol = requestHeaders.get("x-forwarded-proto") || "https";
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || (host ? protocol + "://" + host : "");
+    if (!origin) return { error: "Impossible de déterminer l'adresse du site." };
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: `${origin}/auth/callback?next=/dashboard`, shouldCreateUser: false },
+    });
+    if (error) return { error: "Impossible d'envoyer le lien. Vérifiez l'adresse e-mail et réessayez." };
+    return { success: "Lien de connexion envoyé. Consultez votre boîte e-mail." };
+  } catch (error) {
+    return { error: getSafeAuthError(error) };
+  }
 }

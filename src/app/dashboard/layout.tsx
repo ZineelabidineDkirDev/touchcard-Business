@@ -9,6 +9,7 @@ import { DashboardNavigation, DashboardLogoutLabel } from "@/components/dashboar
 
 const navigation = [
   ["Vue d’ensemble", "/dashboard"],
+  ["Prospects & demandes", "/dashboard/prospects"],
   ["Cartes digitales", "/dashboard/cards"],
   ["Contacts & prospects", "/dashboard/contacts"],
   ["Équipe", "/dashboard/team"],
