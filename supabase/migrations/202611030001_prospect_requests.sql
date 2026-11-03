@@ -101,3 +101,29 @@ $$;
 
 revoke all on function public.claim_prospect_request(uuid) from public, anon;
 grant execute on function public.claim_prospect_request(uuid) to authenticated;
+
+-- Public logo uploads for prospect intake; public bucket URLs are used only as prospect attachments.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('prospect-logos', 'prospect-logos', true, 2097152, array['image/png','image/jpeg','image/webp','image/svg+xml'])
+on conflict (id) do update set public = true, file_size_limit = 2097152,
+  allowed_mime_types = array['image/png','image/jpeg','image/webp','image/svg+xml'];
+
+drop policy if exists prospect_logos_public_insert on storage.objects;
+create policy prospect_logos_public_insert on storage.objects
+for insert to anon, authenticated
+with check (
+  bucket_id = 'prospect-logos'
+  and (storage.foldername(name))[1] ~ '^[0-9a-fA-F-]{36}$'
+);
+
+drop policy if exists prospect_logos_admin_read on storage.objects;
+create policy prospect_logos_admin_read on storage.objects
+for select to authenticated
+using (
+  bucket_id = 'prospect-logos'
+  and exists (
+    select 1 from public.organization_members m
+    where m.user_id = (select auth.uid())
+      and m.role = 'super_admin'::public.app_role
+  )
+);
