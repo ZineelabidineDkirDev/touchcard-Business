@@ -39,7 +39,7 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
       id: requestId,
       full_name: fullName,
       city: input.city.trim(),
-      activity_sector: input.sector === "Autre" ? input.sectorOther.trim() || "Autre" : input.sector,
+      activity_sector: input.sector.split("|").map((sector) => sector === "Autre" ? input.sectorOther.trim() || "Autre" : sector).join(", "),
       email,
       phone,
       card_type: input.cardType,
