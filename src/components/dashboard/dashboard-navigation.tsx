@@ -16,6 +16,7 @@ const items = [
 export function DashboardNavigation() {
   const { t } = useI18n();
   return <nav className="mt-8 flex gap-2 overflow-x-auto lg:flex-col">
+    <Link href="/dashboard/prospects" className="whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50">Prospects & demandes</Link>
     {items.map(([key, href]) => <Link key={href} href={href} className="whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-indigo-50 hover:text-indigo-700">{t(key)}</Link>)}
   </nav>;
 }
