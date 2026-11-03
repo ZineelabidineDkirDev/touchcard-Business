@@ -14,6 +14,7 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
   const [magicState, magicAction, magicPending] = useActionState(sendMagicLink, initialState);
 
   return (
+    <>
     <form action={formAction} className="mt-8 space-y-5">
       {mode === "register" && <div>
         <label htmlFor="fullName" className="mb-2 block text-sm font-medium text-slate-700">{t("fullName")}</label>
@@ -47,5 +48,6 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
         <button disabled={magicPending} className="btn-secondary w-full">{magicPending ? "Envoi..." : "Recevoir un lien sécurisé"}</button>
       </form>
     )}
+    </>
   );
 }
