@@ -1,12 +1,11 @@
-import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { LandingPage } from "@/components/landing/landing-page";
 
-export default async function Home() {
-  // Session cookies are request-specific; opt out of static prerendering
-  // for this page before reading the authenticated Supabase user.
-  await connection();
+// The landing page reads the current Supabase session, so it must be
+// rendered per request instead of being prerendered as an instant page.
+export const instant = false;
 
+export default async function Home() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const userName = user
