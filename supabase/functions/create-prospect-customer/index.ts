@@ -89,7 +89,6 @@ Deno.serve(async (req: Request) => {
     const organizationName = String(prospect.brand_name || prospect.full_name).trim();
     const slugBase = organizationName
       .normalize("NFD")
-      .replace(/[\\u0300-\\u036f]/g, "")
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "")
