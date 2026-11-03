@@ -3,33 +3,46 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export type AuthState = { error?: string };
+export type AuthState = { error?: string; success?: string };
 
 export async function signIn(_state: AuthState, formData: FormData): Promise<AuthState> {
-  const email = String(formData.get("email") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
   if (!email || !password) return { error: "Renseignez votre e-mail et votre mot de passe." };
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { error: "Connexion impossible. Vérifiez vos identifiants." };
+  if (error) return { error: "Connexion impossible. Vérifiez vos identifiants et confirmez votre adresse e-mail si nécessaire." };
   redirect("/dashboard");
 }
 
 export async function signUp(_state: AuthState, formData: FormData): Promise<AuthState> {
   const fullName = String(formData.get("fullName") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
   if (!fullName || !email || password.length < 8) {
     return { error: "Complétez les champs. Le mot de passe doit contenir au moins 8 caractères." };
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
-    email, password, options: { data: { full_name: fullName } },
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { data: { full_name: fullName } },
   });
-  if (error) return { error: "Inscription impossible. Vérifiez les informations saisies." };
-  redirect("/login?registered=1");
+  if (error) {
+    if (error.message.toLowerCase().includes("already registered")) {
+      return { error: "Cette adresse e-mail possède déjà un compte. Connectez-vous plutôt." };
+    }
+    return { error: "Inscription impossible. Vérifiez les informations saisies ou réessayez plus tard." };
+  }
+
+  // Avec la confirmation e-mail désactivée, Supabase renvoie une session :
+  // l'utilisateur entre directement dans son dashboard.
+  if (data.session) redirect("/dashboard");
+
+  // Si la confirmation est activée dans Supabase, on ne contourne pas cette sécurité.
+  return { success: "Compte créé. Consultez votre boîte e-mail pour confirmer l'adresse, puis connectez-vous." };
 }
 
 export async function signOut() {
