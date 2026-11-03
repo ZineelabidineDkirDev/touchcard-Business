@@ -64,7 +64,7 @@ Deno.serve(async (req: Request) => {
 
     const { data: prospect, error: prospectError } = await admin
       .from("prospect_requests")
-      .select("id, user_id, full_name, email, status")
+      .select("id, user_id, full_name, email, status, brand_name")
       .eq("id", requestId)
       .maybeSingle();
 
@@ -87,13 +87,40 @@ Deno.serve(async (req: Request) => {
       throw new Error(inviteError?.message ?? "Unable to invite customer");
     }
 
+    const organizationName = String(prospect.brand_name || prospect.full_name).trim();
+    const slugBase = organizationName
+      .normalize("NFD")
+      .replace(/[\\u0300-\\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 36) || "client";
+    const organizationSlug = `${slugBase}-${crypto.randomUUID().slice(0, 8)}`;
+
+    const { error: organizationError } = await admin
+      .from("organizations")
+      .insert({
+        name: organizationName,
+        slug: organizationSlug,
+        owner_id: invited.user.id,
+      });
+
+    if (organizationError) {
+      await admin.auth.admin.deleteUser(invited.user.id);
+      throw new Error("The invitation could not be prepared because the customer workspace could not be created.");
+    }
+
     const { error: linkError } = await admin
       .from("prospect_requests")
       .update({ user_id: invited.user.id, updated_at: new Date().toISOString() })
       .eq("id", prospect.id)
       .is("user_id", null);
 
-    if (linkError) throw new Error("Invitation sent, but linking the customer account failed. Contact support.");
+    if (linkError) {
+      await admin.from("organizations").delete().eq("owner_id", invited.user.id);
+      await admin.auth.admin.deleteUser(invited.user.id);
+      throw new Error("The customer account could not be linked to the approved request. Please retry.");
+    }
 
     return new Response(JSON.stringify({ ok: true, user_id: invited.user.id }), {
       status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
