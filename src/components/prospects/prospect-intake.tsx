@@ -27,6 +27,7 @@ export function ProspectIntake() {
   const [done, setDone] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [logoName, setLogoName] = useState("");
+  const [logoFile, setLogoFile] = useState<File | null>(null);
   const router = useRouter();
   const progress = useMemo(() => ((step + 1) / 7) * 100, [step]);
 
@@ -43,6 +44,7 @@ export function ProspectIntake() {
       return;
     }
     setLogoName(file.name);
+    setLogoFile(file);
     setError("");
     // The logo is collected as a file name for the first request. Upload is handled after admin review.
     update("logoUrl", file.name);
@@ -66,7 +68,22 @@ export function ProspectIntake() {
 
     setBusy(true);
     const requestId = crypto.randomUUID();
-    const result = await submitProspectRequest(form, requestId);
+    let requestData = form;
+    if (form.customRequested && logoFile) {
+      const supabase = createClient();
+      const extension = logoFile.name.split(".").pop()?.toLowerCase() || "png";
+      const { data: uploaded, error: uploadError } = await supabase.storage
+        .from("prospect-logos")
+        .upload(`${requestId}/brand-logo.${extension}`, logoFile, { contentType: logoFile.type, upsert: false });
+      if (uploadError || !uploaded) {
+        setError("Le logo n'a pas pu être envoyé. Réessayez ou continuez sans logo.");
+        setBusy(false);
+        return;
+      }
+      const { data: publicUrl } = supabase.storage.from("prospect-logos").getPublicUrl(uploaded.path);
+      requestData = { ...form, logoUrl: publicUrl.publicUrl };
+    }
+    const result = await submitProspectRequest(requestData, requestId);
     if (!result.ok) { setError(result.error); setBusy(false); return; }
 
     // Request is saved first. Account access is offered via a Supabase email magic link.
