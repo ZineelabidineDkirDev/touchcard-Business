@@ -75,7 +75,7 @@ export function ProspectIntake() {
       const { error: authError } = await supabase.auth.signInWithOtp({
         email: result.email,
         options: {
-          emailRedirectTo: `${origin}/auth/callback?next=/dashboard`,
+          emailRedirectTo: `${origin}/auth/callback?next=/dashboard&request_id=${result.requestId}`,
           shouldCreateUser: true,
           data: { full_name: form.fullName },
         },
