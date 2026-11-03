@@ -78,3 +78,24 @@ export async function signOut() {
   await supabase.auth.signOut();
   redirect("/");
 }
+
+export async function sendMagicLink(_state: AuthState, formData: FormData): Promise<AuthState> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
+    return { error: "Saisissez une adresse e-mail valide." };
+  }
+
+  try {
+    const supabase = await createClient();
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL;
+    if (!origin) return { error: "L'adresse du site n'est pas configurée." };
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: `${origin}/auth/callback?next=/dashboard`, shouldCreateUser: false },
+    });
+    if (error) return { error: "Impossible d'envoyer le lien. Vérifiez l'adresse e-mail et réessayez." };
+    return { success: "Lien de connexion envoyé. Consultez votre boîte e-mail." };
+  } catch (error) {
+    return { error: getSafeAuthError(error) };
+  }
+}
