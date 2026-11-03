@@ -17,6 +17,7 @@ export type ProspectInput = {
   logoUrl: string;
   businessAddress: string;
   businessPhone: string;
+  socialLinks: { platform: string; url: string }[];
 };
 
 export async function submitProspectRequest(input: ProspectInput, requestId: string) {
@@ -49,6 +50,7 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
       logo_url: input.customRequested ? input.logoUrl.trim() || null : null,
       business_address: input.customRequested ? input.businessAddress.trim() || null : null,
       business_phone: input.customRequested ? input.businessPhone.trim() || null : null,
+      social_links: (input.socialLinks ?? []).filter((item) => item.url.trim()).map((item) => ({ platform: item.platform, url: item.url.trim() })),
       user_id: user?.id ?? null,
       status: "new",
     });
