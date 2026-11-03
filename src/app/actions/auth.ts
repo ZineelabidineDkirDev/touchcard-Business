@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
 export type AuthState = { error?: string; success?: string };
@@ -87,8 +88,11 @@ export async function sendMagicLink(_state: AuthState, formData: FormData): Prom
 
   try {
     const supabase = await createClient();
-    const origin = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL;
-    if (!origin) return { error: "L'adresse du site n'est pas configurée." };
+    const requestHeaders = await headers();
+    const host = requestHeaders.get("x-forwarded-host") || requestHeaders.get("host");
+    const protocol = requestHeaders.get("x-forwarded-proto") || "https";
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || (host ? protocol + "://" + host : "");
+    if (!origin) return { error: "Impossible de déterminer l'adresse du site." };
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: `${origin}/auth/callback?next=/dashboard`, shouldCreateUser: false },
