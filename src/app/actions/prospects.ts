@@ -83,3 +83,32 @@ export async function updateProspectStatus(formData: FormData) {
   const { error } = await supabase.from("prospect_requests").update({ status, updated_at: new Date().toISOString() }).eq("id", id);
   if (!error) revalidatePath("/dashboard/prospects");
 }
+
+
+export async function createProspectCustomer(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: membership } = await supabase
+    .from("organization_members")
+    .select("role")
+    .eq("user_id", user.id)
+    .eq("role", "super_admin")
+    .limit(1)
+    .maybeSingle();
+  if (!membership) return;
+
+  const { error } = await supabase.functions.invoke("create-prospect-customer", {
+    body: { request_id: id },
+  });
+  if (error) {
+    console.error("Customer invitation failed", error);
+    throw new Error("Impossible de créer le compte client. Vérifiez que la fonction Supabase est déployée et que la demande est validée.");
+  }
+
+  revalidatePath("/dashboard/prospects");
+}
