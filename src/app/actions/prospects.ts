@@ -60,3 +60,25 @@ export async function submitProspectRequest(input: ProspectInput) {
 
   return { ok: true as const, requestId: data.id, email };
 }
+
+export async function updateProspectStatus(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  const status = String(formData.get("status") ?? "");
+  const allowed = ["new", "to_contact", "in_discussion", "quote_sent", "approved", "in_production", "completed", "rejected", "cancelled"];
+  if (!id || !allowed.includes(status)) return;
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: membership } = await supabase
+    .from("organization_members")
+    .select("role")
+    .eq("user_id", user.id)
+    .eq("role", "super_admin")
+    .limit(1)
+    .maybeSingle();
+  if (!membership) return;
+
+  await supabase.from("prospect_requests").update({ status, updated_at: new Date().toISOString() }).eq("id", id);
+}
