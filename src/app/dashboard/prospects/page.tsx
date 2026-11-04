@@ -13,7 +13,8 @@ const statuses = [
 
 export default async function ProspectsPage({ searchParams }: { searchParams: Promise<{ created?: string; already_created?: string; approval_required?: string }> }) {
   await connection();
-  const query = await searchParams;\n  const supabase = await createClient();
+  const query = await searchParams;
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
