@@ -154,12 +154,15 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
 
   const { data: prospect, error: prospectError } = await supabase
     .from("prospect_requests")
-    .select("card_type, activity_sector, reason, project_needs, customization_requested, brand_name")
+    .select("card_type, activity_sector, reason, project_needs, customization_requested, brand_name, status")
     .eq("id", id)
     .single();
 
   if (prospectError || !prospect) {
     return { ok: false as const, error: "Impossible de charger cette demande." };
+  }
+  if (prospect.status !== "in_production") {
+    return { ok: false as const, error: "Le test IA est réservé aux demandes déjà validées (en production)." };
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
@@ -187,9 +190,9 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
     card_type: template,
     activity_sector: String(prospect.activity_sector ?? "").slice(0, 160),
     project_description: String(prospect.reason ?? "")
-      .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/gi, "[email masqué]")
-      .replace(/(?:\\+?\\d[\\d\\s().-]{7,}\\d)/g, "[téléphone masqué]")
-      .replace(/https?:\\/\\/\\S+/gi, "[lien masqué]")
+      .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, "[email masqué]")
+      .replace(/(?:\+?\d[\d\s().-]{7,}\d)/g, "[téléphone masqué]")
+      .replace(/https?:\/\/\S+/gi, "[lien masqué]")
       .slice(0, 1200),
     customization_requested: Boolean(prospect.customization_requested),
     selected_needs: Array.isArray(needs.selected) ? needs.selected.slice(0, 30) : [],
