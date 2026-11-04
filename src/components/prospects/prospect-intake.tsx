@@ -17,7 +17,8 @@ const cards = [
 const empty: ProspectInput = {
   fullName: "", city: "", sector: "", sectorOther: "", email: "", phone: "",
   cardType: "", reason: "", customRequested: false, brandName: "", logoUrl: "",
-  businessAddress: "", businessPhone: "", socialLinks: [{ platform: "Instagram", url: "" }], projectNeeds: [], reservationMode: "", reservationChannels: [], managementNeeds: [],
+  businessAddress: "", businessPhone: "", socialLinks: [{ platform: "Instagram", url: "" }],
+  projectNeeds: [], reservationMode: "", reservationChannels: [], managementNeeds: [], projectNeeds: [], reservationMode: "", reservationChannels: [], managementNeeds: [],
 };
 
 export function ProspectIntake() {
