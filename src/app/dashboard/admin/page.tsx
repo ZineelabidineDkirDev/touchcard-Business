@@ -117,7 +117,7 @@ export default async function AdminDashboardPage({ searchParams }: { searchParam
 
     <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <Metric label="Clients / organisations" value={clients} note="Comptes clients créés" icon="◈"/>
-      <Metric label="Demandes reçues" value={prospects.length} note={openRequests + " à traiter"} icon="▤"/>
+      <Metric label="Demandes filtrées" value={filteredProspects.length} note={openRequests + " à traiter"} icon="▤"/>
       <Metric label="Cartes digitales" value={totalCards} note={publishedCards + " publiées"} icon="▣"/>
       <Metric label="Liens de cartes" value={links} note="Liens enregistrés" icon="↗"/>
     </section>
