@@ -186,9 +186,12 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
   const brief = {
     card_type: template,
     activity_sector: String(prospect.activity_sector ?? "").slice(0, 160),
-    project_description: String(prospect.reason ?? "").slice(0, 1200),
+    project_description: String(prospect.reason ?? "")
+      .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}/gi, "[email masqué]")
+      .replace(/(?:\\+?\\d[\\d\\s().-]{7,}\\d)/g, "[téléphone masqué]")
+      .replace(/https?:\\/\\/\\S+/gi, "[lien masqué]")
+      .slice(0, 1200),
     customization_requested: Boolean(prospect.customization_requested),
-    brand_name: prospect.customization_requested ? String(prospect.brand_name ?? "").slice(0, 100) : "",
     selected_needs: Array.isArray(needs.selected) ? needs.selected.slice(0, 30) : [],
     reservation_mode: String(needs.reservation_mode ?? ""),
     reservation_channels: Array.isArray(needs.reservation_channels) ? needs.reservation_channels.slice(0, 10) : [],
