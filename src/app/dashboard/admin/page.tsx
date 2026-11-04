@@ -2,16 +2,9 @@ import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
+import MoroccoProspectMap from "@/components/dashboard/morocco-prospect-map";
 
 type Prospect = { id: string; city: string; status: string; card_type: string; created_at: string };
-
-const cityPoints: Record<string, { x: number; y: number }> = {
-  "Tanger": { x: 47, y: 12 }, "Tétouan": { x: 57, y: 17 }, "Oujda": { x: 84, y: 25 },
-  "Fès": { x: 65, y: 35 }, "Meknès": { x: 57, y: 34 }, "Rabat": { x: 47, y: 43 },
-  "Casablanca": { x: 43, y: 51 }, "El Jadida": { x: 38, y: 58 }, "Marrakech": { x: 51, y: 68 },
-  "Agadir": { x: 39, y: 81 }, "Laâyoune": { x: 34, y: 93 }, "Béni Mellal": { x: 62, y: 57 },
-  "Ouarzazate": { x: 68, y: 76 }, "Errachidia": { x: 80, y: 57 }, "Safi": { x: 34, y: 66 },
-};
 
 const statusLabels: Record<string, string> = {
   new: "Nouvelles", to_contact: "À contacter", in_discussion: "En discussion",
@@ -104,18 +97,7 @@ export default async function AdminDashboardPage() {
       <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-3"><div><h2 className="text-lg font-black text-slate-950">Répartition géographique au Maroc</h2><p className="mt-1 text-sm text-slate-500">Localisation des demandes prospects par ville</p></div><span className="rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-700">{prospects.length} demandes</span></div>
         <div className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_.8fr]">
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-50 via-slate-50 to-violet-50 p-3">
-            <svg viewBox="0 0 100 110" role="img" aria-label="Carte schématique du Maroc avec les villes des prospects" className="mx-auto h-[330px] w-full max-w-[330px]">
-              <path d="M30 3 L49 6 L58 12 L72 13 L86 23 L91 32 L82 40 L78 49 L82 57 L75 66 L72 76 L61 83 L55 96 L44 105 L30 101 L27 88 L20 78 L22 65 L14 55 L18 44 L13 32 L21 20 Z" fill="#dbeafe" stroke="#6366f1" strokeWidth="1.4" strokeLinejoin="round"/>
-              <path d="M22 20 L42 22 L58 12 M18 44 L47 43 L78 49 M22 65 L51 68 L72 76 M27 88 L44 83 L55 96" fill="none" stroke="#a5b4fc" strokeWidth=".55" strokeDasharray="1.5 1.5"/>
-              {Object.entries(cityCounts).map(([city, count]) => {
-                const point = cityPoints[city];
-                if (!point) return null;
-                return <g key={city}><circle cx={point.x} cy={point.y} r={3.2 + count * .8} fill="#4f46e5" fillOpacity=".18"/><circle cx={point.x} cy={point.y} r="1.8" fill="#4338ca" stroke="white" strokeWidth=".8"/><title>{city}: {count} demande(s)</title></g>;
-              })}
-            </svg>
-            <p className="text-center text-[11px] text-slate-500">Carte schématique · les points représentent les villes renseignées</p>
-          </div>
+          <MoroccoProspectMap cities={Object.entries(cityCounts).map(([city, count]) => ({ city, count }))} />
           <div><h3 className="text-sm font-bold text-slate-800">Zones les plus représentées</h3><div className="mt-4 space-y-4">{topCities.map(([city, count]) => <div key={city}><div className="mb-1.5 flex justify-between gap-3 text-sm"><span className="font-medium text-slate-700">{city}</span><strong className="text-slate-950">{count}</strong></div><div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-indigo-600" style={{ width: (count / maxCity * 100) + "%" }}/></div></div>)}{!topCities.length && <p className="text-sm text-slate-400">Aucune ville enregistrée pour le moment.</p>}</div></div>
         </div>
       </article>
