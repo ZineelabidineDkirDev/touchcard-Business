@@ -19,6 +19,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="fr" className={`${geistSans.variable} ${geistMono.variable} ${tajawal.variable} h-full antialiased`}>
+      <head><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" /></head>
       <body className="min-h-full flex flex-col"><I18nProvider>{children}</I18nProvider></body>
     </html>
   );
