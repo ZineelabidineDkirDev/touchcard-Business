@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 export type ProspectInput = {
   fullName: string;
@@ -88,21 +89,42 @@ export async function updateProspectStatus(formData: FormData) {
 
 export async function createProspectCustomer(formData: FormData) {
   const id = String(formData.get("id") ?? "");
-  if (!id) return;
+  const rawConfig = String(formData.get("workspace_config") ?? "");
+  if (!id || !rawConfig) return;
+
+  let workspaceConfig: { template: string; modules: string[]; plan_code?: string };
+  try {
+    workspaceConfig = JSON.parse(rawConfig);
+  } catch {
+    redirect(`/dashboard/prospects/${id}/configure?error=${encodeURIComponent("Configuration invalide. Veuillez recommencer.")}`);
+  }
+
+  const allowedTemplates = ["e-business", "contact", "service"];
+  const allowedModules = [
+    "dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc",
+    "company_profile", "service_catalog", "product_catalog", "orders",
+    "quote_requests", "bookings", "availability_calendar", "team",
+    "gallery", "crm_contacts", "analytics", "whatsapp",
+  ];
+  if (!allowedTemplates.includes(workspaceConfig.template) || !Array.isArray(workspaceConfig.modules)
+    || workspaceConfig.modules.some((module) => !allowedModules.includes(module))) {
+    redirect(`/dashboard/prospects/${id}/configure?error=${encodeURIComponent("Les options sélectionnées ne sont pas valides.")}`);
+  }
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return;
+  if (!user || !isPlatformSuperAdmin(user.email)) return;
 
-  if (!isPlatformSuperAdmin(user.email)) return;
-
-  const { error } = await supabase.functions.invoke("create-prospect-customer", {
-    body: { request_id: id },
+  const { data, error } = await supabase.functions.invoke("create-prospect-customer", {
+    body: { request_id: id, workspace_config: workspaceConfig },
   });
-  if (error) {
-    console.error("Customer invitation failed", error);
-    throw new Error("Impossible de créer le compte client. Vérifiez que la fonction Supabase est déployée et que la demande est validée.");
+  if (error || !data?.ok) {
+    const message = error?.message || data?.error || "La création du compte a échoué.";
+    console.error("Customer workspace provisioning failed", { id, message });
+    redirect(`/dashboard/prospects/${id}/configure?error=${encodeURIComponent(message)}`);
   }
 
   revalidatePath("/dashboard/prospects");
+  revalidatePath("/dashboard/admin");
+  redirect("/dashboard/prospects?created=1");
 }
