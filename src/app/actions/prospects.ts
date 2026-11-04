@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
 import { revalidatePath } from "next/cache";
 
 export type ProspectInput = {
@@ -78,14 +79,7 @@ export async function updateProspectStatus(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  const { data: membership } = await supabase
-    .from("organization_members")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("role", "super_admin")
-    .limit(1)
-    .maybeSingle();
-  if (!membership) return;
+  if (!isPlatformSuperAdmin(user.email)) return;
 
   const { error } = await supabase.from("prospect_requests").update({ status, updated_at: new Date().toISOString() }).eq("id", id);
   if (!error) revalidatePath("/dashboard/prospects");
@@ -100,14 +94,7 @@ export async function createProspectCustomer(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
-  const { data: membership } = await supabase
-    .from("organization_members")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("role", "super_admin")
-    .limit(1)
-    .maybeSingle();
-  if (!membership) return;
+  if (!isPlatformSuperAdmin(user.email)) return;
 
   const { error } = await supabase.functions.invoke("create-prospect-customer", {
     body: { request_id: id },
