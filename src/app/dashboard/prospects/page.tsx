@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
-import { createProspectCustomer, updateProspectStatus } from "@/app/actions/prospects";
+import { updateProspectStatus } from "@/app/actions/prospects";
 
 const statuses = [
   ["new", "Nouveau"], ["to_contact", "À contacter"], ["in_discussion", "En discussion"],
@@ -10,9 +11,9 @@ const statuses = [
   ["completed", "Terminé"], ["rejected", "Refusé"], ["cancelled", "Annulé"],
 ];
 
-export default async function ProspectsPage() {
+export default async function ProspectsPage({ searchParams }: { searchParams: Promise<{ created?: string; already_created?: string; approval_required?: string }> }) {
   await connection();
-  const supabase = await createClient();
+  const query = await searchParams;\n  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
@@ -30,6 +31,9 @@ export default async function ProspectsPage() {
       <p className="text-sm font-semibold uppercase tracking-[.18em] text-indigo-600">TouchCard Business · CRM</p>
       <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">Prospects & demandes</h1>
       <p className="mt-2 text-slate-500">Toutes les demandes reçues depuis le parcours « Créer votre carte ».</p>
+      {query.created === "1" && <div role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">Le compte client et son espace configuré ont été créés. L'invitation a été envoyée par e-mail.</div>}
+      {query.already_created === "1" && <div className="mt-6 rounded-2xl bg-slate-100 p-4 text-sm text-slate-700">Cette demande est déjà liée à un compte client.</div>}
+      {query.approval_required === "1" && <div className="mt-6 rounded-2xl bg-amber-50 p-4 text-sm text-amber-800">Validez d'abord la demande avant de configurer son espace client.</div>}
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         <Metric label="Total des demandes" value={String(prospects?.length ?? 0)}/>
         <Metric label="Nouvelles demandes" value={String(prospects?.filter((p) => p.status === "new").length ?? 0)}/>
@@ -58,10 +62,7 @@ export default async function ProspectsPage() {
                   <button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-500">Enregistrer</button>
                 </form>
                 {p.status === "approved" && !p.user_id && (
-                  <form action={createProspectCustomer}>
-                    <input type="hidden" name="id" value={p.id}/>
-                    <button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-500">Créer le compte client</button>
-                  </form>
+                  <Link href={`/dashboard/prospects/${p.id}/configure`} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">Configurer l'espace client →</Link>
                 )}
                 {p.user_id && <span className="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">Compte client créé</span>}
               </div>
