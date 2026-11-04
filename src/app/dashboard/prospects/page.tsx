@@ -65,7 +65,7 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
                 {p.status === "approved" && !p.user_id && (
                   <Link href={`/dashboard/prospects/${p.id}/configure`} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">Configurer l'espace client →</Link>
                 )}
-                {p.user_id && <span className="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">Compte client créé</span>}
+                {p.user_id && <Link href={`/dashboard/prospects/${p.id}/preview`} className="rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-700 hover:bg-indigo-100">Voir l'espace client ↗</Link>}
               </div>
             </div>
           </article>
