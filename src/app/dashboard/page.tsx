@@ -1,5 +1,8 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
 import { I18nText } from "@/i18n/provider";
 
 const metrics = [
@@ -10,8 +13,10 @@ const metrics = [
 ];
 
 export default async function DashboardPage() {
+  await connection();
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+  if (isPlatformSuperAdmin(user?.email)) redirect("/dashboard/admin");
   const fullName = String(user?.user_metadata.full_name || "").trim();
 
   return (
