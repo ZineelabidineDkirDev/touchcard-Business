@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
 import { createProspectCustomer, updateProspectStatus } from "@/app/actions/prospects";
 
 const statuses = [
@@ -15,15 +16,7 @@ export default async function ProspectsPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: membership } = await supabase
-    .from("organization_members")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("role", "super_admin")
-    .limit(1)
-    .maybeSingle();
-
-  if (!membership) {
+  if (!isPlatformSuperAdmin(user.email)) {
     return <section className="mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-white p-8"><p className="text-xs font-black uppercase tracking-[.2em] text-indigo-600">TouchCard Business</p><h1 className="mt-3 text-3xl font-black text-slate-950">Espace administrateur</h1><p className="mt-3 text-slate-600">Cette rubrique est réservée aux administrateurs TouchCard autorisés.</p></section>;
   }
 
