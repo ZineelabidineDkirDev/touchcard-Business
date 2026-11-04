@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
@@ -13,10 +14,22 @@ function getSafeAuthError(error: unknown): string {
   }
 
   if (/fetch failed|failed to fetch|network/i.test(message)) {
-    return "Impossible de joindre le service d'inscription. Vérifiez la connexion et réessayez.";
+    return "Impossible de joindre le service. Vérifiez la connexion et réessayez.";
   }
 
-  return "Une erreur technique a empêché l'inscription. Réessayez dans quelques instants.";
+  return "Une erreur technique est survenue. Réessayez dans quelques instants.";
+}
+
+async function getAppOrigin() {
+  const configuredUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (configuredUrl) return configuredUrl.replace(/\/$/, "");
+
+  const requestHeaders = await headers();
+  const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
+  if (!host) return null;
+
+  const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  return `${protocol}://${host}`;
 }
 
 export async function signIn(_state: AuthState, formData: FormData): Promise<AuthState> {
@@ -24,9 +37,8 @@ export async function signIn(_state: AuthState, formData: FormData): Promise<Aut
   const password = String(formData.get("password") ?? "");
   if (!email || !password) return { error: "Renseignez votre e-mail et votre mot de passe." };
 
-  let supabase;
   try {
-    supabase = await createClient();
+    const supabase = await createClient();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       return { error: "Connexion impossible. Vérifiez vos identifiants et confirmez votre adresse e-mail si nécessaire." };
@@ -65,12 +77,51 @@ export async function signUp(_state: AuthState, formData: FormData): Promise<Aut
     return { error: getSafeAuthError(error) };
   }
 
-  // Avec la confirmation e-mail désactivée, Supabase renvoie une session :
-  // l'utilisateur entre directement dans son dashboard.
   if (data.session) redirect("/dashboard");
-
-  // Si la confirmation est activée dans Supabase, on ne contourne pas cette sécurité.
   return { success: "Compte créé. Consultez votre boîte e-mail pour confirmer l'adresse, puis connectez-vous." };
+}
+
+export async function requestPasswordReset(_state: AuthState, formData: FormData): Promise<AuthState> {
+  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  if (!email) return { error: "Saisissez votre adresse e-mail." };
+
+  const origin = await getAppOrigin();
+  if (!origin) return { error: "Impossible de déterminer l'adresse du site. Réessayez depuis la page de connexion." };
+
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${origin}/auth/callback?next=/reset-password/update`,
+    });
+    if (error) return { error: "L'envoi du lien a échoué. Vérifiez la configuration e-mail Supabase et réessayez." };
+  } catch (error) {
+    return { error: getSafeAuthError(error) };
+  }
+
+  // Même réponse que le compte existe ou non : ne pas révéler les adresses enregistrées.
+  return { success: "Si un compte correspond à cette adresse, un lien de réinitialisation vient d'être envoyé. Vérifiez votre boîte e-mail et vos courriers indésirables." };
+}
+
+export async function updatePassword(_state: AuthState, formData: FormData): Promise<AuthState> {
+  const password = String(formData.get("password") ?? "");
+  const confirmation = String(formData.get("confirmation") ?? "");
+  if (password.length < 8) return { error: "Le nouveau mot de passe doit contenir au moins 8 caractères." };
+  if (password !== confirmation) return { error: "Les deux mots de passe ne correspondent pas." };
+
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return { error: "Votre lien est invalide ou a expiré. Demandez un nouveau lien de réinitialisation." };
+    }
+
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) return { error: "Le changement de mot de passe a échoué. Demandez un nouveau lien et réessayez." };
+  } catch (error) {
+    return { error: getSafeAuthError(error) };
+  }
+
+  redirect("/login?password_updated=1");
 }
 
 export async function signOut() {
