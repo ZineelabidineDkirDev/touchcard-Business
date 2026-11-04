@@ -64,17 +64,22 @@ export default async function AdminDashboardPage() {
     label: type === "e-business" ? "E-Business" : type === "contact" ? "Contact" : "Service",
     count: prospects.filter((p) => p.card_type === type).length,
   }));
-  const monthLabels = Array.from({ length: 6 }, (_, i) => {
-    const d = new Date(); d.setMonth(d.getMonth() - (5 - i)); d.setDate(1);
-    return d.toLocaleDateString("fr-FR", { month: "short" });
+  // Anchor the chart to the latest persisted prospect timestamp.
+  // This avoids reading the wall clock during prerendering.
+  const chartAnchor = new Date(prospects[0]?.created_at ?? "2026-01-01T00:00:00.000Z");
+  const monthStarts = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date(chartAnchor.getFullYear(), chartAnchor.getMonth() - (5 - i), 1);
+    return d;
   });
-  const monthValues = Array.from({ length: 6 }, (_, i) => {
-    const d = new Date(); d.setMonth(d.getMonth() - (5 - i)); d.setDate(1);
-    return prospects.filter((p) => {
+  const monthLabels = monthStarts.map((d) =>
+    d.toLocaleDateString("fr-FR", { month: "short" })
+  );
+  const monthValues = monthStarts.map((d) =>
+    prospects.filter((p) => {
       const created = new Date(p.created_at);
       return created.getFullYear() === d.getFullYear() && created.getMonth() === d.getMonth();
-    }).length;
-  });
+    }).length
+  );
   const maxMonth = Math.max(1, ...monthValues);
   const maxCity = Math.max(1, ...topCities.map(([, n]) => n));
 
