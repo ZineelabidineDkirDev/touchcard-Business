@@ -25,6 +25,13 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       <div>
         <label htmlFor="password" className="mb-2 block text-sm font-medium text-slate-700">{t("password")}</label>
         <input id="password" name="password" type="password" required minLength={8} autoComplete={mode === "login" ? "current-password" : "new-password"} className="field" placeholder={t("minPassword")} />
+        {mode === "login" && (
+          <div className="mt-2 text-right">
+            <Link href="/forgot-password" className="text-sm font-semibold text-indigo-600 transition hover:text-indigo-800">
+              Mot de passe oublié ?
+            </Link>
+          </div>
+        )}
       </div>
       {state.error && <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{state.error}</p>}
       {state.success && <p role="status" className="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{state.success}</p>}
