@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 export default function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ registered?: string }>;
+  searchParams: Promise<{ registered?: string; password_updated?: string }>;
 }) {
   return (
     <Suspense fallback={<LoginLoading />}>
@@ -21,7 +21,7 @@ export default function LoginPage({
 async function LoginContent({
   searchParams,
 }: {
-  searchParams: Promise<{ registered?: string }>;
+  searchParams: Promise<{ registered?: string; password_updated?: string }>;
 }) {
   await connection();
   const supabase = await createClient();
@@ -47,6 +47,11 @@ async function LoginContent({
         {params.registered === "1" && (
           <p className="mt-5 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700">
             <I18nText message="created" />
+          </p>
+        )}
+        {params.password_updated === "1" && (
+          <p role="status" className="mt-5 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700">
+            Votre mot de passe a été modifié. Vous pouvez maintenant vous connecter.
           </p>
         )}
         <AuthForm mode="login" />
