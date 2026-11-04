@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { I18nText } from "@/i18n/provider";
 
@@ -11,7 +10,6 @@ const metrics = [
 ];
 
 export default async function DashboardPage() {
-  await connection();
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const fullName = String(user?.user_metadata.full_name || "").trim();
