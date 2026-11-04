@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
 
 type Prospect = { id: string; city: string; status: string; card_type: string; created_at: string };
 
@@ -24,10 +25,7 @@ export default async function AdminDashboardPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: membership } = await supabase.from("organization_members")
-    .select("role").eq("user_id", user.id).eq("role", "super_admin").limit(1).maybeSingle();
-
-  if (!membership) {
+  if (!isPlatformSuperAdmin(user.email)) {
     return <main className="mx-auto max-w-3xl rounded-3xl border border-amber-200 bg-white p-8 shadow-sm">
       <p className="text-xs font-black uppercase tracking-[.2em] text-indigo-600">TouchCard Business · Administration globale</p>
       <h1 className="mt-3 text-3xl font-black text-slate-950">Activation du Super Admin nécessaire</h1>
