@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { signOut } from "@/app/actions/auth";
 import { createClient } from "@/lib/supabase/server";
+import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
 import { LanguageSwitcher } from "@/i18n/provider";
 import { DashboardNavigation, DashboardLogoutLabel } from "@/components/dashboard/dashboard-navigation";
 
@@ -36,7 +37,7 @@ async function AuthenticatedDashboard({ children }: Readonly<{ children: React.R
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
-  const { data: adminMembership } = await supabase.from("organization_members").select("role").eq("user_id", user.id).eq("role", "super_admin").limit(1).maybeSingle();
+  const isSuperAdmin = isPlatformSuperAdmin(user.email);
 
   return (
     <div className="min-h-screen bg-slate-50 lg:flex">
@@ -44,7 +45,7 @@ async function AuthenticatedDashboard({ children }: Readonly<{ children: React.R
         <Link href="/" className="text-2xl font-black tracking-tight text-slate-950">Touch<span className="text-indigo-600">Card</span></Link>
         <p className="mt-1 text-xs text-slate-400">BUSINESS WORKSPACE</p>
         <div className="mt-4"><LanguageSwitcher /></div>
-        <DashboardNavigation isSuperAdmin={Boolean(adminMembership)} />
+        <DashboardNavigation isSuperAdmin={isSuperAdmin} />
         <div className="mt-8 border-t border-slate-100 pt-5 lg:absolute lg:inset-x-5 lg:bottom-6">
           <p className="truncate text-sm font-semibold text-slate-800">{String(user.user_metadata.full_name || user.email)}</p>
           <p className="mt-1 truncate text-xs text-slate-400">{user.email}</p>
