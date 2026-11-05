@@ -46,7 +46,7 @@ export default async function ClientWorkspacePreview({ params }: { params: Promi
     .eq("id", id)
     .maybeSingle();
 
-  if (!prospect || prospect.status !== "approved" || !prospect.user_id) notFound();
+  if (!prospect || !prospect.user_id) notFound();
 
   const { data: membership } = await supabase
     .from("organization_members")
