@@ -3,7 +3,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
-import { updateProspectStatus } from "@/app/actions/prospects";
+import { activateProspectClientAccess, updateProspectStatus } from "@/app/actions/prospects";
 
 const statuses = [
   ["new", "Nouveau"], ["to_contact", "À contacter"], ["in_discussion", "En discussion"],
@@ -24,7 +24,7 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
 
   const { data: prospects, error } = await supabase
     .from("prospect_requests")
-    .select("id, user_id, full_name, city, activity_sector, email, phone, card_type, reason, customization_requested, brand_name, logo_url, business_address, business_phone, social_links, project_needs, status, admin_notes, created_at")
+    .select("id, user_id, full_name, city, activity_sector, email, phone, card_type, reason, customization_requested, brand_name, logo_url, business_address, business_phone, social_links, project_needs, status, admin_notes, password_initialized, client_access_enabled, created_at")
     .order("created_at", { ascending: false });
 
   return (
@@ -65,6 +65,9 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
                 {p.status === "approved" && !p.user_id && (
                   <Link href={`/dashboard/prospects/${p.id}/configure`} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">Configurer l'espace client →</Link>
                 )}
+                {p.user_id && !p.password_initialized && <span className="rounded-lg bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800">Invitation envoyée · mot de passe à définir</span>}
+                {p.user_id && p.password_initialized && !p.client_access_enabled && <form action={activateProspectClientAccess}><input type="hidden" name="id" value={p.id}/><button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">Valider et ouvrir l'accès client</button></form>}
+                {p.user_id && p.client_access_enabled && <span className="rounded-lg bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800">Espace client activé</span>}
                 {p.user_id && <Link href={`/dashboard/prospects/${p.id}/preview`} className="rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-700 hover:bg-indigo-100">Voir l'espace client ↗</Link>}
                 {p.status === "in_production" && p.user_id && <Link href={`/dashboard/prospects/${p.id}/ai-test`} className="rounded-lg border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-bold text-violet-700 hover:bg-violet-100">Tester Gemini sans création ✨</Link>}
               </div>
