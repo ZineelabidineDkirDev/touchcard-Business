@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
 import { activateProspectClientAccess, updateProspectStatus } from "@/app/actions/prospects";
 import { reviewCardDesignRequest } from "@/app/actions/cards";
+import { AdminResetPasswordButton } from "@/components/prospects/admin-reset-password-button";
 
 const statuses = [
   ["new", "Nouveau"], ["to_contact", "À contacter"], ["in_discussion", "En discussion"],
@@ -80,6 +81,7 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
                 {p.user_id && !p.password_initialized && <span className="rounded-lg bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800">Compte créé · changement du mot de passe à la première connexion</span>}
                 {p.user_id && p.password_initialized && !p.client_access_enabled && ["in_production", "completed"].includes(p.status) && <form action={activateProspectClientAccess}><input type="hidden" name="id" value={p.id}/><button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">Valider et ouvrir l'accès client</button></form>}
                 {p.user_id && p.client_access_enabled && <span className="rounded-lg bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800">Espace client activé</span>}
+                {p.user_id && <AdminResetPasswordButton requestId={p.id}/>}
                 {p.user_id && <Link href={`/dashboard/prospects/${p.id}/preview`} className="rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-700 hover:bg-indigo-100">Voir l'espace client ↗</Link>}
                 {p.status === "in_production" && p.user_id && <Link href={`/dashboard/prospects/${p.id}/ai-test`} className="rounded-lg border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-bold text-violet-700 hover:bg-violet-100">Tester Gemini sans création ✨</Link>}
               </div>
