@@ -11,7 +11,8 @@ export function PasswordRecoveryForm({ mode }: { mode: "request" | "update" | "s
   const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
-    <form action={formAction} className="mt-8 space-y-5">\n      {mode === "setup" && <input type="hidden" name="clientSetup" value="1" />}
+    <form action={formAction} className="mt-8 space-y-5">
+      {mode === "setup" && <input type="hidden" name="clientSetup" value="1" />}
       {mode === "request" ? (
         <div>
           <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-700">Adresse e-mail</label>
