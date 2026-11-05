@@ -57,6 +57,7 @@ export function ProspectIntake() {
     if (step === 2 && (!form.sector || (form.sector.split("|").includes("Autre") && !form.sectorOther.trim()))) return "Sélectionnez au moins un secteur d'activité.";
     if (step === 3 && (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) || !form.phone.trim())) return "Indiquez un e-mail valide et votre téléphone.";
     if (step === 4 && !form.cardType) return "Choisissez le type de carte qui vous intéresse.";
+    if (step === 5 && !form.projectNeeds[0]) return "Choisissez une formule de service pour continuer.";
     return "";
   }
 
