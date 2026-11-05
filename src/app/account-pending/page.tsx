@@ -10,11 +10,11 @@ export default async function AccountPendingPage() {
 
   const { data: request } = await supabase
     .from("prospect_requests")
-    .select("password_initialized, client_access_enabled")
+    .select("status, password_initialized, client_access_enabled")
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (!request) redirect("/dashboard");
+  if (!request || !["in_production", "completed", "rejected", "cancelled"].includes(request.status)) redirect("/dashboard");
   if (!request.password_initialized) redirect("/setup-password");
   if (request.client_access_enabled) redirect("/dashboard");
 
