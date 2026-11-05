@@ -18,11 +18,16 @@ export async function POST(request: Request) {
       .select("id,organization_id").eq("id", cardId).eq("is_published", true).maybeSingle();
     if (!card) return NextResponse.json({ ok: false }, { status: 404 });
 
+    let safeLinkId: string | null = null;
+    if (linkId && eventType === "click") {
+      const { data: link } = await supabase.from("card_links").select("id").eq("id", linkId).eq("card_id", card.id).maybeSingle();
+      safeLinkId = link?.id ?? null;
+    }
     const { error } = await supabase.from("card_events").insert({
       organization_id: card.organization_id,
       card_id: card.id,
       event_type: eventType,
-      link_id: linkId,
+      link_id: safeLinkId,
       referrer: request.headers.get("referer")?.slice(0, 500) ?? null,
     });
     if (error) return NextResponse.json({ ok: false }, { status: 403 });
