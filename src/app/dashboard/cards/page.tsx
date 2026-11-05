@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import { createClientCard, saveClientCardProfile, addClientCardLink, deleteClientCardLink, toggleClientCardPublication } from "@/app/actions/cards";
 import { createClient } from "@/lib/supabase/server";
@@ -33,8 +34,9 @@ export default async function ClientCardsPage() {
   const { data: events } = cardIds.length
     ? await supabase.from("card_events").select("card_id,event_type").in("card_id", cardIds)
     : { data: [] as { card_id: string; event_type: string }[] };
-  const config = (organization?.workspace_config ?? {}) as { modules?: string[]; ai_suggestions?: { profile_draft?: { tagline?: string; description?: string; card_fields?: { key: string; label: string; type: string; visible: boolean }[] } } };
+  const config = (organization?.workspace_config ?? {}) as { modules?: string[]; ai_suggestions?: { profile_draft?: { tagline?: string; description?: string; card_fields?: { key: string; label: string; type: string; visible: boolean }[]; suggested_buttons?: { kind: string; label: string; enabled: boolean }[] } } };
   const modules = Array.isArray(config.modules) ? config.modules : [];
+  if (config.version && !modules.includes("digital_card")) notFound();
   const profileDraft = config.ai_suggestions?.profile_draft;
   const totalViews = (events ?? []).filter((event) => ["view", "qr_scan", "nfc_scan"].includes(event.event_type)).length;
   const totalNfc = (events ?? []).filter((event) => event.event_type === "nfc_scan").length;
@@ -52,7 +54,7 @@ export default async function ClientCardsPage() {
         {[["Visites & scans", totalViews], ["Scans NFC", totalNfc], ["Contacts enregistrés", totalSaves], ["Clics sur les boutons", totalClicks]].map(([label, value]) => <article key={String(label)} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p className="text-sm text-slate-500">{label}</p><p className="mt-3 text-3xl font-black text-slate-950">{value}</p><p className="mt-1 text-xs text-slate-400">Événements réels enregistrés</p></article>)}
       </section>
 
-      {profileDraft?.tagline && <aside className="rounded-2xl border border-indigo-100 bg-indigo-50 p-4 text-sm text-indigo-950"><strong>Suggestion IA approuvée :</strong> {profileDraft.tagline}{profileDraft.description ? " — " + profileDraft.description : ""}</aside>}
+      {profileDraft?.tagline && <aside className="rounded-2xl border border-indigo-100 bg-indigo-50 p-4 text-sm text-indigo-950"><strong>Suggestion IA approuvée :</strong> {profileDraft.tagline}{profileDraft.description ? " — " + profileDraft.description : ""}{profileDraft.suggested_buttons?.length ? <p className="mt-2 text-xs">Boutons recommandés à configurer : {profileDraft.suggested_buttons.filter((button) => button.enabled).map((button) => button.label).join(" · ")}</p> : null}</aside>}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="text-lg font-bold text-slate-950">Créer une carte</h2>
