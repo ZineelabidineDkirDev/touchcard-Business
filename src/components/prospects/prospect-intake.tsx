@@ -30,7 +30,9 @@ export function ProspectIntake() {
   const reduceMotion = useReducedMotion();
   const [logoName, setLogoName] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  const progress = useMemo(() => ((step + 1) / 9) * 100, [step]);
+  const [provisionalPassword, setProvisionalPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const progress = useMemo(() => ((step + 1) / 10) * 100, [step]);
 
   function update<K extends keyof ProspectInput>(key: K, value: ProspectInput[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -58,6 +60,8 @@ export function ProspectIntake() {
     if (step === 3 && (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) || !form.phone.trim())) return "Indiquez un e-mail valide et votre téléphone.";
     if (step === 4 && !form.cardType) return "Choisissez le type de carte qui vous intéresse.";
     if (step === 5 && !form.projectNeeds[0]) return "Choisissez une formule de service pour continuer.";
+    if (step === 8 && provisionalPassword.length < 8) return "Le mot de passe provisoire doit contenir au moins 8 caractères.";
+    if (step === 8 && provisionalPassword !== passwordConfirmation) return "Les deux mots de passe ne correspondent pas.";
     return "";
   }
 
@@ -66,7 +70,7 @@ export function ProspectIntake() {
     setError("");
     const validation = validateStep();
     if (validation) { setError(validation); return; }
-    if (step < 8) { setStep((value) => value + 1); return; }
+    if (step < 9) { setStep((value) => value + 1); return; }
 
     setBusy(true);
     const requestId = crypto.randomUUID();
@@ -85,10 +89,10 @@ export function ProspectIntake() {
       const { data: publicUrl } = supabase.storage.from("prospect-logos").getPublicUrl(uploaded.path);
       requestData = { ...form, logoUrl: publicUrl.publicUrl };
     }
-    const result = await submitProspectRequest(requestData, requestId);
+    const result = await submitProspectRequest(requestData, requestId, provisionalPassword);
     if (!result.ok) { setError(result.error); setBusy(false); return; }
 
-    // Aucun compte n’est créé à cette étape : la demande attend la validation de l’administrateur.
+    // Le compte est créé sans e-mail de confirmation, mais reste verrouillé jusqu’à validation du Super Admin.
     setDone(true);
     setBusy(false);
   }
@@ -104,7 +108,7 @@ export function ProspectIntake() {
           <p className="mx-auto mt-5 max-w-lg leading-8 text-slate-600">Votre demande a bien été transmise à notre équipe. Nous allons étudier votre besoin et vous contacter pour confirmer les détails.</p>
           <div className="mt-8 rounded-2xl border border-violet-100 bg-violet-50/70 p-5 text-left">
             <p className="font-bold">Votre demande est enregistrée.</p>
-            <p className="mt-2 text-sm text-slate-600">"Notre équipe étudiera votre demande. Si elle est validée, un compte client sera créé et vous recevrez une invitation par e-mail."</p>
+            <p className="mt-2 text-sm text-slate-600">Votre compte est créé. Connectez-vous avec votre adresse e-mail et votre mot de passe provisoire. À la première connexion, vous devrez choisir un nouveau mot de passe. Votre espace restera verrouillé jusqu’à la validation du Super Admin.</p>
           </div>
           <Link href="/" className="mt-8 inline-flex rounded-xl bg-violet-700 px-7 py-4 font-bold text-white transition hover:bg-violet-800">Retour à l'accueil</Link>
         </div>
@@ -112,8 +116,8 @@ export function ProspectIntake() {
     );
   }
 
-  const titles = ["Faisons connaissance", "Votre localisation", "Votre activité", "Vos coordonnées", "Votre choix", "Votre formule de service", "Vos réseaux & pages", "Votre personnalisation", "Récapitulatif"];
-  const subtitles = ["Comment pouvons-nous vous appeler ?", "Dans quelle ville exercez-vous ?", "Quel est votre domaine professionnel ?", "Comment pouvons-nous vous joindre ?", "Quelle solution correspond à votre besoin ?", "Choisissez une seule formule. Notre agent IA prépare automatiquement les fonctionnalités adaptées.", "Où peut-on découvrir votre activité en ligne ?", "Souhaitez-vous une carte personnalisée ?", "Relisez votre demande avant de l’envoyer."];
+  const titles = ["Faisons connaissance", "Votre localisation", "Votre activité", "Vos coordonnées", "Votre choix", "Votre formule de service", "Vos réseaux & pages", "Votre personnalisation", "Sécurité du compte", "Récapitulatif"];
+  const subtitles = ["Comment pouvons-nous vous appeler ?", "Dans quelle ville exercez-vous ?", "Quel est votre domaine professionnel ?", "Comment pouvons-nous vous joindre ?", "Quelle solution correspond à votre besoin ?", "Choisissez une seule formule. Notre agent IA prépare automatiquement les fonctionnalités adaptées.", "Où peut-on découvrir votre activité en ligne ?", "Souhaitez-vous une carte personnalisée ?", "Créez un mot de passe provisoire pour votre première connexion.", "Relisez votre demande avant de l’envoyer."];
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#080a19] px-4 py-10 text-slate-900 sm:px-6 sm:py-14">
@@ -126,7 +130,7 @@ export function ProspectIntake() {
       </header>
 
       <section className="relative mx-auto mt-10 max-w-3xl rounded-[2rem] border border-slate-200/90 bg-white/95 p-6 shadow-[0_24px_80px_rgba(30,27,75,.12)] sm:mt-12 sm:p-10">
-        <div className="flex items-center justify-between gap-4 text-xs font-bold uppercase tracking-[.18em] text-violet-700"><span>Votre projet TouchCard</span><span>Étape {step + 1} / 9</span></div>
+        <div className="flex items-center justify-between gap-4 text-xs font-bold uppercase tracking-[.18em] text-violet-700"><span>Votre projet TouchCard</span><span>Étape {step + 1} / 10</span></div>
         <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 transition-all duration-500" style={{ width: `${progress}%` }}/></div>
         <p className="mt-9 text-xs font-black uppercase tracking-[.22em] text-violet-700">{titles[step]}</p>
         <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">{subtitles[step]}</h1>
@@ -163,9 +167,10 @@ export function ProspectIntake() {
   </div>
 </div>}
           {step === 6 && <div className="space-y-5"><p className="text-sm leading-6 text-slate-600">Ajoutez les liens de vos pages professionnelles et réseaux sociaux. Vous pouvez en ajouter plusieurs ou supprimer ceux qui ne sont pas utiles.</p><div className="space-y-3">{form.socialLinks.map((item, index) => <div key={index} className="grid gap-2 rounded-2xl border border-violet-100 bg-violet-50/60 p-3 sm:grid-cols-[.8fr_1.4fr_auto] sm:items-end"><div><label className="mb-2 block text-xs font-bold text-slate-700">Plateforme</label><select value={item.platform} onChange={(event) => update("socialLinks", form.socialLinks.map((link, i) => i === index ? { ...link, platform: event.target.value } : link))} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm text-slate-900 outline-none focus:border-violet-400"><option>Instagram</option><option>Facebook</option><option>TikTok</option><option>LinkedIn</option><option>YouTube</option><option>WhatsApp</option><option>Site web</option><option>Autre</option></select></div><div><label className="mb-2 block text-xs font-bold text-slate-700">Lien de votre page</label><input type="url" value={item.url} onChange={(event) => update("socialLinks", form.socialLinks.map((link, i) => i === index ? { ...link, url: event.target.value } : link))} placeholder="https://..." className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-violet-400"/></div><div className="flex gap-2"><button type="button" aria-label="Ajouter un lien" onClick={() => update("socialLinks", [...form.socialLinks, { platform: "Instagram", url: "" }])} className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-700 text-2xl text-white shadow-md hover:bg-violet-800">+</button><button type="button" aria-label="Supprimer ce lien" disabled={form.socialLinks.length === 1} onClick={() => update("socialLinks", form.socialLinks.filter((_, i) => i !== index))} className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-300 bg-white text-2xl text-slate-600 hover:bg-rose-50 disabled:opacity-30">−</button></div></div>)}</div></div>}{step === 7 && <div className="space-y-5"><p className="text-sm text-slate-600">Nous pouvons adapter le design et les informations de votre carte à votre marque.</p><div className="grid grid-cols-2 gap-3"><Choice selected={form.customRequested} onClick={() => update("customRequested", true)}>Oui, personnaliser</Choice><Choice selected={!form.customRequested} onClick={() => update("customRequested", false)}>Non, passer</Choice></div>{form.customRequested && <div className="grid gap-4 rounded-2xl border border-violet-100 bg-violet-50/60 p-4 sm:grid-cols-2"><Field label="Nom de marque" value={form.brandName} onChange={(v) => update("brandName", v)} placeholder="Votre brand name"/><div><label className="mb-2 block text-sm font-semibold text-slate-700">Logo (image, 2 Mo max.)</label><input type="file" accept="image/*" onChange={onLogoChange} className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-500 file:px-3 file:py-2 file:font-bold file:text-white"/>{logoName && <p className="mt-2 text-xs text-emerald-700">{logoName}</p>}</div><Field label="Adresse professionnelle" value={form.businessAddress} onChange={(v) => update("businessAddress", v)} placeholder="Adresse"/><Field label="Téléphone professionnel" value={form.businessPhone} onChange={(v) => update("businessPhone", v)} placeholder="+212..."/></div>}</div>}
-          {step === 8 && <div className="space-y-3 rounded-2xl border border-violet-100 bg-violet-50/50 p-5 text-sm"><Review label="Nom" value={form.fullName}/><Review label="Ville" value={form.city}/><Review label="Secteur" value={form.sector === "Autre" ? form.sectorOther : form.sector}/><Review label="E-mail" value={form.email}/><Review label="Téléphone" value={form.phone}/><Review label="Pages & réseaux" value={form.socialLinks.filter((item) => item.url.trim()).map((item) => item.platform + ": " + item.url).join(" · ") || "Non renseignés"}/><Review label="Carte souhaitée" value={cards.find((card) => card.id === form.cardType)?.title || ""}/><Review label="Formule choisie" value={form.projectNeeds[0] || "Non sélectionnée"}/><Review label="Personnalisation" value={form.customRequested ? "Oui" : "Non"}/>{form.customRequested && <><Review label="Marque" value={form.brandName}/><Review label="Logo" value={logoName || "Non fourni"}/><Review label="Adresse" value={form.businessAddress}/><Review label="Téléphone professionnel" value={form.businessPhone}/></>}</div>}
+          {step === 8 && <div className="space-y-5"><div className="rounded-2xl border border-violet-100 bg-violet-50/60 p-5"><p className="font-bold text-slate-900">Ce mot de passe est provisoire.</p><p className="mt-2 text-sm leading-6 text-slate-600">Il vous permettra de vous connecter après l’envoi de votre demande. Lors de votre première connexion, TouchCard vous demandera de le remplacer par un mot de passe personnel. Ne le partagez avec personne.</p></div><Field label="Mot de passe provisoire (8 caractères minimum)" type="password" value={provisionalPassword} onChange={setProvisionalPassword} placeholder="Créer votre mot de passe" autoComplete="new-password"/><Field label="Confirmer le mot de passe" type="password" value={passwordConfirmation} onChange={setPasswordConfirmation} placeholder="Répéter le mot de passe" autoComplete="new-password"/></div>}
+          {step === 9 && <div className="space-y-3 rounded-2xl border border-violet-100 bg-violet-50/50 p-5 text-sm"><Review label="Nom" value={form.fullName}/><Review label="Ville" value={form.city}/><Review label="Secteur" value={form.sector === "Autre" ? form.sectorOther : form.sector}/><Review label="E-mail" value={form.email}/><Review label="Téléphone" value={form.phone}/><Review label="Pages & réseaux" value={form.socialLinks.filter((item) => item.url.trim()).map((item) => item.platform + ": " + item.url).join(" · ") || "Non renseignés"}/><Review label="Carte souhaitée" value={cards.find((card) => card.id === form.cardType)?.title || ""}/><Review label="Formule choisie" value={form.projectNeeds[0] || "Non sélectionnée"}/><Review label="Personnalisation" value={form.customRequested ? "Oui" : "Non"}/>{form.customRequested && <><Review label="Marque" value={form.brandName}/><Review label="Logo" value={logoName || "Non fourni"}/><Review label="Adresse" value={form.businessAddress}/><Review label="Téléphone professionnel" value={form.businessPhone}/></>}</div>}
           {error && <p role="alert" className="mt-5 rounded-xl border border-rose-400/20 bg-rose-400/10 p-3 text-sm text-rose-700">{error}</p>}
-          <div className="mt-9 flex flex-col-reverse justify-between gap-3 sm:flex-row"><button type="button" disabled={step === 0 || busy} onClick={() => { setError(""); setStep((value) => value - 1); }} className="rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 transition hover:border-violet-300 hover:bg-violet-50 disabled:opacity-30">Précédent</button><button type="submit" disabled={busy} className="rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-7 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-indigo-950/30 transition hover:-translate-y-0.5 hover:brightness-110 disabled:opacity-60">{busy ? "Enregistrement..." : step === 8 ? "Confirmer ma demande" : "Suivant →"}</button></div>
+          <div className="mt-9 flex flex-col-reverse justify-between gap-3 sm:flex-row"><button type="button" disabled={step === 0 || busy} onClick={() => { setError(""); setStep((value) => value - 1); }} className="rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 transition hover:border-violet-300 hover:bg-violet-50 disabled:opacity-30">Précédent</button><button type="submit" disabled={busy} className="rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-7 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-indigo-950/30 transition hover:-translate-y-0.5 hover:brightness-110 disabled:opacity-60">{busy ? "Enregistrement..." : step === 9 ? "Créer mon compte et envoyer la demande" : "Suivant →"}</button></div>
         </form>
         <p className="mt-7 text-center text-[11px] leading-5 text-slate-500">En confirmant, vous acceptez que TouchCard utilise ces informations pour traiter votre demande et vous contacter à ce sujet.</p>
       </section>
