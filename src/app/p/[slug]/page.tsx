@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { I18nText } from "@/i18n/provider";
 import { PublicCardTracker, TrackedPublicLink } from "@/components/cards/public-card-tracker";
 
-type PublicFields = { tagline?: string; location?: string; hours?: string; whatsapp?: string };
+type PublicFields = { tagline?: string; location?: string; hours?: string; whatsapp?: string; custom_fields?: { key: string; label: string; value: string; visible: boolean }[] };
 type PublicLink = { id: string; label: string; url: string; kind: string };
 
 export default function PublicCardPage({
@@ -56,6 +56,7 @@ async function PublicCardContent({
           {fields.tagline && <p className="mt-4 text-sm font-semibold text-slate-700">{fields.tagline}</p>}
           {card.bio && <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-600">{card.bio}</p>}
           {(fields.location || fields.hours) && <div className="mt-4 space-y-1 text-xs text-slate-500">{fields.location && <p>📍 {fields.location}</p>}{fields.hours && <p>🕒 {fields.hours}</p>}</div>}
+          {fields.custom_fields?.some((field) => field.visible && field.label && field.value) && <section className="mt-5 space-y-2">{fields.custom_fields.filter((field) => field.visible && field.label && field.value).map((field) => <div key={field.key} className="rounded-xl bg-slate-50 px-4 py-3"><p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">{field.label}</p><p className="mt-1 whitespace-pre-line text-sm font-medium text-slate-800">{field.value}</p></div>)}</section>}
 
           <div className="mt-7 grid gap-3">
             <TrackedPublicLink cardId={card.id} href={vcardUrl} eventType="contact_save" className="btn-primary text-center">Enregistrer le contact</TrackedPublicLink>
