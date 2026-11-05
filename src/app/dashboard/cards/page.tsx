@@ -23,7 +23,7 @@ export default async function ClientCardsPage() {
     ? await supabase.from("organizations").select("id,name,workspace_config").eq("id", organizationId).maybeSingle()
     : { data: null };
   const { data: cards } = organizationId
-    ? await supabase.from("cards").select("id,slug,full_name,job_title,company_name,bio,email,phone,website,avatar_url,is_published,public_fields")
+    ? await supabase.from("cards").select("id,slug,full_name,job_title,company_name,bio,email,phone,website,avatar_url,is_published,public_fields,public_settings")
       .eq("organization_id", organizationId).order("created_at", { ascending: false })
     : { data: [] as Card[] };
   const cardIds = (cards ?? []).map((card) => card.id);
