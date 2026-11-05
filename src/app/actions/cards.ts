@@ -69,6 +69,12 @@ export async function saveClientCardProfile(formData: FormData) {
     website: String(formData.get("website") ?? "").trim().slice(0, 500) || null,
     avatar_url: String(formData.get("avatar_url") ?? "").trim().slice(0, 1000) || null,
     public_fields: fields,
+    public_settings: {
+      show_phone: formData.get("show_phone") === "on",
+      show_email: formData.get("show_email") === "on",
+      show_website: formData.get("show_website") === "on",
+      show_save_contact: true,
+    },
     updated_at: new Date().toISOString(),
   }).eq("id", cardId).eq("organization_id", organizationId);
   if (!error) revalidatePath("/dashboard/cards");
