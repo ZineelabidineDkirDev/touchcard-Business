@@ -38,6 +38,15 @@ async function AuthenticatedDashboard({ children }: Readonly<{ children: React.R
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
   const isSuperAdmin = isPlatformSuperAdmin(user.email);
+  if (!isSuperAdmin) {
+    const { data: clientRequest } = await supabase
+      .from("prospect_requests")
+      .select("password_initialized, client_access_enabled")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (clientRequest && !clientRequest.password_initialized) redirect("/setup-password");
+    if (clientRequest && !clientRequest.client_access_enabled) redirect("/account-pending");
+  }
   const { data: membership } = await supabase
     .from("organization_members")
     .select("organization_id")
