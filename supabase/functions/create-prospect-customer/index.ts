@@ -171,7 +171,7 @@ Deno.serve(async (req: Request) => {
     const { error: nfcError } = await admin.from("nfc_tags").insert({
       card_id: card.id,
       public_url: `${siteUrl.replace(/\/$/, "")}/p/${card.slug}?source=nfc`,
-      is_active: true,
+      is_active: false,
     });
     if (nfcError) throw new Error("The NFC link could not be prepared.");
 
