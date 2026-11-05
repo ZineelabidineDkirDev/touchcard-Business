@@ -35,7 +35,7 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
       <p className="text-sm font-semibold uppercase tracking-[.18em] text-indigo-600">TouchCard Business · CRM</p>
       <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">Prospects & demandes</h1>
       <p className="mt-2 text-slate-500">Toutes les demandes reçues depuis le parcours « Créer votre carte ».</p>
-      {query.created === "1" && <div role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">Le compte client et son espace configuré ont été créés. L'invitation a été envoyée par e-mail.</div>}
+      {query.created === "1" && <div role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">L'espace client a été configuré. Il reste verrouillé jusqu'à l'activation par le Super Admin.</div>}
       {query.already_created === "1" && <div className="mt-6 rounded-2xl bg-slate-100 p-4 text-sm text-slate-700">Cette demande est déjà liée à un compte client.</div>}
       {query.approval_required === "1" && <div className="mt-6 rounded-2xl bg-amber-50 p-4 text-sm text-amber-800">Validez d'abord la demande avant de configurer son espace client.</div>}
       <section className="mt-10 space-y-4">
@@ -74,11 +74,11 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
                   <select name="status" defaultValue={p.status} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">{statuses.map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select>
                   <button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-500">Enregistrer</button>
                 </form>
-                {p.status === "approved" && !p.user_id && (
+                {p.status === "approved" && p.user_id && (
                   <Link href={`/dashboard/prospects/${p.id}/configure`} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">Configurer l'espace client →</Link>
                 )}
-                {p.user_id && !p.password_initialized && <span className="rounded-lg bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800">Invitation envoyée · mot de passe à définir</span>}
-                {p.user_id && p.password_initialized && !p.client_access_enabled && <form action={activateProspectClientAccess}><input type="hidden" name="id" value={p.id}/><button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">Valider et ouvrir l'accès client</button></form>}
+                {p.user_id && !p.password_initialized && <span className="rounded-lg bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800">Compte créé · changement du mot de passe à la première connexion</span>}
+                {p.user_id && p.password_initialized && !p.client_access_enabled && ["in_production", "completed"].includes(p.status) && <form action={activateProspectClientAccess}><input type="hidden" name="id" value={p.id}/><button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">Valider et ouvrir l'accès client</button></form>}
                 {p.user_id && p.client_access_enabled && <span className="rounded-lg bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800">Espace client activé</span>}
                 {p.user_id && <Link href={`/dashboard/prospects/${p.id}/preview`} className="rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-700 hover:bg-indigo-100">Voir l'espace client ↗</Link>}
                 {p.status === "in_production" && p.user_id && <Link href={`/dashboard/prospects/${p.id}/ai-test`} className="rounded-lg border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-bold text-violet-700 hover:bg-violet-100">Tester Gemini sans création ✨</Link>}
