@@ -34,6 +34,9 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
   if (!fullName || !input.city || !input.sector || !email || !phone || !input.cardType) {
     return { ok: false as const, error: "Veuillez compléter tous les champs obligatoires." };
   }
+  if (input.sector.includes("|")) {
+    return { ok: false as const, error: "Un seul domaine professionnel peut être sélectionné." };
+  }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { ok: false as const, error: "Veuillez saisir une adresse e-mail valide." };
   }
@@ -46,7 +49,7 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
       id: requestId,
       full_name: fullName,
       city: input.city.trim(),
-      activity_sector: input.sector.split("|").map((sector) => sector === "Autre" ? input.sectorOther.trim() || "Autre" : sector).join(", "),
+      activity_sector: input.sector === "Autre" ? input.sectorOther.trim() || "Autre" : input.sector,
       email,
       phone,
       card_type: input.cardType,
