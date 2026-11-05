@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { createClientCard, saveClientCardProfile, addClientCardLink, deleteClientCardLink, toggleClientCardPublication } from "@/app/actions/cards";
 import { createClient } from "@/lib/supabase/server";
 import { CustomCardFieldsEditor, type EditableCardField } from "@/components/cards/custom-card-fields-editor";
+import { CardTemplateGallery } from "@/components/cards/card-template-gallery";
 
 type Card = {
   id: string; slug: string; full_name: string; job_title: string | null; company_name: string | null;
@@ -38,6 +39,7 @@ export default async function ClientCardsPage() {
   const modules = Array.isArray(config.modules) ? config.modules : [];
   if (config.version && !modules.includes("digital_card")) notFound();
   const profileDraft = config.ai_suggestions?.profile_draft;
+  const { data: designRequest } = await supabase.from("card_design_requests").select("status,template_id").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
   const totalViews = (events ?? []).filter((event) => ["view", "qr_scan", "nfc_scan"].includes(event.event_type)).length;
   const totalNfc = (events ?? []).filter((event) => event.event_type === "nfc_scan").length;
   const totalQr = (events ?? []).filter((event) => event.event_type === "qr_scan").length;
@@ -50,6 +52,8 @@ export default async function ClientCardsPage() {
         <div><p className="text-sm font-bold uppercase tracking-wider text-indigo-600">Espace client · {organization?.name ?? "TouchCard"}</p><h1 className="mt-2 text-3xl font-black text-slate-950">Mes cartes NFC</h1><p className="mt-2 text-sm text-slate-500">Gérez vos profils, vos boutons et les informations visibles après un scan.</p></div>
         <Link href="/dashboard" className="text-sm font-semibold text-indigo-700">← Tableau de bord</Link>
       </header>
+
+      <CardTemplateGallery cardType={String(config.template ?? "contact")} modules={modules} existingStatus={designRequest?.status ?? null} existingTemplate={designRequest?.template_id ?? null} />
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[["Visites & scans", totalViews], ["Scans NFC", totalNfc], ["Contacts enregistrés", totalSaves], ["Clics sur les boutons", totalClicks]].map(([label, value]) => <article key={String(label)} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p className="text-sm text-slate-500">{label}</p><p className="mt-3 text-3xl font-black text-slate-950">{value}</p><p className="mt-1 text-xs text-slate-400">Événements réels enregistrés</p></article>)}
