@@ -44,7 +44,8 @@ async function AuthenticatedDashboard({ children }: Readonly<{ children: React.R
       .select("status, password_initialized, client_access_enabled")
       .eq("user_id", user.id)
       .maybeSingle();
-    const accessManaged = clientRequest && ["in_production", "completed", "rejected", "cancelled"].includes(clientRequest.status);
+    const accessManaged = clientRequest && ["in_production", "completed"].includes(clientRequest.status);
+    if (clientRequest && ["rejected", "cancelled"].includes(clientRequest.status)) redirect("/account-pending?blocked=1");
     if (accessManaged && !clientRequest.password_initialized) redirect("/setup-password");
     if (accessManaged && !clientRequest.client_access_enabled) redirect("/account-pending");
   }
