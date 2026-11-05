@@ -293,7 +293,7 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
         generationConfig: {
           responseMimeType: "application/json",
           responseJsonSchema: schema,
-          temperature: 0.25,
+          // Gemini 3.8 Flash no longer accepts legacy sampling parameters such as temperature.
           maxOutputTokens: 1800,
         },
       }),
@@ -301,14 +301,35 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
     });
 
     if (!response.ok) {
+      const providerBody = await response.text();
+      let providerMessage = "";
+      try {
+        const parsedError = JSON.parse(providerBody);
+        providerMessage = String(parsedError?.error?.message ?? "");
+      } catch {
+        providerMessage = providerBody;
+      }
+      console.error("Gemini generation failed", {
+        status: response.status,
+        statusText: response.statusText,
+        providerMessage: providerMessage.slice(0, 1200),
+      });
+
       if (response.status === 429) {
-        return { ok: false as const, error: "Quota gratuit Gemini atteint ou temporairement limité. Réessaie plus tard ou continue la configuration manuellement. Aucun autre fournisseur payant ne sera utilisé." };
+        return { ok: false as const, error: "Quota gratuit Gemini atteint ou temporairement limité (HTTP 429). Réessaie plus tard ou continue la configuration manuellement. Aucun autre fournisseur payant ne sera utilisé." };
       }
       if (response.status === 401 || response.status === 403) {
-        return { ok: false as const, error: "Gemini a refusé la clé API. Vérifie la clé et l'activation de Gemini API dans Google AI Studio." };
+        return { ok: false as const, error: "Gemini a refusé la clé API ou l'accès au modèle (HTTP " + response.status + "). Vérifie la clé et l'activation de Gemini API dans Google AI Studio." };
       }
-      console.error("Gemini generation failed", { status: response.status });
-      return { ok: false as const, error: "Gemini n'a pas pu générer la configuration. Tu peux continuer manuellement." };
+      if (response.status === 404) {
+        return { ok: false as const, error: "Le modèle Gemini demandé est introuvable ou indisponible pour cette clé (HTTP 404)." };
+      }
+      return {
+        ok: false as const,
+        error: "Gemini a refusé la génération (HTTP " + response.status + "). " +
+          (providerMessage ? providerMessage.slice(0, 320) : "Consulte les journaux serveur pour le détail.") +
+          " Tu peux continuer manuellement.",
+      };
     }
 
     const payload = await response.json();
@@ -356,7 +377,12 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
       },
     };
   } catch (error) {
-    console.error("Gemini request error", error);
-    return { ok: false as const, error: "Erreur de communication avec Gemini. Vérifie ta connexion et réessaie." };
+    console.error("Gemini request/response parsing error", error);
+    return {
+      ok: false as const,
+      error: error instanceof SyntaxError
+        ? "Gemini a répondu, mais sa proposition JSON est invalide. Relance le test."
+        : "Erreur de communication avec Gemini. Vérifie la connexion et les journaux serveur, puis réessaie.",
+    };
   }
 }
