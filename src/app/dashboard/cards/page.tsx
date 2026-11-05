@@ -34,7 +34,7 @@ export default async function ClientCardsPage() {
   const { data: events } = cardIds.length
     ? await supabase.from("card_events").select("card_id,event_type").in("card_id", cardIds)
     : { data: [] as { card_id: string; event_type: string }[] };
-  const config = (organization?.workspace_config ?? {}) as { modules?: string[]; ai_suggestions?: { profile_draft?: { tagline?: string; description?: string; card_fields?: { key: string; label: string; type: string; visible: boolean }[]; suggested_buttons?: { kind: string; label: string; enabled: boolean }[] } } };
+  const config = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[]; ai_suggestions?: { profile_draft?: { tagline?: string; description?: string; card_fields?: { key: string; label: string; type: string; visible: boolean }[]; suggested_buttons?: { kind: string; label: string; enabled: boolean }[] } } };
   const modules = Array.isArray(config.modules) ? config.modules : [];
   if (config.version && !modules.includes("digital_card")) notFound();
   const profileDraft = config.ai_suggestions?.profile_draft;
