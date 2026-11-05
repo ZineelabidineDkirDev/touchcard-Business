@@ -121,6 +121,14 @@ export async function updatePassword(_state: AuthState, formData: FormData): Pro
     return { error: getSafeAuthError(error) };
   }
 
+  if (String(formData.get("clientSetup") ?? "") === "1") {
+    const { error: setupError } = await supabase.functions.invoke("complete-client-password-setup", { body: {} });
+    if (setupError) {
+      return { error: "Votre mot de passe est enregistré, mais la confirmation de sécurité n'a pas abouti. Soumettez à nouveau ce formulaire pour terminer l'activation." };
+    }
+    redirect("/account-pending");
+  }
+
   redirect("/login?password_updated=1");
 }
 
