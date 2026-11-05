@@ -16,6 +16,7 @@ export default async function SetupPasswordPage() {
     .eq("user_id", user.id)
     .maybeSingle();
 
+  if (request && ["rejected", "cancelled"].includes(request.status)) redirect("/account-pending?blocked=1");
   if (!request || !["in_production", "completed"].includes(request.status)) redirect("/dashboard");
   if (request.password_initialized) redirect("/account-pending");
 
