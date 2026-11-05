@@ -12,7 +12,7 @@ const designs=[
 {id:"market",name:"Market Modern",type:"e-business",tag:"E-commerce",desc:"Vitrine dynamique pensée pour convertir les visiteurs en clients.",bg:"#312e81",accent:"#a5b4fc",modules:["product_catalog","orders","crm_contacts","whatsapp"]}];
 export function CardTemplateGallery({cardType,modules,existingStatus}:Props){
 const [selected,setSelected]=useState("");const [notes,setNotes]=useState("");const [state,setState]=useState("idle");const [message,setMessage]=useState("");
-const available=designs.filter(d=>d.type===cardType&&d.modules.every(m=>modules.includes(m)||!modules.length));
+const core:Record<string,string>={contact:"contact_profile",service:"service_catalog","e-business":"product_catalog"};\nconst available=designs.filter(d=>d.type===cardType&&(!modules.length||modules.includes(core[cardType])));
 async function send(){if(!selected)return;setState("sending");const r=await submitCardDesignRequest(selected,notes);if(r.ok){setState("sent");setMessage("Demande transmise au Super Admin. Le modèle reste en attente de validation.");}else{setState("error");setMessage(r.error);}}
 return <section className="space-y-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
 <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-[.2em] text-violet-700">Bibliothèque de designs</p><h2 className="mt-2 text-2xl font-black text-slate-950">Choisissez votre modèle</h2><p className="mt-2 text-sm text-slate-500">Modèles filtrés selon votre carte et les fonctionnalités activées dans votre espace.</p></div><span className="rounded-full bg-violet-50 px-3 py-1.5 text-xs font-bold text-violet-700">{available.length} modèles compatibles</span></div>
