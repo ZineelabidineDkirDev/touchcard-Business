@@ -57,7 +57,7 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
       business_address: input.customRequested ? input.businessAddress.trim() || null : null,
       business_phone: input.customRequested ? input.businessPhone.trim() || null : null,
       social_links: (input.socialLinks ?? []).filter((item) => item.url.trim()).map((item) => ({ platform: item.platform, url: item.url.trim() })),
-      project_needs: { selected: input.projectNeeds ?? [], reservation_mode: input.reservationMode || null, reservation_channels: input.reservationChannels ?? [], management_needs: input.managementNeeds ?? [] },
+      project_needs: { selected: (input.projectNeeds ?? []).slice(0, 1), reservation_mode: input.reservationMode || null, reservation_channels: [], management_needs: [] },
       user_id: user?.id ?? null,
       status: "new",
     });
@@ -242,7 +242,7 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
           parts: [{
             text: [
               "Tu es l'architecte produit IA de TouchCard Business. Analyse le brief et prépare une configuration initiale réellement utile.",
-              "Respecte strictement le type de carte demandé. Contact = carte professionnelle et coordonnées; service = vitrine de prestations et demandes/réservations; e-business = boutique avec catalogue produits, commandes et gestion commerciale.",
+              "Respecte strictement le type de carte demandé ET la formule unique choisie par le client dans selected_needs. Cette liste contient une seule formule : elle est la source de vérité. Ne combine jamais plusieurs formules. Déduis automatiquement tous les modules nécessaires à cette formule, sans demander au client de choisir les modules un par un. Si la formule contient boutique, active product_catalog et orders; si elle contient prestations, active service_catalog; si elle contient réservations, active bookings et availability_calendar; si elle contient plusieurs collaborateurs, active team.",
               "Sélectionne uniquement les modules autorisés. N'invente jamais de tarifs, d'adresses, de numéros, de certifications ou de faits. Laisse price vide si le tarif n'est pas fourni.",
               "Rédige tagline et description en français. Les catégories et éléments de catalogue sont des propositions à valider, pas des faits confirmés.",
               "Retourne un JSON conforme au schéma. Ne crée aucun compte, ne contacte personne et n'effectue aucune action externe.",
