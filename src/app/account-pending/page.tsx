@@ -27,7 +27,6 @@ async function AccountPendingContent() {
 
   if (!request) redirect("/dashboard");
   const accessBlocked = ["rejected", "cancelled"].includes(request.status);
-  if (!accessBlocked && !["in_production", "completed"].includes(request.status)) redirect("/dashboard");
   if (!accessBlocked && !request.password_initialized) redirect("/setup-password");
   if (!accessBlocked && request.client_access_enabled) redirect("/dashboard");
 
@@ -39,7 +38,7 @@ async function AccountPendingContent() {
         </div>
         <p className="mt-6 text-xs font-black uppercase tracking-[.2em] text-indigo-600">TouchCard Business</p>
         <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-950">{accessBlocked ? "Accès désactivé" : "Votre espace est presque prêt"}</h1>
-        <p className="mt-4 leading-7 text-slate-600">{accessBlocked ? "Votre demande a été annulée ou refusée. L’accès à votre espace est désactivé. Contactez TouchCard si vous pensez qu’il s’agit d’une erreur." : "Votre mot de passe est bien configuré. Votre demande attend maintenant la validation finale du Super Admin. Votre tableau de bord et vos outils resteront verrouillés jusqu’à l’activation."}</p>
+        <p className="mt-4 leading-7 text-slate-600">{accessBlocked ? "Votre demande a été annulée ou refusée. L’accès à votre espace est désactivé. Contactez TouchCard si vous pensez qu’il s’agit d’une erreur." : "Votre mot de passe est bien configuré. Votre demande attend la validation du Super Admin. Votre tableau de bord et vos outils resteront verrouillés jusqu’à la validation et à l’activation de votre espace."}</p>
         {!accessBlocked && <div className="mt-7 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">En attente de validation par TouchCard</div>}
         <p className="mt-5 text-sm text-slate-500">Connecté avec {user.email}</p>
         <div className="mt-7 flex flex-wrap justify-center gap-3">
