@@ -82,8 +82,34 @@ export async function updateProspectStatus(formData: FormData) {
 
   if (!isPlatformSuperAdmin(user.email)) return;
 
-  const { error } = await supabase.from("prospect_requests").update({ status, updated_at: new Date().toISOString() }).eq("id", id);
+  const { error } = await supabase.from("prospect_requests").update({ status, ...(status === "rejected" || status === "cancelled" ? { client_access_enabled: false } : {}), updated_at: new Date().toISOString() }).eq("id", id);
   if (!error) revalidatePath("/dashboard/prospects");
+}
+
+export async function activateProspectClientAccess(formData: FormData) {
+  const id = String(formData.get("id") ?? "").trim();
+  if (!id) return;
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user || !isPlatformSuperAdmin(user.email)) return;
+
+  const { data, error } = await supabase
+    .from("prospect_requests")
+    .update({ client_access_enabled: true, updated_at: new Date().toISOString() })
+    .eq("id", id)
+    .not("user_id", "is", null)
+    .eq("password_initialized", true)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !data) {
+    console.error("Client access activation failed", { id, error });
+    return;
+  }
+
+  revalidatePath("/dashboard/prospects");
+  revalidatePath("/dashboard");
 }
 
 
