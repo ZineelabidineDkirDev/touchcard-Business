@@ -40,6 +40,7 @@ export default async function ClientCardsPage() {
   const profileDraft = config.ai_suggestions?.profile_draft;
   const totalViews = (events ?? []).filter((event) => ["view", "qr_scan", "nfc_scan"].includes(event.event_type)).length;
   const totalNfc = (events ?? []).filter((event) => event.event_type === "nfc_scan").length;
+  const totalQr = (events ?? []).filter((event) => event.event_type === "qr_scan").length;
   const totalSaves = (events ?? []).filter((event) => event.event_type === "contact_save").length;
   const totalClicks = (events ?? []).filter((event) => event.event_type === "click").length;
 
