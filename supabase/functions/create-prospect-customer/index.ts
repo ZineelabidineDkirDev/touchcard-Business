@@ -59,7 +59,6 @@ function safeProfileDraft(raw: any) {
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
-  let invitedUserId: string | null = null;
   let organizationId: string | null = null;
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
     auth: { persistSession: false, autoRefreshToken: false },
@@ -92,7 +91,7 @@ Deno.serve(async (req: Request) => {
       .eq("id", requestId).maybeSingle();
     if (prospectError || !prospect) return json({ error: "Prospect not found" }, 404);
     if (prospect.status !== "approved") return json({ error: "Approve the prospect before creating an account" }, 409);
-    if (prospect.user_id) return json({ error: "A customer account is already linked to this prospect" }, 409);
+    if (!prospect.user_id) return json({ error: "The customer account must be created when the prospect submits the request" }, 409);
     if (prospect.card_type !== cardType) return json({ error: "The selected template must match the prospect's original card choice" }, 400);
 
     const profileDraft = safeProfileDraft(submitted.ai_suggestions?.profile_draft);
@@ -106,12 +105,7 @@ Deno.serve(async (req: Request) => {
     } : null;
 
     const siteUrl = normalizeSiteUrl(Deno.env.get("SITE_URL") ?? "https://touchcard-zayn-dk.vercel.app");
-    const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(prospect.email, {
-      data: { full_name: prospect.full_name, prospect_request_id: prospect.id },
-      redirectTo: `${siteUrl}/auth/callback?next=/setup-password`,
-    });
-    if (inviteError || !invited.user) return json({ error: inviteError?.message ?? "Unable to invite customer" }, 400);
-    invitedUserId = invited.user.id;
+    const customerUserId = prospect.user_id;
 
     const organizationName = String(prospect.brand_name || prospect.full_name).trim();
     const slugBase = organizationName.normalize("NFD").toLowerCase()
@@ -138,7 +132,7 @@ Deno.serve(async (req: Request) => {
     const { data: organization, error: organizationError } = await admin.from("organizations").insert({
       name: organizationName,
       slug: organizationSlug,
-      owner_id: invited.user.id,
+      owner_id: customerUserId,
       phone: prospect.phone,
       logo_url: logoUrl,
       workspace_config: workspaceConfig,
@@ -158,7 +152,7 @@ Deno.serve(async (req: Request) => {
     };
     const { data: card, error: cardError } = await admin.from("cards").insert({
       organization_id: organization.id,
-      created_by: invited.user.id,
+      created_by: customerUserId,
       slug: cardSlug,
       full_name: cardType === "contact" ? prospect.full_name : organizationName,
       company_name: organizationName,
@@ -177,14 +171,13 @@ Deno.serve(async (req: Request) => {
     if (nfcError) throw new Error("The NFC link could not be prepared.");
 
     const { data: linked, error: linkError } = await admin.from("prospect_requests")
-      .update({ user_id: invited.user.id, status: "in_production", password_initialized: false, client_access_enabled: false, updated_at: new Date().toISOString() })
+      .update({ status: "in_production", client_access_enabled: false, updated_at: new Date().toISOString() })
       .eq("id", prospect.id).is("user_id", null).select("id").maybeSingle();
     if (linkError || !linked) throw new Error("The customer account could not be linked to the approved request.");
 
-    return json({ ok: true, user_id: invited.user.id, organization_id: organization.id, card_id: card.id, card_slug: card.slug, published: false });
+    return json({ ok: true, user_id: customerUserId, organization_id: organization.id, card_id: card.id, card_slug: card.slug, published: false });
   } catch (error) {
     if (organizationId) await admin.from("organizations").delete().eq("id", organizationId);
-    if (invitedUserId) await admin.auth.admin.deleteUser(invitedUserId);
     return json({ error: error instanceof Error ? error.message : "Unexpected error" }, 400);
   }
 });
