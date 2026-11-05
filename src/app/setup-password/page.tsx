@@ -1,10 +1,19 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { PasswordRecoveryForm } from "@/components/auth/password-recovery-form";
 
-export default async function SetupPasswordPage() {
+export default function SetupPasswordPage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-slate-50" />}>
+      <SetupPasswordContent />
+    </Suspense>
+  );
+}
+
+async function SetupPasswordContent() {
   await connection();
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
