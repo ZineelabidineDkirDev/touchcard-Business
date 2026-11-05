@@ -26,7 +26,7 @@ export type ProspectInput = {
   managementNeeds: string[];
 };
 
-export async function submitProspectRequest(input: ProspectInput, requestId: string) {
+export async function submitProspectRequest(input: ProspectInput, requestId: string, provisionalPassword: string) {
   const fullName = input.fullName.trim();
   const email = input.email.trim().toLowerCase();
   const phone = input.phone.trim();
@@ -40,34 +40,40 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { ok: false as const, error: "Veuillez saisir une adresse e-mail valide." };
   }
+  if (provisionalPassword.length < 8) {
+    return { ok: false as const, error: "Le mot de passe provisoire doit contenir au moins 8 caractères." };
+  }
 
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data, error } = await supabase
-    .from("prospect_requests")
-    .insert({
-      id: requestId,
-      full_name: fullName,
-      city: input.city.trim(),
-      activity_sector: input.sector === "Autre" ? input.sectorOther.trim() || "Autre" : input.sector,
-      email,
-      phone,
-      card_type: input.cardType,
-      reason: input.reason.trim() || null,
-      customization_requested: input.customRequested,
-      brand_name: input.customRequested ? input.brandName.trim() || null : null,
-      logo_url: input.customRequested ? input.logoUrl.trim() || null : null,
-      business_address: input.customRequested ? input.businessAddress.trim() || null : null,
-      business_phone: input.customRequested ? input.businessPhone.trim() || null : null,
-      social_links: (input.socialLinks ?? []).filter((item) => item.url.trim()).map((item) => ({ platform: item.platform, url: item.url.trim() })),
-      project_needs: { selected: (input.projectNeeds ?? []).slice(0, 1), reservation_mode: input.reservationMode || null, reservation_channels: [], management_needs: [] },
-      user_id: user?.id ?? null,
-      status: "new",
-    });
+  const { data, error } = await supabase.functions.invoke("create-prospect-account", {
+    body: {
+      request_id: requestId,
+      password: provisionalPassword,
+      prospect: {
+        full_name: fullName,
+        city: input.city.trim(),
+        activity_sector: input.sector === "Autre" ? input.sectorOther.trim() || "Autre" : input.sector,
+        email,
+        phone,
+        card_type: input.cardType,
+        reason: input.reason.trim() || null,
+        customization_requested: input.customRequested,
+        brand_name: input.customRequested ? input.brandName.trim() || null : null,
+        logo_url: input.customRequested ? input.logoUrl.trim() || null : null,
+        business_address: input.customRequested ? input.businessAddress.trim() || null : null,
+        business_phone: input.customRequested ? input.businessPhone.trim() || null : null,
+        social_links: (input.socialLinks ?? []).filter((item) => item.url.trim()).map((item) => ({ platform: item.platform, url: item.url.trim() })),
+        project_needs: { selected: (input.projectNeeds ?? []).slice(0, 1), reservation_mode: input.reservationMode || null, reservation_channels: [], management_needs: [] },
+      },
+    },
+  });
 
-  if (error) {
-    console.error("Prospect request insert failed", error);
-    return { ok: false as const, error: "Votre demande n'a pas pu être enregistrée. Veuillez réessayer." };
+  if (error || !data?.ok) {
+    if (data?.code === "EMAIL_ALREADY_REGISTERED") {
+      return { ok: false as const, error: "Cette adresse possède déjà un compte TouchCard. Connectez-vous avec ce compte avant de déposer une nouvelle demande." };
+    }
+    console.error("Prospect account creation failed", { requestId, error: error?.message, details: data?.error });
+    return { ok: false as const, error: data?.error || "La création du compte et l'enregistrement de la demande ont échoué. Veuillez réessayer." };
   }
 
   return { ok: true as const, requestId, email };
@@ -103,6 +109,7 @@ export async function activateProspectClientAccess(formData: FormData) {
     .eq("id", id)
     .not("user_id", "is", null)
     .eq("password_initialized", true)
+    .in("status", ["in_production", "completed"])
     .select("id")
     .maybeSingle();
 
