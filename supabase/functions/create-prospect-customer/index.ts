@@ -20,6 +20,7 @@ const corsHeaders = {
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 }
+function normalizeSiteUrl(value: string) { return value.endsWith("/") ? value.slice(0, -1) : value; }
 function safeHttpUrl(value: unknown) {
   if (typeof value !== "string" || !value.trim()) return null;
   try {
@@ -104,10 +105,10 @@ Deno.serve(async (req: Request) => {
       reviewed_by_super_admin: true,
     } : null;
 
-    const siteUrl = Deno.env.get("SITE_URL") ?? "https://touchcard-zayn-dk.vercel.app";
+    const siteUrl = normalizeSiteUrl(Deno.env.get("SITE_URL") ?? "https://touchcard-zayn-dk.vercel.app");
     const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(prospect.email, {
       data: { full_name: prospect.full_name, prospect_request_id: prospect.id },
-      redirectTo: `${siteUrl.replace(/\/$/, "")}/auth/callback?next=/dashboard`,
+      redirectTo: `${siteUrl}/auth/callback?next=/dashboard`,
     });
     if (inviteError || !invited.user) return json({ error: inviteError?.message ?? "Unable to invite customer" }, 400);
     invitedUserId = invited.user.id;
@@ -170,7 +171,7 @@ Deno.serve(async (req: Request) => {
 
     const { error: nfcError } = await admin.from("nfc_tags").insert({
       card_id: card.id,
-      public_url: `${siteUrl.replace(/\/$/, "")}/p/${card.slug}?source=nfc`,
+      public_url: `${siteUrl}/p/${card.slug}?source=nfc`,
       is_active: false,
     });
     if (nfcError) throw new Error("The NFC link could not be prepared.");
