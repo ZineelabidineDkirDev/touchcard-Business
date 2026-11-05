@@ -43,6 +43,16 @@ export async function saveClientCardProfile(formData: FormData) {
   const { supabase, user, organizationId } = await getWorkspace();
   if (!user || !organizationId) return;
   const cardId = String(formData.get("card_id") ?? "");
+  let customFields: { key: string; label: string; value: string; visible: boolean }[] = [];
+  try {
+    const parsed = JSON.parse(String(formData.get("custom_fields") ?? "[]"));
+    if (Array.isArray(parsed)) customFields = parsed.slice(0, 20).map((field) => ({
+      key: String(field.key ?? "").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 48),
+      label: String(field.label ?? "").trim().slice(0, 80),
+      value: String(field.value ?? "").trim().slice(0, 500),
+      visible: Boolean(field.visible),
+    })).filter((field) => field.key && field.label);
+  } catch { customFields = []; }
   const fields = {
     tagline: String(formData.get("tagline") ?? "").trim().slice(0, 180),
     location: String(formData.get("location") ?? "").trim().slice(0, 180),
