@@ -2,6 +2,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { createClientCard, saveClientCardProfile, addClientCardLink, deleteClientCardLink, toggleClientCardPublication } from "@/app/actions/cards";
 import { createClient } from "@/lib/supabase/server";
+import { CustomCardFieldsEditor, type EditableCardField } from "@/components/cards/custom-card-fields-editor";
 
 type Card = {
   id: string; slug: string; full_name: string; job_title: string | null; company_name: string | null;
@@ -32,7 +33,7 @@ export default async function ClientCardsPage() {
   const { data: events } = cardIds.length
     ? await supabase.from("card_events").select("card_id,event_type").in("card_id", cardIds)
     : { data: [] as { card_id: string; event_type: string }[] };
-  const config = (organization?.workspace_config ?? {}) as { modules?: string[]; ai_suggestions?: { profile_draft?: { tagline?: string; description?: string } } };
+  const config = (organization?.workspace_config ?? {}) as { modules?: string[]; ai_suggestions?: { profile_draft?: { tagline?: string; description?: string; card_fields?: { key: string; label: string; type: string; visible: boolean }[] } } };
   const modules = Array.isArray(config.modules) ? config.modules : [];
   const profileDraft = config.ai_suggestions?.profile_draft;
   const totalViews = (events ?? []).filter((event) => ["view", "qr_scan", "nfc_scan"].includes(event.event_type)).length;
@@ -68,7 +69,10 @@ export default async function ClientCardsPage() {
         {(cards ?? []).map((card) => {
           const cardLinks = (links ?? []).filter((link) => link.card_id === card.id);
           const cardEvents = (events ?? []).filter((event) => event.card_id === card.id);
-          const fields = (card.public_fields ?? {}) as Record<string, string>;
+          const fields = (card.public_fields ?? {}) as Record<string, any>;
+          const initialCustomFields: EditableCardField[] = Array.isArray(fields.custom_fields) && fields.custom_fields.length
+            ? fields.custom_fields
+            : (profileDraft?.card_fields ?? []).map((field) => ({ key: field.key, label: field.label, value: "", visible: field.visible }));
           const publicUrl = "/p/" + card.slug;
           return <article key={card.id} className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 p-5">
@@ -96,6 +100,7 @@ export default async function ClientCardsPage() {
                   <label className="text-xs font-semibold text-slate-600">Ville / adresse<input name="location" defaultValue={fields.location ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600">Horaires<input name="hours" defaultValue={fields.hours ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600 sm:col-span-2">WhatsApp Business (numéro)<input name="whatsapp" defaultValue={fields.whatsapp ?? ""} placeholder="+212..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
+                  <CustomCardFieldsEditor initialFields={initialCustomFields}/>
                 </div>
                 <button className="btn-primary">Enregistrer les modifications</button>
               </form>
