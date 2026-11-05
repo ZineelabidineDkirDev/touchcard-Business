@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
+const PLATFORM_SUPER_ADMIN_EMAIL = "zainmawada@gmail.com";
 const corsHeaders = {
   "Access-Control-Allow-Origin": Deno.env.get("SITE_URL") ?? "https://touchcard-zayn-dk.vercel.app",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -41,6 +42,7 @@ Deno.serve(async (req: Request) => {
       return json({ error: "Les informations obligatoires de la demande sont incomplètes." }, 400);
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "Adresse e-mail invalide." }, 400);
+    if (email === PLATFORM_SUPER_ADMIN_EMAIL) return json({ error: "Cette adresse est réservée au compte Super Admin." }, 403);
     if (password.length < 8) return json({ error: "Le mot de passe provisoire doit contenir au moins 8 caractères." }, 400);
 
     let linkedUserId: string | null = null;
