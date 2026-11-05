@@ -160,3 +160,23 @@ export async function toggleClientCardPublication(formData: FormData) {
   }
   if (!error) revalidatePath("/dashboard/cards");
 }
+
+
+export async function submitCardDesignRequest(templateId: string, notes: string) {
+ const allowed=["midnight","minimal","studio","service-pro","atelier","business","market"];
+ if(!allowed.includes(templateId)) return {ok:false as const,error:"Modèle non reconnu."};
+ const {supabase,user,organizationId}=await getWorkspace();
+ if(!user||!organizationId) return {ok:false as const,error:"Connectez-vous à votre espace client."};
+ const {data:organization}=await supabase.from("organizations").select("workspace_config").eq("id",organizationId).maybeSingle();
+ const config=(organization?.workspace_config??{}) as {template?:string;modules?:string[]};
+ const {data:prospect}=await supabase.from("prospect_requests").select("card_type,status").eq("user_id",user.id).maybeSingle();
+ if(!prospect||!["in_production","completed"].includes(prospect.status)) return {ok:false as const,error:"Votre espace doit être activé avant de choisir un modèle."};
+ const type=config.template||prospect.card_type;
+ const compatible:Record<string,string[]>={contact:["midnight","minimal","studio"],service:["service-pro","atelier"],"e-business":["business","market"]};
+ if(!compatible[type]?.includes(templateId)) return {ok:false as const,error:"Ce modèle ne correspond pas au type de carte de votre espace."};
+ const {data:pending}=await supabase.from("card_design_requests").select("id").eq("user_id",user.id).eq("status","pending").limit(1).maybeSingle();
+ if(pending) return {ok:false as const,error:"Vous avez déjà une demande en attente de validation."};
+ const {error}=await supabase.from("card_design_requests").insert({user_id:user.id,organization_id:organizationId,template_id:templateId,card_type:type,notes:String(notes??"").trim().slice(0,700)});
+ if(error){console.error("Card design request failed",error);return {ok:false as const,error:"La demande n'a pas pu être enregistrée. Vérifiez que la migration des modèles est appliquée."};}
+ revalidatePath("/dashboard/cards");revalidatePath("/dashboard/prospects");return {ok:true as const};
+}
