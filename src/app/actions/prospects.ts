@@ -292,7 +292,17 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
     }
 
     const safeModules = [...new Set(parsed.modules.filter((module) => allowedModules.includes(module)))];
-    if (!safeModules.includes("dashboard")) safeModules.unshift("dashboard");
+    const formula = String(needs.selected?.[0] ?? "").toLocaleLowerCase("fr");
+    const requiredModules = ["dashboard", "digital_card", "analytics"];
+    if (template === "contact") requiredModules.push("contact_profile", "social_links", "qr_nfc");
+    if (formula.includes("contact") || template === "contact") requiredModules.push("contact_profile");
+    if (formula.includes("entreprise")) requiredModules.push("company_profile");
+    if (formula.includes("prospect")) requiredModules.push("crm_contacts");
+    if (formula.includes("prestation") || template === "service") requiredModules.push("service_catalog");
+    if (formula.includes("boutique") || template === "e-business") requiredModules.push("product_catalog", "orders");
+    if (formula.includes("réservation") || formula.includes("reservation")) requiredModules.push("bookings", "availability_calendar");
+    if (formula.includes("équipe") || formula.includes("collaborateur") || needs.reservation_mode === "team") requiredModules.push("team");
+    for (const module of requiredModules) if (!safeModules.includes(module)) safeModules.push(module);
 
     return {
       ok: true as const,
