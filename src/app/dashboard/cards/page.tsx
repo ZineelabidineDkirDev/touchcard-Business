@@ -7,7 +7,7 @@ import { CustomCardFieldsEditor, type EditableCardField } from "@/components/car
 type Card = {
   id: string; slug: string; full_name: string; job_title: string | null; company_name: string | null;
   bio: string | null; email: string | null; phone: string | null; website: string | null;
-  avatar_url: string | null; is_published: boolean; public_fields: Record<string, string> | null;
+  avatar_url: string | null; is_published: boolean; public_fields: Record<string, string> | null; public_settings: Record<string, boolean> | null;
 };
 type CardLink = { id: string; card_id: string; label: string; url: string; kind: string };
 
@@ -70,6 +70,7 @@ export default async function ClientCardsPage() {
           const cardLinks = (links ?? []).filter((link) => link.card_id === card.id);
           const cardEvents = (events ?? []).filter((event) => event.card_id === card.id);
           const fields = (card.public_fields ?? {}) as Record<string, any>;
+          const settings = card.public_settings ?? {};
           const initialCustomFields: EditableCardField[] = Array.isArray(fields.custom_fields) && fields.custom_fields.length
             ? fields.custom_fields
             : (profileDraft?.card_fields ?? []).map((field) => ({ key: field.key, label: field.label, value: "", visible: field.visible }));
@@ -101,6 +102,7 @@ export default async function ClientCardsPage() {
                   <label className="text-xs font-semibold text-slate-600">Horaires<input name="hours" defaultValue={fields.hours ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600 sm:col-span-2">WhatsApp Business (numéro)<input name="whatsapp" defaultValue={fields.whatsapp ?? ""} placeholder="+212..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <CustomCardFieldsEditor initialFields={initialCustomFields}/>
+                  <div className="flex flex-wrap gap-4 rounded-xl bg-slate-50 p-3 sm:col-span-2"><span className="w-full text-xs font-bold text-slate-700">Champs visibles sur la page publique</span><label className="flex items-center gap-2 text-xs"><input type="checkbox" name="show_phone" defaultChecked={settings.show_phone !== false}/> Téléphone</label><label className="flex items-center gap-2 text-xs"><input type="checkbox" name="show_email" defaultChecked={settings.show_email !== false}/> E-mail</label><label className="flex items-center gap-2 text-xs"><input type="checkbox" name="show_website" defaultChecked={settings.show_website !== false}/> Site web</label></div>
                 </div>
                 <button className="btn-primary">Enregistrer les modifications</button>
               </form>
