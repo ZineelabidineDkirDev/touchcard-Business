@@ -108,7 +108,7 @@ Deno.serve(async (req: Request) => {
     const siteUrl = normalizeSiteUrl(Deno.env.get("SITE_URL") ?? "https://touchcard-zayn-dk.vercel.app");
     const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(prospect.email, {
       data: { full_name: prospect.full_name, prospect_request_id: prospect.id },
-      redirectTo: `${siteUrl}/auth/callback?next=/dashboard`,
+      redirectTo: `${siteUrl}/auth/callback?next=/setup-password`,
     });
     if (inviteError || !invited.user) return json({ error: inviteError?.message ?? "Unable to invite customer" }, 400);
     invitedUserId = invited.user.id;
@@ -177,7 +177,7 @@ Deno.serve(async (req: Request) => {
     if (nfcError) throw new Error("The NFC link could not be prepared.");
 
     const { data: linked, error: linkError } = await admin.from("prospect_requests")
-      .update({ user_id: invited.user.id, status: "in_production", updated_at: new Date().toISOString() })
+      .update({ user_id: invited.user.id, status: "in_production", password_initialized: false, client_access_enabled: false, updated_at: new Date().toISOString() })
       .eq("id", prospect.id).is("user_id", null).select("id").maybeSingle();
     if (linkError || !linked) throw new Error("The customer account could not be linked to the approved request.");
 
