@@ -180,3 +180,16 @@ export async function submitCardDesignRequest(templateId: string, notes: string)
  if(error){console.error("Card design request failed",error);return {ok:false as const,error:"La demande n'a pas pu être enregistrée. Vérifiez que la migration des modèles est appliquée."};}
  revalidatePath("/dashboard/cards");revalidatePath("/dashboard/prospects");return {ok:true as const};
 }
+
+
+export async function reviewCardDesignRequest(formData: FormData) {
+ const id=String(formData.get("id")??"").trim();
+ const status=String(formData.get("status")??"");
+ if(!id||!["approved","revision_requested","rejected"].includes(status)) return;
+ const supabase=await createClient();
+ const {data:{user}}=await supabase.auth.getUser();
+ if(!user||!(await import("@/lib/auth/platform-admin")).isPlatformSuperAdmin(user.email)) return;
+ const {error}=await supabase.from("card_design_requests").update({status,updated_at:new Date().toISOString()}).eq("id",id);
+ if(error){console.error("Card design review failed",error);return;}
+ revalidatePath("/dashboard/prospects");revalidatePath("/dashboard/cards");
+}
