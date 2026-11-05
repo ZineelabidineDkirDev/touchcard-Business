@@ -393,3 +393,25 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
     };
   }
 }
+
+
+export async function resetProspectClientPassword(requestId: string) {
+  const id = String(requestId ?? "").trim();
+  if (!id) return { ok: false as const, error: "Demande introuvable." };
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user || !isPlatformSuperAdmin(user.email)) {
+    return { ok: false as const, error: "Action réservée au Super Admin." };
+  }
+
+  const { data, error } = await supabase.functions.invoke("admin-reset-prospect-password", {
+    body: { request_id: id },
+  });
+  if (error || !data?.ok || !data?.temporary_password) {
+    return { ok: false as const, error: data?.error || "La réinitialisation a échoué." };
+  }
+
+  revalidatePath("/dashboard/prospects");
+  return { ok: true as const, temporaryPassword: String(data.temporary_password) };
+}
