@@ -16,6 +16,15 @@ async function getWorkspace() {
   return { supabase, user, organizationId: membership?.organization_id ?? null };
 }
 
+function safeHttpUrl(value: string, maxLength: number) {
+  const raw = value.trim().slice(0, maxLength);
+  if (!raw) return null;
+  try {
+    const parsed = new URL(raw);
+    return ["https:", "http:"].includes(parsed.protocol) ? parsed.toString() : null;
+  } catch { return null; }
+}
+
 function cleanSlug(value: string) {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()
     .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 36) || "carte";
@@ -67,8 +76,8 @@ export async function saveClientCardProfile(formData: FormData) {
     bio: String(formData.get("bio") ?? "").trim().slice(0, 1200) || null,
     email: String(formData.get("email") ?? "").trim().slice(0, 180) || null,
     phone: String(formData.get("phone") ?? "").trim().slice(0, 30) || null,
-    website: String(formData.get("website") ?? "").trim().slice(0, 500) || null,
-    avatar_url: String(formData.get("avatar_url") ?? "").trim().slice(0, 1000) || null,
+    website: safeHttpUrl(String(formData.get("website") ?? ""), 500),
+    avatar_url: safeHttpUrl(String(formData.get("avatar_url") ?? ""), 1000),
     public_fields: fields,
     public_settings: {
       show_phone: formData.get("show_phone") === "on",
