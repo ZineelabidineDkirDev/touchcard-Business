@@ -48,19 +48,12 @@ export default async function ClientWorkspacePreview({ params }: { params: Promi
 
   if (!prospect || !prospect.user_id) notFound();
 
-  const { data: membership } = await supabase
-    .from("organization_members")
-    .select("organization_id")
-    .eq("user_id", prospect.user_id)
-    .limit(1)
-    .maybeSingle();
-
-  if (!membership?.organization_id) notFound();
-
+  // Le Super Admin lit les organisations via la policy platform_admin_read_all.
+  // organization_members reste volontairement limité aux membres de l'organisation.
   const { data: organization } = await supabase
     .from("organizations")
     .select("id, name, workspace_config")
-    .eq("id", membership.organization_id)
+    .eq("owner_id", prospect.user_id)
     .maybeSingle();
 
   if (!organization) notFound();
