@@ -58,6 +58,7 @@ export async function saveClientCardProfile(formData: FormData) {
     location: String(formData.get("location") ?? "").trim().slice(0, 180),
     hours: String(formData.get("hours") ?? "").trim().slice(0, 180),
     whatsapp: String(formData.get("whatsapp") ?? "").trim().replace(/[^+\d]/g, "").slice(0, 20),
+    custom_fields: customFields,
   };
   const { error } = await supabase.from("cards").update({
     full_name: String(formData.get("full_name") ?? "").trim().slice(0, 120),
