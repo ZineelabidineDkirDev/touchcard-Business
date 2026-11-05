@@ -57,6 +57,7 @@ export async function saveClientCardProfile(formData: FormData) {
     email: String(formData.get("email") ?? "").trim().slice(0, 180) || null,
     phone: String(formData.get("phone") ?? "").trim().slice(0, 30) || null,
     website: String(formData.get("website") ?? "").trim().slice(0, 500) || null,
+    avatar_url: String(formData.get("avatar_url") ?? "").trim().slice(0, 1000) || null,
     public_fields: fields,
     updated_at: new Date().toISOString(),
   }).eq("id", cardId).eq("organization_id", organizationId);
