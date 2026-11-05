@@ -3,6 +3,7 @@ import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
 import MoroccoProspectMap from "@/components/dashboard/morocco-prospect-map";
+import { reviewCardDesignRequest } from "@/app/actions/cards";
 
 type Prospect = { id: string; city: string; status: string; card_type: string; created_at: string; activity_sector: string | null; project_needs: { selected?: string[] } | string[] | null };
 
@@ -28,12 +29,13 @@ export default async function AdminDashboardPage({ searchParams }: { searchParam
   }
 
   const filters = await searchParams;
-  const [prospectsResult, orgsResult, cardsResult, linksResult, eventsResult] = await Promise.all([
+  const [prospectsResult, orgsResult, cardsResult, linksResult, eventsResult, designRequestsResult] = await Promise.all([
     supabase.from("prospect_requests").select("id,city,status,card_type,created_at,activity_sector,project_needs").order("created_at", { ascending: false }),
     supabase.from("organizations").select("id", { count: "exact", head: true }),
     supabase.from("cards").select("id,is_published", { count: "exact" }),
     supabase.from("card_links").select("id", { count: "exact", head: true }),
     supabase.from("card_events").select("id,event_type,created_at", { count: "exact" }),
+    supabase.from("card_design_requests").select("id,user_id,organization_id,template_id,card_type,notes,status,created_at").order("created_at", { ascending: false }).limit(50),
   ]);
 
   const prospects = (prospectsResult.data ?? []) as Prospect[];
@@ -103,6 +105,24 @@ export default async function AdminDashboardPage({ searchParams }: { searchParam
       <div><p className="text-xs font-black uppercase tracking-[.2em] text-indigo-600">TouchCard Business · Super Admin</p><h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Vue globale</h1><p className="mt-2 text-slate-500">Pilotage des clients, demandes, cartes et performances commerciales.</p></div>
       <a href="/dashboard/prospects" className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700">Consulter les demandes ↗</a>
     </header>
+
+    <section className="rounded-3xl border border-violet-200 bg-white p-5 shadow-sm sm:p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div><p className="text-xs font-black uppercase tracking-[.18em] text-violet-700">Validation des designs</p><h2 className="mt-2 text-xl font-black text-slate-950">Demandes de modèles de cartes</h2><p className="mt-1 text-sm text-slate-500">Espace de validation Super Admin : chaque modèle choisi par un client doit être approuvé ici avant toute application.</p></div>
+        <span className="rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold text-amber-800">{(designRequestsResult.data ?? []).filter((r) => r.status === "pending").length} en attente</span>
+      </div>
+      <div className="mt-5 space-y-3">
+        {(designRequestsResult.data ?? []).map((request) => <article key={request.id} className="rounded-2xl border border-slate-200 p-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div><h3 className="font-black text-slate-900">{request.template_id}</h3><p className="mt-1 text-xs text-slate-500">Carte : {request.card_type} · Client : {request.user_id.slice(0,8)}… · {new Date(request.created_at).toLocaleString("fr-FR")}</p><p className="mt-2 text-sm text-slate-600">{request.notes || "Aucune précision de personnalisation."}</p></div>
+            <span className={"rounded-full px-3 py-1.5 text-xs font-bold " + (request.status === "approved" ? "bg-emerald-50 text-emerald-700" : request.status === "pending" ? "bg-amber-50 text-amber-800" : request.status === "rejected" ? "bg-rose-50 text-rose-700" : "bg-slate-100 text-slate-600")}>{request.status === "pending" ? "En attente" : request.status === "approved" ? "Validé" : request.status === "rejected" ? "Refusé" : "Modification demandée"}</span>
+          </div>
+          {request.status === "pending" && <form action={reviewCardDesignRequest} className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4"><input type="hidden" name="id" value={request.id}/><button name="status" value="approved" className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white">Approuver</button><button name="status" value="revision_requested" className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-800">Demander une modification</button><button name="status" value="rejected" className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-bold text-rose-700">Refuser</button></form>}
+        </article>)}
+        {!(designRequestsResult.data?.length) && <p className="rounded-xl border border-dashed border-slate-300 p-6 text-sm text-slate-500">Aucune demande de modèle pour le moment.</p>}
+        {designRequestsResult.error && <p className="rounded-xl bg-rose-50 p-3 text-sm text-rose-700">Impossible de charger les demandes de modèles. Vérifiez les droits RLS de card_design_requests.</p>}
+      </div>
+    </section>
 
     <form method="get" className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-base font-black text-slate-950">Filtres d’analyse</h2><p className="mt-1 text-sm text-slate-500">Les graphiques, la carte et les classements suivent ces critères.</p></div><span className="rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-700">{filteredProspects.length} / {prospects.length} demandes</span></div>
