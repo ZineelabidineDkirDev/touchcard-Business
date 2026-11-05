@@ -10,11 +10,11 @@ export default async function SetupPasswordPage() {
 
   const { data: request } = await supabase
     .from("prospect_requests")
-    .select("password_initialized")
+    .select("status, password_initialized")
     .eq("user_id", user.id)
     .maybeSingle();
 
-  if (!request) redirect("/dashboard");
+  if (!request || !["in_production", "completed"].includes(request.status)) redirect("/dashboard");
   if (request.password_initialized) redirect("/account-pending");
 
   return (
