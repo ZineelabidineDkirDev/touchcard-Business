@@ -163,8 +163,8 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
   if (prospectError || !prospect) {
     return { ok: false as const, error: "Impossible de charger cette demande." };
   }
-  if (prospect.status !== "in_production") {
-    return { ok: false as const, error: "Le test IA est réservé aux demandes déjà validées (en production)." };
+  if (!["approved", "in_production"].includes(prospect.status)) {
+    return { ok: false as const, error: "L'IA est disponible après validation de la demande par le Super Admin." };
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
