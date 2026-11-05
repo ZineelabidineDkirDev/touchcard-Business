@@ -172,8 +172,8 @@ Deno.serve(async (req: Request) => {
 
     const { data: linked, error: linkError } = await admin.from("prospect_requests")
       .update({ status: "in_production", client_access_enabled: false, updated_at: new Date().toISOString() })
-      .eq("id", prospect.id).is("user_id", null).select("id").maybeSingle();
-    if (linkError || !linked) throw new Error("The customer account could not be linked to the approved request.");
+      .eq("id", prospect.id).eq("user_id", customerUserId).select("id").maybeSingle();
+    if (linkError || !linked) throw new Error("The customer workspace could not be linked to the approved request.");
 
     return json({ ok: true, user_id: customerUserId, organization_id: organization.id, card_id: card.id, card_slug: card.slug, published: false });
   } catch (error) {
