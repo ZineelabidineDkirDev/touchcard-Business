@@ -138,6 +138,8 @@ export type ProspectWorkspaceAISuggestions = {
     description: string;
     categories: string[];
     catalog_items: { name: string; description: string; price: string }[];
+    card_fields: { key: string; label: string; type: string; visible: boolean }[];
+    suggested_buttons: { kind: string; label: string; enabled: boolean }[];
   };
   rationale: string;
 };
@@ -212,6 +214,14 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
           tagline: { type: "STRING" },
           description: { type: "STRING" },
           categories: { type: "ARRAY", items: { type: "STRING" } },
+          card_fields: {
+            type: "ARRAY",
+            items: { type: "OBJECT", properties: { key: { type: "STRING" }, label: { type: "STRING" }, type: { type: "STRING", enum: ["text", "textarea", "url", "phone", "email"] }, visible: { type: "BOOLEAN" } }, required: ["key", "label", "type", "visible"] },
+          },
+          suggested_buttons: {
+            type: "ARRAY",
+            items: { type: "OBJECT", properties: { kind: { type: "STRING", enum: ["whatsapp", "telegram", "instagram", "facebook", "linkedin", "website", "store"] }, label: { type: "STRING" }, enabled: { type: "BOOLEAN" } }, required: ["kind", "label", "enabled"] },
+          },
           catalog_items: {
             type: "ARRAY",
             items: {
@@ -225,7 +235,7 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
             },
           },
         },
-        required: ["tagline", "description", "categories", "catalog_items"],
+        required: ["tagline", "description", "categories", "catalog_items", "card_fields", "suggested_buttons"],
       },
       rationale: { type: "STRING" },
     },
@@ -244,7 +254,7 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
               "Tu es l'architecte produit IA de TouchCard Business. Analyse le brief et prépare une configuration initiale réellement utile.",
               "Respecte strictement le type de carte demandé ET la formule unique choisie par le client dans selected_needs. Cette liste contient une seule formule : elle est la source de vérité. Ne combine jamais plusieurs formules. Déduis automatiquement tous les modules nécessaires à cette formule, sans demander au client de choisir les modules un par un. Si la formule contient boutique, active product_catalog et orders; si elle contient prestations, active service_catalog; si elle contient réservations, active bookings et availability_calendar; si elle contient plusieurs collaborateurs, active team.",
               "Sélectionne uniquement les modules autorisés. N'invente jamais de tarifs, d'adresses, de numéros, de certifications ou de faits. Laisse price vide si le tarif n'est pas fourni.",
-              "Rédige tagline et description en français. Les catégories et éléments de catalogue sont des propositions à valider, pas des faits confirmés.",
+              "Rédige tagline et description en français. Prépare aussi card_fields : champs de profil utiles et modifiables adaptés au secteur, sans champs personnels non nécessaires. Prépare suggested_buttons parmi WhatsApp, Telegram, réseaux sociaux, site et boutique ; enabled indique si le bouton est pertinent, sans inventer son URL ou ses coordonnées. Les catégories et éléments de catalogue sont des propositions à valider, pas des faits confirmés.",
               "Retourne un JSON conforme au schéma. Ne crée aucun compte, ne contacte personne et n'effectue aucune action externe.",
               "BRIEF ANONYMISÉ :",
               JSON.stringify(brief),
@@ -293,6 +303,8 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
           tagline: String(parsed.profile_draft.tagline ?? "").slice(0, 180),
           description: String(parsed.profile_draft.description ?? "").slice(0, 1200),
           categories: Array.isArray(parsed.profile_draft.categories) ? parsed.profile_draft.categories.slice(0, 12).map((v) => String(v).slice(0, 80)) : [],
+          card_fields: Array.isArray(parsed.profile_draft.card_fields) ? parsed.profile_draft.card_fields.slice(0, 12).map((field) => ({ key: String(field.key ?? "").toLowerCase().replace(/[^a-z0-9_]/g, "").slice(0, 40), label: String(field.label ?? "").slice(0, 80), type: ["text", "textarea", "url", "phone", "email"].includes(field.type) ? field.type : "text", visible: Boolean(field.visible) })) : [],
+          suggested_buttons: Array.isArray(parsed.profile_draft.suggested_buttons) ? parsed.profile_draft.suggested_buttons.slice(0, 8).map((button) => ({ kind: ["whatsapp", "telegram", "instagram", "facebook", "linkedin", "website", "store"].includes(button.kind) ? button.kind : "website", label: String(button.label ?? "").slice(0, 60), enabled: Boolean(button.enabled) })) : [],
           catalog_items: Array.isArray(parsed.profile_draft.catalog_items) ? parsed.profile_draft.catalog_items.slice(0, 12).map((item) => ({
             name: String(item.name ?? "").slice(0, 100),
             description: String(item.description ?? "").slice(0, 240),
