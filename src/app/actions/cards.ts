@@ -130,8 +130,32 @@ export async function toggleClientCardPublication(formData: FormData) {
   if (!user || !organizationId) return;
   const cardId = String(formData.get("card_id") ?? "");
   const publish = String(formData.get("publish") ?? "") === "true";
+  const { data: card } = await supabase.from("cards").select("id,slug")
+    .eq("id", cardId).eq("organization_id", organizationId).maybeSingle();
+  if (!card) return;
+
+  const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://touchcard-zayn-dk.vercel.app").replace(/\\/$/, "");
+  if (publish) {
+    const { data: existingTag } = await supabase.from("nfc_tags").select("id")
+      .eq("card_id", cardId).limit(1).maybeSingle();
+    if (existingTag) {
+      const { error: tagError } = await supabase.from("nfc_tags").update({
+        public_url: siteUrl + "/p/" + card.slug + "?source=nfc", is_active: true,
+      }).eq("id", existingTag.id);
+      if (tagError) return;
+    } else {
+      const { error: tagError } = await supabase.from("nfc_tags").insert({
+        card_id: cardId, public_url: siteUrl + "/p/" + card.slug + "?source=nfc", is_active: true,
+      });
+      if (tagError) return;
+    }
+  }
+
   const { error } = await supabase.from("cards").update({
     is_published: publish, updated_at: new Date().toISOString(),
   }).eq("id", cardId).eq("organization_id", organizationId);
+  if (!error && !publish) {
+    await supabase.from("nfc_tags").update({ is_active: false }).eq("card_id", cardId);
+  }
   if (!error) revalidatePath("/dashboard/cards");
 }
