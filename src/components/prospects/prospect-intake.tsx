@@ -42,7 +42,10 @@ export function ProspectIntake() {
       const saved = window.localStorage.getItem("touchcard-prospect-draft-v1");
       if (saved) {
         const draft = JSON.parse(saved) as { step?: number; form?: ProspectInput };
-        if (draft.form && typeof draft.form === "object") setForm((current) => ({ ...current, ...draft.form }));
+        if (draft.form && typeof draft.form === "object") {
+          const restoredForm = { ...draft.form, logoUrl: /^https?:\\/\\//i.test(String(draft.form.logoUrl ?? "")) ? draft.form.logoUrl : "" };
+          setForm((current) => ({ ...current, ...restoredForm }));
+        }
         if (Number.isInteger(draft.step)) setStep(Math.min(9, Math.max(0, Number(draft.step))));
       }
     } catch { window.localStorage.removeItem("touchcard-prospect-draft-v1"); }
