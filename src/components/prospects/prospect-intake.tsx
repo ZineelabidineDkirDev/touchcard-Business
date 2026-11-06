@@ -43,7 +43,8 @@ export function ProspectIntake() {
       if (saved) {
         const draft = JSON.parse(saved) as { step?: number; form?: ProspectInput };
         if (draft.form && typeof draft.form === "object") {
-          const restoredForm = { ...draft.form, logoUrl: /^https?:\\/\\//i.test(String(draft.form.logoUrl ?? "")) ? draft.form.logoUrl : "" };
+          const savedLogoUrl = String(draft.form.logoUrl ?? "");
+          const restoredForm = { ...draft.form, logoUrl: savedLogoUrl.startsWith("https://") || savedLogoUrl.startsWith("http://") ? savedLogoUrl : "" };
           setForm((current) => ({ ...current, ...restoredForm }));
         }
         if (Number.isInteger(draft.step)) setStep(Math.min(9, Math.max(0, Number(draft.step))));
