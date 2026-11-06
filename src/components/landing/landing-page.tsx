@@ -802,8 +802,15 @@ export function LandingPage({ userName }: { userName?: string | null }) {
             </h2>
             <p className="mx-auto mt-7 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">{t("finalDesc")}</p>
             <p className="mx-auto mt-7 max-w-2xl text-base leading-8 text-slate-300">Découvrez les retours et expériences de nos clients.</p>
-            <div className="mt-10 grid gap-5 text-left md:grid-cols-3">{[1,2,3].map((video)=><div key={video} className="flex aspect-video items-center justify-center rounded-2xl border border-white/15 bg-white/[.045] text-center text-xs text-slate-400"><span>Vidéo client {video}<br/><span className="font-normal text-slate-500">Emplacement vidéo à connecter</span></span></div>)}</div>
-            <a href="https://www.instagram.com/" target="_blank" rel="noreferrer" className="mt-7 inline-flex rounded-2xl border border-white/20 bg-white/[.07] px-7 py-4 text-sm font-bold text-white transition hover:bg-white/10">Ce que nos clients pensent de nous ↗</a>
+           
+            {/* Vidéos et placeholder for client videos */}
+            {/* <div className="mt-10 grid gap-5 text-left md:grid-cols-3">
+              {[1,2,3].map((video)=><div key={video} className="flex aspect-video items-center justify-center rounded-2xl border border-white/15 bg-white/[.045] text-center text-xs text-slate-400">
+              <span>Vidéo client {video}<br/><span className="font-normal text-slate-500">
+                Emplacement vidéo à connecter</span></span></div>)}
+            </div>
+            <a href="https://www.instagram.com/touchcard-nfc" target="_blank" rel="noreferrer" className="mt-7 inline-flex rounded-2xl border border-white/20 bg-white/[.07] px-7 py-4 text-sm font-bold text-white transition hover:bg-white/10">Ce que nos clients pensent de nous ↗</a>
+           */}
           </motion.div>
         </motion.div>
       </section>
