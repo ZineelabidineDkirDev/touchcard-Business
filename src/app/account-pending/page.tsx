@@ -21,7 +21,7 @@ async function AccountPendingContent() {
 
   const { data: request } = await supabase
     .from("prospect_requests")
-    .select("id, full_name, status, admin_notes, password_initialized, client_access_enabled, created_at")
+    .select("id, full_name, status, admin_notes, password_initialized, client_access_enabled, created_at, updated_at")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -31,7 +31,8 @@ async function AccountPendingContent() {
   if (!accessBlocked && !request.password_initialized) redirect("/setup-password");
   if (!accessBlocked && request.client_access_enabled) redirect("/dashboard");
 
-  const deadline = new Date(new Date(request.created_at).getTime() + 12 * 60 * 60 * 1000);
+  const deadlineBase = correctionRequested ? request.updated_at : request.created_at;
+  const deadline = new Date(new Date(deadlineBase).getTime() + 12 * 60 * 60 * 1000);
   const displayName = String(request.full_name || user.user_metadata.full_name || "cher client").trim();
 
   return (
