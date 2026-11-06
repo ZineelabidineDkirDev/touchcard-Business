@@ -56,7 +56,7 @@ async function AccountPendingContent() {
               <p className="text-sm font-bold uppercase tracking-wider text-indigo-700">Délai maximal de validation</p>
               <p className="mt-2 text-4xl font-black text-indigo-950 sm:text-5xl">12 heures</p>
               <p className="mt-3 text-base leading-7 text-slate-600">à compter de la réception de votre demande.</p>
-              <p className="mt-5 text-xs font-semibold text-slate-500">Échéance indicative : {deadline.toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}</p>
+              <p className="mt-5 text-xs font-semibold text-slate-500">Échéance indicative : {deadline.toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short", timeZone: "Africa/Casablanca" })}</p>
             </div>
             <p className="mt-7 text-sm text-slate-500">Numéro de demande : <span className="font-mono font-bold text-slate-800">{request.id}</span></p>
             <p className="mt-8 text-xl font-bold text-slate-900 sm:text-2xl">Merci pour votre confiance !</p>
