@@ -55,7 +55,7 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
         activity_sector: input.sector === "Autre" ? input.sectorOther.trim() || "Autre" : input.sector,
         email,
         phone,
-        card_type: input.cardType,
+        card_type: input.cardType === "google-review" ? "contact" : input.cardType,
         reason: input.reason.trim() || null,
         customization_requested: input.customRequested,
         brand_name: input.brandName.trim() || null,
