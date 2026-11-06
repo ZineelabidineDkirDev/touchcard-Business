@@ -21,12 +21,13 @@ async function AccountPendingContent() {
 
   const { data: request } = await supabase
     .from("prospect_requests")
-    .select("id, full_name, status, password_initialized, client_access_enabled, created_at")
+    .select("id, full_name, status, admin_notes, password_initialized, client_access_enabled, created_at")
     .eq("user_id", user.id)
     .maybeSingle();
 
   if (!request) redirect("/dashboard");
   const accessBlocked = ["rejected", "cancelled"].includes(request.status);
+  const correctionRequested = request.status === "correction_requested";
   if (!accessBlocked && !request.password_initialized) redirect("/setup-password");
   if (!accessBlocked && request.client_access_enabled) redirect("/dashboard");
 
@@ -50,10 +51,11 @@ async function AccountPendingContent() {
           </>
         ) : (
           <>
-            <h1 className="mt-6 text-4xl font-black leading-tight tracking-tight sm:text-6xl">Pour des raisons de sécurité, veuillez patienter, {displayName}.</h1>
-            <p className="mx-auto mt-8 max-w-3xl text-xl font-medium leading-relaxed text-slate-700 sm:text-2xl">Votre compte a bien été créé. Votre espace client sera accessible après validation de votre demande par l’équipe TouchCard.</p>
+            <h1 className="mt-6 text-4xl font-black leading-tight tracking-tight sm:text-6xl">{correctionRequested ? "Une précision est nécessaire, " + displayName + "." : "Pour des raisons de sécurité, veuillez patienter, " + displayName + "."}</h1>
+            <p className="mx-auto mt-8 max-w-3xl text-xl font-medium leading-relaxed text-slate-700 sm:text-2xl">{correctionRequested ? "Notre équipe a besoin d’une précision pour poursuivre l’étude de votre demande. Consultez la note ci-dessous." : "Votre compte a bien été créé. Votre espace client sera accessible après validation de votre demande par l’équipe TouchCard."}</p>
+            {correctionRequested && request.admin_notes && <div className="mx-auto mt-6 max-w-2xl rounded-2xl border border-amber-200 bg-amber-50 p-5 text-left text-base leading-7 text-amber-950"><p className="text-xs font-black uppercase tracking-wider text-amber-700">Message de l’équipe TouchCard</p><p className="mt-2 whitespace-pre-wrap">{request.admin_notes}</p></div>}
             <div className="mx-auto mt-9 max-w-2xl rounded-3xl border border-indigo-100 bg-indigo-50/70 px-6 py-7">
-              <p className="text-sm font-bold uppercase tracking-wider text-indigo-700">Délai maximal de validation</p>
+              <p className="text-sm font-bold uppercase tracking-wider text-indigo-700">{correctionRequested ? "Délai de traitement après réception de votre précision" : "Délai maximal de validation"}</p>
               <p className="mt-2 text-4xl font-black text-indigo-950 sm:text-5xl">12 heures</p>
               <p className="mt-3 text-base leading-7 text-slate-600">à compter de la réception de votre demande.</p>
               <p className="mt-5 text-xs font-semibold text-slate-500">Échéance indicative : {deadline.toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short", timeZone: "Africa/Casablanca" })}</p>
