@@ -293,6 +293,7 @@ export function LandingPage({ userName }: { userName?: string | null }) {
   ];
   const reduceMotion = useReducedMotion();
   const heroVideoRef = useRef<HTMLVideoElement>(null);
+  const [previewName, setPreviewName] = useState("Votre nom");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [pricingIndex, setPricingIndex] = useState(0);
@@ -729,6 +730,26 @@ export function LandingPage({ userName }: { userName?: string | null }) {
             ))}
           </div></div>
           <p className="mt-8 text-center text-xs leading-6 text-slate-500">{t("pricingNote")}</p>
+        </div>
+      </section>
+
+      <section id="aperçu" className="px-5 py-20 sm:px-8 lg:px-12">
+        <div className="mx-auto grid max-w-[1180px] items-center gap-12 rounded-[2rem] border border-indigo-100 bg-white p-6 shadow-[0_25px_80px_-45px_rgba(79,70,229,.35)] sm:p-10 lg:grid-cols-[1fr_.9fr]">
+          <div>
+            <p className="text-xs font-black uppercase tracking-[.22em] text-indigo-600">Aperçu interactif</p>
+            <h2 className="mt-4 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Imaginez votre carte avant de la commander.</h2>
+            <p className="mt-4 max-w-xl text-base leading-7 text-slate-600">Saisissez votre nom et découvrez un aperçu visuel de votre future carte TouchCard. Le design final sera adapté à votre activité après validation.</p>
+            <label htmlFor="touchcard-preview-name" className="mt-8 block text-sm font-bold text-slate-800">Votre nom ou nom d’activité</label>
+            <input id="touchcard-preview-name" value={previewName} onChange={(event) => setPreviewName(event.target.value.slice(0, 32))} maxLength={32} placeholder="Ex. : MMC Event" className="mt-2 w-full max-w-md rounded-xl border border-slate-300 px-4 py-3.5 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"/>
+            <p className="mt-2 text-xs text-slate-400">Aperçu indicatif — aucune information n’est enregistrée.</p>
+            <Link href="/demande" className="mt-7 inline-flex rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-700">Personnaliser ma carte <Arrow /></Link>
+          </div>
+          <div className="flex justify-center rounded-3xl bg-slate-950 px-4 py-10">
+            <div className="w-full max-w-[350px]">
+              <InteractiveNfcCard title={previewName.trim() || "Votre nom"} size="pricing"/>
+              <p className="mt-5 text-center text-xs font-bold uppercase tracking-[.2em] text-indigo-200">TouchCard Business</p>
+            </div>
+          </div>
         </div>
       </section>
 
