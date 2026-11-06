@@ -58,7 +58,7 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
         card_type: input.cardType,
         reason: input.reason.trim() || null,
         customization_requested: input.customRequested,
-        brand_name: input.customRequested ? input.brandName.trim() || null : null,
+        brand_name: input.brandName.trim() || null,
         logo_url: input.customRequested ? input.logoUrl.trim() || null : null,
         business_address: input.customRequested ? input.businessAddress.trim() || null : null,
         business_phone: input.customRequested ? input.businessPhone.trim() || null : null,
