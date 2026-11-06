@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/i18n/provider";
 import { motion, useReducedMotion } from "framer-motion";
 
@@ -292,6 +292,7 @@ export function LandingPage({ userName }: { userName?: string | null }) {
     ["03", t("step3Title"), t("step3Desc")],
   ];
   const reduceMotion = useReducedMotion();
+  const heroVideoRef = useRef<HTMLVideoElement>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [pricingIndex, setPricingIndex] = useState(0);
@@ -317,6 +318,24 @@ export function LandingPage({ userName }: { userName?: string | null }) {
     }, 4200);
     return () => window.clearInterval(timer);
   }, [pricingPaused, pricingMaxIndex, reduceMotion]);
+
+  useEffect(() => {
+    const video = heroVideoRef.current;
+    if (!video) return;
+    const desktopMotion = window.matchMedia("(min-width: 640px) and (prefers-reduced-motion: no-preference)");
+    if (!desktopMotion.matches) return;
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries.some((entry) => entry.isIntersecting);
+      if (visible) {
+        video.load();
+        void video.play().catch(() => undefined);
+      } else {
+        video.pause();
+      }
+    }, { rootMargin: "160px" });
+    observer.observe(video);
+    return () => { observer.disconnect(); video.pause(); };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 24);
@@ -390,12 +409,12 @@ export function LandingPage({ userName }: { userName?: string | null }) {
         <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
           {/* Vidéo d'ambiance NFC : les motifs Framer Motion ci-dessous restent inchangés. */}
           <video
-            className="absolute inset-0 h-full w-full object-cover opacity-55"
-            autoPlay
+            ref={heroVideoRef}
+            className="absolute inset-0 hidden h-full w-full object-cover opacity-55 sm:block"
             muted
             loop
             playsInline
-            preload="auto"
+            preload="none"
             aria-hidden="true"
             poster="https://images.pexels.com/videos/5101679/free-video-5101679.jpg?auto=compress&cs=tinysrgb&w=1920"
           >
