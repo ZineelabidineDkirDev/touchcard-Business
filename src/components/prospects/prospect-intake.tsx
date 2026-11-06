@@ -131,7 +131,7 @@ export function ProspectIntake() {
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-3xl text-emerald-700">✓</div>
           <p className="mt-8 text-xs font-black uppercase tracking-[.24em] text-violet-700">TouchCard Business</p>
           <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-5xl">Merci pour votre confiance !</h1>
-          <p className="mx-auto mt-5 max-w-lg leading-8 text-slate-600">Votre demande a bien été transmise à notre équipe. Nous allons étudier votre besoin et vous contacter pour confirmer les détails.</p>
+          <p className="mx-auto mt-5 max-w-lg leading-8 text-slate-600">Votre demande a bien été transmise à notre équipe. Le délai maximal de validation est de 12 heures à compter de sa réception. Vous serez informé de la suite donnée à votre demande.</p>
           <div className="mt-8 rounded-2xl border border-violet-100 bg-violet-50/70 p-5 text-left">\n            <p className="font-bold">Numéro de demande : <span className="font-mono">{submittedRequestId}</span></p>
             <p className="font-bold">Votre demande est enregistrée.</p>
             <p className="mt-2 text-sm text-slate-600">Votre compte est créé. Connectez-vous avec votre adresse e-mail et votre mot de passe provisoire. À la première connexion, vous devrez choisir un nouveau mot de passe. Votre espace restera verrouillé jusqu’à la validation du Super Admin.</p>
