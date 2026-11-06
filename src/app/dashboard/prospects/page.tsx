@@ -72,7 +72,7 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
               <div className="flex flex-wrap gap-2">
                 <form action={updateProspectStatus} className="flex flex-wrap gap-2">
                   <input type="hidden" name="id" value={p.id}/>
-                  <select name="status" defaultValue={p.status} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">{statuses.map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select>
+                  <select name="status" defaultValue={p.status} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">{statuses.map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select><input name="admin_notes" defaultValue={p.admin_notes ?? ""} placeholder="Note / correction à communiquer" maxLength={2000} className="min-w-52 rounded-lg border border-slate-200 px-3 py-2 text-sm"/>
                   <button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-500">Enregistrer</button>
                 </form>
                 {p.status === "approved" && p.user_id && (
