@@ -82,7 +82,7 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
 export async function updateProspectStatus(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "");
-  const allowed = ["new", "to_contact", "in_discussion", "quote_sent", "approved", "in_production", "completed", "rejected", "cancelled"];
+  const allowed = ["new", "to_contact", "in_discussion", "quote_sent", "approved", "correction_requested", "in_production", "completed", "rejected", "cancelled"];
   if (!id || !allowed.includes(status)) return;
 
   const supabase = await createClient();
