@@ -82,6 +82,7 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
 export async function updateProspectStatus(formData: FormData) {
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "");
+  const adminNotes = String(formData.get("admin_notes") ?? "").trim().slice(0, 2000);
   const allowed = ["new", "to_contact", "in_discussion", "quote_sent", "approved", "correction_requested", "in_production", "completed", "rejected", "cancelled"];
   if (!id || !allowed.includes(status)) return;
 
@@ -91,7 +92,7 @@ export async function updateProspectStatus(formData: FormData) {
 
   if (!isPlatformSuperAdmin(user.email)) return;
 
-  const { error } = await supabase.from("prospect_requests").update({ status, ...(status === "rejected" || status === "cancelled" ? { client_access_enabled: false } : {}), updated_at: new Date().toISOString() }).eq("id", id);
+  const { error } = await supabase.from("prospect_requests").update({ status, ...(adminNotes ? { admin_notes: adminNotes } : {}), ...(status === "rejected" || status === "cancelled" ? { client_access_enabled: false } : {}), updated_at: new Date().toISOString() }).eq("id", id);
   if (!error) revalidatePath("/dashboard/prospects");
 }
 
