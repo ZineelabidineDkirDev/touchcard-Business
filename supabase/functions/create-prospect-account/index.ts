@@ -2,27 +2,45 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const PLATFORM_SUPER_ADMIN_EMAIL = "zainmawada@gmail.com";
-const corsHeaders = {
-  "Access-Control-Allow-Origin": Deno.env.get("SITE_URL") ?? "https://touchcard-zayn-dk.vercel.app",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+const PRODUCTION_ORIGIN = "https://touchcard-zayn-dk.vercel.app";
 
-function json(data: unknown, status = 200) {
+function corsHeaders(req: Request) {
+  const origin = req.headers.get("Origin") ?? "";
+  const configured = Deno.env.get("SITE_URL")?.replace(/\/$/, "");
+  const allowed = new Set([PRODUCTION_ORIGIN, configured, "http://localhost:3000", "http://127.0.0.1:3000"].filter(Boolean));
+  const safeOrigin = allowed.has(origin) ? origin : PRODUCTION_ORIGIN;
+  return {
+    "Access-Control-Allow-Origin": safeOrigin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+  };
+}
+
+function json(req: Request, data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
+    headers: { ...corsHeaders(req), "Content-Type": "application/json" },
   });
 }
 
+async function sha256(value: string) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+  return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
-  if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
+  const origin = req.headers.get("Origin") ?? "";
+  const configured = Deno.env.get("SITE_URL")?.replace(/\/$/, "");
+  const allowedOrigins = new Set([PRODUCTION_ORIGIN, configured, "http://localhost:3000", "http://127.0.0.1:3000"].filter(Boolean));
+  if (origin && !allowedOrigins.has(origin)) return json(req, { error: "Origine non autorisée." }, 403);
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders(req) });
+  if (req.method !== "POST") return json(req, { error: "Method not allowed" }, 405);
 
   const url = Deno.env.get("SUPABASE_URL");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
-  if (!url || !serviceKey || !anonKey) return json({ error: "Server configuration error" }, 500);
+  if (!url || !serviceKey || !anonKey) return json(req, { error: "Server configuration error" }, 500);
 
   const admin = createClient(url, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
 
@@ -37,13 +55,43 @@ Deno.serve(async (req: Request) => {
     const city = String(prospect.city ?? "").trim();
     const sector = String(prospect.activity_sector ?? "").trim();
     const cardType = String(prospect.card_type ?? "");
+    const brandName = String(prospect.brand_name ?? "").trim();
 
-    if (!requestId || !fullName || !email || !phone || !city || !sector || !["contact", "service", "e-business"].includes(cardType)) {
-      return json({ error: "Les informations obligatoires de la demande sont incomplètes." }, 400);
+    if (!requestId || !fullName || !email || !phone || !city || !sector || !brandName || !["contact", "service", "e-business", "google-review"].includes(cardType)) {
+      return json(req, { error: "Les informations obligatoires de la demande sont incomplètes." }, 400);
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "Adresse e-mail invalide." }, 400);
-    if (email === PLATFORM_SUPER_ADMIN_EMAIL) return json({ error: "Cette adresse est réservée au compte Super Admin." }, 403);
-    if (password.length < 8) return json({ error: "Le mot de passe provisoire doit contenir au moins 8 caractères." }, 400);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json(req, { error: "Adresse e-mail invalide." }, 400);
+    if (email === PLATFORM_SUPER_ADMIN_EMAIL) return json(req, { error: "Cette adresse est réservée au compte Super Admin." }, 403);
+    if (password.length < 10 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+      return json(req, { error: "Le mot de passe doit contenir au moins 10 caractères, avec des lettres et des chiffres." }, 400);
+    }
+    if (fullName.length > 160 || brandName.length > 160 || email.length > 254 || phone.length > 60 || city.length > 120 || sector.length > 160) {
+      return json(req, { error: "Une information dépasse la longueur autorisée." }, 400);
+    }
+
+    // Rate limit by a one-way hash of the network address and normalized email.
+    const forwarded = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
+    const clientIp = req.headers.get("cf-connecting-ip") ?? req.headers.get("x-real-ip") ?? forwarded ?? "unknown";
+    const ipHash = await sha256(clientIp + ":" + (Deno.env.get("RATE_LIMIT_SALT") ?? url));
+    const emailHash = await sha256(email);
+    const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const [{ count: ipCount, error: ipCountError }, { count: emailCount, error: emailCountError }] = await Promise.all([
+      admin.from("prospect_request_attempts").select("id", { count: "exact", head: true }).eq("ip_hash", ipHash).gte("created_at", hourAgo),
+      admin.from("prospect_request_attempts").select("id", { count: "exact", head: true }).eq("email_hash", emailHash).gte("created_at", dayAgo),
+    ]);
+    if (ipCountError || emailCountError) {
+      console.error("Prospect rate-limit lookup failed", ipCountError ?? emailCountError);
+      return json(req, { error: "La vérification de sécurité est temporairement indisponible. Réessayez plus tard." }, 503);
+    }
+    if ((ipCount ?? 0) >= 8 || (emailCount ?? 0) >= 3) {
+      return json(req, { error: "Trop de demandes ont été envoyées. Veuillez patienter avant de réessayer." }, 429);
+    }
+    const { error: attemptError } = await admin.from("prospect_request_attempts").insert({ ip_hash: ipHash, email_hash: emailHash });
+    if (attemptError) {
+      console.error("Prospect rate-limit write failed", attemptError);
+      return json(req, { error: "La vérification de sécurité est temporairement indisponible. Réessayez plus tard." }, 503);
+    }
 
     let linkedUserId: string | null = null;
     let createdUserId: string | null = null;
@@ -56,11 +104,11 @@ Deno.serve(async (req: Request) => {
       const { data: { user } } = await userClient.auth.getUser();
       if (user) {
         if (user.email?.trim().toLowerCase() !== email) {
-          return json({ error: "L'adresse e-mail de la demande doit correspondre au compte connecté." }, 403);
+          return json(req, { error: "L'adresse e-mail de la demande doit correspondre au compte connecté." }, 403);
         }
         linkedUserId = user.id;
         const { error: passwordError } = await admin.auth.admin.updateUserById(user.id, { password });
-        if (passwordError) return json({ error: "Impossible de mettre à jour le mot de passe du compte connecté." }, 400);
+        if (passwordError) return json(req, { error: "Impossible de mettre à jour le mot de passe du compte connecté." }, 400);
       }
     }
 
@@ -73,7 +121,7 @@ Deno.serve(async (req: Request) => {
       });
       if (createError || !created.user) {
         const alreadyExists = /already|registered|exists/i.test(createError?.message ?? "");
-        return json({
+        return json(req, {
           code: alreadyExists ? "EMAIL_ALREADY_REGISTERED" : "ACCOUNT_CREATION_FAILED",
           error: alreadyExists
             ? "Cette adresse possède déjà un compte TouchCard. Connectez-vous avec ce compte avant de déposer une nouvelle demande."
@@ -108,7 +156,7 @@ Deno.serve(async (req: Request) => {
       card_type: cardType,
       reason: typeof prospect.reason === "string" ? prospect.reason.slice(0, 2000) : null,
       customization_requested: Boolean(prospect.customization_requested),
-      brand_name: typeof prospect.brand_name === "string" ? prospect.brand_name.slice(0, 160) : null,
+      brand_name: brandName.slice(0, 160),
       logo_url: typeof prospect.logo_url === "string" ? prospect.logo_url.slice(0, 1000) : null,
       business_address: typeof prospect.business_address === "string" ? prospect.business_address.slice(0, 500) : null,
       business_phone: typeof prospect.business_phone === "string" ? prospect.business_phone.slice(0, 60) : null,
@@ -122,12 +170,12 @@ Deno.serve(async (req: Request) => {
     if (insertError) {
       if (createdUserId) await admin.auth.admin.deleteUser(createdUserId);
       console.error("Prospect request insert failed", insertError);
-      return json({ error: "La demande n'a pas pu être enregistrée. Aucun compte client n'a été conservé." }, 400);
+      return json(req, { error: "La demande n'a pas pu être enregistrée. Aucun compte client n'a été conservé." }, 400);
     }
 
-    return json({ ok: true, user_id: linkedUserId, request_id: requestId });
+    return json(req, { ok: true, user_id: linkedUserId, request_id: requestId });
   } catch (error) {
     console.error("Prospect account creation failed", error);
-    return json({ error: "Une erreur technique est survenue. Veuillez réessayer." }, 500);
+    return json(req, { error: "Une erreur technique est survenue. Veuillez réessayer." }, 500);
   }
 });
