@@ -40,8 +40,8 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { ok: false as const, error: "Veuillez saisir une adresse e-mail valide." };
   }
-  if (provisionalPassword.length < 8) {
-    return { ok: false as const, error: "Le mot de passe provisoire doit contenir au moins 8 caractères." };
+  if (provisionalPassword.length < 10 || !/[A-Za-z]/.test(provisionalPassword) || !/[0-9]/.test(provisionalPassword)) {
+    return { ok: false as const, error: "Le mot de passe doit contenir au moins 10 caractères, avec des lettres et des chiffres." };
   }
 
   const supabase = await createClient();
