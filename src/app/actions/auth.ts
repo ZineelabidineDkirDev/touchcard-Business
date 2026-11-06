@@ -105,6 +105,7 @@ export async function requestPasswordReset(_state: AuthState, formData: FormData
 export async function updatePassword(_state: AuthState, formData: FormData): Promise<AuthState> {
   const password = String(formData.get("password") ?? "");
   const confirmation = String(formData.get("confirmation") ?? "");
+  const isClientSetup = String(formData.get("clientSetup") ?? "") === "1";
   if (password.length < 8) return { error: "Le nouveau mot de passe doit contenir au moins 8 caractères." };
   if (password !== confirmation) return { error: "Les deux mots de passe ne correspondent pas." };
 
@@ -117,10 +118,18 @@ export async function updatePassword(_state: AuthState, formData: FormData): Pro
 
     const { error } = await supabase.auth.updateUser({ password });
     if (error) return { error: "Le changement de mot de passe a échoué. Demandez un nouveau lien et réessayez." };
+
+    if (isClientSetup) {
+      const { error: setupError } = await supabase.functions.invoke("complete-client-password-setup", { body: {} });
+      if (setupError) {
+        return { error: "Votre mot de passe est enregistré, mais la confirmation de sécurité n'a pas abouti. Soumettez à nouveau ce formulaire pour terminer l'activation." };
+      }
+    }
   } catch (error) {
     return { error: getSafeAuthError(error) };
   }
 
+  if (isClientSetup) redirect("/account-pending");
   redirect("/login?password_updated=1");
 }
 

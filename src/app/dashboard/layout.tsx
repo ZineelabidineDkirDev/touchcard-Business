@@ -38,6 +38,34 @@ async function AuthenticatedDashboard({ children }: Readonly<{ children: React.R
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
   const isSuperAdmin = isPlatformSuperAdmin(user.email);
+  if (!isSuperAdmin) {
+    const { data: clientRequest } = await supabase
+      .from("prospect_requests")
+      .select("status, password_initialized, client_access_enabled")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (clientRequest && ["rejected", "cancelled"].includes(clientRequest.status)) redirect("/account-pending?blocked=1");
+    if (clientRequest && !clientRequest.password_initialized) redirect("/setup-password");
+    if (clientRequest && !clientRequest.client_access_enabled) redirect("/account-pending");
+  }
+  const { data: membership } = await supabase
+    .from("organization_members")
+    .select("organization_id")
+    .eq("user_id", user.id)
+    .limit(1)
+    .maybeSingle();
+  let enabledModules: string[] = [];
+  let hasWorkspaceConfig = false;
+  if (membership?.organization_id) {
+    const { data: organization } = await supabase
+      .from("organizations")
+      .select("workspace_config")
+      .eq("id", membership.organization_id)
+      .maybeSingle();
+    const config = organization?.workspace_config as { version?: number; modules?: string[] } | null;
+    hasWorkspaceConfig = Boolean(config?.version);
+    enabledModules = Array.isArray(config?.modules) ? config.modules : [];
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 lg:flex">
@@ -45,7 +73,7 @@ async function AuthenticatedDashboard({ children }: Readonly<{ children: React.R
         <Link href="/" className="text-2xl font-black tracking-tight text-slate-950">Touch<span className="text-indigo-600">Card</span></Link>
         <p className="mt-1 text-xs text-slate-400">BUSINESS WORKSPACE</p>
         <div className="mt-4"><LanguageSwitcher /></div>
-        <DashboardNavigation isSuperAdmin={isSuperAdmin} />
+        <DashboardNavigation isSuperAdmin={isSuperAdmin} enabledModules={enabledModules} hasWorkspaceConfig={hasWorkspaceConfig} />
         <div className="mt-8 border-t border-slate-100 pt-5 lg:absolute lg:inset-x-5 lg:bottom-6">
           <p className="truncate text-sm font-semibold text-slate-800">{String(user.user_metadata.full_name || user.email)}</p>
           <p className="mt-1 truncate text-xs text-slate-400">{user.email}</p>

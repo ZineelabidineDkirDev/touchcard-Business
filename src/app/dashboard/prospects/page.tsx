@@ -1,8 +1,11 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
-import { createProspectCustomer, updateProspectStatus } from "@/app/actions/prospects";
+import { activateProspectClientAccess, updateProspectStatus } from "@/app/actions/prospects";
+import { reviewCardDesignRequest } from "@/app/actions/cards";
+import { AdminResetPasswordButton } from "@/components/prospects/admin-reset-password-button";
 
 const statuses = [
   ["new", "Nouveau"], ["to_contact", "À contacter"], ["in_discussion", "En discussion"],
@@ -10,8 +13,9 @@ const statuses = [
   ["completed", "Terminé"], ["rejected", "Refusé"], ["cancelled", "Annulé"],
 ];
 
-export default async function ProspectsPage() {
+export default async function ProspectsPage({ searchParams }: { searchParams: Promise<{ created?: string; already_created?: string; approval_required?: string }> }) {
   await connection();
+  const query = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -20,9 +24,11 @@ export default async function ProspectsPage() {
     return <section className="mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-white p-8"><p className="text-xs font-black uppercase tracking-[.2em] text-indigo-600">TouchCard Business</p><h1 className="mt-3 text-3xl font-black text-slate-950">Espace administrateur</h1><p className="mt-3 text-slate-600">Cette rubrique est réservée aux administrateurs TouchCard autorisés.</p></section>;
   }
 
+  const { data: designRequests } = await supabase.from("card_design_requests").select("id,user_id,organization_id,template_id,card_type,notes,status,created_at").order("created_at", { ascending: false }).limit(50);
+
   const { data: prospects, error } = await supabase
     .from("prospect_requests")
-    .select("id, user_id, full_name, city, activity_sector, email, phone, card_type, reason, customization_requested, brand_name, logo_url, business_address, business_phone, social_links, project_needs, status, admin_notes, created_at")
+    .select("id, user_id, full_name, city, activity_sector, email, phone, card_type, reason, customization_requested, brand_name, logo_url, business_address, business_phone, social_links, project_needs, status, admin_notes, password_initialized, client_access_enabled, created_at")
     .order("created_at", { ascending: false });
 
   return (
@@ -30,6 +36,18 @@ export default async function ProspectsPage() {
       <p className="text-sm font-semibold uppercase tracking-[.18em] text-indigo-600">TouchCard Business · CRM</p>
       <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">Prospects & demandes</h1>
       <p className="mt-2 text-slate-500">Toutes les demandes reçues depuis le parcours « Créer votre carte ».</p>
+      {query.created === "1" && <div role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">L'espace client a été configuré. Il reste verrouillé jusqu'à l'activation par le Super Admin.</div>}
+      {query.already_created === "1" && <div className="mt-6 rounded-2xl bg-slate-100 p-4 text-sm text-slate-700">Cette demande est déjà liée à un compte client.</div>}
+      {query.approval_required === "1" && <div className="mt-6 rounded-2xl bg-amber-50 p-4 text-sm text-amber-800">Validez d'abord la demande avant de configurer son espace client.</div>}
+      <section className="mt-10 space-y-4">
+        <div><p className="text-xs font-black uppercase tracking-[.18em] text-violet-700">Validation des designs</p><h2 className="mt-2 text-2xl font-black text-slate-950">Demandes de modèles de cartes</h2><p className="mt-1 text-sm text-slate-500">Les clients choisissent un design compatible. Aucune carte n'est publiée automatiquement.</p></div>
+        {(designRequests ?? []).map((request:any) => <article key={request.id} className="rounded-2xl border border-violet-100 bg-white p-5 shadow-sm">
+          <div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-bold text-slate-950">{request.template_id}</h3><p className="mt-1 text-xs text-slate-500">Type : {request.card_type} · Demande du {new Date(request.created_at).toLocaleString("fr-FR")}</p><p className="mt-2 text-sm text-slate-600">{request.notes || "Aucune précision fournie."}</p></div><span className={"rounded-full px-3 py-1.5 text-xs font-bold "+(request.status==="approved"?"bg-emerald-50 text-emerald-700":request.status==="pending"?"bg-amber-50 text-amber-700":"bg-slate-100 text-slate-600")}>{request.status==="pending"?"En attente":request.status==="approved"?"Validé":request.status==="rejected"?"Refusé":"Modification demandée"}</span></div>
+          {request.status==="pending"&&<form action={reviewCardDesignRequest} className="mt-4 flex flex-wrap gap-2 border-t border-slate-100 pt-4"><input type="hidden" name="id" value={request.id}/><button name="status" value="approved" className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white">Valider le modèle</button><button name="status" value="revision_requested" className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-800">Demander une modification</button><button name="status" value="rejected" className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-bold text-rose-700">Refuser</button></form>}
+        </article>)}
+        {!(designRequests?.length)&&<p className="rounded-xl border border-dashed border-slate-300 p-6 text-sm text-slate-500">Aucune demande de modèle pour le moment.</p>}
+      </section>
+
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         <Metric label="Total des demandes" value={String(prospects?.length ?? 0)}/>
         <Metric label="Nouvelles demandes" value={String(prospects?.filter((p) => p.status === "new").length ?? 0)}/>
@@ -57,13 +75,15 @@ export default async function ProspectsPage() {
                   <select name="status" defaultValue={p.status} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">{statuses.map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select>
                   <button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-500">Enregistrer</button>
                 </form>
-                {p.status === "approved" && !p.user_id && (
-                  <form action={createProspectCustomer}>
-                    <input type="hidden" name="id" value={p.id}/>
-                    <button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-500">Créer le compte client</button>
-                  </form>
+                {p.status === "approved" && p.user_id && (
+                  <Link href={`/dashboard/prospects/${p.id}/configure`} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">Configurer l'espace client →</Link>
                 )}
-                {p.user_id && <span className="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">Compte client créé</span>}
+                {p.user_id && !p.password_initialized && <span className="rounded-lg bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800">Compte créé · changement du mot de passe à la première connexion</span>}
+                {p.user_id && p.password_initialized && !p.client_access_enabled && ["in_production", "completed"].includes(p.status) && <form action={activateProspectClientAccess}><input type="hidden" name="id" value={p.id}/><button className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">Valider et ouvrir l'accès client</button></form>}
+                {p.user_id && p.client_access_enabled && <span className="rounded-lg bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800">Espace client activé</span>}
+                {p.user_id && <AdminResetPasswordButton requestId={p.id}/>}
+                {p.user_id && <Link href={`/dashboard/prospects/${p.id}/preview`} className="rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-700 hover:bg-indigo-100">Voir l'espace client ↗</Link>}
+                {p.status === "in_production" && p.user_id && <Link href={`/dashboard/prospects/${p.id}/ai-test`} className="rounded-lg border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-bold text-violet-700 hover:bg-violet-100">Tester Gemini sans création ✨</Link>}
               </div>
             </div>
           </article>

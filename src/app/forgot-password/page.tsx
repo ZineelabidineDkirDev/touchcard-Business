@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { PasswordRecoveryForm } from "@/components/auth/password-recovery-form";
 
 export default function ForgotPasswordPage() {
   return (
@@ -11,8 +10,11 @@ export default function ForgotPasswordPage() {
         </Link>
         <p className="mt-8 text-sm font-semibold uppercase tracking-[.18em] text-indigo-600">Sécurité du compte</p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">Mot de passe oublié ?</h1>
-        <p className="mt-2 leading-6 text-slate-500">Saisissez l’adresse e-mail associée à votre compte. Si un compte existe, vous recevrez un lien sécurisé pour choisir un nouveau mot de passe.</p>
-        <PasswordRecoveryForm mode="request" />
+        <p className="mt-3 leading-6 text-slate-600">Pour éviter les liens de réinitialisation qui n'arrivent pas par e-mail, la récupération est traitée par le Super Admin.</p>
+        <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+          Contactez l'équipe TouchCard en utilisant le numéro de téléphone indiqué dans votre demande et communiquez l'adresse e-mail de votre compte. Après vérification de votre identité, le Super Admin pourra générer un mot de passe provisoire et vous le transmettre par un canal direct. Vous devrez ensuite choisir un nouveau mot de passe dès votre prochaine connexion.
+        </div>
+        <Link href="/login" className="btn-primary mt-7 block w-full text-center">Retour à la connexion</Link>
       </section>
     </main>
   );
