@@ -11,6 +11,7 @@ type Props = {
   className?: string;
   interactivePreview?: boolean;
   colorTheme?: CardColorTheme;
+  animateBrandColors?: boolean;
 };
 
 function NfcMark() {
@@ -34,7 +35,7 @@ function QrDemo() {
   return <div className="grid aspect-square w-full grid-cols-9 gap-[3px] rounded-lg bg-white p-2">{cells.map((v,i)=><span key={i} className={v?"rounded-[1px] bg-[#111827]":"bg-white"}/>)}</div>;
 }
 
-export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", cardType = "contact", className = "", interactivePreview = false, colorTheme = "metallic-black" }: Props) {
+export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", cardType = "contact", className = "", interactivePreview = false, colorTheme = "metallic-black", animateBrandColors = false }: Props) {
   const reduceMotion = useReducedMotion();
   const isGoogle = cardType === "google-review" || /avis google|google/i.test(title);
   const service = title || (cardType === "e-business" ? "E-Business" : cardType === "service" ? "Personnalisée" : "Contact");
@@ -88,6 +89,7 @@ export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", c
         transition={{ type: "spring", stiffness: interactivePreview ? 120 : 180, damping: 20 }}
       >
         <div className="absolute inset-0 overflow-hidden rounded-[1.15rem] border text-white shadow-[0_22px_55px_-22px_rgba(0,0,0,.85)] [backface-visibility:hidden]" style={{ background: palette.surface, borderColor: palette.border, color: palette.text }}>
+        {animateBrandColors && <motion.div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ mixBlendMode: "color", opacity: 0.28 }} animate={reduceMotion ? undefined : { backgroundColor: ["#6366f1", "#8b5cf6", "#22d3ee", "#d946ef", "#6366f1"] }} transition={{ duration: 40, repeat: Infinity, ease: "easeInOut" }} />}
         <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at 18% 12%, ${palette.sheen}, transparent 38%), repeating-linear-gradient(118deg, rgba(255,255,255,.035) 0px, rgba(255,255,255,.035) 1px, transparent 1px, transparent 5px)` }}/>
         <div className="absolute inset-[1px] rounded-[1.08rem] border border-white/10"/>
         <div className="absolute -right-[12%] -top-[38%] h-[115%] w-[58%] rotate-[28deg] border-l border-white/10 bg-gradient-to-r from-white/[.045] via-white/[.10] to-transparent"/>
