@@ -21,7 +21,7 @@ type Prospect = {
   project_needs: { selected?: string[] } | string[] | null;
   organization_name: string | null;
   cards: ClientCard[];
-  design_status: string | null;
+  design_status: string | null;\n  design_template: string | null;
 };
 type ClientCard = {
   id: string;
@@ -157,7 +157,7 @@ export function AdminClientCards({ prospects }: Props) {
             <Info label="Compte" value={selected.user_id ? (selected.password_initialized ? "Mot de passe initialisé" : "En attente du premier mot de passe") : "Aucun compte lié"}/>
             <Info label="Organisation" value={selected.organization_name || "Non créée"}/>
             <Info label="Type de carte" value={typeLabels[selected.card_type] ?? selected.card_type}/>
-            <Info label="Modèle demandé" value={selected.design_status ? (selected.design_status === "approved" ? "Modèle approuvé" : selected.design_status === "pending" ? "Modèle en attente" : selected.design_status) : "Aucune demande de modèle"}/>
+            <Info label="Modèle demandé" value={selected.design_status ? ((selected.design_template ? selected.design_template + " · " : "") + (selected.design_status === "approved" ? "Modèle approuvé" : selected.design_status === "pending" ? "Modèle en attente" : selected.design_status)) : "Aucune demande de modèle"}/>
             <Info label="Demande reçue" value={formatDate(selected.created_at)}/>
           </div>
 
@@ -168,7 +168,7 @@ export function AdminClientCards({ prospects }: Props) {
             <div>
               <div className="mb-4 flex flex-wrap items-end justify-between gap-3"><div><h3 className="text-lg font-black text-slate-950">Cartes du client</h3><p className="mt-1 text-sm text-slate-500">Aperçus 3D et état de publication.</p></div><span className="text-xs font-semibold text-slate-500">{selected.cards.length} carte(s)</span></div>
               {selected.cards.length ? <div className="grid gap-5 lg:grid-cols-2">{selected.cards.map((card) => <article key={card.id} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                <div className="mx-auto w-full max-w-[420px]"><PhysicalNfcCard title={typeTitles[selected.card_type] ?? "Contact"} clientName={card.full_name || selected.full_name} cardType={selected.card_type} colorTheme={colorForType(selected.card_type)}/></div>
+                <div className="mx-auto aspect-[1.586/1] w-full max-w-[420px]"><PhysicalNfcCard title={typeTitles[selected.card_type] ?? "Contact"} clientName={card.full_name || selected.full_name} cardType={selected.card_type} colorTheme={colorForType(selected.card_type)}/></div>
                 <div className="mt-4 flex flex-wrap items-center justify-between gap-2"><div><p className="font-bold text-slate-900">{card.full_name}</p><p className="text-xs text-slate-500">{card.company_name || selected.brand_name || "Carte professionnelle"} · {card.slug}</p></div><span className={"rounded-full px-2.5 py-1 text-xs font-bold " + (card.is_published ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-800")}>{card.is_published ? "Publiée" : "Brouillon"}</span></div>
                 <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">{[["Visites",card.views],["Scans NFC",card.nfc_scans],["Scans QR",card.qr_scans],["Clics",card.clicks]].map(([label,value]) => <div key={String(label)} className="rounded-xl bg-white p-3"><p className="text-lg font-black text-slate-950">{value}</p><p className="text-[11px] text-slate-500">{label}</p></div>)}</div>
                 <div className="mt-3 rounded-xl bg-white p-3"><p className="text-xs font-bold text-slate-700">Liens configurés · {card.links.length}</p>{card.links.length ? <div className="mt-2 flex flex-wrap gap-2">{card.links.map((link) => <span key={link.id} className="rounded-lg bg-slate-100 px-2 py-1 text-xs text-slate-600">{link.label}</span>)}</div> : <p className="mt-1 text-xs text-slate-400">Aucun lien configuré.</p>}</div>
