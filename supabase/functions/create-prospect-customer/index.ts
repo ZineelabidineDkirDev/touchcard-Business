@@ -13,7 +13,7 @@ const allowedModules = new Set([
 const allowedButtonKinds = new Set(["whatsapp", "telegram", "instagram", "facebook", "linkedin", "website", "store"]);
 const allowedFieldTypes = new Set(["text", "textarea", "url", "phone", "email"]);
 const corsHeaders = {
-  "Access-Control-Allow-Origin": Deno.env.get("SITE_URL") ?? "https://touchcard-zayn-dk.vercel.app",
+  "Access-Control-Allow-Origin": "https://touchcard-three.vercel.app",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
@@ -104,7 +104,7 @@ Deno.serve(async (req: Request) => {
       reviewed_by_super_admin: true,
     } : null;
 
-    const siteUrl = normalizeSiteUrl(Deno.env.get("SITE_URL") ?? "https://touchcard-zayn-dk.vercel.app");
+    const siteUrl = "https://touchcard-three.vercel.app";
     const customerUserId = prospect.user_id;
 
     const organizationName = String(prospect.brand_name || prospect.full_name).trim();
