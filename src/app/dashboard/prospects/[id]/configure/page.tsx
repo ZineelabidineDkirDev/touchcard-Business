@@ -26,7 +26,11 @@ export default async function ConfigureProspectPage({
     .maybeSingle();
 
   if (error || !prospect) notFound();
-  if (prospect.user_id) redirect("/dashboard/prospects?already_created=1");
+  if (prospect.user_id) {
+    const { data: existingOrganization } = await supabase.from("organizations")
+      .select("id").eq("owner_id", prospect.user_id).maybeSingle();
+    if (existingOrganization) redirect("/dashboard/prospects?already_created=1");
+  }
   if (prospect.status !== "approved") redirect("/dashboard/prospects?approval_required=1");
 
   return (
