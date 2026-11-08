@@ -72,7 +72,6 @@ export async function updateContact(formData: FormData) {
   const { error } = await workspace.supabase.from("contacts").update({
     status, priority, next_follow_up_at: nextFollowUp ? new Date(nextFollowUp).toISOString() : null,
     updated_at: new Date().toISOString(),
-    ...(status !== existing.status ? { last_contacted_at: new Date().toISOString() } : {}),
   }).eq("id", id).eq("organization_id", workspace.organizationId);
   if (error) {
     console.error("CRM contact update failed", error);
@@ -99,11 +98,19 @@ export async function addContactActivity(formData: FormData) {
   const { data: contact } = await workspace.supabase.from("contacts").select("id")
     .eq("id", contactId).eq("organization_id", workspace.organizationId).maybeSingle();
   if (!contact) return;
+  const dueAtIso = dueAt ? new Date(dueAt).toISOString() : null;
   const { error } = await workspace.supabase.from("contact_activities").insert({
     organization_id: workspace.organizationId, contact_id: contactId, activity_type: activityType,
-    subject, description, due_at: dueAt ? new Date(dueAt).toISOString() : null, created_by: workspace.user.id,
+    subject, description, due_at: dueAtIso, created_by: workspace.user.id,
   });
-  if (error) console.error("CRM activity creation failed", error);
+  if (error) {
+    console.error("CRM activity creation failed", error);
+  } else {
+    const updates: Record<string, string | null> = { updated_at: new Date().toISOString() };
+    if (dueAtIso) updates.next_follow_up_at = dueAtIso;
+    if (["call", "email", "meeting", "whatsapp"].includes(activityType)) updates.last_contacted_at = new Date().toISOString();
+    await workspace.supabase.from("contacts").update(updates).eq("id", contactId).eq("organization_id", workspace.organizationId);
+  }
   revalidatePath(CRM_PATH);
 }
 
@@ -112,8 +119,15 @@ export async function completeContactActivity(formData: FormData) {
   if ("error" in workspace) return;
   const id = String(formData.get("id") ?? "");
   if (!id) return;
+  const { data: activity } = await workspace.supabase.from("contact_activities").select("contact_id,due_at")
+    .eq("id", id).eq("organization_id", workspace.organizationId).is("completed_at", null).maybeSingle();
+  if (!activity) return;
   const { error } = await workspace.supabase.from("contact_activities").update({ completed_at: new Date().toISOString() })
     .eq("id", id).eq("organization_id", workspace.organizationId).is("completed_at", null);
   if (error) console.error("CRM activity completion failed", error);
+  else if (activity.due_at) {
+    await workspace.supabase.from("contacts").update({ next_follow_up_at: null, updated_at: new Date().toISOString() })
+      .eq("id", activity.contact_id).eq("organization_id", workspace.organizationId).eq("next_follow_up_at", activity.due_at);
+  }
   revalidatePath(CRM_PATH);
 }
