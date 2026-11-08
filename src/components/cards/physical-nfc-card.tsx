@@ -121,21 +121,29 @@ export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", c
           </div>
         </div>
         </div>
-        {interactivePreview && <div className="absolute inset-0 overflow-hidden rounded-[1.15rem] [backface-visibility:hidden] [transform:rotateY(180deg)]"><PhysicalNfcCardBack/></div>}
+        {interactivePreview && <div className="absolute inset-0 overflow-hidden rounded-[1.15rem] [backface-visibility:hidden] [transform:rotateY(180deg)]"><PhysicalNfcCardBack colorTheme={colorTheme}/></div>}
       </motion.div>
     </div>
   );
 }
 
-export function PhysicalNfcCardBack() {
+export function PhysicalNfcCardBack({ colorTheme = "metallic-black" }: { colorTheme?: CardColorTheme }) {
+  const backBackgrounds = {
+    gold: "linear-gradient(132deg, #fff0b8 0%, #c99b3d 35%, #76501b 100%)",
+    "metallic-black": "linear-gradient(132deg, #303945 0%, #11151d 55%, #05070a 100%)",
+    "dark-gray": "linear-gradient(132deg, #747b83 0%, #424951 48%, #252b32 100%)",
+    white: "linear-gradient(132deg, #ffffff 0%, #f4f6f8 55%, #dce2e8 100%)",
+  } as const;
+  const lightTheme = colorTheme === "gold" || colorTheme === "white";
+  const ink = colorTheme === "gold" ? "#241707" : "#17202b";
   return (
-    <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-[1.15rem] border border-white/20 bg-gradient-to-br from-[#303945] via-[#11151d] to-[#05070a] p-[7%] text-white">
+    <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-[1.15rem] border p-[7%]" style={{ background: backBackgrounds[colorTheme], borderColor: lightTheme ? "rgba(71,85,105,.25)" : "rgba(255,255,255,.2)", color: lightTheme ? ink : "#ffffff" }}>
       <div className="absolute left-[7%] top-[8%] flex items-center gap-2 opacity-100">
-        <img src="/brand/touchcard-mark.svg" alt="Logo TouchCard" className="h-5 w-5 grayscale brightness-200"/>
-        <span className="text-xs font-black tracking-[-.04em] text-[#d0d5dc] drop-shadow-[0_0_7px_rgba(220,230,245,.42)]">TouchCard</span>
+        <img src="/brand/touchcard-mark.svg" alt="Logo TouchCard" className="h-5 w-5" style={{ filter: lightTheme ? "grayscale(1) brightness(.45)" : "grayscale(1) brightness(2)" }}/>
+        <span className="text-xs font-black tracking-[-.04em]" style={{ color: lightTheme ? "rgba(36,23,7,.78)" : "#d0d5dc" }}>TouchCard</span>
       </div>
       <div className="w-[36%] max-w-28"><QrDemo/></div>
-      <span className="mt-2 text-[clamp(7px,1.1vw,10px)] font-bold tracking-[.2em] text-slate-300">TAP · SCAN · CONNECT</span>
+      <span className="mt-2 text-[clamp(7px,1.1vw,10px)] font-bold tracking-[.2em]" style={{ color: lightTheme ? "rgba(36,23,7,.78)" : "#cbd5e1" }}>TAP · SCAN · CONNECT</span>
     </div>
   );
 }
