@@ -89,7 +89,7 @@ function CardWaveMotif({ position }: { position: "top-right" | "bottom-left" }) 
 }
 
 export function InteractiveNfcCard({ title, size = "pricing", cardType = "contact", clientName }: { title: string; size?: "pricing" | "hero"; cardType?: string; clientName?: string }) {
-  return <PhysicalNfcCard title={title} cardType={cardType} clientName={clientName} size={size} />;
+  return <PhysicalNfcCard title={title} cardType={cardType} clientName={clientName} />;
 }
 
 function DashboardPreview() {
