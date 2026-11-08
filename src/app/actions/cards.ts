@@ -134,7 +134,7 @@ export async function toggleClientCardPublication(formData: FormData) {
     .eq("id", cardId).eq("organization_id", organizationId).maybeSingle();
   if (!card) return;
 
-  const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://touchcard-zayn-dk.vercel.app";
+  const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://touchcard-three.vercel.app";
   const siteUrl = rawSiteUrl.endsWith("/") ? rawSiteUrl.slice(0, -1) : rawSiteUrl;
   if (publish) {
     const { data: existingTag } = await supabase.from("nfc_tags").select("id")
