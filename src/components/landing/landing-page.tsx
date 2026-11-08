@@ -88,8 +88,8 @@ function CardWaveMotif({ position }: { position: "top-right" | "bottom-left" }) 
   );
 }
 
-export function InteractiveNfcCard({ title, size = "pricing", cardType = "contact", clientName }: { title: string; size?: "pricing" | "hero"; cardType?: string; clientName?: string }) {
-  return <PhysicalNfcCard title={title} cardType={cardType} clientName={clientName} />;
+export function InteractiveNfcCard({ title, size = "pricing", cardType = "contact", clientName, interactivePreview = false }: { title: string; size?: "pricing" | "hero"; cardType?: string; clientName?: string; interactivePreview?: boolean }) {
+  return <PhysicalNfcCard title={title} cardType={cardType} clientName={clientName} interactivePreview={interactivePreview} />;
 }
 
 function DashboardPreview() {
@@ -695,10 +695,12 @@ export function LandingPage({ userName }: { userName?: string | null }) {
             <p className="mt-2 text-xs text-slate-400">Aperçu indicatif — aucune information n’est enregistrée.</p>
             <Link href="/demande" className="mt-7 inline-flex rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-700">Personnaliser ma carte <Arrow /></Link>
           </div>
-          <div className="flex justify-center rounded-3xl bg-slate-950 px-4 py-10">
-            <div className="w-full max-w-[350px]">
-              <InteractiveNfcCard title="E-Business" size="pricing" cardType="e-business" clientName={previewName.trim() || "M./Mme Client"}/>
-              <p className="mt-5 text-center text-xs font-bold uppercase tracking-[.2em] text-indigo-200">TouchCard Business</p>
+          <div className="flex flex-col items-center justify-center rounded-3xl bg-slate-950 px-5 py-10 sm:px-8 sm:py-14">
+            <div className="w-full max-w-[460px]">
+              <div className="aspect-[1.586/1] w-full">
+                <InteractiveNfcCard title="E-Business" size="pricing" cardType="e-business" clientName={previewName.trim() || "Votre nom"} interactivePreview />
+              </div>
+              <p className="mt-5 text-center text-xs font-semibold text-indigo-200">Survolez la carte pour découvrir son verso et son QR Code</p>
             </div>
           </div>
         </div>
