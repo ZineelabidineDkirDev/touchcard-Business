@@ -151,8 +151,6 @@ export function AdminClientCards({ prospects }: Props) {
             <div><p className="text-xs font-black uppercase tracking-[.18em] text-indigo-600">Fiche client · {selected.organization_name || "Organisation non configurée"}</p><h2 id="client-detail-title" className="mt-2 text-2xl font-black text-slate-950">{selected.full_name}</h2><p className="mt-1 text-sm text-slate-500">{selected.brand_name || selected.activity_sector} · {selected.city}</p></div>
             <div className="flex items-center gap-2"><span className={"rounded-full px-3 py-1.5 text-xs font-bold " + (canShowCard(selected) ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-800")}>{canShowCard(selected) ? "Espace client actif" : "Espace verrouillé"}</span><button type="button" onClick={() => setSelectedId(null)} aria-label="Fermer la fiche client" className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-900">×</button></div>
           </div>
-            <span className={"rounded-full px-3 py-1.5 text-xs font-bold " + (canShowCard(selected) ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-800")}>{canShowCard(selected) ? "Espace client actif" : "Espace verrouillé"}</span>
-          </div>
 
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <Info label="E-mail" value={selected.email}/>
