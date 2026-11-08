@@ -44,7 +44,7 @@ export function ProspectIntake() {
         const draft = JSON.parse(saved) as { savedAt?: number; step?: number; form?: ProspectInput };
         const draftAge = typeof draft.savedAt === "number" ? Date.now() - draft.savedAt : Number.POSITIVE_INFINITY;
         const draftIsFresh = draftAge >= 0 && draftAge <= 24 * 60 * 60 * 1000;
-        if (draftIsFresh && draft.form && typeof draft.form === "object")
+        if (draftIsFresh && draft.form && typeof draft.form === "object") {
           const savedLogoUrl = String(draft.form.logoUrl ?? "");
           const restoredForm = { ...draft.form, logoUrl: savedLogoUrl.startsWith("https://") || savedLogoUrl.startsWith("http://") ? savedLogoUrl : "" };
           setForm((current) => ({ ...current, ...restoredForm }));
