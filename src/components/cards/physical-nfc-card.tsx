@@ -20,8 +20,7 @@ function NfcMark() {
 function GoogleWordmark() {
   return (
     <span className="inline-flex items-center text-[25px] font-semibold tracking-[-.07em]" aria-label="Google">
-      <span className="text-[#4285F4]">G</span>
-      <span className="ml-1 text-white">oogle</span>
+      <span className="text-[#4285F4]">G</span><span className="text-[#EA4335]">o</span><span className="text-[#FBBC05]">o</span><span className="text-[#4285F4]">g</span><span className="text-[#34A853]">l</span><span className="text-[#EA4335]">e</span>
     </span>
   );
 }
@@ -35,7 +34,7 @@ export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", c
   const reduceMotion = useReducedMotion();
   const isGoogle = cardType === "google-review" || /avis google|google/i.test(title);
   const service = title || (cardType === "e-business" ? "E-Business" : cardType === "service" ? "Personnalisée" : "Contact");
-  const displayName = clientName.trim() || "M./Mme Client";
+  const rawName = clientName.trim();\n  const displayName = !rawName ? "M./Mme Client" : /^(M\\.|Mme|Mlle)\\s/i.test(rawName) ? rawName : `M./Mme ${rawName}`;
 
   return (
     <div className={`group relative h-full w-full [perspective:1400px] ${className}`}>
