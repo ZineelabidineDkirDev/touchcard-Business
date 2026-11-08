@@ -95,7 +95,8 @@ export default async function ClientCardsPage() {
         project_needs: prospect.project_needs as { selected?: string[] } | string[] | null,
         organization_name: organization?.name ?? null,
         cards: clientCards,
-        design_status: prospect.user_id ? latestDesignByUser.get(prospect.user_id)?.status ?? null : null,\n        design_template: prospect.user_id ? latestDesignByUser.get(prospect.user_id)?.template_id ?? null : null,
+        design_status: prospect.user_id ? latestDesignByUser.get(prospect.user_id)?.status ?? null : null,
+        design_template: prospect.user_id ? latestDesignByUser.get(prospect.user_id)?.template_id ?? null : null,
       };
     });
     return <AdminClientCards prospects={adminClients} />;
