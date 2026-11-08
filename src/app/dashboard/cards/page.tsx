@@ -29,7 +29,7 @@ export default async function ClientCardsPage() {
         .order("created_at", { ascending: false }),
       supabase.from("organizations").select("id,name,owner_id"),
       supabase.from("cards").select("id,organization_id,slug,full_name,job_title,company_name,is_published,theme,created_at"),
-      supabase.from("card_design_requests").select("user_id,status").order("created_at", { ascending: false }),
+      supabase.from("card_design_requests").select("user_id,status,template_id").order("created_at", { ascending: false }),
     ]);
 
     const prospects = prospectsResult.data ?? [];
@@ -50,9 +50,9 @@ export default async function ClientCardsPage() {
         ? supabase.from("card_events").select("card_id,event_type").in("card_id", visibleCardIds)
         : Promise.resolve({ data: [] as { card_id: string; event_type: string }[] }),
     ]);
-    const latestDesignByUser = new Map<string, string>();
+    const latestDesignByUser = new Map<string, { status: string; template_id: string }>();
     for (const request of designRequestsResult.data ?? []) {
-      if (!latestDesignByUser.has(request.user_id)) latestDesignByUser.set(request.user_id, request.status);
+      if (!latestDesignByUser.has(request.user_id)) latestDesignByUser.set(request.user_id, { status: request.status, template_id: request.template_id });
     }
     const adminClients = prospects.map((prospect) => {
       const organization = prospect.user_id ? organizationByOwner.get(prospect.user_id) : null;
@@ -95,7 +95,7 @@ export default async function ClientCardsPage() {
         project_needs: prospect.project_needs as { selected?: string[] } | string[] | null,
         organization_name: organization?.name ?? null,
         cards: clientCards,
-        design_status: prospect.user_id ? latestDesignByUser.get(prospect.user_id) ?? null : null,
+        design_status: prospect.user_id ? latestDesignByUser.get(prospect.user_id)?.status ?? null : null,\n        design_template: prospect.user_id ? latestDesignByUser.get(prospect.user_id)?.template_id ?? null : null,
       };
     });
     return <AdminClientCards prospects={adminClients} />;
