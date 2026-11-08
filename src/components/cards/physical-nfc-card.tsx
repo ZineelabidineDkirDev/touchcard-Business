@@ -95,29 +95,29 @@ export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", c
         {interactivePreview && <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-center"><img src="/brand/touchcard-mark.svg" alt="" className="h-[42%] w-[42%] object-contain" style={{ opacity: 0.075, filter: palette.logo }}/></div>}
         <div className="relative z-10 flex h-full flex-col justify-between p-[6.2%]">
           <div className="flex min-w-0 items-start justify-between gap-2">
-            {!interactivePreview && <div className="flex min-w-0 items-center gap-2">
-              <img src="/brand/touchcard-mark.svg" alt="Logo TouchCard" className="h-5 w-5 shrink-0 object-contain opacity-90" style={{ filter: palette.logo }}/>
-              <span className="whitespace-nowrap text-[clamp(10px,1.8vw,16px)] font-black tracking-[-.055em]" style={{ color: palette.muted }}>TouchCard</span>
-            </div>}
-            <div className="flex max-w-[48%] shrink-0 items-center justify-end gap-1.5 text-right text-slate-100">
-              {isGoogle ? (
-                <div className="flex flex-col items-end leading-tight">
-                  <GoogleWordmark/>
-                  <span className="flex items-center gap-1 text-[clamp(7px,1.15vw,10px)] font-bold tracking-[.12em] text-slate-100">
-                    AVIS <span className="text-[clamp(10px,1.55vw,13px)] tracking-[.04em] text-[#fbbc04]" aria-label="5 étoiles">★★★★★</span>
-                  </span>
-                </div>
-              ) : (
-                <>
-                  <span className="truncate text-[clamp(7px,1.15vw,10px)] font-extrabold uppercase tracking-[.12em]" style={{ color: palette.text }}>{service}</span>
-                  <span className="[&>svg]:h-5 [&>svg]:w-5"><NfcMark/></span>
-                </>
-              )}
-            </div>
+            {interactivePreview ? (
+              <div className="flex min-w-0 items-center gap-1.5">
+                <span className="truncate text-[clamp(8px,1.3vw,11px)] font-extrabold uppercase tracking-[.12em]" style={{ color: palette.text }}>{service}</span>
+                <span className="[&>svg]:h-5 [&>svg]:w-5"><NfcMark/></span>
+              </div>
+            ) : (
+              <div className="flex min-w-0 items-center gap-2">
+                <img src="/brand/touchcard-mark.svg" alt="Logo TouchCard" className="h-5 w-5 shrink-0 object-contain opacity-90" style={{ filter: palette.logo }}/>
+                <span className="whitespace-nowrap text-[clamp(10px,1.8vw,16px)] font-black tracking-[-.055em]" style={{ color: palette.muted }}>TouchCard</span>
+              </div>
+            )}
+            {isGoogle && (
+              <div className="flex max-w-[48%] shrink-0 flex-col items-end leading-tight text-right">
+                <GoogleWordmark/>
+                <span className="flex items-center gap-1 text-[clamp(7px,1.15vw,10px)] font-bold tracking-[.12em]" style={{ color: palette.text }}>
+                  AVIS <span className="text-[clamp(10px,1.55vw,13px)] tracking-[.04em] text-[#fbbc04]" aria-label="5 étoiles">★★★★★</span>
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="relative z-10 flex items-end justify-between gap-3">
-            <span className="min-w-0 truncate text-[clamp(9px,1.55vw,13px)] font-semibold tracking-[.035em]" style={{ color: palette.text }}>{displayName}</span>
+            <span className="min-w-0 truncate text-[clamp(11px,1.8vw,16px)] font-semibold tracking-[.025em]" style={{ color: palette.text }}>{displayName}</span>
             <span className="shrink-0 text-[clamp(7px,1.1vw,9px)] font-bold tracking-[.2em]" style={{ color: palette.muted }}>NFC</span>
           </div>
         </div>
