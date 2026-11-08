@@ -41,13 +41,16 @@ export function ProspectIntake() {
     try {
       const saved = window.localStorage.getItem("touchcard-prospect-draft-v1");
       if (saved) {
-        const draft = JSON.parse(saved) as { step?: number; form?: ProspectInput };
-        if (draft.form && typeof draft.form === "object") {
+        const draft = JSON.parse(saved) as { savedAt?: number; step?: number; form?: ProspectInput };
+        const draftAge = typeof draft.savedAt === "number" ? Date.now() - draft.savedAt : Number.POSITIVE_INFINITY;
+        const draftIsFresh = draftAge >= 0 && draftAge <= 24 * 60 * 60 * 1000;
+        if (draftIsFresh && draft.form && typeof draft.form === "object")
           const savedLogoUrl = String(draft.form.logoUrl ?? "");
           const restoredForm = { ...draft.form, logoUrl: savedLogoUrl.startsWith("https://") || savedLogoUrl.startsWith("http://") ? savedLogoUrl : "" };
           setForm((current) => ({ ...current, ...restoredForm }));
         }
-        if (Number.isInteger(draft.step)) setStep(Math.min(9, Math.max(0, Number(draft.step))));
+        if (draftIsFresh && Number.isInteger(draft.step)) setStep(Math.min(9, Math.max(0, Number(draft.step))));
+        if (!draftIsFresh) window.localStorage.removeItem("touchcard-prospect-draft-v1");
       }
     } catch { window.localStorage.removeItem("touchcard-prospect-draft-v1"); }
     finally { setDraftLoaded(true); }
@@ -55,7 +58,7 @@ export function ProspectIntake() {
 
   useEffect(() => {
     if (!draftLoaded) return;
-    try { window.localStorage.setItem("touchcard-prospect-draft-v1", JSON.stringify({ step, form })); }
+    try { window.localStorage.setItem("touchcard-prospect-draft-v1", JSON.stringify({ savedAt: Date.now(), step, form })); }
     catch { /* Storage may be disabled; the form remains usable. */ }
   }, [step, form, draftLoaded]);
 
@@ -118,6 +121,8 @@ export function ProspectIntake() {
     const result = await submitProspectRequest(requestData, requestId, provisionalPassword);
     if (!result.ok) { setError(result.error); setBusy(false); return; }
 
+    // Remove locally cached contact details after a successful submission.
+    try { window.localStorage.removeItem("touchcard-prospect-draft-v1"); } catch { /* Storage may be disabled. */ }
     // Le compte est créé sans e-mail de confirmation, mais reste verrouillé jusqu’à validation du Super Admin.
     setDone(true);
     setBusy(false);
