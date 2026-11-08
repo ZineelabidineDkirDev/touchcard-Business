@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/i18n/provider";
 import { motion, useReducedMotion } from "framer-motion";
+import { PhysicalNfcCard } from "@/components/cards/physical-nfc-card";
 
 const rise = {
   hidden: { opacity: 0, y: 28 },
@@ -87,58 +88,8 @@ function CardWaveMotif({ position }: { position: "top-right" | "bottom-left" }) 
   );
 }
 
-export function InteractiveNfcCard({ title, size = "pricing" }: { title: string; size?: "pricing" | "hero" }) {
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
-  const [flipped, setFlipped] = useState(false);
-  const handleMove = (event: React.MouseEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = (event.clientX - rect.left) / rect.width - 0.5;
-    const y = (event.clientY - rect.top) / rect.height - 0.5;
-    setTilt({ x: -y * 20, y: x * 24 });
-  };
-  const hero = size === "hero";
-  return (
-    <div
-      className={`h-full w-full [perspective:1200px] ${hero ? "max-w-[430px]" : ""}`}
-      onMouseMove={handleMove}
-      onMouseEnter={() => setFlipped(true)}
-      onMouseLeave={() => { setTilt({ x: 0, y: 0 }); setFlipped(false); }}
-      onClick={() => setFlipped((value) => !value)}
-      role="button"
-      tabIndex={0}
-      aria-label={`Carte NFC ${title}, survoler pour afficher le QR code`}
-      onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") setFlipped((value) => !value); }}
-    >
-      <motion.div
-        className="h-full w-full [transform-style:preserve-3d]"
-        animate={{ rotateX: tilt.x, rotateY: tilt.y }}
-        whileHover={{ scale: 1.035 }}
-        transition={{ type: "spring", stiffness: 180, damping: 18, mass: 0.6 }}
-      >
-        <motion.div
-          className="relative h-full w-full [transform-style:preserve-3d]"
-          animate={{ rotateY: flipped ? 180 : 0 }}
-          transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <div className={`absolute inset-0 flex flex-col justify-between overflow-hidden rounded-[1.7rem] border border-white/20 bg-gradient-to-br from-[#45417c] via-[#171936] to-[#080a19] text-white shadow-[0_30px_70px_-25px_rgba(79,70,229,.7)] [backface-visibility:hidden] ${hero ? "p-8 sm:p-10" : "items-center p-5 text-center"}`}>
-            <CardWaveMotif position="top-right" />
-            <CardWaveMotif position="bottom-left" />
-            <div className="relative z-10 flex items-center justify-between"><img src="/brand/touchcard-mark.svg" alt="TouchCard" className={hero ? "h-12 w-12" : "h-9 w-9"}/><span className="text-[10px] font-bold tracking-[.18em] text-indigo-200">{hero ? "E-BUSINESS · NFC" : "TOUCHCARD · NFC"}</span></div>
-            <div className="relative z-10"><h3 className={hero ? "text-3xl font-black sm:text-4xl" : "text-lg font-black"}>{hero ? "Votre identité." : title}</h3>{hero && <p className="mt-2 text-2xl font-bold text-indigo-200">Tous vos services.</p>}<div className="mt-6 h-1.5 w-2/3 rounded-full bg-white/30"/><p className="mt-4 text-[10px] font-semibold tracking-[.2em] text-white/55">TAP · SCAN · CONNECT</p></div>
-          </div>
-          <div className="absolute inset-0 flex flex-col items-center justify-between overflow-hidden rounded-[1.7rem] border border-indigo-200/30 bg-gradient-to-br from-[#171936] to-[#080a19] p-4 text-white shadow-[0_30px_70px_-25px_rgba(79,70,229,.7)] [backface-visibility:hidden] [transform:rotateY(180deg)]">
-            <CardWaveMotif position="top-right" />
-            <CardWaveMotif position="bottom-left" />
-            <div className="relative z-10 flex w-full items-center justify-between"><span className="text-[10px] font-bold tracking-[.2em] text-indigo-200">SCAN · CONNECT</span><img src="/brand/touchcard-mark.svg" alt="TouchCard" className="h-7 w-7"/></div>
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none">
-              <div className={hero ? "h-28 w-28" : "h-[88px] w-[88px]"}><QrPattern /></div>
-              <span className="whitespace-nowrap text-[8px] leading-none text-slate-300">QR de démonstration</span>
-            </div>
-          </div>
-        </motion.div>
-      </motion.div>
-    </div>
-  );
+export function InteractiveNfcCard({ title, size = "pricing", cardType = "contact", clientName }: { title: string; size?: "pricing" | "hero"; cardType?: string; clientName?: string }) {
+  return <PhysicalNfcCard title={title} cardType={cardType} clientName={clientName} />;
 }
 
 function DashboardPreview() {
@@ -465,7 +416,7 @@ export function LandingPage({ userName }: { userName?: string | null }) {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, scale: 0.94, x: 30 }} animate={{ opacity: 1, scale: 1, x: 0 }} transition={{ duration: 0.9, delay: 0.15, ease: [0.22, 1, 0.36, 1] }} className="py-8 lg:py-0">
-            <div className="mx-auto flex min-h-[420px] max-w-[560px] items-center justify-center px-4"><div className="h-[340px] w-full max-w-[430px]"><InteractiveNfcCard title="E-BUSINESS · NFC" size="hero" /></div></div>
+            <div className="mx-auto flex w-full max-w-[560px] items-center justify-center px-4"><div className="aspect-[1.586/1] w-full max-w-[430px]"><InteractiveNfcCard title="E-Business" size="hero" cardType="e-business" /></div></div>
           </motion.div>
         </div>
 
@@ -716,13 +667,13 @@ export function LandingPage({ userName }: { userName?: string | null }) {
           </div>
           <div className="mt-8 w-full overflow-hidden" onMouseEnter={() => setPricingPaused(true)} onMouseLeave={() => setPricingPaused(false)}><div className="flex w-full items-stretch gap-6 transition-transform duration-700 ease-in-out" style={{ transform: `translateX(-${pricingIndex * (100 / pricingSlidesToShow)}%)` }}>
             {[
-              {name:t("eBusinessName"),type:t("eBusinessType"),desc:t("eBusinessDesc"),price:"399 DH",tone:"metal",number:"01",features:["Profil professionnel complet","Coordonnées, liens et services digitaux","Partage NFC et QR code"]},
-              {name:t("cardContactName"),type:t("cardContactType"),desc:t("cardContactDesc"),price:"149 DH",tone:"metal",number:"02",features:[t("contactDetails"),t("quickSharing"),t("easySaving")]},
-              {name:t("cardGoogleName"),type:t("cardGoogleType"),desc:t("cardGoogleDesc"),price:"199 DH",tone:"google",number:"03",features:[t("googlePageAccess"),t("oneTapSharing"),t("reviewRequests")]},
-              {name:t("customCardName"),type:t("cardCustomType"),desc:t("customCardDescription"),price:"499 DH",tone:"custom",number:"04",features:[t("customLogoDesign"),t("tailoredDigitalService"),t("businessTailoredExperience"),t("customNfcCard")]}
+              {name:t("eBusinessName"),type:t("eBusinessType"),desc:t("eBusinessDesc"),price:"399 DH",tone:"metal",cardType:"e-business",number:"01",features:["Profil professionnel complet","Coordonnées, liens et services digitaux","Partage NFC et QR code"]},
+              {name:t("cardContactName"),type:t("cardContactType"),desc:t("cardContactDesc"),price:"149 DH",tone:"metal",cardType:"contact",number:"02",features:[t("contactDetails"),t("quickSharing"),t("easySaving")]},
+              {name:t("cardGoogleName"),type:t("cardGoogleType"),desc:t("cardGoogleDesc"),price:"199 DH",tone:"google",cardType:"google-review",number:"03",features:[t("googlePageAccess"),t("oneTapSharing"),t("reviewRequests")]},
+              {name:t("customCardName"),type:t("cardCustomType"),desc:t("customCardDescription"),price:"499 DH",tone:"custom",cardType:"service",number:"04",features:[t("customLogoDesign"),t("tailoredDigitalService"),t("businessTailoredExperience"),t("customNfcCard")]}
             ].map((card,index) => (
               <motion.article key={card.name} whileHover={reduceMotion ? undefined : { y: -8 }} transition={{ type: "spring", stiffness: 260, damping: 22 }} className="w-full shrink-0 sm:w-[calc((100%-24px)/2)] xl:w-[calc((100%-48px)/3)]">
-                <div className="mx-auto mb-7 aspect-[1.586/1] w-full max-w-[310px]"><InteractiveNfcCard title={card.name} size="pricing" /></div>
+                <div className="mx-auto mb-7 aspect-[1.586/1] w-full max-w-[310px]"><InteractiveNfcCard title={card.name} size="pricing" cardType={card.cardType} /></div>
                 <div className="mx-auto max-w-[310px]"><p className="text-[9px] font-extrabold uppercase tracking-widest text-indigo-600">{card.type}</p><h3 className="mt-2 text-xl font-black text-[#11132d]">{card.name}</h3><p className="mt-3 min-h-[90px] text-sm leading-6 text-slate-500">{card.desc}</p><p className="mt-4 text-3xl font-black text-[#11132d]">{card.price}</p>
                 <ul className="mt-4 space-y-2">{card.features.map((feature) => <li key={feature} className="text-xs text-slate-600">✓ {feature}</li>)}</ul>
                 <Link href="/demande" className="mt-6 inline-flex w-full justify-center rounded-xl border border-indigo-300 bg-indigo-50 px-4 py-3 text-xs font-extrabold text-indigo-700">Choisir {card.name} <Arrow /></Link></div>
@@ -746,7 +697,7 @@ export function LandingPage({ userName }: { userName?: string | null }) {
           </div>
           <div className="flex justify-center rounded-3xl bg-slate-950 px-4 py-10">
             <div className="w-full max-w-[350px]">
-              <InteractiveNfcCard title={previewName.trim() || "Votre nom"} size="pricing"/>
+              <InteractiveNfcCard title="E-Business" size="pricing" cardType="e-business" clientName={previewName.trim() || "M./Mme Client"}/>
               <p className="mt-5 text-center text-xs font-bold uppercase tracking-[.2em] text-indigo-200">TouchCard Business</p>
             </div>
           </div>
