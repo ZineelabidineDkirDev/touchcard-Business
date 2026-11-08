@@ -89,7 +89,7 @@ function CardWaveMotif({ position }: { position: "top-right" | "bottom-left" }) 
 }
 
 export function InteractiveNfcCard({ title, size = "pricing", cardType = "contact", clientName, interactivePreview = false, colorTheme }: { title: string; size?: "pricing" | "hero"; cardType?: string; clientName?: string; interactivePreview?: boolean; colorTheme?: CardColorTheme }) {
-  return <PhysicalNfcCard title={title} cardType={cardType} clientName={clientName} interactivePreview={interactivePreview} colorTheme={colorTheme} />;
+  return <PhysicalNfcCard title={title} cardType={cardType} clientName={clientName} interactivePreview={interactivePreview} colorTheme={colorTheme} animateBrandColors={size === "hero"} />;
 }
 
 function DashboardPreview() {
