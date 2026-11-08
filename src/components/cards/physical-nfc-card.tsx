@@ -7,6 +7,7 @@ type Props = {
   clientName?: string;
   cardType?: string;
   className?: string;
+  interactivePreview?: boolean;
 };
 
 function NfcMark() {
@@ -30,7 +31,7 @@ function QrDemo() {
   return <div className="grid aspect-square w-full grid-cols-9 gap-[3px] rounded-lg bg-white p-2">{cells.map((v,i)=><span key={i} className={v?"rounded-[1px] bg-[#111827]":"bg-white"}/>)}</div>;
 }
 
-export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", cardType = "contact", className = "" }: Props) {
+export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", cardType = "contact", className = "", interactivePreview = false }: Props) {
   const reduceMotion = useReducedMotion();
   const isGoogle = cardType === "google-review" || /avis google|google/i.test(title);
   const service = title || (cardType === "e-business" ? "E-Business" : cardType === "service" ? "Personnalisée" : "Contact");
@@ -40,10 +41,11 @@ export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", c
   return (
     <div className={`group relative h-full w-full [perspective:1400px] ${className}`}>
       <motion.div
-        className="relative h-full w-full overflow-hidden rounded-[1.15rem] border border-white/25 bg-[#11151d] text-white shadow-[0_22px_55px_-22px_rgba(0,0,0,.85)] [transform-style:preserve-3d]"
-        whileHover={reduceMotion ? undefined : { rotateX: 3, rotateY: -4, y: -3 }}
-        transition={{ type: "spring", stiffness: 180, damping: 20 }}
+        className="relative h-full w-full [transform-style:preserve-3d]"
+        whileHover={reduceMotion ? undefined : (interactivePreview ? { rotateY: 180 } : { rotateX: 3, rotateY: -4, y: -3 })}
+        transition={{ type: "spring", stiffness: interactivePreview ? 120 : 180, damping: 20 }}
       >
+        <div className="absolute inset-0 overflow-hidden rounded-[1.15rem] border border-white/25 bg-[#11151d] text-white shadow-[0_22px_55px_-22px_rgba(0,0,0,.85)] [backface-visibility:hidden]">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_18%_12%,rgba(255,255,255,.13),transparent_38%),repeating-linear-gradient(118deg,rgba(255,255,255,.018)_0px,rgba(255,255,255,.018)_1px,transparent_1px,transparent_5px),linear-gradient(132deg,#343a43_0%,#171c24_24%,#07090d_62%,#252b33_100%)]"/>
         <div className="absolute inset-[1px] rounded-[1.08rem] border border-white/10"/>
         <div className="absolute -right-[12%] -top-[38%] h-[115%] w-[58%] rotate-[28deg] border-l border-white/10 bg-gradient-to-r from-white/[.045] via-white/[.10] to-transparent"/>
@@ -76,6 +78,8 @@ export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", c
             <span className="shrink-0 text-[clamp(7px,1.1vw,9px)] font-bold tracking-[.2em] text-slate-300/75">NFC</span>
           </div>
         </div>
+        </div>
+        {interactivePreview && <div className="absolute inset-0 overflow-hidden rounded-[1.15rem] [backface-visibility:hidden] [transform:rotateY(180deg)]"><PhysicalNfcCardBack/></div>}
       </motion.div>
     </div>
   );
