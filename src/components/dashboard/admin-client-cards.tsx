@@ -74,7 +74,7 @@ function colorForType(type: string): CardColorTheme {
 }
 
 export function AdminClientCards({ prospects }: Props) {
-  const [selectedId, setSelectedId] = useState<string | null>(prospects[0]?.id ?? null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const filtered = useMemo(() => prospects.filter((client) => {
@@ -84,7 +84,7 @@ export function AdminClientCards({ prospects }: Props) {
     const matchesFilter = filter === "all" || (filter === "active" && active) || (filter === "pending" && !active && !["rejected", "cancelled"].includes(client.status)) || (filter === "blocked" && ["rejected", "cancelled"].includes(client.status));
     return matchesSearch && matchesFilter;
   }), [prospects, filter, search]);
-  const selected = filtered.find((client) => client.id === selectedId) ?? filtered[0] ?? null;
+  const selected = (selectedId ? filtered.find((client) => client.id === selectedId) : null) ?? null;
   const activeCount = prospects.filter(canShowCard).length;
   const pendingCount = prospects.filter((p) => !canShowCard(p) && !["rejected", "cancelled"].includes(p.status)).length;
   const totalCards = prospects.filter(canShowCard).reduce((sum, p) => sum + p.cards.length, 0);
@@ -128,7 +128,7 @@ export function AdminClientCards({ prospects }: Props) {
               {filtered.map((client) => {
                 const active = canShowCard(client);
                 const selectedRow = selected?.id === client.id;
-                return <tr key={client.id} onClick={() => setSelectedId(client.id)} className={"cursor-pointer transition " + (selectedRow ? "bg-indigo-50/70" : "hover:bg-slate-50")}>
+                return <tr key={client.id} onClick={() => setSelectedId(client.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelectedId(client.id); } }} tabIndex={0} role="button" className={"cursor-pointer transition " + (selectedRow ? "bg-indigo-50/70" : "hover:bg-slate-50")}>
                   <td className="px-5 py-4"><div className="flex items-center gap-3"><div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-100 to-violet-100 font-black text-indigo-700">{client.full_name.split(/\s+/).slice(0,2).map((part) => part[0]).join("").toUpperCase()}</div><div className="min-w-0"><p className="font-bold text-slate-900">{client.full_name}</p><p className="mt-0.5 max-w-[220px] truncate text-xs text-slate-500">{client.email}</p></div></div></td>
                   <td className="px-5 py-4"><span className="font-semibold text-slate-800">{typeLabels[client.card_type] ?? client.card_type}</span><p className="mt-0.5 text-xs text-slate-400">{active ? client.cards.length + " carte(s) configurée(s)" : "Aperçu masqué"}</p></td>
                   <td className="px-5 py-4 text-slate-600">{client.city || "—"}</td>
@@ -145,9 +145,12 @@ export function AdminClientCards({ prospects }: Props) {
       </section>
 
       {selected && (
-        <section className="space-y-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/65 p-3 backdrop-blur-sm sm:p-6" onClick={() => setSelectedId(null)}>
+        <section role="dialog" aria-modal="true" aria-labelledby="client-detail-title" onClick={(event) => event.stopPropagation()} className="relative max-h-[92vh] w-full max-w-6xl space-y-5 overflow-y-auto rounded-3xl border border-white/70 bg-white p-5 shadow-2xl sm:p-7">
           <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 pb-5">
-            <div><p className="text-xs font-black uppercase tracking-[.18em] text-indigo-600">Fiche client · {selected.organization_name || "Organisation non configurée"}</p><h2 className="mt-2 text-2xl font-black text-slate-950">{selected.full_name}</h2><p className="mt-1 text-sm text-slate-500">{selected.brand_name || selected.activity_sector} · {selected.city}</p></div>
+            <div><p className="text-xs font-black uppercase tracking-[.18em] text-indigo-600">Fiche client · {selected.organization_name || "Organisation non configurée"}</p><h2 id="client-detail-title" className="mt-2 text-2xl font-black text-slate-950">{selected.full_name}</h2><p className="mt-1 text-sm text-slate-500">{selected.brand_name || selected.activity_sector} · {selected.city}</p></div>
+            <div className="flex items-center gap-2"><span className={"rounded-full px-3 py-1.5 text-xs font-bold " + (canShowCard(selected) ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-800")}>{canShowCard(selected) ? "Espace client actif" : "Espace verrouillé"}</span><button type="button" onClick={() => setSelectedId(null)} aria-label="Fermer la fiche client" className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-xl text-slate-500 transition hover:bg-slate-100 hover:text-slate-900">×</button></div>
+          </div>
             <span className={"rounded-full px-3 py-1.5 text-xs font-bold " + (canShowCard(selected) ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-800")}>{canShowCard(selected) ? "Espace client actif" : "Espace verrouillé"}</span>
           </div>
 
@@ -183,6 +186,7 @@ export function AdminClientCards({ prospects }: Props) {
             </div>
           )}
         </section>
+        </div>
       )}
     </div>
   );
