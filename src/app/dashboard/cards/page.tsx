@@ -5,6 +5,8 @@ import { createClientCard, saveClientCardProfile, addClientCardLink, deleteClien
 import { createClient } from "@/lib/supabase/server";
 import { CustomCardFieldsEditor, type EditableCardField } from "@/components/cards/custom-card-fields-editor";
 import { CardTemplateGallery } from "@/components/cards/card-template-gallery";
+import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
+import { AdminClientCards } from "@/components/dashboard/admin-client-cards";
 
 type Card = {
   id: string; slug: string; full_name: string; job_title: string | null; company_name: string | null;
@@ -18,6 +20,87 @@ export default async function ClientCardsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
+
+  // Super Admin: vue transversale des demandes, comptes et cartes de tous les clients.
+  if (isPlatformSuperAdmin(user.email)) {
+    const [prospectsResult, organizationsResult, cardsResult, designRequestsResult] = await Promise.all([
+      supabase.from("prospect_requests")
+        .select("id,user_id,full_name,email,phone,city,activity_sector,card_type,status,client_access_enabled,password_initialized,created_at,brand_name,reason,project_needs")
+        .order("created_at", { ascending: false }),
+      supabase.from("organizations").select("id,name,owner_id"),
+      supabase.from("cards").select("id,organization_id,slug,full_name,job_title,company_name,is_published,theme,created_at"),
+      supabase.from("card_design_requests").select("user_id,status").order("created_at", { ascending: false }),
+    ]);
+
+    const prospects = prospectsResult.data ?? [];
+    const organizations = organizationsResult.data ?? [];
+    const organizationByOwner = new Map(organizations.map((org) => [org.owner_id, org]));
+    const activeUserIds = prospects
+      .filter((p) => p.user_id && p.client_access_enabled && ["approved", "in_production", "completed"].includes(p.status))
+      .map((p) => p.user_id as string);
+    const activeOrganizations = organizations.filter((org) => activeUserIds.includes(org.owner_id));
+    const activeOrganizationIds = activeOrganizations.map((org) => org.id);
+    const visibleCards = (cardsResult.data ?? []).filter((card) => activeOrganizationIds.includes(card.organization_id));
+    const visibleCardIds = visibleCards.map((card) => card.id);
+    const [linksResult, eventsResult] = await Promise.all([
+      visibleCardIds.length
+        ? supabase.from("card_links").select("id,card_id,label,url,kind").in("card_id", visibleCardIds).order("position")
+        : Promise.resolve({ data: [] as { id: string; card_id: string; label: string; url: string; kind: string }[] }),
+      visibleCardIds.length
+        ? supabase.from("card_events").select("card_id,event_type").in("card_id", visibleCardIds)
+        : Promise.resolve({ data: [] as { card_id: string; event_type: string }[] }),
+    ]);
+    const latestDesignByUser = new Map<string, string>();
+    for (const request of designRequestsResult.data ?? []) {
+      if (!latestDesignByUser.has(request.user_id)) latestDesignByUser.set(request.user_id, request.status);
+    }
+    const adminClients = prospects.map((prospect) => {
+      const organization = prospect.user_id ? organizationByOwner.get(prospect.user_id) : null;
+      const clientCards = prospect.client_access_enabled && prospect.user_id && organization
+        ? visibleCards.filter((card) => card.organization_id === organization.id).map((card) => {
+            const cardEvents = (eventsResult.data ?? []).filter((event) => event.card_id === card.id);
+            return {
+              id: card.id,
+              slug: card.slug,
+              full_name: card.full_name,
+              job_title: card.job_title,
+              company_name: card.company_name,
+              is_published: card.is_published,
+              theme: card.theme as Record<string, unknown> | null,
+              created_at: card.created_at,
+              links: (linksResult.data ?? []).filter((link) => link.card_id === card.id),
+              views: cardEvents.filter((event) => ["view", "qr_scan", "nfc_scan"].includes(event.event_type)).length,
+              nfc_scans: cardEvents.filter((event) => event.event_type === "nfc_scan").length,
+              qr_scans: cardEvents.filter((event) => event.event_type === "qr_scan").length,
+              clicks: cardEvents.filter((event) => event.event_type === "click").length,
+              saves: cardEvents.filter((event) => event.event_type === "contact_save").length,
+            };
+          })
+        : [];
+      return {
+        id: prospect.id,
+        user_id: prospect.user_id,
+        full_name: prospect.full_name,
+        email: prospect.email,
+        phone: prospect.phone,
+        city: prospect.city,
+        activity_sector: prospect.activity_sector,
+        card_type: prospect.card_type,
+        status: prospect.status,
+        client_access_enabled: prospect.client_access_enabled,
+        password_initialized: prospect.password_initialized,
+        created_at: prospect.created_at,
+        brand_name: prospect.brand_name,
+        reason: prospect.reason,
+        project_needs: prospect.project_needs as { selected?: string[] } | string[] | null,
+        organization_name: organization?.name ?? null,
+        cards: clientCards,
+        design_status: prospect.user_id ? latestDesignByUser.get(prospect.user_id) ?? null : null,
+      };
+    });
+    return <AdminClientCards prospects={adminClients} />;
+  }
+
   const { data: membership } = await supabase.from("organization_members")
     .select("organization_id").eq("user_id", user.id).limit(1).maybeSingle();
   const organizationId = membership?.organization_id;
