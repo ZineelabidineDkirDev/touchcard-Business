@@ -92,12 +92,13 @@ export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", c
         <div className="absolute inset-[1px] rounded-[1.08rem] border border-white/10"/>
         <div className="absolute -right-[12%] -top-[38%] h-[115%] w-[58%] rotate-[28deg] border-l border-white/10 bg-gradient-to-r from-white/[.045] via-white/[.10] to-transparent"/>
         <div className="absolute bottom-0 left-0 h-[42%] w-full" style={{ background: `linear-gradient(to top, ${palette.shade}, transparent)` }}/>
-        <div className="relative flex h-full flex-col justify-between p-[6.2%]">
+        {interactivePreview && <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-center"><img src="/brand/touchcard-mark.svg" alt="" className="h-[42%] w-[42%] object-contain" style={{ opacity: 0.075, filter: palette.logo }}/></div>}
+        <div className="relative z-10 flex h-full flex-col justify-between p-[6.2%]">
           <div className="flex min-w-0 items-start justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2">
+            {!interactivePreview && <div className="flex min-w-0 items-center gap-2">
               <img src="/brand/touchcard-mark.svg" alt="Logo TouchCard" className="h-5 w-5 shrink-0 object-contain opacity-90" style={{ filter: palette.logo }}/>
               <span className="whitespace-nowrap text-[clamp(10px,1.8vw,16px)] font-black tracking-[-.055em]" style={{ color: palette.muted }}>TouchCard</span>
-            </div>
+            </div>}
             <div className="flex max-w-[48%] shrink-0 items-center justify-end gap-1.5 text-right text-slate-100">
               {isGoogle ? (
                 <div className="flex flex-col items-end leading-tight">
