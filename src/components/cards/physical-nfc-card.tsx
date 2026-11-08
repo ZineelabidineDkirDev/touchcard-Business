@@ -35,7 +35,7 @@ export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", c
   const isGoogle = cardType === "google-review" || /avis google|google/i.test(title);
   const service = title || (cardType === "e-business" ? "E-Business" : cardType === "service" ? "Personnalisée" : "Contact");
   const rawName = clientName.trim();
-  const displayName = !rawName ? "M./Mme Client" : /^(M\.|Mme|Mlle)\s/i.test(rawName) ? rawName : `M./Mme ${rawName}`;
+  const displayName = rawName || "Nom du client";
 
   return (
     <div className={`group relative h-full w-full [perspective:1400px] ${className}`}>
