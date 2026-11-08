@@ -2,12 +2,13 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const PLATFORM_SUPER_ADMIN_EMAIL = "zainmawada@gmail.com";
-const PRODUCTION_ORIGIN = "https://touchcard-zayn-dk.vercel.app";
+const PRODUCTION_ORIGIN = "https://touchcard-three.vercel.app";
+const LEGACY_PRODUCTION_ORIGIN = "https://touchcard-zayn-dk.vercel.app";
 
 function corsHeaders(req: Request) {
   const origin = req.headers.get("Origin") ?? "";
   const configured = Deno.env.get("SITE_URL")?.replace(/\/$/, "");
-  const allowed = new Set([PRODUCTION_ORIGIN, configured, "http://localhost:3000", "http://127.0.0.1:3000"].filter(Boolean));
+  const allowed = new Set([PRODUCTION_ORIGIN, LEGACY_PRODUCTION_ORIGIN, configured, "http://localhost:3000", "http://127.0.0.1:3000"].filter(Boolean));
   const safeOrigin = allowed.has(origin) ? origin : PRODUCTION_ORIGIN;
   return {
     "Access-Control-Allow-Origin": safeOrigin,
