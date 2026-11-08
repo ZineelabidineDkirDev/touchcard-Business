@@ -75,10 +75,7 @@ export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", c
 export function PhysicalNfcCardBack() {
   return (
     <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-[1.15rem] border border-white/20 bg-gradient-to-br from-[#303945] via-[#11151d] to-[#05070a] p-[7%] text-white">
-      <div className="absolute left-[7%] top-[8%] flex items-center gap-2 opacity-100">
-        <img src="/brand/touchcard-mark.svg" alt="Logo TouchCard" className="h-5 w-5 grayscale brightness-200"/>
-        <span className="text-xs font-black tracking-[-.04em] text-[#d0d5dc] drop-shadow-[0_0_7px_rgba(220,230,245,.42)]">TouchCard</span>
-      </div>
+      <img src="/brand/touchcard-mark.svg" alt="" aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 h-32 w-32 -translate-x-1/2 -translate-y-1/2 object-contain grayscale brightness-200 opacity-[0.07]"/>
       <div className="w-[36%] max-w-28"><QrDemo/></div>
       <span className="mt-2 text-[clamp(7px,1.1vw,10px)] font-bold tracking-[.2em] text-slate-300">TAP · SCAN · CONNECT</span>
     </div>
