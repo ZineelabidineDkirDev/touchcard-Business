@@ -21,7 +21,8 @@ type Prospect = {
   project_needs: { selected?: string[] } | string[] | null;
   organization_name: string | null;
   cards: ClientCard[];
-  design_status: string | null;\n  design_template: string | null;
+  design_status: string | null;
+  design_template: string | null;
 };
 type ClientCard = {
   id: string;
