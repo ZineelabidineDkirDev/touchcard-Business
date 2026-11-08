@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/i18n/provider";
 import { motion, useReducedMotion } from "framer-motion";
-import { PhysicalNfcCard } from "@/components/cards/physical-nfc-card";
+import { PhysicalNfcCard, type CardColorTheme } from "@/components/cards/physical-nfc-card";
 
 const rise = {
   hidden: { opacity: 0, y: 28 },
@@ -88,8 +88,8 @@ function CardWaveMotif({ position }: { position: "top-right" | "bottom-left" }) 
   );
 }
 
-export function InteractiveNfcCard({ title, size = "pricing", cardType = "contact", clientName, interactivePreview = false }: { title: string; size?: "pricing" | "hero"; cardType?: string; clientName?: string; interactivePreview?: boolean }) {
-  return <PhysicalNfcCard title={title} cardType={cardType} clientName={clientName} interactivePreview={interactivePreview} />;
+export function InteractiveNfcCard({ title, size = "pricing", cardType = "contact", clientName, interactivePreview = false, colorTheme }: { title: string; size?: "pricing" | "hero"; cardType?: string; clientName?: string; interactivePreview?: boolean; colorTheme?: CardColorTheme }) {
+  return <PhysicalNfcCard title={title} cardType={cardType} clientName={clientName} interactivePreview={interactivePreview} colorTheme={colorTheme} />;
 }
 
 function DashboardPreview() {
@@ -245,6 +245,7 @@ export function LandingPage({ userName }: { userName?: string | null }) {
   const reduceMotion = useReducedMotion();
   const heroVideoRef = useRef<HTMLVideoElement>(null);
   const [previewName, setPreviewName] = useState("Votre nom");
+  const [previewColor, setPreviewColor] = useState<CardColorTheme>("gold");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [pricingIndex, setPricingIndex] = useState(0);
@@ -692,13 +693,36 @@ export function LandingPage({ userName }: { userName?: string | null }) {
             <p className="mt-4 max-w-xl text-base leading-7 text-slate-600">Saisissez votre nom et découvrez un aperçu visuel de votre future carte TouchCard. Le design final sera adapté à votre activité après validation.</p>
             <label htmlFor="touchcard-preview-name" className="mt-8 block text-sm font-bold text-slate-800">Votre nom ou nom d’activité</label>
             <input id="touchcard-preview-name" value={previewName} onChange={(event) => setPreviewName(event.target.value.slice(0, 32))} maxLength={32} placeholder="Ex. : MMC Event" className="mt-2 w-full max-w-md rounded-xl border border-slate-300 px-4 py-3.5 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"/>
-            <p className="mt-2 text-xs text-slate-400">Aperçu indicatif — aucune information n’est enregistrée.</p>
+            <div className="mt-6">
+              <p className="text-sm font-bold text-slate-800">Choisissez la finition de votre carte</p>
+              <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {([
+                  { id: "gold", label: "Or", swatch: "bg-gradient-to-br from-[#fff0b8] via-[#c99b3d] to-[#76501b]" },
+                  { id: "metallic-black", label: "Noir métallique", swatch: "bg-gradient-to-br from-[#59616b] via-[#171c24] to-[#05070a]" },
+                  { id: "dark-gray", label: "Gris sombre", swatch: "bg-gradient-to-br from-[#9aa1a9] via-[#555d66] to-[#252b32]" },
+                  { id: "white", label: "Blanc", swatch: "bg-gradient-to-br from-white via-[#f4f6f8] to-[#cbd5e1]" },
+                ] as const).map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    aria-pressed={previewColor === option.id}
+                    onClick={() => setPreviewColor(option.id)}
+                    className={`flex items-center gap-2 rounded-xl border px-2.5 py-3 text-left text-xs font-bold transition ${previewColor === option.id ? "border-indigo-600 bg-indigo-50 text-indigo-800 ring-2 ring-indigo-200" : "border-slate-200 bg-white text-slate-700 hover:border-indigo-300"}`}
+                  >
+                    <span className={`h-7 w-7 shrink-0 rounded-full border border-black/10 shadow-inner ${option.swatch}`} />
+                    <span>{option.label}</span>
+                    {previewColor === option.id && <span className="ml-auto text-indigo-600">✓</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <p className="mt-3 text-xs text-slate-400">L’aperçu change instantanément selon la finition choisie. Aucune information n’est enregistrée.</p>
             <Link href="/demande" className="mt-7 inline-flex rounded-xl bg-indigo-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:-translate-y-0.5 hover:bg-indigo-700">Personnaliser ma carte <Arrow /></Link>
           </div>
           <div className="flex flex-col items-center justify-center rounded-3xl bg-slate-950 px-5 py-10 sm:px-8 sm:py-14">
             <div className="w-full max-w-[460px]">
               <div className="aspect-[1.586/1] w-full">
-                <InteractiveNfcCard title="E-Business" size="pricing" cardType="e-business" clientName={previewName.trim() || "Votre nom"} interactivePreview />
+                <InteractiveNfcCard title="E-Business" size="pricing" cardType="e-business" clientName={previewName.trim() || "Votre nom"} interactivePreview colorTheme={previewColor} />
               </div>
               <p className="mt-5 text-center text-xs font-semibold text-indigo-200">Survolez la carte pour découvrir son verso et son QR Code</p>
             </div>
