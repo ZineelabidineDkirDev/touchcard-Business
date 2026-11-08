@@ -2,12 +2,15 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 
+export type CardColorTheme = "gold" | "metallic-black" | "dark-gray" | "white";
+
 type Props = {
   title?: string;
   clientName?: string;
   cardType?: string;
   className?: string;
   interactivePreview?: boolean;
+  colorTheme?: CardColorTheme;
 };
 
 function NfcMark() {
@@ -31,12 +34,51 @@ function QrDemo() {
   return <div className="grid aspect-square w-full grid-cols-9 gap-[3px] rounded-lg bg-white p-2">{cells.map((v,i)=><span key={i} className={v?"rounded-[1px] bg-[#111827]":"bg-white"}/>)}</div>;
 }
 
-export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", cardType = "contact", className = "", interactivePreview = false }: Props) {
+export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", cardType = "contact", className = "", interactivePreview = false, colorTheme = "metallic-black" }: Props) {
   const reduceMotion = useReducedMotion();
   const isGoogle = cardType === "google-review" || /avis google|google/i.test(title);
   const service = title || (cardType === "e-business" ? "E-Business" : cardType === "service" ? "Personnalisée" : "Contact");
   const rawName = clientName.trim();
   const displayName = rawName || "Nom du client";
+  const palettes = {
+    gold: {
+      surface: "linear-gradient(132deg, #fff0b8 0%, #c99b3d 24%, #76501b 58%, #e5c16b 100%)",
+      text: "#241707",
+      muted: "rgba(36,23,7,.78)",
+      border: "rgba(255,248,220,.72)",
+      logo: "brightness(0) saturate(100%)",
+      sheen: "rgba(255,255,255,.30)",
+      shade: "rgba(62,38,7,.22)",
+    },
+    "metallic-black": {
+      surface: "linear-gradient(132deg, #343a43 0%, #171c24 24%, #07090d 62%, #252b33 100%)",
+      text: "#f1f5f9",
+      muted: "rgba(226,232,240,.78)",
+      border: "rgba(255,255,255,.25)",
+      logo: "grayscale(1) brightness(2)",
+      sheen: "rgba(255,255,255,.13)",
+      shade: "rgba(0,0,0,.45)",
+    },
+    "dark-gray": {
+      surface: "linear-gradient(132deg, #747b83 0%, #424951 28%, #252b32 66%, #555d66 100%)",
+      text: "#ffffff",
+      muted: "rgba(241,245,249,.82)",
+      border: "rgba(255,255,255,.32)",
+      logo: "grayscale(1) brightness(2)",
+      sheen: "rgba(255,255,255,.20)",
+      shade: "rgba(0,0,0,.30)",
+    },
+    white: {
+      surface: "linear-gradient(132deg, #ffffff 0%, #f4f6f8 48%, #dce2e8 100%)",
+      text: "#17202b",
+      muted: "rgba(51,65,85,.78)",
+      border: "rgba(71,85,105,.25)",
+      logo: "grayscale(1) brightness(.45)",
+      sheen: "rgba(255,255,255,.78)",
+      shade: "rgba(15,23,42,.10)",
+    },
+  } as const;
+  const palette = palettes[colorTheme];
 
   return (
     <div className={`group relative h-full w-full [perspective:1400px] ${className}`}>
@@ -45,16 +87,16 @@ export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", c
         whileHover={reduceMotion ? undefined : (interactivePreview ? { rotateY: 180 } : { rotateX: 3, rotateY: -4, y: -3 })}
         transition={{ type: "spring", stiffness: interactivePreview ? 120 : 180, damping: 20 }}
       >
-        <div className="absolute inset-0 overflow-hidden rounded-[1.15rem] border border-white/25 bg-[#11151d] text-white shadow-[0_22px_55px_-22px_rgba(0,0,0,.85)] [backface-visibility:hidden]">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_18%_12%,rgba(255,255,255,.13),transparent_38%),repeating-linear-gradient(118deg,rgba(255,255,255,.018)_0px,rgba(255,255,255,.018)_1px,transparent_1px,transparent_5px),linear-gradient(132deg,#343a43_0%,#171c24_24%,#07090d_62%,#252b33_100%)]"/>
+        <div className="absolute inset-0 overflow-hidden rounded-[1.15rem] border text-white shadow-[0_22px_55px_-22px_rgba(0,0,0,.85)] [backface-visibility:hidden]" style={{ background: palette.surface, borderColor: palette.border, color: palette.text }}>
+        <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse at 18% 12%, ${palette.sheen}, transparent 38%), repeating-linear-gradient(118deg, rgba(255,255,255,.035) 0px, rgba(255,255,255,.035) 1px, transparent 1px, transparent 5px)` }}/>
         <div className="absolute inset-[1px] rounded-[1.08rem] border border-white/10"/>
         <div className="absolute -right-[12%] -top-[38%] h-[115%] w-[58%] rotate-[28deg] border-l border-white/10 bg-gradient-to-r from-white/[.045] via-white/[.10] to-transparent"/>
-        <div className="absolute bottom-0 left-0 h-[42%] w-full bg-gradient-to-t from-black/45 to-transparent"/>
+        <div className="absolute bottom-0 left-0 h-[42%] w-full" style={{ background: `linear-gradient(to top, ${palette.shade}, transparent)` }}/>
         <div className="relative flex h-full flex-col justify-between p-[6.2%]">
           <div className="flex min-w-0 items-start justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
-              <img src="/brand/touchcard-mark.svg" alt="Logo TouchCard" className="h-5 w-5 shrink-0 object-contain grayscale brightness-200 opacity-100"/>
-              <span className="whitespace-nowrap text-[clamp(10px,1.8vw,16px)] font-black tracking-[-.055em] text-[#d0d5dc] drop-shadow-[0_0_7px_rgba(220,230,245,.42)]">TouchCard</span>
+              <img src="/brand/touchcard-mark.svg" alt="Logo TouchCard" className="h-5 w-5 shrink-0 object-contain opacity-90" style={{ filter: palette.logo }}/>
+              <span className="whitespace-nowrap text-[clamp(10px,1.8vw,16px)] font-black tracking-[-.055em]" style={{ color: palette.muted }}>TouchCard</span>
             </div>
             <div className="flex max-w-[48%] shrink-0 items-center justify-end gap-1.5 text-right text-slate-100">
               {isGoogle ? (
@@ -66,7 +108,7 @@ export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", c
                 </div>
               ) : (
                 <>
-                  <span className="truncate text-[clamp(7px,1.15vw,10px)] font-extrabold uppercase tracking-[.12em]">{service}</span>
+                  <span className="truncate text-[clamp(7px,1.15vw,10px)] font-extrabold uppercase tracking-[.12em]" style={{ color: palette.text }}>{service}</span>
                   <span className="[&>svg]:h-5 [&>svg]:w-5"><NfcMark/></span>
                 </>
               )}
@@ -74,8 +116,8 @@ export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", c
           </div>
 
           <div className="relative z-10 flex items-end justify-between gap-3">
-            <span className="min-w-0 truncate text-[clamp(9px,1.55vw,13px)] font-semibold tracking-[.035em] text-slate-200">{displayName}</span>
-            <span className="shrink-0 text-[clamp(7px,1.1vw,9px)] font-bold tracking-[.2em] text-slate-300/75">NFC</span>
+            <span className="min-w-0 truncate text-[clamp(9px,1.55vw,13px)] font-semibold tracking-[.035em]" style={{ color: palette.text }}>{displayName}</span>
+            <span className="shrink-0 text-[clamp(7px,1.1vw,9px)] font-bold tracking-[.2em]" style={{ color: palette.muted }}>NFC</span>
           </div>
         </div>
         </div>
