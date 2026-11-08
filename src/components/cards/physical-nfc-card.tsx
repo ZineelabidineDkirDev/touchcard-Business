@@ -44,15 +44,15 @@ export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", c
         whileHover={reduceMotion ? undefined : { rotateX: 3, rotateY: -4, y: -3 }}
         transition={{ type: "spring", stiffness: 180, damping: 20 }}
       >
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_18%_12%,rgba(255,255,255,.2),transparent_38%),linear-gradient(132deg,#4b5563_0%,#202833_24%,#090d13_62%,#343b45_100%)]"/>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_18%_12%,rgba(255,255,255,.13),transparent_38%),repeating-linear-gradient(118deg,rgba(255,255,255,.018)_0px,rgba(255,255,255,.018)_1px,transparent_1px,transparent_5px),linear-gradient(132deg,#343a43_0%,#171c24_24%,#07090d_62%,#252b33_100%)]"/>
         <div className="absolute inset-[1px] rounded-[1.08rem] border border-white/10"/>
         <div className="absolute -right-[12%] -top-[38%] h-[115%] w-[58%] rotate-[28deg] border-l border-white/10 bg-gradient-to-r from-white/[.045] via-white/[.10] to-transparent"/>
         <div className="absolute bottom-0 left-0 h-[42%] w-full bg-gradient-to-t from-black/45 to-transparent"/>
         <div className="relative flex h-full flex-col justify-between p-[6.2%]">
           <div className="flex min-w-0 items-start justify-between gap-2">
             <div className="flex min-w-0 items-center gap-2">
-              <img src="/brand/touchcard-mark.svg" alt="Logo TouchCard" className="h-7 w-7 shrink-0 object-contain grayscale brightness-200 opacity-100"/>
-              <span className="whitespace-nowrap text-[clamp(12px,2.3vw,20px)] font-black tracking-[-.055em] text-[#c3c9d1] drop-shadow-[0_1px_5px_rgba(255,255,255,.22)]">TouchCard</span>
+              <img src="/brand/touchcard-mark.svg" alt="Logo TouchCard" className="h-5 w-5 shrink-0 object-contain grayscale brightness-200 opacity-100"/>
+              <span className="whitespace-nowrap text-[clamp(10px,1.8vw,16px)] font-black tracking-[-.055em] text-[#d0d5dc] drop-shadow-[0_0_7px_rgba(220,230,245,.42)]">TouchCard</span>
             </div>
             <div className="flex max-w-[48%] shrink-0 items-center justify-end gap-1.5 text-right text-slate-100">
               {isGoogle ? (
@@ -64,8 +64,8 @@ export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", c
                 </div>
               ) : (
                 <>
-                  <span className="truncate text-[clamp(8px,1.45vw,12px)] font-extrabold uppercase tracking-[.12em]">{service}</span>
-                  <NfcMark/>
+                  <span className="truncate text-[clamp(7px,1.15vw,10px)] font-extrabold uppercase tracking-[.12em]">{service}</span>
+                  <span className="[&>svg]:h-5 [&>svg]:w-5"><NfcMark/></span>
                 </>
               )}
             </div>
@@ -85,8 +85,8 @@ export function PhysicalNfcCardBack() {
   return (
     <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-[1.15rem] border border-white/20 bg-gradient-to-br from-[#303945] via-[#11151d] to-[#05070a] p-[7%] text-white">
       <div className="absolute left-[7%] top-[8%] flex items-center gap-2 opacity-100">
-        <img src="/brand/touchcard-mark.svg" alt="Logo TouchCard" className="h-6 w-6 grayscale brightness-200"/>
-        <span className="text-sm font-black text-[#c3c9d1]">TouchCard</span>
+        <img src="/brand/touchcard-mark.svg" alt="Logo TouchCard" className="h-5 w-5 grayscale brightness-200"/>
+        <span className="text-xs font-black tracking-[-.04em] text-[#d0d5dc] drop-shadow-[0_0_7px_rgba(220,230,245,.42)]">TouchCard</span>
       </div>
       <div className="w-[36%] max-w-28"><QrDemo/></div>
       <span className="mt-2 text-[clamp(7px,1.1vw,10px)] font-bold tracking-[.2em] text-slate-300">TAP · SCAN · CONNECT</span>
