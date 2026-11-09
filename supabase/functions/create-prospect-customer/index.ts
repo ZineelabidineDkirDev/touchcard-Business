@@ -106,6 +106,11 @@ Deno.serve(async (req: Request) => {
 
     const siteUrl = "https://touchcard-three.vercel.app";
     const customerUserId = prospect.user_id;
+    const { data: existingWorkspace } = await admin.from("organizations")
+      .select("id").eq("owner_id", customerUserId).maybeSingle();
+    if (existingWorkspace) {
+      return json({ error: "Ce compte possède déjà un espace client. Ouvrez sa configuration existante au lieu de créer un doublon." }, 409);
+    }
 
     const organizationName = String(prospect.brand_name || prospect.full_name).trim();
     const slugBase = organizationName.normalize("NFD").toLowerCase()
@@ -118,6 +123,7 @@ Deno.serve(async (req: Request) => {
       modules: selectedModules,
       plan: { code: String(submitted.plan_code ?? "to_define"), status: "pending" },
       ai_suggestions: aiSuggestions,
+      generator: { engine: "touchcard-template-engine", schema_version: 1, state: "draft" },
       original_client_choices: {
         card_type: prospect.card_type,
         activity_sector: prospect.activity_sector,
@@ -146,6 +152,7 @@ Deno.serve(async (req: Request) => {
       location: prospect.city ?? "",
       hours: "",
       whatsapp: "",
+      google_review_url: "",
       custom_fields: (profileDraft?.card_fields ?? []).map((field: any) => ({
         key: field.key, label: field.label, value: "", visible: field.visible,
       })),
@@ -158,6 +165,13 @@ Deno.serve(async (req: Request) => {
       company_name: organizationName,
       bio: profileDraft?.description || null,
       avatar_url: logoUrl,
+      theme: {
+        accent: cardType === "google-review" ? "#16a34a" : cardType === "service" ? "#0ea5e9" : cardType === "e-business" ? "#10b981" : "#6366f1",
+        layout: "classic",
+        template: cardType,
+        design_id: "default-" + cardType,
+        schema_version: 1,
+      },
       public_fields: publicFields,
       is_published: false,
     }).select("id,slug").single();
