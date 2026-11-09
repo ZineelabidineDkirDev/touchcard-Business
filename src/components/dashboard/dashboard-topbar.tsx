@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { signOut } from "@/app/actions/auth";
+import type { ReactNode } from "react";
 
 type AdminNotification = {
   id: string;
@@ -19,6 +20,7 @@ type Props = {
   avatarUrl?: string;
   notificationsEnabled?: boolean;
   isSuperAdmin?: boolean;
+  navigation?: ReactNode;
 };
 
 function Icon({ name, size = 19 }: { name: "bell" | "sun" | "moon" | "user" | "settings" | "logout" | "chevron" | "check" | "inbox" | "arrow"; size?: number }) {
@@ -44,7 +46,7 @@ const cardLabels: Record<string, string> = {
   "google-review": "Avis Google",
 };
 
-export function DashboardTopbar({ name, email, avatarUrl = "", notificationsEnabled = true, isSuperAdmin = false }: Props) {
+export function DashboardTopbar({ name, email, avatarUrl = "", notificationsEnabled = true, isSuperAdmin = false, navigation }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [dark, setDark] = useState(false);
@@ -95,13 +97,14 @@ export function DashboardTopbar({ name, email, avatarUrl = "", notificationsEnab
   }
 
   return (
-    <header className={"dashboard-topbar sticky top-0 z-40 mb-6 flex min-h-[64px] items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur sm:px-6 " + (!isSuperAdmin ? "mb-5" : "")}>
+    <header className={"dashboard-topbar " + (isSuperAdmin ? "sticky top-0 z-40 mb-6 " : "mb-0 ") + "relative flex min-h-[64px] flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-2xl border border-slate-200 bg-white/95 px-3 py-3 shadow-sm backdrop-blur sm:px-5"}>
       {isSuperAdmin && <div className="min-w-0">
         <p className="text-[10px] font-bold uppercase tracking-[.18em] text-indigo-600">TouchCard Business</p>
         <p className="mt-1 truncate text-base font-extrabold text-slate-900 sm:text-lg">{name || "Espace client"}</p>
       </div>}
-      {!isSuperAdmin && <div className="min-w-0 flex-1"><p className="text-xs font-semibold text-slate-500">Votre espace professionnel</p></div>}
-      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+      {!isSuperAdmin && <div className="hidden min-w-0 shrink-0 xl:block"><p className="text-xs font-semibold text-slate-500">Espace professionnel</p></div>}
+      {!isSuperAdmin && navigation && <div className="order-3 w-full min-w-0 xl:order-2 xl:w-auto xl:flex-1">{navigation}</div>}
+      <div className={"flex shrink-0 items-center gap-2 sm:gap-3 " + (!isSuperAdmin ? "order-2 ml-auto xl:order-3 xl:ml-0" : "")}>
         <button type="button" onClick={toggleTheme} aria-label={dark ? "Passer au thème clair" : "Passer au thème sombre"} title={dark ? "Mode clair" : "Mode sombre"} className="dashboard-icon-button flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100">
           <Icon name={dark ? "sun" : "moon"} />
         </button>
