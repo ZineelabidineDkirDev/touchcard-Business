@@ -174,15 +174,14 @@ export default async function ClientCardsPage() {
         </div>
       </section>}
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-bold text-slate-950">Créer une carte</h2>
-        <p className="mt-1 text-sm text-slate-500">Vous pouvez créer plusieurs cartes NFC dans votre espace si votre formule l'autorise.</p>
-        <form action={createClientCard} className="mt-4 grid gap-3 sm:grid-cols-3">
+      <section className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div><h2 className="text-lg font-bold text-slate-950">Mes cartes NFC</h2><p className="mt-1 text-sm text-slate-500">Créez une carte supplémentaire si votre formule l'autorise.</p></div>
+        <PopupDialog title="Créer une carte NFC" description="Configurez les informations principales de votre nouvelle carte." triggerLabel="+ Créer une carte"><form action={createClientCard} className="grid gap-3 sm:grid-cols-2">
           <input name="full_name" required placeholder="Nom affiché sur la carte" className="rounded-xl border border-slate-200 px-3 py-3 text-sm" />
           <input name="job_title" placeholder="Fonction / activité" className="rounded-xl border border-slate-200 px-3 py-3 text-sm" />
           <input name="company_name" placeholder="Entreprise" className="rounded-xl border border-slate-200 px-3 py-3 text-sm" />
-          <button className="btn-primary sm:col-span-3 sm:justify-self-start">Créer ma carte NFC</button>
-        </form>
+          <button className="btn-primary sm:col-span-2">Créer ma carte NFC</button>
+        </form></PopupDialog>
       </section>
 
       <div className="space-y-6">
@@ -233,12 +232,12 @@ export default async function ClientCardsPage() {
               <div className="space-y-5">
                 <div><h3 className="font-bold text-slate-900">Liens et boutons publics</h3><p className="mt-1 text-xs text-slate-500">WhatsApp, Telegram, réseaux sociaux, boutique et autres liens.</p>
                   <div className="mt-3 space-y-2">{cardLinks.map((link) => <div key={link.id} className="flex items-center justify-between gap-2 rounded-xl border border-slate-100 p-3"><div className="min-w-0"><p className="text-sm font-semibold text-slate-800">{link.label} <span className="text-xs font-normal text-slate-400">· {link.kind}</span></p><p className="truncate text-xs text-slate-500">{link.url}</p></div><form action={deleteClientCardLink}><input type="hidden" name="card_id" value={card.id}/><input type="hidden" name="link_id" value={link.id}/><button className="text-xs font-bold text-rose-600">Supprimer</button></form></div>)}</div>
-                  <form action={addClientCardLink} className="mt-3 space-y-2 rounded-xl bg-slate-50 p-3">
+                  <PopupDialog title="Ajouter un bouton à ma carte" description="Ajoutez un lien WhatsApp, réseau social, site web ou boutique." triggerLabel="+ Ajouter un bouton"><form action={addClientCardLink} className="space-y-2 rounded-xl bg-slate-50 p-3">
                     <input type="hidden" name="card_id" value={card.id}/>
                     <input name="label" required placeholder="Nom du bouton (ex. WhatsApp Business)" className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"/>
                     <input name="url" type="url" required placeholder="https://..." className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"/>
                     <div className="flex gap-2"><select name="kind" className="min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"><option value="whatsapp">WhatsApp</option><option value="telegram">Telegram</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="linkedin">LinkedIn</option><option value="store">Boutique / Store</option><option value="website">Site web</option><option value="other">Autre</option></select><button className="btn-primary">Ajouter</button></div>
-                  </form>
+                  </form></PopupDialog>
                 </div>
                 <div className="rounded-2xl bg-slate-950 p-4 text-white"><p className="text-xs font-bold uppercase tracking-wider text-indigo-300">Statistiques de cette carte</p><div className="mt-3 grid grid-cols-2 gap-3"><div><p className="text-2xl font-black">{cardEvents.filter(e => ["view","qr_scan","nfc_scan"].includes(e.event_type)).length}</p><p className="text-xs text-slate-300">Visites</p></div><div><p className="text-2xl font-black">{cardEvents.filter(e => e.event_type === "nfc_scan").length}</p><p className="text-xs text-slate-300">Scans NFC</p></div></div><p className="mt-2 text-xs text-slate-400">Les statistiques commencent à la publication et à l'enregistrement des événements.</p><div className="mt-4 border-t border-white/10 pt-3"><p className="text-xs font-bold text-white">URL à encoder sur la puce NFC</p><p className="mt-1 break-all text-[11px] text-slate-300">${publicSiteUrl}/p/${card.slug}?source=nfc</p><p className="mt-3 text-xs font-bold text-white">QR code de partage</p><img alt="QR code de la carte" loading="lazy" className="mt-2 h-28 w-28 rounded-lg bg-white p-1" src={"https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(publicSiteUrl + "/p/" + card.slug + "?source=qr")}/></div></div>
                 <p className="text-xs text-slate-400">Modules autorisés : {modules.join(" · ") || "Configuration standard"}</p>
