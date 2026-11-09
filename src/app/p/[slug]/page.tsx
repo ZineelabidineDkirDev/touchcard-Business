@@ -70,9 +70,10 @@ async function PublicCardContent({
   const whatsapp = String(fields.whatsapp ?? "").replace(/[^+\d]/g, "").replace(/^\+/, "");
   const vcardUrl = "/api/cards/" + encodeURIComponent(slug) + "/vcard";
   const organizationCity = workspaceConfig.original_client_choices?.city?.trim() ?? "";
-  const mapLocation = fields.location?.trim() || organizationCity || [card.company_name, "Maroc"].filter(Boolean).join(", ");
-  const mapEmbedUrl = "https://www.google.com/maps?q=" + encodeURIComponent(mapLocation) + "&output=embed";
-  const mapDirectionsUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(mapLocation);
+  // The map must point to the exact address entered for this card. Never fall back to a city or company name.
+  const exactAddress = fields.location?.trim() ?? "";
+  const mapEmbedUrl = exactAddress ? "https://www.google.com/maps?q=" + encodeURIComponent(exactAddress) + "&output=embed" : null;
+  const mapDirectionsUrl = exactAddress ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(exactAddress) : null;
   const socialLinks = (links ?? []).filter((link) => ["instagram", "facebook", "linkedin", "tiktok", "youtube", "x", "pinterest", "whatsapp", "telegram"].includes(link.kind));
   const videoLinks = (links ?? []).filter((link) => link.kind === "youtube");
   const featuredLinks = (links ?? []).filter((link) => ["calendly", "store", "website", "other"].includes(link.kind));
@@ -105,12 +106,16 @@ async function PublicCardContent({
             <TrackedPublicLink cardId={card.id} href={vcardUrl} eventType="contact_save" className="flex min-h-14 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-3 text-center text-xs font-black text-slate-900 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-base" aria-hidden="true">↓</span><span>Enregistrer contact</span></TrackedPublicLink>
           </div>
           {card.bio && (() => { const words = card.bio.trim().split(/\s+/); const shortBio = words.slice(0, 20).join(" "); const isLong = words.length > 20; return <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-slate-900">À propos</h2><p className="mt-2 whitespace-pre-line text-[13px] leading-[1.7] text-slate-700">{isLong ? shortBio + "…" : card.bio}</p>{isLong && <details className="mt-2"><summary className="w-fit cursor-pointer list-none text-xs font-bold" style={{ color: accent }}>Lire plus <span aria-hidden="true">＋</span></summary><p className="mt-2 whitespace-pre-line text-[13px] leading-[1.7] text-slate-700">{card.bio}</p></details>}</section>; })()}
-          {(card.phone || card.email || card.website || whatsapp) && <section className="rounded-2xl bg-white p-4"><h2 className="text-sm font-bold text-slate-900">Restons en contact</h2><div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {settings.show_phone !== false && card.phone && <TrackedPublicLink cardId={card.id} href={"tel:" + card.phone} className="flex min-h-[94px] flex-col items-center justify-center gap-2 rounded-2xl border border-slate-100 bg-white px-2 py-3 text-center text-xs font-bold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"><span className="flex h-12 w-12 items-center justify-center rounded-full text-xl text-white shadow-sm" style={{ backgroundColor: accent }} aria-hidden="true">☎</span><span>Appeler</span></TrackedPublicLink>}
-            {settings.show_email !== false && card.email && <TrackedPublicLink cardId={card.id} href={"mailto:" + card.email} className="flex min-h-[94px] flex-col items-center justify-center gap-2 rounded-2xl border border-slate-100 bg-white px-2 py-3 text-center text-xs font-bold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"><span className="flex h-12 w-12 items-center justify-center rounded-full text-xl text-white shadow-sm" style={{ backgroundColor: accent }} aria-hidden="true">✉</span><span>E-mail</span></TrackedPublicLink>}
-            {settings.show_website !== false && card.website && <TrackedPublicLink cardId={card.id} href={card.website} className="flex min-h-[94px] flex-col items-center justify-center gap-2 rounded-2xl border border-slate-100 bg-white px-2 py-3 text-center text-xs font-bold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"><span className="flex h-12 w-12 items-center justify-center rounded-full text-white shadow-sm" style={{ backgroundColor: accent }} aria-hidden="true"><svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg></span><span>Site web</span></TrackedPublicLink>}
-            {whatsapp && <TrackedPublicLink cardId={card.id} href={"https://wa.me/" + whatsapp} className="flex min-h-[94px] flex-col items-center justify-center gap-2 rounded-2xl border border-slate-100 bg-white px-2 py-3 text-center text-xs font-bold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"><span className="flex h-12 w-12 items-center justify-center rounded-full text-xl text-white shadow-sm" style={{ backgroundColor: accent }} aria-hidden="true">◉</span><span>WhatsApp</span></TrackedPublicLink>}
-          </div></section>}
+          {(card.phone || card.email || card.website || whatsapp) && <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h2 className="text-base font-extrabold text-slate-950">Restons en contact</h2>
+            <p className="mt-1 text-xs text-slate-500">Retrouvez facilement les coordonnées de {card.company_name || card.full_name}.</p>
+            <div className="mt-4 grid grid-cols-1 gap-2">
+              {settings.show_phone !== false && card.phone && <TrackedPublicLink cardId={card.id} href={"tel:" + card.phone} className="flex min-h-[68px] items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left transition hover:border-slate-300 hover:bg-slate-50"><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg font-bold text-white" style={{ backgroundColor: accent }} aria-hidden="true">☎</span><span className="min-w-0 flex-1"><span className="block text-xs font-semibold text-slate-500">Téléphone</span><span className="block break-all text-sm font-bold text-slate-950">{card.phone}</span></span><span className="text-xs font-bold" style={{ color: accent }}>Appeler ↗</span></TrackedPublicLink>}
+              {settings.show_email !== false && card.email && <TrackedPublicLink cardId={card.id} href={"mailto:" + card.email} className="flex min-h-[68px] items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left transition hover:border-slate-300 hover:bg-slate-50"><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg font-bold text-white" style={{ backgroundColor: accent }} aria-hidden="true">✉</span><span className="min-w-0 flex-1"><span className="block text-xs font-semibold text-slate-500">E-mail</span><span className="block break-all text-sm font-bold text-slate-950">{card.email}</span></span><span className="text-xs font-bold" style={{ color: accent }}>Écrire ↗</span></TrackedPublicLink>}
+              {settings.show_website !== false && card.website && <TrackedPublicLink cardId={card.id} href={card.website} className="flex min-h-[68px] items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left transition hover:border-slate-300 hover:bg-slate-50"><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg font-bold text-white" style={{ backgroundColor: accent }} aria-hidden="true">◎</span><span className="min-w-0 flex-1"><span className="block text-xs font-semibold text-slate-500">Site web</span><span className="block break-all text-sm font-bold text-slate-950">{card.website.replace(/^https?:\\/\\//, "")}</span></span><span className="text-xs font-bold" style={{ color: accent }}>Visiter ↗</span></TrackedPublicLink>}
+              {whatsapp && <TrackedPublicLink cardId={card.id} href={"https://wa.me/" + whatsapp} className="flex min-h-[68px] items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left transition hover:border-slate-300 hover:bg-slate-50"><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg font-bold text-white" style={{ backgroundColor: accent }} aria-hidden="true">◉</span><span className="min-w-0 flex-1"><span className="block text-xs font-semibold text-slate-500">WhatsApp</span><span className="block break-all text-sm font-bold text-slate-950">{fields.whatsapp}</span></span><span className="text-xs font-bold" style={{ color: accent }}>Écrire ↗</span></TrackedPublicLink>}
+            </div>
+          </section>}
           {(profileCategories.length > 0 || selectedServices.length > 0) && <section className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
             <h2 className="text-xs font-black uppercase tracking-wider text-slate-500">{template === "service" ? "Nos domaines de service" : template === "e-business" ? "Univers & spécialités" : template === "google-review" ? "Notre activité" : "Expertises"}</h2>
             {profileCategories.length > 0 && <div className="mt-3 flex flex-wrap gap-2">{profileCategories.map((category) => <span key={category} className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-700 ring-1 ring-slate-200">{category}</span>)}</div>}
@@ -153,21 +158,14 @@ async function PublicCardContent({
           <section className="rounded-2xl bg-white p-4" aria-label="Localisation">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <h2 className="text-base font-bold text-black">Map</h2>
-                <p className="mt-2 text-xs leading-5 text-slate-500">{fields.location?.trim() || organizationCity || "Adresse à compléter par le propriétaire de cette carte"}</p>
+                <h2 className="text-base font-bold text-black">Adresse exacte</h2>
+                <p className="mt-2 text-xs leading-5 text-slate-600">{exactAddress || "Le propriétaire doit renseigner l’adresse complète de son établissement."}</p>
               </div>
-              <a href={mapDirectionsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:opacity-90" style={{ backgroundColor: accent }}>Itinéraire Google Maps ↗</a>
+              {mapDirectionsUrl && <a href={mapDirectionsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:opacity-90" style={{ backgroundColor: accent }}>Itinéraire Google Maps ↗</a>}
             </div>
-            <div className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
-              <iframe
-                title={"Localisation de " + (card.company_name || card.full_name)}
-                src={mapEmbedUrl}
-                className="h-52 w-full"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                allowFullScreen
-              />
-            </div>
+            {mapEmbedUrl ? <div className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
+              <iframe title={"Localisation de " + (card.company_name || card.full_name)} src={mapEmbedUrl} className="h-64 w-full" loading="lazy" referrerPolicy="no-referrer-when-downgrade" allowFullScreen />
+            </div> : <div className="mt-3 flex min-h-32 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 text-center text-sm text-slate-500">Aucune carte géographique ne sera affichée tant que l’adresse exacte n’est pas renseignée.</div>}
           </section>
 
           <p className="py-3 text-center text-[10px] text-slate-400"><I18nText message="powered" /></p>
