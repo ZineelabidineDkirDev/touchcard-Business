@@ -80,7 +80,7 @@ async function PublicCardContent({
   const infoFields = (fields.custom_fields ?? []).filter((field) => field.visible && !faqFields.includes(field) && field.label && field.value);
 
   return (
-    <main className="min-h-screen bg-[#c8e900] px-0 py-0 sm:px-5 sm:py-8">
+    <main className="min-h-screen bg-slate-100 px-0 py-0 sm:px-5 sm:py-8">
       <PublicCardTracker cardId={card.id} eventType={source} />
       <article className="mx-auto w-full max-w-[440px] overflow-hidden rounded-none bg-[#111111] p-0 shadow-[0_28px_90px_rgba(0,0,0,.28)] sm:rounded-[2.4rem] sm:p-2">
         <div className="relative h-[230px] overflow-hidden rounded-b-[1.5rem] bg-cover bg-center sm:h-[270px]" style={{ background: `linear-gradient(120deg, #0f172a, ${accent})` }}>
@@ -102,7 +102,7 @@ async function PublicCardContent({
           </section>
           <div className="grid grid-cols-2 gap-2">
             <TrackedPublicLink cardId={card.id} href={vcardUrl} eventType="contact_save" className="flex min-h-14 items-center justify-center gap-2 rounded-full px-3 py-3 text-center text-xs font-black text-black shadow-sm transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" style={{ backgroundColor: accent }}><span className="flex h-8 w-8 items-center justify-center rounded-full bg-black/10 text-base" aria-hidden="true">↗</span><span>Échanger contact</span></TrackedPublicLink>
-            <TrackedPublicLink cardId={card.id} href={vcardUrl} eventType="contact_save" className="flex min-h-14 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-3 text-center text-xs font-black text-slate-900 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-base" aria-hidden="true">↓</span><span>Enregistrer contact</span></TrackedPublicLink>
+            <TrackedPublicLink cardId={card.id} href={vcardUrl} eventType="contact_save" className="flex min-h-14 items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-3 text-center text-xs font-black text-slate-900 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-500"><span className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-base" aria-hidden="true">↓</span><span>Enregistrer contact</span></TrackedPublicLink>
           </div>
           {card.bio && (() => { const words = card.bio.trim().split(/\s+/); const shortBio = words.slice(0, 20).join(" "); const isLong = words.length > 20; return <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-slate-900">À propos</h2><p className="mt-2 whitespace-pre-line text-[13px] leading-[1.7] text-slate-700">{isLong ? shortBio + "…" : card.bio}</p>{isLong && <details className="mt-2"><summary className="w-fit cursor-pointer list-none text-xs font-bold" style={{ color: accent }}>Lire plus <span aria-hidden="true">＋</span></summary><p className="mt-2 whitespace-pre-line text-[13px] leading-[1.7] text-slate-700">{card.bio}</p></details>}</section>; })()}
           {(profileCategories.length > 0 || selectedServices.length > 0) && <section className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
@@ -126,7 +126,7 @@ async function PublicCardContent({
             <div className="flex snap-x gap-3 overflow-x-auto pb-2">
               {(catalogItems ?? []).map((item) => <article key={item.id} className="w-[245px] shrink-0 snap-start overflow-hidden rounded-xl border border-slate-200 bg-white">
                 {item.image_url && <img src={item.image_url} alt={item.name} loading="lazy" className="h-40 w-full object-cover"/>}
-                <div className="p-4"><h3 className="font-bold text-slate-900">{item.name}</h3>{item.description && <p className="mt-1 text-sm leading-6 text-slate-600">{item.description}</p>}<p className="mt-3 text-sm font-black text-indigo-700">{Number(item.price).toLocaleString("fr-MA")} {item.currency}</p></div>
+                <div className="p-4"><h3 className="font-bold text-slate-900">{item.name}</h3>{item.description && <p className="mt-1 text-sm leading-6 text-slate-600">{item.description}</p>}<p className="mt-3 text-sm font-black text-slate-700">{Number(item.price).toLocaleString("fr-MA")} {item.currency}</p></div>
               </article>)}
               {!(catalogItems?.length) && <p className="w-full rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Ajoutez vos photos et réalisations depuis votre espace client pour afficher votre galerie.</p>}
             </div>
@@ -134,6 +134,7 @@ async function PublicCardContent({
 
           {(allowOrders || allowBookings || allowQuotes) && <PublicWorkspaceRequestForms
             cardSlug={card.slug}
+            accent={accent}
             products={(catalogItems ?? []).map((item) => ({ id: item.id, name: item.name, price: Number(item.price), currency: item.currency }))}
             allowOrders={allowOrders}
             allowBookings={allowBookings}
@@ -176,5 +177,5 @@ async function PublicCardContent({
 }
 
 function PublicCardLoading() {
-  return <main className="flex min-h-screen items-center justify-center bg-slate-100 px-5 py-12"><div aria-label="Chargement de la carte digitale" className="h-[460px] w-full max-w-md animate-pulse overflow-hidden rounded-[2rem] bg-white shadow-xl"><div className="h-32 bg-indigo-100" /><div className="px-7 pt-5"><div className="h-28 w-28 rounded-3xl bg-slate-100" /><div className="mt-5 h-7 w-2/3 rounded bg-slate-100" /><div className="mt-3 h-4 w-1/2 rounded bg-slate-100" /><div className="mt-8 h-12 rounded-xl bg-slate-100" /><div className="mt-3 h-12 rounded-xl bg-slate-100" /></div></div></main>;
+  return <main className="flex min-h-screen items-center justify-center bg-slate-100 px-5 py-12"><div aria-label="Chargement de la carte digitale" className="h-[460px] w-full max-w-md animate-pulse overflow-hidden rounded-[2rem] bg-white shadow-xl"><div className="h-32 bg-slate-100" /><div className="px-7 pt-5"><div className="h-28 w-28 rounded-3xl bg-slate-100" /><div className="mt-5 h-7 w-2/3 rounded bg-slate-100" /><div className="mt-3 h-4 w-1/2 rounded bg-slate-100" /><div className="mt-8 h-12 rounded-xl bg-slate-100" /><div className="mt-3 h-12 rounded-xl bg-slate-100" /></div></div></main>;
 }
