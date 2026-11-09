@@ -71,17 +71,17 @@ async function PublicCardContent({
   const vcardUrl = "/api/cards/" + encodeURIComponent(slug) + "/vcard";
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-8 sm:py-12">
+    <main className="min-h-screen bg-[#f4f6fb] px-3 py-6 sm:px-6 sm:py-10">
       <PublicCardTracker cardId={card.id} eventType={source} />
-      <article className="mx-auto w-full max-w-md overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-slate-300/60">
-        <div className="relative h-36" style={{ background: `linear-gradient(135deg, #0f172a, ${accent})` }}>
+      <article className="mx-auto w-full max-w-5xl overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.10)]">
+        <div className="relative h-44 overflow-hidden sm:h-64" style={{ background: `linear-gradient(120deg, #0f172a, ${accent})` }}>
           {card.cover_url && <img src={card.cover_url} alt="" className="h-full w-full object-cover" />}
         </div>
-        <div className="-mt-14 px-7 pb-8">
-          <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-3xl border-4 border-white bg-indigo-50 text-3xl font-bold text-indigo-700 shadow-lg">
+        <div className="-mt-14 px-5 pb-8 sm:-mt-20 sm:px-10 sm:pb-12">
+          <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-[1.8rem] border-4 border-white bg-indigo-50 text-3xl font-bold text-indigo-700 shadow-xl sm:h-36 sm:w-36">
             {card.avatar_url ? <img src={card.avatar_url} alt={card.full_name} className="h-full w-full object-cover" /> : card.full_name.slice(0, 1).toUpperCase()}
           </div>
-          <h1 className="mt-5 text-2xl font-black text-slate-950">{card.full_name}</h1>
+          <h1 className="mt-5 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">{card.full_name}</h1>
           {card.job_title && <p className="mt-1 font-semibold" style={{ color: accent }}>{card.job_title}</p>}
           {card.company_name && <p className="mt-1 text-sm text-slate-500">{card.company_name}</p>}
           {fields.tagline && <p className="mt-4 text-sm font-semibold text-slate-700">{fields.tagline}</p>}
@@ -94,7 +94,7 @@ async function PublicCardContent({
           {(fields.location || fields.hours) && <div className="mt-4 space-y-1 text-xs text-slate-500">{fields.location && <p>📍 {fields.location}</p>}{fields.hours && <p>🕒 {fields.hours}</p>}</div>}
           {fields.custom_fields?.some((field) => field.visible && field.label && field.value) && <section className="mt-5 space-y-2">{fields.custom_fields.filter((field) => field.visible && field.label && field.value).map((field) => <div key={field.key} className="rounded-xl bg-slate-50 px-4 py-3"><p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">{field.label}</p><p className="mt-1 whitespace-pre-line text-sm font-medium text-slate-800">{field.value}</p></div>)}</section>}
 
-          <div className="mt-7 grid gap-3">
+          <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:max-w-3xl">
             <TrackedPublicLink cardId={card.id} href={vcardUrl} eventType="contact_save" className="block rounded-xl px-4 py-3 text-center text-sm font-bold text-white" style={{ backgroundColor: accent }}>Enregistrer le contact</TrackedPublicLink>
             {settings.show_phone !== false && card.phone && <TrackedPublicLink cardId={card.id} href={"tel:" + card.phone} className="btn-secondary text-center">Appeler</TrackedPublicLink>}
             {settings.show_email !== false && card.email && <TrackedPublicLink cardId={card.id} href={"mailto:" + card.email} className="btn-secondary text-center">Envoyer un e-mail</TrackedPublicLink>}
@@ -122,7 +122,7 @@ async function PublicCardContent({
             allowQuotes={allowQuotes}
           />}
 
-          {links && links.length > 0 && <section className="mt-7 border-t border-slate-100 pt-6"><h2 className="mb-3 text-sm font-black uppercase tracking-wider text-slate-400">Me retrouver en ligne</h2><div className="grid gap-2">{links.map((link: PublicLink) => <TrackedPublicLink key={link.id} cardId={card.id} linkId={link.id} href={link.url} className="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-800"><span>{link.label}</span><span className="text-indigo-600">↗</span></TrackedPublicLink>)}</div></section>}
+          {links && links.length > 0 && <section className="mt-8 border-t border-slate-100 pt-7"><div className="flex flex-wrap items-end justify-between gap-2"><div><p className="text-xs font-black uppercase tracking-[.18em] text-indigo-600">Présence digitale</p><h2 className="mt-1 text-xl font-black text-slate-950">Réseaux sociaux & liens</h2></div><p className="text-xs text-slate-400">Retrouvez-nous sur nos plateformes</p></div><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{links.map((link: PublicLink) => <TrackedPublicLink key={link.id} cardId={card.id} linkId={link.id} href={link.url} className="group flex min-w-0 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xs font-black uppercase text-slate-700">{({instagram:"IG",facebook:"f",linkedin:"in",tiktok:"♪",youtube:"▶",x:"X",pinterest:"P",whatsapp:"WA",telegram:"TG",calendly:"↗",store:"SHOP",website:"WEB"} as Record<string,string>)[link.kind] ?? "↗"}</span><span className="min-w-0 flex-1 truncate">{link.label}</span><span className="text-indigo-600 transition group-hover:translate-x-0.5">↗</span></TrackedPublicLink>)}</div></section>}
 
           <p className="mt-8 text-center text-xs text-slate-400"><I18nText message="powered" /></p>
         </div>
