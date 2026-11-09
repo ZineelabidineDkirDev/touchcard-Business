@@ -93,6 +93,10 @@ export async function saveClientCardProfile(formData: FormData) {
     location: String(formData.get("location") ?? "").trim().slice(0, 180),
     hours: String(formData.get("hours") ?? "").trim().slice(0, 180),
     whatsapp: String(formData.get("whatsapp") ?? "").trim().replace(/[^+\d]/g, "").slice(0, 20),
+    company_phone: String(formData.get("company_phone") ?? "").trim().slice(0, 30),
+    company_email: String(formData.get("company_email") ?? "").trim().slice(0, 180),
+    company_address: String(formData.get("company_address") ?? "").trim().slice(0, 240),
+    industry: String(formData.get("industry") ?? "").trim().slice(0, 120),
     google_review_url: safeHttpUrl(String(formData.get("google_review_url") ?? ""), 1000) ?? "",
     custom_fields: customFields,
   };
