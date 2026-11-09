@@ -241,6 +241,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                       </label>)}
                     </div>
                   </div>
+                  <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Code NFC affiché sur la couverture<input name="nfc_display_code" defaultValue={fields.nfc_display_code ?? `TC-${card.id.slice(0,8).toUpperCase()}`} maxLength={24} placeholder="Ex. TC-CLIENT-001" className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/><span className="mt-1 block text-[11px] font-normal text-slate-400">Ce code est un identifiant visuel personnalisable. Le QR code à côté renvoie automatiquement vers votre carte publique.</span></label>
                   <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Présentation / bio<textarea name="bio" defaultValue={card.bio ?? ""} rows={3} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600">Téléphone<input name="phone" defaultValue={card.phone ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600">E-mail<input name="email" type="email" defaultValue={card.email ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
