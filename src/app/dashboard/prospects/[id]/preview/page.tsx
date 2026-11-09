@@ -51,6 +51,18 @@ export default async function ClientWorkspacePreview({ params }: { params: Promi
   const config = (organization.workspace_config || {}) as WorkspaceConfig;
   const enabledModules = Array.isArray(config.modules) ? config.modules : [];
   const templateName = config.template || prospect.card_type || "Espace client";
+  const { data: clientCards } = await supabase.from("cards")
+    .select("id,slug,full_name,job_title,company_name,bio,phone,email,website,avatar_url,is_published,theme,public_fields")
+    .eq("organization_id", organization.id).order("created_at", { ascending: false });
+  const primaryCard = clientCards?.[0] ?? null;
+  const { data: primaryCardLinks } = primaryCard
+    ? await supabase.from("card_links").select("id,label,url,kind").eq("card_id", primaryCard.id).order("position")
+    : { data: [] as { id: string; label: string; url: string; kind: string }[] };
+  const showCatalog = enabledModules.includes("product_catalog") || enabledModules.includes("service_catalog");
+  const { data: clientCatalog } = showCatalog
+    ? await supabase.from("products").select("id,name,description,price,currency,image_url")
+      .eq("organization_id", organization.id).eq("is_active", true).order("created_at", { ascending: false })
+    : { data: [] as { id: string; name: string; description: string | null; price: number; currency: string; image_url: string | null }[] };
   const enabledPreviews = enabledModules.map((module) => ({ id: module, ...(previews[module] || {
     title: moduleLabels[module] || module.replaceAll("_", " "),
     description: "Module sélectionné dans la configuration du client.",
@@ -61,7 +73,7 @@ export default async function ClientWorkspacePreview({ params }: { params: Promi
   return (
     <div className="mx-auto max-w-7xl space-y-7">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-        <div><p className="text-sm font-black text-amber-900">APERÇU SUPER ADMIN · DONNÉES FICTIVES</p><p className="mt-1 text-xs text-amber-800">Les champs et exemples servent à valider la structure. Aucun contenu n'est enregistré ni publié.</p></div>
+        <div><p className="text-sm font-black text-amber-900">APERÇU SUPER ADMIN · ESPACE CLIENT</p><p className="mt-1 text-xs text-amber-800">Les cartes et catalogues affichés proviennent des données réelles. Les modules non encore développés restent des maquettes explicatives.</p></div>
         <Link href="/dashboard/prospects" className="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white">← Retour Super Admin</Link>
       </div>
 
