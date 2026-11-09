@@ -100,7 +100,7 @@ Deno.serve(async (req: Request) => {
       modules: selectedModules,
       profile_draft: profileDraft,
       rationale: String(submitted.ai_suggestions?.rationale ?? "").slice(0, 600),
-      generated_by: "gemini-3.8-flash",
+      generated_by: String(submitted.ai_suggestions?.generated_by ?? "manual-super-admin").slice(0, 80),
       reviewed_by_super_admin: true,
     } : null;
 
