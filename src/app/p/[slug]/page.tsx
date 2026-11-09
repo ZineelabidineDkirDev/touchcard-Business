@@ -73,48 +73,65 @@ async function PublicCardContent({
   const mapLocation = fields.location?.trim() || organizationCity || [card.company_name, "Maroc"].filter(Boolean).join(", ");
   const mapEmbedUrl = "https://www.google.com/maps?q=" + encodeURIComponent(mapLocation) + "&output=embed";
   const mapDirectionsUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(mapLocation);
+  const socialLinks = (links ?? []).filter((link) => ["instagram", "facebook", "linkedin", "tiktok", "youtube", "x", "pinterest", "whatsapp", "telegram"].includes(link.kind));
+  const videoLinks = (links ?? []).filter((link) => link.kind === "youtube");
+  const faqFields = (fields.custom_fields ?? []).filter((field) => field.visible && /^(faq|question|q\d)/i.test(field.key + " " + field.label) && field.label && field.value);
+  const infoFields = (fields.custom_fields ?? []).filter((field) => field.visible && !faqFields.includes(field) && field.label && field.value);
 
   return (
-    <main className="min-h-screen bg-[#f4f6fb] px-3 py-6 sm:px-6 sm:py-10">
+    <main className="min-h-screen bg-[#c8e900] px-0 py-0 sm:px-5 sm:py-8">
       <PublicCardTracker cardId={card.id} eventType={source} />
-      <article className="mx-auto w-full max-w-5xl overflow-hidden rounded-[2rem] border border-slate-200/80 bg-white shadow-[0_24px_80px_rgba(15,23,42,0.10)]">
-        <div className="relative h-44 overflow-hidden sm:h-64" style={{ background: `linear-gradient(120deg, #0f172a, ${accent})` }}>
+      <article className="mx-auto w-full max-w-[440px] overflow-hidden rounded-none bg-[#111111] p-0 shadow-[0_28px_90px_rgba(0,0,0,.28)] sm:rounded-[2.4rem] sm:p-2">
+        <div className="relative h-[270px] overflow-hidden rounded-b-[1.5rem] sm:h-[300px]" style={{ background: `linear-gradient(120deg, #0f172a, ${accent})` }}>
           {card.cover_url && <img src={card.cover_url} alt="" className="h-full w-full object-cover" />}
         </div>
-        <div className="-mt-14 px-5 pb-8 sm:-mt-20 sm:px-10 sm:pb-12">
-          <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-[1.8rem] border-4 border-white bg-indigo-50 text-3xl font-bold text-indigo-700 shadow-xl sm:h-36 sm:w-36">
+        <div className="space-y-2 px-2 pb-3 pt-0 sm:px-0">
+          <div className="flex h-[118px] w-[118px] shrink-0 items-center justify-center overflow-hidden rounded-xl border-4 border-white bg-indigo-50 text-3xl font-bold text-indigo-700 shadow-xl">
             {card.avatar_url ? <img src={card.avatar_url} alt={card.full_name} className="h-full w-full object-cover" /> : card.full_name.slice(0, 1).toUpperCase()}
           </div>
-          <h1 className="mt-5 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">{card.full_name}</h1>
-          {card.job_title && <p className="mt-1 font-semibold" style={{ color: accent }}>{card.job_title}</p>}
-          {card.company_name && <p className="mt-1 text-sm text-slate-500">{card.company_name}</p>}
-          {fields.tagline && <p className="mt-4 text-sm font-semibold text-slate-700">{fields.tagline}</p>}
-          {card.bio && <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-600">{card.bio}</p>}
+          <section className="relative z-10 -mt-12 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
+            <div className="grid grid-cols-[1fr_118px] items-stretch gap-3">
+              <div className="flex min-w-0 flex-col justify-between py-1">
+                <div><h1 className="break-words text-[25px] font-black leading-[1.02] tracking-tight text-black">{card.full_name}</h1>
+                  {card.job_title && <p className="mt-3 text-xs font-medium leading-4 text-slate-600">{card.job_title}</p>}
+                  {card.company_name && <p className="mt-1 text-xs font-bold text-slate-700">{card.company_name}</p>}</div>
+                {fields.tagline && <p className="mt-3 text-[11px] font-bold leading-4 text-slate-700">{fields.tagline}</p>}
+              </div>
+              <div className="h-[118px] w-[118px] overflow-hidden rounded-xl bg-slate-100">
+                {card.avatar_url ? <img src={card.avatar_url} alt={card.full_name} className="h-full w-full object-cover"/> : <div className="flex h-full items-center justify-center text-4xl font-black text-slate-400">{card.full_name.slice(0,1).toUpperCase()}</div>}
+              </div>
+            </div>
+          </section>
+          <div className="grid grid-cols-2 gap-2">
+            <TrackedPublicLink cardId={card.id} href={vcardUrl} eventType="contact_save" className="flex min-h-12 items-center justify-center gap-2 rounded-xl px-3 py-3 text-center text-xs font-black text-black" style={{ backgroundColor: accent }}>↗ Échanger contact</TrackedPublicLink>
+            <TrackedPublicLink cardId={card.id} href={vcardUrl} eventType="contact_save" className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-3 py-3 text-center text-xs font-black text-slate-900">↓ Enregistrer contact</TrackedPublicLink>
+          </div>
+          {card.bio && <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-black">Bio</h2><p className="mt-2 whitespace-pre-line text-[13px] leading-[1.65] text-slate-700">{card.bio}</p></section>}
           {(profileCategories.length > 0 || selectedServices.length > 0) && <section className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
             <h2 className="text-xs font-black uppercase tracking-wider text-slate-500">{template === "service" ? "Nos domaines de service" : template === "e-business" ? "Univers & spécialités" : template === "google-review" ? "Notre activité" : "Expertises"}</h2>
             {profileCategories.length > 0 && <div className="mt-3 flex flex-wrap gap-2">{profileCategories.map((category) => <span key={category} className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-700 ring-1 ring-slate-200">{category}</span>)}</div>}
             {selectedServices.length > 0 && <div className="mt-3 space-y-2">{selectedServices.map((service) => <div key={service} className="flex items-start gap-2 text-sm text-slate-700"><span className="mt-0.5 font-black" style={{ color: accent }}>✓</span><span>{service}</span></div>)}</div>}
           </section>}
           {(fields.location || fields.hours) && <div className="mt-4 space-y-1 text-xs text-slate-500">{fields.location && <p>📍 {fields.location}</p>}{fields.hours && <p>🕒 {fields.hours}</p>}</div>}
-          {fields.custom_fields?.some((field) => field.visible && field.label && field.value) && <section className="mt-5 space-y-2">{fields.custom_fields.filter((field) => field.visible && field.label && field.value).map((field) => <div key={field.key} className="rounded-xl bg-slate-50 px-4 py-3"><p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">{field.label}</p><p className="mt-1 whitespace-pre-line text-sm font-medium text-slate-800">{field.value}</p></div>)}</section>}
+          {infoFields.length > 0 && <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-black">Informations</h2><div className="mt-3 space-y-3">{infoFields.map((field) => <div key={field.key} className="border-b border-slate-100 pb-3 last:border-0"><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">{field.label}</p><p className="mt-1 whitespace-pre-line text-sm font-medium text-slate-800">{field.value}</p></div>)}</div></section>}
 
-          <div className="mt-7 grid gap-3 sm:grid-cols-2 lg:max-w-3xl">
-            <TrackedPublicLink cardId={card.id} href={vcardUrl} eventType="contact_save" className="block rounded-xl px-4 py-3 text-center text-sm font-bold text-white" style={{ backgroundColor: accent }}>Enregistrer le contact</TrackedPublicLink>
-            {settings.show_phone !== false && card.phone && <TrackedPublicLink cardId={card.id} href={"tel:" + card.phone} className="btn-secondary text-center">Appeler</TrackedPublicLink>}
-            {settings.show_email !== false && card.email && <TrackedPublicLink cardId={card.id} href={"mailto:" + card.email} className="btn-secondary text-center">Envoyer un e-mail</TrackedPublicLink>}
-            {settings.show_website !== false && card.website && <TrackedPublicLink cardId={card.id} href={card.website} className="btn-secondary text-center">Site web</TrackedPublicLink>}
-            {whatsapp && <TrackedPublicLink cardId={card.id} href={"https://wa.me/" + whatsapp} className="flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white">WhatsApp Business</TrackedPublicLink>}
+          <div className="grid grid-cols-2 gap-2 rounded-2xl bg-white p-3">
+
+            {settings.show_phone !== false && card.phone && <TrackedPublicLink cardId={card.id} href={"tel:" + card.phone} className="flex items-center justify-center rounded-xl border border-slate-200 px-3 py-3 text-xs font-bold text-slate-800">☎ Appeler</TrackedPublicLink>}
+            {settings.show_email !== false && card.email && <TrackedPublicLink cardId={card.id} href={"mailto:" + card.email} className="flex items-center justify-center rounded-xl border border-slate-200 px-3 py-3 text-xs font-bold text-slate-800">✉ E-mail</TrackedPublicLink>}
+            {settings.show_website !== false && card.website && <TrackedPublicLink cardId={card.id} href={card.website} className="flex items-center justify-center rounded-xl border border-slate-200 px-3 py-3 text-xs font-bold text-slate-800">▣ Site web</TrackedPublicLink>}
+            {whatsapp && <TrackedPublicLink cardId={card.id} href={"https://wa.me/" + whatsapp} className="flex items-center justify-center rounded-xl bg-emerald-600 px-3 py-3 text-xs font-bold text-white">WhatsApp</TrackedPublicLink>}
             {template === "google-review" && <div className="rounded-2xl bg-emerald-50 p-4 text-center"><p className="text-sm font-bold text-emerald-950">Votre avis compte pour nous</p><p className="mt-1 text-2xl tracking-[.2em] text-amber-500" aria-label="5 étoiles">★★★★★</p>{fields.google_review_url ? <TrackedPublicLink cardId={card.id} href={fields.google_review_url} className="mt-3 flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white">Laisser un avis Google</TrackedPublicLink> : <p className="mt-2 text-xs text-emerald-800">Le lien Google sera ajouté prochainement.</p>}</div>}
           </div>
 
-          {showCatalog && <section className="mt-8 border-t border-slate-100 pt-6">
-            <h2 className="mb-3 text-sm font-black uppercase tracking-wider text-slate-400">{template === "service" ? "Prestations" : "Catalogue"}</h2>
-            <div className="grid gap-3">
-              {(catalogItems ?? []).map((item) => <article key={item.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-                {item.image_url && <img src={item.image_url} alt={item.name} loading="lazy" className="h-36 w-full object-cover"/>}
+          {showCatalog && <section className="rounded-2xl bg-white p-4">
+            <h2 className="mb-3 text-base font-bold text-black">{template === "service" ? "Prestations" : "Photo gallery"}</h2>
+            <div className="flex snap-x gap-3 overflow-x-auto pb-2">
+              {(catalogItems ?? []).map((item) => <article key={item.id} className="w-[245px] shrink-0 snap-start overflow-hidden rounded-xl border border-slate-200 bg-white">
+                {item.image_url && <img src={item.image_url} alt={item.name} loading="lazy" className="h-40 w-full object-cover"/>}
                 <div className="p-4"><h3 className="font-bold text-slate-900">{item.name}</h3>{item.description && <p className="mt-1 text-sm leading-6 text-slate-600">{item.description}</p>}<p className="mt-3 text-sm font-black text-indigo-700">{Number(item.price).toLocaleString("fr-MA")} {item.currency}</p></div>
               </article>)}
-              {!(catalogItems?.length) && <p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">{template === "service" ? "Les prestations seront bientôt disponibles." : "Le catalogue sera bientôt disponible."}</p>}
+              {!(catalogItems?.length) && <p className="w-full rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Ajoutez vos photos et réalisations depuis votre espace client pour afficher votre galerie.</p>}
             </div>
           </section>}
 
@@ -126,22 +143,25 @@ async function PublicCardContent({
             allowQuotes={allowQuotes}
           />}
 
-          {links && links.length > 0 && <section className="mt-8 border-t border-slate-100 pt-7"><div className="flex flex-wrap items-end justify-between gap-2"><div><p className="text-xs font-black uppercase tracking-[.18em] text-indigo-600">Présence digitale</p><h2 className="mt-1 text-xl font-black text-slate-950">Réseaux sociaux & liens</h2></div><p className="text-xs text-slate-400">Retrouvez-nous sur nos plateformes</p></div><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{links.map((link: PublicLink) => <TrackedPublicLink key={link.id} cardId={card.id} linkId={link.id} href={link.url} className="group flex min-w-0 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xs font-black uppercase text-slate-700">{({instagram:"IG",facebook:"f",linkedin:"in",tiktok:"♪",youtube:"▶",x:"X",pinterest:"P",whatsapp:"WA",telegram:"TG",calendly:"↗",store:"SHOP",website:"WEB"} as Record<string,string>)[link.kind] ?? "↗"}</span><span className="min-w-0 flex-1 truncate">{link.label}</span><span className="text-indigo-600 transition group-hover:translate-x-0.5">↗</span></TrackedPublicLink>)}</div></section>}
+          {socialLinks.length > 0 && <section className="rounded-2xl bg-white p-4"><div className="flex flex-wrap items-end justify-between gap-2"><div><h2 className="text-base font-bold text-black">Social</h2></div></div><div className="mt-4 grid grid-cols-5 gap-2">{socialLinks.map((link: PublicLink) => <TrackedPublicLink key={link.id} cardId={card.id} linkId={link.id} href={link.url} aria-label={link.label} className="flex aspect-square min-w-0 items-center justify-center rounded-xl bg-slate-100 text-lg font-black text-slate-800 transition hover:-translate-y-0.5 hover:bg-slate-200"><span>{({instagram:"◎",facebook:"f",linkedin:"in",tiktok:"♪",youtube:"▶",x:"𝕏",pinterest:"P",whatsapp:"◉",telegram:"➤"} as Record<string,string>)[link.kind] ?? "↗"}</span></TrackedPublicLink>)}</div></section>}
 
-          <section className="mt-9 border-t border-slate-100 pt-8" aria-label="Localisation">
+          {faqFields.length > 0 && <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-black">Expandable Text. FAQ</h2><div className="mt-3 divide-y divide-slate-100">{faqFields.map((field) => <details key={field.key} className="py-3"><summary className="cursor-pointer list-none text-sm font-semibold text-slate-800">{field.label.replace(/^(FAQ|Question|Q\d+)\s*[:.-]?\s*/i,"")}<span className="float-right text-slate-400">⌄</span></summary><p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-600">{field.value}</p></details>)}</div></section>}
+
+          {videoLinks.length > 0 && <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-black">Multiple Videos</h2><div className="mt-3 flex gap-3 overflow-x-auto pb-2">{videoLinks.map((link) => <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="w-[245px] shrink-0 rounded-xl border border-slate-200 p-3 text-sm font-semibold text-slate-800">▶ {link.label}</a>)}</div></section>}
+
+          <section className="rounded-2xl bg-white p-4" aria-label="Localisation">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
-                <p className="text-xs font-black uppercase tracking-[.18em]" style={{ color: accent }}>Nous trouver</p>
-                <h2 className="mt-1 text-xl font-black text-slate-950 sm:text-2xl">Notre localisation</h2>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">{fields.location?.trim() || organizationCity || "Localisation de l’entreprise"}</p>
+                <h2 className="text-base font-bold text-black">Map</h2>
+                <p className="mt-2 text-xs leading-5 text-slate-500">{fields.location?.trim() || organizationCity || "Adresse à compléter par le propriétaire de cette carte"}</p>
               </div>
-              <a href={mapDirectionsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:opacity-90" style={{ backgroundColor: accent }}>Itinéraire Google Maps ↗</a>
+              <a href={mapDirectionsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center rounded-xl px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:opacity-90" style={{ backgroundColor: accent }}>Itinéraire Google Maps ↗</a>
             </div>
-            <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm">
+            <div className="mt-3 overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
               <iframe
                 title={"Localisation de " + (card.company_name || card.full_name)}
                 src={mapEmbedUrl}
-                className="h-64 w-full sm:h-80"
+                className="h-52 w-full"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 allowFullScreen
@@ -149,7 +169,17 @@ async function PublicCardContent({
             </div>
           </section>
 
-          <p className="mt-8 text-center text-xs text-slate-400"><I18nText message="powered" /></p>
+          <section className="rounded-2xl bg-white p-4">
+            <h2 className="text-base font-bold text-black">Contact Info</h2>
+            <div className="mt-2 divide-y divide-slate-100">
+              {card.phone && <a href={"tel:"+card.phone} className="flex items-center gap-3 py-3 text-sm text-slate-800"><span className="w-5 text-slate-400">☎</span><span className="min-w-0 flex-1">{card.phone}</span><span className="text-slate-300">›</span></a>}
+              {card.email && <a href={"mailto:"+card.email} className="flex items-center gap-3 py-3 text-sm text-slate-800"><span className="w-5 text-slate-400">✉</span><span className="min-w-0 flex-1 break-all">{card.email}</span><span className="text-slate-300">›</span></a>}
+              {card.website && <a href={card.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 py-3 text-sm text-slate-800"><span className="w-5 text-slate-400">▣</span><span className="min-w-0 flex-1 truncate">{card.website}</span><span className="text-slate-300">›</span></a>}
+              {fields.location && <div className="flex items-start gap-3 py-3 text-sm text-slate-800"><span className="w-5 text-slate-400">⌖</span><span className="min-w-0 flex-1">{fields.location}</span></div>}
+              {fields.hours && <div className="flex items-start gap-3 py-3 text-sm text-slate-800"><span className="w-5 text-slate-400">◷</span><span className="min-w-0 flex-1">{fields.hours}</span></div>}
+            </div>
+          </section>
+          <p className="py-3 text-center text-[10px] text-slate-400"><I18nText message="powered" /></p>
         </div>
       </article>
     </main>
