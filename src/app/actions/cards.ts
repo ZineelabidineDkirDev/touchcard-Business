@@ -90,6 +90,7 @@ export async function saveClientCardProfile(formData: FormData) {
 
   const fields = {
     tagline: String(formData.get("tagline") ?? "").trim().slice(0, 180),
+    nfc_display_code: String(formData.get("nfc_display_code") ?? "").trim().replace(/[^a-zA-Z0-9-]/g, "").slice(0, 24),
     location: String(formData.get("location") ?? "").trim().slice(0, 180),
     hours: String(formData.get("hours") ?? "").trim().slice(0, 180),
     whatsapp: String(formData.get("whatsapp") ?? "").trim().replace(/[^+\d]/g, "").slice(0, 20),
