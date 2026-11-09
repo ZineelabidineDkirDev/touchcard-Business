@@ -1,12 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { signOut } from "@/app/actions/auth";
 
-type Props = { name: string; email: string; notificationsEnabled?: boolean };
+type AdminNotification = {
+  id: string;
+  full_name: string;
+  brand_name: string | null;
+  card_type: string;
+  city: string | null;
+  created_at: string;
+};
 
-function Icon({ name, size = 19 }: { name: "bell" | "sun" | "moon" | "user" | "settings" | "logout" | "chevron" | "check"; size?: number }) {
+type Props = {
+  name: string;
+  email: string;
+  notificationsEnabled?: boolean;
+  isSuperAdmin?: boolean;
+};
+
+function Icon({ name, size = 19 }: { name: "bell" | "sun" | "moon" | "user" | "settings" | "logout" | "chevron" | "check" | "inbox" | "arrow"; size?: number }) {
   const common = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, "aria-hidden": true as const };
   switch (name) {
     case "bell": return <svg {...common}><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" /><path d="M10 21h4" /></svg>;
@@ -17,13 +31,41 @@ function Icon({ name, size = 19 }: { name: "bell" | "sun" | "moon" | "user" | "s
     case "logout": return <svg {...common}><path d="M10 17l5-5-5-5m5 5H3" /><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" /></svg>;
     case "chevron": return <svg {...common}><path d="m7 10 5 5 5-5" /></svg>;
     case "check": return <svg {...common}><path d="m5 12 4 4L19 6" /></svg>;
+    case "inbox": return <svg {...common}><path d="M4 4h16v16H4z" /><path d="M4 13h4l2 3h4l2-3h4" /></svg>;
+    case "arrow": return <svg {...common}><path d="M5 12h14m-6-6 6 6-6 6" /></svg>;
   }
 }
 
-export function DashboardTopbar({ name, email, notificationsEnabled = true }: Props) {
+const cardLabels: Record<string, string> = {
+  contact: "Contact",
+  service: "E-Service",
+  "e-business": "E-Business",
+  "google-review": "Avis Google",
+};
+
+export function DashboardTopbar({ name, email, notificationsEnabled = true, isSuperAdmin = false }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [dark, setDark] = useState(false);
+  const [notifications, setNotifications] = useState<AdminNotification[]>([]);
+  const [notificationCount, setNotificationCount] = useState(0);
+  const [notificationsLoading, setNotificationsLoading] = useState(false);
+
+  const loadNotifications = useCallback(async () => {
+    if (!isSuperAdmin || !notificationsEnabled) return;
+    setNotificationsLoading(true);
+    try {
+      const response = await fetch("/api/admin/notifications", { cache: "no-store" });
+      if (!response.ok) throw new Error("Notification request failed");
+      const payload = await response.json();
+      setNotifications(Array.isArray(payload.notifications) ? payload.notifications : []);
+      setNotificationCount(Number(payload.count) || 0);
+    } catch (error) {
+      console.error("Unable to refresh admin notifications", error);
+    } finally {
+      setNotificationsLoading(false);
+    }
+  }, [isSuperAdmin, notificationsEnabled]);
 
   useEffect(() => {
     const saved = window.localStorage.getItem("touchcard-dashboard-theme");
@@ -32,6 +74,17 @@ export function DashboardTopbar({ name, email, notificationsEnabled = true }: Pr
     document.documentElement.dataset.theme = enabled ? "dark" : "light";
     return () => { document.documentElement.dataset.theme = "light"; };
   }, []);
+
+  useEffect(() => {
+    if (!isSuperAdmin || !notificationsEnabled) {
+      setNotifications([]);
+      setNotificationCount(0);
+      return;
+    }
+    void loadNotifications();
+    const interval = window.setInterval(() => void loadNotifications(), 30000);
+    return () => window.clearInterval(interval);
+  }, [isSuperAdmin, notificationsEnabled, loadNotifications]);
 
   function toggleTheme() {
     const next = !dark;
@@ -50,13 +103,25 @@ export function DashboardTopbar({ name, email, notificationsEnabled = true }: Pr
         <button type="button" onClick={toggleTheme} aria-label={dark ? "Passer au thème clair" : "Passer au thème sombre"} title={dark ? "Mode clair" : "Mode sombre"} className="dashboard-icon-button flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100">
           <Icon name={dark ? "sun" : "moon"} />
         </button>
-        <div className="relative">
-          <button type="button" onClick={() => { setNotificationsOpen(!notificationsOpen); setMenuOpen(false); }} aria-expanded={notificationsOpen} aria-label="Notifications" className="dashboard-icon-button relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100">
+        {isSuperAdmin && <div className="relative">
+          <button type="button" onClick={() => { const next = !notificationsOpen; setNotificationsOpen(next); setMenuOpen(false); if (next) void loadNotifications(); }} aria-expanded={notificationsOpen} aria-label={`Notifications : ${notificationCount} demande(s) en attente`} className="dashboard-icon-button relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100">
             <Icon name="bell" />
-            {notificationsEnabled && <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-indigo-600 ring-2 ring-white" />}
+            {notificationsEnabled && notificationCount > 0 && <span className="absolute -right-1 -top-1 flex min-h-[19px] min-w-[19px] items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-black text-white ring-2 ring-white">{notificationCount > 99 ? "99+" : notificationCount}</span>}
           </button>
-          {notificationsOpen && <div className="dashboard-popover absolute right-0 top-12 z-50 w-72 rounded-2xl border border-slate-200 bg-white p-4 shadow-xl"><div className="flex items-center gap-2 font-bold text-slate-900"><Icon name="bell" size={17} /> Notifications</div><div className="mt-4 flex flex-col items-center py-3 text-center"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500"><Icon name="check" /></span><p className="mt-3 text-sm font-semibold text-slate-700">Tout est à jour</p><p className="mt-1 text-xs leading-5 text-slate-500">{notificationsEnabled ? "Aucune nouvelle notification pour le moment." : "Les notifications sont désactivées dans vos paramètres."}</p><Link href="/dashboard/settings" onClick={() => setNotificationsOpen(false)} className="mt-3 text-xs font-semibold text-indigo-600 hover:underline">Gérer les notifications</Link></div></div>}
-        </div>
+          {notificationsOpen && <div className="dashboard-popover absolute right-0 top-12 z-50 w-[min(360px,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+            <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
+              <div><p className="flex items-center gap-2 font-bold text-slate-900"><Icon name="bell" size={17} /> Nouvelles demandes</p><p className="mt-1 text-[11px] text-slate-500">Demandes à examiner par le Super Admin</p></div>
+              {notificationCount > 0 && <span className="rounded-full bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700">{notificationCount} en attente</span>}
+            </div>
+            {!notificationsEnabled ? <p className="p-5 text-sm text-slate-500">Les notifications sont désactivées dans vos paramètres.</p> : notificationsLoading && notifications.length === 0 ? <p className="p-5 text-sm text-slate-500">Chargement des demandes…</p> : notifications.length === 0 ? <div className="flex flex-col items-center px-5 py-7 text-center"><span className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-50 text-emerald-600"><Icon name="check" /></span><p className="mt-3 text-sm font-semibold text-slate-800">Aucune nouvelle demande</p><p className="mt-1 text-xs text-slate-500">Les nouvelles demandes apparaîtront ici automatiquement.</p></div> : <div className="max-h-[min(420px,65vh)] overflow-y-auto divide-y divide-slate-100">
+              {notifications.map((item) => <Link key={item.id} href={`/dashboard/prospects?notification=${encodeURIComponent(item.id)}`} onClick={() => setNotificationsOpen(false)} className="block px-4 py-3 transition hover:bg-indigo-50/60">
+                <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate text-sm font-bold text-slate-900">{item.brand_name || item.full_name}</p><p className="mt-1 text-xs text-slate-600">{item.full_name} · {cardLabels[item.card_type] || item.card_type}</p><p className="mt-1 text-[11px] text-slate-400">{item.city || "Ville non précisée"} · {new Date(item.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}</p></div><span className="mt-1 shrink-0 text-indigo-600"><Icon name="arrow" size={17} /></span></div>
+                <span className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-indigo-700">Examiner la demande <Icon name="arrow" size={13} /></span>
+              </Link>)}
+            </div>}
+            <div className="border-t border-slate-100 bg-slate-50 px-4 py-3"><Link href="/dashboard/prospects" onClick={() => setNotificationsOpen(false)} className="text-xs font-bold text-indigo-700 hover:underline">Ouvrir toutes les demandes</Link><Link href="/dashboard/settings" onClick={() => setNotificationsOpen(false)} className="float-right text-xs font-medium text-slate-500 hover:underline">Paramètres</Link></div>
+          </div>}
+        </div>}
         <div className="relative">
           <button type="button" onClick={() => { setMenuOpen(!menuOpen); setNotificationsOpen(false); }} aria-expanded={menuOpen} className="flex max-w-[190px] items-center gap-2 rounded-xl border border-slate-200 bg-white px-2 py-2 text-left transition hover:bg-slate-50 sm:px-3">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-700"><Icon name="user" size={17} /></span>
