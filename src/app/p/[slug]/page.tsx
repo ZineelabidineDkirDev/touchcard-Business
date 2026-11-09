@@ -6,7 +6,7 @@ import { I18nText } from "@/i18n/provider";
 import { PublicCardTracker, TrackedPublicLink } from "@/components/cards/public-card-tracker";
 import { PublicWorkspaceRequestForms } from "@/components/cards/public-workspace-request-forms";
 
-type PublicFields = { tagline?: string; location?: string; hours?: string; whatsapp?: string; company_phone?: string; company_email?: string; company_address?: string; industry?: string; custom_fields?: { key: string; label: string; value: string; visible: boolean }[] };
+type PublicFields = { nfc_display_code?: string; tagline?: string; location?: string; hours?: string; whatsapp?: string; company_phone?: string; company_email?: string; company_address?: string; industry?: string; custom_fields?: { key: string; label: string; value: string; visible: boolean }[] };
 type PublicLink = { id: string; label: string; url: string; kind: string };
 type PublicCatalogItem = { id: string; name: string; description: string | null; price: number; currency: string; image_url: string | null };
 
@@ -85,7 +85,7 @@ async function PublicCardContent({
       <article className="mx-auto w-full max-w-[440px] overflow-hidden rounded-none bg-[#111111] p-0 shadow-[0_28px_90px_rgba(0,0,0,.28)] sm:rounded-[2.4rem] sm:p-2">
         <div className="relative h-[230px] overflow-hidden rounded-b-[1.5rem] bg-cover bg-center sm:h-[270px]" style={{ background: `linear-gradient(120deg, #0f172a, ${accent})` }}>
           {card.cover_url && <img src={card.cover_url} alt="" className="h-full w-full object-cover" />}
-          <div className="absolute right-3 top-3 flex items-center gap-2 rounded-full border border-white/30 bg-black/65 px-3 py-2 text-white shadow-lg backdrop-blur-md"><svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M7 7v10M17 7v10M4 9v6M20 9v6M10 4v16M14 4v16"/></svg><span className="text-[10px] font-black tracking-[.12em]">NFC · TC-{card.id.slice(0,8).toUpperCase()}</span></div>
+          <div className="absolute bottom-3 right-3 flex items-center gap-2 rounded-2xl border border-white/30 bg-black/70 p-2 text-white shadow-xl backdrop-blur-md"><div className="flex min-w-0 items-center gap-2 px-1"><svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M7 7v10M17 7v10M4 9v6M20 9v6M10 4v16M14 4v16"/></svg><span className="min-w-0"><span className="block text-[9px] font-bold uppercase tracking-[.14em] text-white/70">NFC</span><span className="block max-w-[104px] truncate text-[11px] font-black tracking-wide">{fields.nfc_display_code?.trim() || `TC-${card.id.slice(0,8).toUpperCase()}`}</span></span></div><div className="h-14 w-14 shrink-0 rounded-lg bg-white p-1"><img alt="QR code pour ouvrir cette carte" loading="lazy" className="h-full w-full object-contain" src={"https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=" + encodeURIComponent("https://touchcard-three.vercel.app/p/" + card.slug + "?source=qr")}/></div></div>
         </div>
         <div className="space-y-2 px-2 pb-3 pt-0 sm:px-0">
           <section className="relative z-10 -mt-12 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
