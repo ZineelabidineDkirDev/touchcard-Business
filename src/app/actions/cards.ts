@@ -106,6 +106,7 @@ export async function saveClientCardProfile(formData: FormData) {
     phone: String(formData.get("phone") ?? "").trim().slice(0, 30) || null,
     website: safeHttpUrl(String(formData.get("website") ?? ""), 500),
     avatar_url: safeHttpUrl(String(formData.get("avatar_url") ?? ""), 1000),
+    cover_url: safeHttpUrl(String(formData.get("cover_url") ?? ""), 1000),
     public_fields: fields,
     public_settings: {
       show_phone: formData.get("show_phone") === "on",
@@ -137,7 +138,7 @@ export async function addClientCardLink(formData: FormData) {
   const label = String(formData.get("label") ?? "").trim().slice(0, 60);
   const rawUrl = String(formData.get("url") ?? "").trim().slice(0, 500);
   const kind = String(formData.get("kind") ?? "website");
-  const allowedKinds = ["website", "whatsapp", "telegram", "instagram", "facebook", "linkedin", "store", "other"];
+  const allowedKinds = ["website", "whatsapp", "telegram", "instagram", "facebook", "linkedin", "tiktok", "youtube", "x", "pinterest", "calendly", "store", "other"];
   if (!cardId || !label || !rawUrl || !allowedKinds.includes(kind)) return;
   let url: URL;
   try { url = new URL(rawUrl); } catch { return; }
