@@ -18,13 +18,17 @@ export function DashboardNavigation({
   isSuperAdmin = false,
   enabledModules = [],
   hasWorkspaceConfig = false,
+  hiddenModules = [],
 }: {
   isSuperAdmin?: boolean;
   enabledModules?: string[];
   hasWorkspaceConfig?: boolean;
+  hiddenModules?: string[];
 }) {
   const { t } = useI18n();
-  const visibleItems = items.filter(([, , module]) => {
+  const visibleItems = items.filter(([key, , module]) => {
+    if (key === "settings" || key === "overview") return true;
+    if (module && hiddenModules.includes(module)) return false;
     if (!hasWorkspaceConfig || !module) return true;
     if (module === "requests") return enabledModules.some((value) => ["orders", "bookings", "quote_requests"].includes(value));
     return enabledModules.includes(module);
@@ -33,24 +37,12 @@ export function DashboardNavigation({
   return (
     <nav className="mt-8 flex gap-2 overflow-x-auto lg:flex-col">
       {visibleItems.map(([key, href]) => (
-        <Link
-          key={href}
-          href={href}
-          className="whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-indigo-50 hover:text-indigo-700"
-        >
+        <Link key={href} href={href} className="whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-indigo-50 hover:text-indigo-700">
           {key === "requests" ? "Demandes clients" : t(key)}
         </Link>
       ))}
-      {isSuperAdmin && (
-        <Link href="/dashboard/admin" className="whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50">
-          Vue globale Super Admin
-        </Link>
-      )}
-      {isSuperAdmin && (
-        <Link href="/dashboard/prospects" className="whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50">
-          Prospects / Demandes clients
-        </Link>
-      )}
+      {isSuperAdmin && <Link href="/dashboard/admin" className="whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50">Vue globale Super Admin</Link>}
+      {isSuperAdmin && <Link href="/dashboard/prospects" className="whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50">Prospects / Demandes clients</Link>}
     </nav>
   );
 }
