@@ -214,28 +214,28 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
               </div>
             </div>
             <div className="grid gap-6 p-5 xl:grid-cols-[1.15fr_.85fr]">
-              <PopupDialog title="Modifier ma carte NFC" description="Modifiez les coordonnées, la photo et les rubriques affichées après un scan." triggerLabel="Modifier ma carte">
+              <PopupDialog title="Personnaliser ma carte NFC" description="Modifiez votre identité, votre couverture, vos coordonnées et les contenus visibles après un scan." triggerLabel="Personnaliser ma carte">
               <form action={saveClientCardProfile} className="space-y-3">
                 <input type="hidden" name="card_id" value={card.id}/>
-                <h3 className="font-bold text-slate-900">Informations de la carte</h3>
+                <div className="rounded-xl bg-indigo-50 p-3"><h3 className="text-sm font-bold text-indigo-950">1. Identité et couverture</h3><p className="mt-1 text-xs leading-5 text-indigo-800">Choisissez une photo de profil et une bannière horizontale. Vous pouvez remplacer ou retirer chaque image à tout moment.</p></div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="text-xs font-semibold text-slate-600">Nom affiché<input name="full_name" required defaultValue={card.full_name} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600">Fonction<input name="job_title" defaultValue={card.job_title ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600">Entreprise<input name="company_name" defaultValue={card.company_name ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
-                  <div className="sm:col-span-2 grid gap-3 md:grid-cols-2"><MediaImagePicker organizationId={organizationId!} name="avatar_url" initialUrl={card.avatar_url} label="Photo de profil"/><MediaImagePicker organizationId={organizationId!} name="cover_url" initialUrl={card.cover_url} label="Image de couverture (bannière)"/></div>
-                  <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Présentation<textarea name="bio" defaultValue={card.bio ?? ""} rows={3} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
+                  <div className="sm:col-span-2 grid gap-4 md:grid-cols-[.8fr_1.2fr]"><MediaImagePicker organizationId={organizationId!} name="avatar_url" initialUrl={card.avatar_url} label="Photo de profil"/><MediaImagePicker organizationId={organizationId!} name="cover_url" initialUrl={card.cover_url} label="Couverture de la carte" shape="wide"/></div>
+                  <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Présentation / bio<textarea name="bio" defaultValue={card.bio ?? ""} rows={3} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600">Téléphone<input name="phone" defaultValue={card.phone ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600">E-mail<input name="email" type="email" defaultValue={card.email ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Site web<input name="website" defaultValue={card.website ?? ""} placeholder="https://..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Phrase d'accroche<input name="tagline" defaultValue={fields.tagline ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600">Ville / adresse<input name="location" defaultValue={fields.location ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
-                  <label className="text-xs font-semibold text-slate-600">Horaires<input name="hours" defaultValue={fields.hours ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
+                  <label className="text-xs font-semibold text-slate-600">Horaires d’ouverture<input name="hours" defaultValue={fields.hours ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600 sm:col-span-2">WhatsApp Business (numéro)<input name="whatsapp" defaultValue={fields.whatsapp ?? ""} placeholder="+212..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   {config.template === "google-review" && <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Lien officiel Google Avis<input name="google_review_url" type="url" defaultValue={fields.google_review_url ?? ""} placeholder="https://g.page/r/..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>}
                   <CustomCardFieldsEditor initialFields={initialCustomFields}/>
                   <div className="flex flex-wrap gap-4 rounded-xl bg-slate-50 p-3 sm:col-span-2"><span className="w-full text-xs font-bold text-slate-700">Champs visibles sur la page publique</span><label className="flex items-center gap-2 text-xs"><input type="checkbox" name="show_phone" defaultChecked={settings.show_phone !== false}/> Téléphone</label><label className="flex items-center gap-2 text-xs"><input type="checkbox" name="show_email" defaultChecked={settings.show_email !== false}/> E-mail</label><label className="flex items-center gap-2 text-xs"><input type="checkbox" name="show_website" defaultChecked={settings.show_website !== false}/> Site web</label></div>
                 </div>
-                <button className="btn-primary">Enregistrer les modifications</button>
+                <div className="sticky bottom-0 -mx-1 border-t border-slate-100 bg-white/95 px-1 py-3 backdrop-blur"><button className="btn-primary w-full rounded-full py-3 text-sm">✓ Enregistrer ma carte</button><p className="mt-2 text-center text-[10px] text-slate-400">Vos modifications seront visibles après enregistrement.</p></div>
               </form>
               </PopupDialog>
 
