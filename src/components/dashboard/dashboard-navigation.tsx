@@ -6,6 +6,7 @@ import { useI18n } from "@/i18n/provider";
 const items = [
   ["overview", "/dashboard", null],
   ["cards", "/dashboard/cards", "digital_card"],
+  ["requests", "/dashboard/requests", "requests"],
   ["contacts", "/dashboard/contacts", "crm_contacts"],
   ["team", "/dashboard/team", "team"],
   ["analytics", "/dashboard/analytics", "analytics"],
@@ -23,9 +24,11 @@ export function DashboardNavigation({
   hasWorkspaceConfig?: boolean;
 }) {
   const { t } = useI18n();
-  const visibleItems = items.filter(([, , module]) =>
-    !hasWorkspaceConfig || !module || enabledModules.includes(module)
-  );
+  const visibleItems = items.filter(([, , module]) => {
+    if (!hasWorkspaceConfig || !module) return true;
+    if (module === "requests") return enabledModules.some((value) => ["orders", "bookings", "quote_requests"].includes(value));
+    return enabledModules.includes(module);
+  });
 
   return (
     <nav className="mt-8 flex gap-2 overflow-x-auto lg:flex-col">
@@ -35,7 +38,7 @@ export function DashboardNavigation({
           href={href}
           className="whitespace-nowrap rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-indigo-50 hover:text-indigo-700"
         >
-          {t(key)}
+          {key === "requests" ? "Demandes clients" : t(key)}
         </Link>
       ))}
       {isSuperAdmin && (
