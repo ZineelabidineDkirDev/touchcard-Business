@@ -86,9 +86,6 @@ async function PublicCardContent({
           {card.cover_url && <img src={card.cover_url} alt="" className="h-full w-full object-cover" />}
         </div>
         <div className="space-y-2 px-2 pb-3 pt-0 sm:px-0">
-          <div className="flex h-[118px] w-[118px] shrink-0 items-center justify-center overflow-hidden rounded-xl border-4 border-white bg-indigo-50 text-3xl font-bold text-indigo-700 shadow-xl">
-            {card.avatar_url ? <img src={card.avatar_url} alt={card.full_name} className="h-full w-full object-cover" /> : card.full_name.slice(0, 1).toUpperCase()}
-          </div>
           <section className="relative z-10 -mt-12 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
             <div className="grid grid-cols-[1fr_118px] items-stretch gap-3">
               <div className="flex min-w-0 flex-col justify-between py-1">
@@ -143,11 +140,11 @@ async function PublicCardContent({
             allowQuotes={allowQuotes}
           />}
 
-          {socialLinks.length > 0 && <section className="rounded-2xl bg-white p-4"><div className="flex flex-wrap items-end justify-between gap-2"><div><h2 className="text-base font-bold text-black">Social</h2></div></div><div className="mt-4 grid grid-cols-5 gap-2">{socialLinks.map((link: PublicLink) => <TrackedPublicLink key={link.id} cardId={card.id} linkId={link.id} href={link.url} aria-label={link.label} className="flex aspect-square min-w-0 items-center justify-center rounded-xl bg-slate-100 text-lg font-black text-slate-800 transition hover:-translate-y-0.5 hover:bg-slate-200"><span>{({instagram:"◎",facebook:"f",linkedin:"in",tiktok:"♪",youtube:"▶",x:"𝕏",pinterest:"P",whatsapp:"◉",telegram:"➤"} as Record<string,string>)[link.kind] ?? "↗"}</span></TrackedPublicLink>)}</div></section>}
+          {socialLinks.length > 0 && <section className="rounded-2xl bg-white p-4"><div className="flex flex-wrap items-end justify-between gap-2"><div><h2 className="text-base font-bold text-black">Social</h2></div></div><div className="mt-4 grid grid-cols-5 gap-2">{socialLinks.map((link: PublicLink) => <TrackedPublicLink key={link.id} cardId={card.id} linkId={link.id} href={link.url} className="flex aspect-square min-w-0 items-center justify-center rounded-xl bg-slate-100 text-lg font-black text-slate-800 transition hover:-translate-y-0.5 hover:bg-slate-200"><span>{({instagram:"◎",facebook:"f",linkedin:"in",tiktok:"♪",youtube:"▶",x:"𝕏",pinterest:"P",whatsapp:"◉",telegram:"➤"} as Record<string,string>)[link.kind] ?? "↗"}</span></TrackedPublicLink>)}</div></section>}
 
           {faqFields.length > 0 && <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-black">Expandable Text. FAQ</h2><div className="mt-3 divide-y divide-slate-100">{faqFields.map((field) => <details key={field.key} className="py-3"><summary className="cursor-pointer list-none text-sm font-semibold text-slate-800">{field.label.replace(/^(FAQ|Question|Q\d+)\s*[:.-]?\s*/i,"")}<span className="float-right text-slate-400">⌄</span></summary><p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-600">{field.value}</p></details>)}</div></section>}
 
-          {videoLinks.length > 0 && <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-black">Multiple Videos</h2><div className="mt-3 flex gap-3 overflow-x-auto pb-2">{videoLinks.map((link) => <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="w-[245px] shrink-0 rounded-xl border border-slate-200 p-3 text-sm font-semibold text-slate-800">▶ {link.label}</a>)}</div></section>}
+          {videoLinks.length > 0 && <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-black">Multiple Videos</h2><div className="mt-3 flex gap-3 overflow-x-auto pb-2">{videoLinks.map((link) => <a key={link.id} href={link.url} target="_blank" rel="noopener noreferrer" className="w-[245px] shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-white"><div className="flex h-32 items-center justify-center bg-slate-900 text-4xl text-white">▶</div><p className="p-3 text-xs font-semibold leading-5 text-slate-800">{link.label}</p></a>)}</div></section>}
 
           <section className="rounded-2xl bg-white p-4" aria-label="Localisation">
             <div className="flex flex-wrap items-end justify-between gap-3">
