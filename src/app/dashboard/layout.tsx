@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
 import { LanguageSwitcher } from "@/i18n/provider";
 import { DashboardNavigation, DashboardLogoutLabel } from "@/components/dashboard/dashboard-navigation";
+import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
 
 const navigation = [
   ["Vue d’ensemble", "/dashboard"],
@@ -80,7 +81,7 @@ async function AuthenticatedDashboard({ children }: Readonly<{ children: React.R
           <form action={signOut}><button className="mt-4 text-sm font-semibold text-rose-600"><DashboardLogoutLabel /></button></form>
         </div>
       </aside>
-      <main className="min-w-0 flex-1 p-5 sm:p-8 lg:ml-64">{children}</main>
+      <main className="min-w-0 flex-1 p-4 sm:p-7 lg:ml-64"><DashboardTopbar name={String(user.user_metadata.full_name || user.user_metadata.name || "")} email={user.email || ""} />{children}</main>
     </div>
   );
 }
