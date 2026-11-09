@@ -4,6 +4,7 @@ import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { I18nText } from "@/i18n/provider";
 import { PublicCardTracker, TrackedPublicLink } from "@/components/cards/public-card-tracker";
+import { PublicWorkspaceRequestForms } from "@/components/cards/public-workspace-request-forms";
 
 type PublicFields = { tagline?: string; location?: string; hours?: string; whatsapp?: string; custom_fields?: { key: string; label: string; value: string; visible: boolean }[] };
 type PublicLink = { id: string; label: string; url: string; kind: string };
@@ -37,7 +38,15 @@ async function PublicCardContent({
   const theme = (card.theme ?? {}) as Record<string, unknown>;
   const template = String(theme.template ?? "contact");
   const accent = typeof theme.accent === "string" && /^#[0-9a-fA-F]{6}$/.test(theme.accent) ? theme.accent : "#4f46e5";
-  const showCatalog = ["service", "e-business"].includes(template);
+  const { data: organization } = await supabase.from("organizations").select("workspace_config")
+    .eq("id", card.organization_id).maybeSingle();
+  const workspaceConfig = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[] };
+  const modules = Array.isArray(workspaceConfig.modules) ? workspaceConfig.modules : [];
+  const showCatalog = ["service", "e-business"].includes(template)
+    && (!workspaceConfig.version || modules.some((module) => ["service_catalog", "product_catalog"].includes(module)));
+  const allowOrders = modules.includes("orders");
+  const allowBookings = modules.includes("bookings");
+  const allowQuotes = modules.includes("quote_requests");
   const { data: catalogItems } = showCatalog
     ? await supabase.from("products").select("id,name,description,price,currency,image_url")
       .eq("organization_id", card.organization_id).eq("is_active", true).order("created_at", { ascending: false }).limit(24)
@@ -86,6 +95,14 @@ async function PublicCardContent({
               {!(catalogItems?.length) && <p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">{template === "service" ? "Les prestations seront bientôt disponibles." : "Le catalogue sera bientôt disponible."}</p>}
             </div>
           </section>}
+
+          {(allowOrders || allowBookings || allowQuotes) && <PublicWorkspaceRequestForms
+            cardSlug={card.slug}
+            products={(catalogItems ?? []).map((item) => ({ id: item.id, name: item.name, price: Number(item.price), currency: item.currency }))}
+            allowOrders={allowOrders}
+            allowBookings={allowBookings}
+            allowQuotes={allowQuotes}
+          />}
 
           {links && links.length > 0 && <section className="mt-7 border-t border-slate-100 pt-6"><h2 className="mb-3 text-sm font-black uppercase tracking-wider text-slate-400">Me retrouver en ligne</h2><div className="grid gap-2">{links.map((link: PublicLink) => <TrackedPublicLink key={link.id} cardId={card.id} linkId={link.id} href={link.url} className="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-800"><span>{link.label}</span><span className="text-indigo-600">↗</span></TrackedPublicLink>)}</div></section>}
 
