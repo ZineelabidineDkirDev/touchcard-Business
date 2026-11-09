@@ -35,6 +35,13 @@ export async function createClientCard(formData: FormData) {
   if (!user || !organizationId) return;
   const fullName = String(formData.get("full_name") ?? "").trim().slice(0, 120);
   if (!fullName) return;
+  const { data: organization } = await supabase.from("organizations")
+    .select("workspace_config").eq("id", organizationId).maybeSingle();
+  const config = (organization?.workspace_config ?? {}) as { version?: number; template?: string; modules?: string[] };
+  const modules = Array.isArray(config.modules) ? config.modules : [];
+  if (config.version && !modules.includes("digital_card")) return;
+  const template = config.template ?? "contact";
+  const accent = template === "google-review" ? "#16a34a" : template === "service" ? "#0ea5e9" : template === "e-business" ? "#10b981" : "#6366f1";
   const suffix = crypto.randomUUID().slice(0, 7);
   const { error } = await supabase.from("cards").insert({
     organization_id: organizationId,
@@ -42,6 +49,7 @@ export async function createClientCard(formData: FormData) {
     slug: cleanSlug(fullName) + "-" + suffix,
     full_name: fullName,
     company_name: String(formData.get("company_name") ?? "").trim().slice(0, 120) || null,
+    theme: { template, accent, layout: "classic", schema_version: 1 },
     job_title: String(formData.get("job_title") ?? "").trim().slice(0, 120) || null,
     is_published: false,
   });
