@@ -6,7 +6,7 @@ import { I18nText } from "@/i18n/provider";
 import { PublicCardTracker, TrackedPublicLink } from "@/components/cards/public-card-tracker";
 import { PublicWorkspaceRequestForms } from "@/components/cards/public-workspace-request-forms";
 
-type PublicFields = { tagline?: string; location?: string; hours?: string; whatsapp?: string; custom_fields?: { key: string; label: string; value: string; visible: boolean }[] };
+type PublicFields = { tagline?: string; location?: string; hours?: string; whatsapp?: string; company_phone?: string; company_email?: string; company_address?: string; industry?: string; custom_fields?: { key: string; label: string; value: string; visible: boolean }[] };
 type PublicLink = { id: string; label: string; url: string; kind: string };
 type PublicCatalogItem = { id: string; name: string; description: string | null; price: number; currency: string; image_url: string | null };
 
@@ -70,7 +70,7 @@ async function PublicCardContent({
   const whatsapp = String(fields.whatsapp ?? "").replace(/[^+\d]/g, "").replace(/^\+/, "");
   const vcardUrl = "/api/cards/" + encodeURIComponent(slug) + "/vcard";
   // The map must point to the exact address entered for this card. Never fall back to a city or company name.
-  const exactAddress = fields.location?.trim() ?? "";
+  const exactAddress = (template === "e-business" ? fields.company_address : fields.location)?.trim() ?? "";
   const mapEmbedUrl = exactAddress ? "https://www.google.com/maps?q=" + encodeURIComponent(exactAddress) + "&output=embed" : null;
   const mapDirectionsUrl = exactAddress ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(exactAddress) : null;
   const socialLinks = (links ?? []).filter((link) => ["instagram", "facebook", "linkedin", "tiktok", "youtube", "x", "pinterest", "whatsapp", "telegram"].includes(link.kind));
@@ -116,6 +116,15 @@ async function PublicCardContent({
               {whatsapp && <TrackedPublicLink cardId={card.id} href={"https://wa.me/" + whatsapp} className="flex min-h-[68px] items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left transition hover:border-slate-300 hover:bg-slate-50"><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#25D366] text-white" aria-hidden="true"><svg viewBox="0 0 32 32" className="h-7 w-7" fill="currentColor"><path d="M16.02 3.2A12.7 12.7 0 0 0 5.1 22.37L3.4 28.6l6.38-1.67A12.7 12.7 0 1 0 16.02 3.2Zm0 23.1c-1.94 0-3.84-.52-5.5-1.5l-.4-.24-3.78.99 1.01-3.68-.26-.42a10.45 10.45 0 1 1 8.93 4.85Zm5.74-7.83c-.31-.16-1.83-.9-2.11-1-.28-.1-.49-.16-.7.16-.21.31-.8 1-.98 1.2-.18.2-.36.23-.67.08-.31-.16-1.3-.48-2.47-1.53-.91-.81-1.53-1.82-1.71-2.13-.18-.31-.02-.48.14-.64.14-.14.31-.36.47-.54.16-.18.21-.31.31-.52.1-.21.05-.39-.03-.55-.08-.16-.7-1.69-.96-2.31-.25-.6-.51-.52-.7-.53h-.6c-.21 0-.55.08-.83.39-.28.31-1.09 1.07-1.09 2.6s1.12 3.02 1.27 3.23c.16.21 2.2 3.36 5.33 4.71.75.32 1.33.52 1.78.66.75.24 1.43.2 1.97.12.6-.09 1.83-.75 2.09-1.48.26-.73.26-1.35.18-1.48-.08-.13-.28-.21-.6-.37Z"/></svg></span><span className="min-w-0 flex-1"><span className="block text-xs font-semibold text-slate-500">WhatsApp Business</span><span className="block break-all text-sm font-bold text-slate-950">{fields.whatsapp}</span></span><span className="text-xs font-bold" style={{ color: accent }}>Écrire ↗</span></TrackedPublicLink>}
             </div>
           </section>}
+          {template === "e-business" && (fields.company_phone || fields.company_email || fields.company_address || fields.industry) && <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h2 className="text-base font-extrabold text-slate-950">Company Info</h2>
+            <div className="mt-3 space-y-2">
+              {fields.company_phone && <TrackedPublicLink cardId={card.id} href={"tel:" + fields.company_phone} className="flex items-center gap-3 rounded-xl border border-slate-100 p-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-lg" aria-hidden="true">☎</span><span className="min-w-0"><span className="block text-[10px] font-bold uppercase tracking-wide text-slate-400">Téléphone de l’entreprise</span><span className="break-all text-sm font-bold text-slate-900">{fields.company_phone}</span></span></TrackedPublicLink>}
+              {fields.company_email && <TrackedPublicLink cardId={card.id} href={"mailto:" + fields.company_email} className="flex items-center gap-3 rounded-xl border border-slate-100 p-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-lg" aria-hidden="true">✉</span><span className="min-w-0"><span className="block text-[10px] font-bold uppercase tracking-wide text-slate-400">E-mail de l’entreprise</span><span className="break-all text-sm font-bold text-slate-900">{fields.company_email}</span></span></TrackedPublicLink>}
+              {fields.company_address && <div className="flex items-center gap-3 rounded-xl border border-slate-100 p-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-lg" aria-hidden="true">📍</span><span className="min-w-0"><span className="block text-[10px] font-bold uppercase tracking-wide text-slate-400">Adresse de l’entreprise</span><span className="text-sm font-bold text-slate-900">{fields.company_address}</span></span></div>}
+              {fields.industry && <div className="flex items-center gap-3 rounded-xl border border-slate-100 p-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-lg" aria-hidden="true">🏢</span><span className="min-w-0"><span className="block text-[10px] font-bold uppercase tracking-wide text-slate-400">Secteur d’activité</span><span className="text-sm font-bold text-slate-900">{fields.industry}</span></span></div>}
+            </div>
+          </section>}
           {(profileCategories.length > 0 || selectedServices.length > 0) && <section className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
             <h2 className="text-xs font-black uppercase tracking-wider text-slate-500">{template === "service" ? "Nos domaines de service" : template === "e-business" ? "Univers & spécialités" : template === "google-review" ? "Notre activité" : "Expertises"}</h2>
             {profileCategories.length > 0 && <div className="mt-3 flex flex-wrap gap-2">{profileCategories.map((category) => <span key={category} className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-700 ring-1 ring-slate-200">{category}</span>)}</div>}
@@ -128,13 +137,13 @@ async function PublicCardContent({
           {template === "google-review" && <section className="rounded-2xl bg-white p-4 text-center"><p className="text-sm font-bold text-slate-900">Votre avis compte pour nous</p><p className="mt-1 text-2xl tracking-[.2em] text-amber-500" aria-label="5 étoiles">★★★★★</p>{fields.google_review_url ? <TrackedPublicLink cardId={card.id} href={fields.google_review_url} className="mt-3 flex items-center justify-center rounded-xl px-4 py-3 text-sm font-bold text-white" style={{ backgroundColor: accent }}>Laisser un avis Google</TrackedPublicLink> : <p className="mt-2 text-xs text-slate-600">Le lien Google sera ajouté prochainement.</p>}</section>}
 
           {showCatalog && <section className="rounded-2xl bg-white p-4">
-            <h2 className="mb-3 text-base font-bold text-black">{template === "service" ? "Prestations" : "Portfolio"}</h2>
+            <h2 className="mb-3 text-base font-bold text-black">{template === "service" ? "Prestations" : "Projets"}</h2>
             <div className="flex snap-x gap-3 overflow-x-auto pb-2">
               {(catalogItems ?? []).map((item) => <article key={item.id} className="w-[245px] shrink-0 snap-start overflow-hidden rounded-xl border border-slate-200 bg-white">
                 {item.image_url && <img src={item.image_url} alt={item.name} loading="lazy" className="h-40 w-full object-cover"/>}
                 <div className="p-4"><h3 className="font-bold text-slate-900">{item.name}</h3>{item.description && <p className="mt-1 text-sm leading-6 text-slate-600">{item.description}</p>}<p className="mt-3 text-sm font-black text-slate-700">{Number(item.price).toLocaleString("fr-MA")} {item.currency}</p></div>
               </article>)}
-              {!(catalogItems?.length) && <p className="w-full rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Ajoutez vos photos et réalisations depuis votre espace client pour présenter votre portfolio.</p>}
+              {!(catalogItems?.length) && <p className="w-full rounded-xl bg-slate-50 p-4 text-sm text-slate-500">Ajoutez vos photos et réalisations depuis votre espace client pour présenter vos projets.</p>}
             </div>
           </section>}
 
@@ -147,7 +156,7 @@ async function PublicCardContent({
             allowQuotes={allowQuotes}
           />}
 
-          {socialLinks.length > 0 && <section className="rounded-2xl bg-white p-4"><div className="flex flex-wrap items-end justify-between gap-2"><div><h2 className="text-base font-bold text-black">Social</h2></div></div><div className="mt-4 grid grid-cols-5 gap-2">{socialLinks.map((link: PublicLink) => <TrackedPublicLink key={link.id} cardId={card.id} linkId={link.id} href={link.url} className="flex aspect-square min-w-0 items-center justify-center rounded-xl bg-slate-100 text-lg font-black text-slate-800 transition hover:-translate-y-0.5 hover:bg-slate-200"><span>{({instagram:"◎",facebook:"f",linkedin:"in",tiktok:"♪",youtube:"▶",x:"𝕏",pinterest:"P",whatsapp:"◉",telegram:"➤"} as Record<string,string>)[link.kind] ?? "↗"}</span></TrackedPublicLink>)}</div></section>}
+          {socialLinks.length > 0 && <section className="rounded-2xl bg-white p-4"><div className="flex flex-wrap items-end justify-between gap-2"><div><h2 className="text-base font-bold text-black">Social</h2></div></div><div className="mt-4 grid grid-cols-5 gap-2">{socialLinks.map((link: PublicLink) => <TrackedPublicLink key={link.id} cardId={card.id} linkId={link.id} href={link.url} className="flex aspect-square min-w-0 items-center justify-center rounded-xl text-lg font-black text-white shadow-sm transition hover:-translate-y-0.5" style={{ backgroundColor: ({instagram:"#E4405F",facebook:"#1877F2",linkedin:"#0A66C2",tiktok:"#111111",youtube:"#FF0000",x:"#000000",pinterest:"#BD081C",whatsapp:"#25D366",telegram:"#229ED9"} as Record<string,string>)[link.kind] ?? "#64748b" }}><span>{({instagram:"◎",facebook:"f",linkedin:"in",tiktok:"♪",youtube:"▶",x:"𝕏",pinterest:"P",whatsapp:"◉",telegram:"➤"} as Record<string,string>)[link.kind] ?? "↗"}</span></TrackedPublicLink>)}</div></section>}
 
           {featuredLinks.length > 0 && <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-black">Featured</h2><div className="mt-3 grid grid-cols-2 gap-2">{featuredLinks.map((link) => <TrackedPublicLink key={link.id} cardId={card.id} linkId={link.id} href={link.url} className="flex min-h-24 items-end justify-between rounded-xl bg-slate-100 p-3 text-sm font-bold text-slate-800"><span className="max-w-[85%]">{link.label}</span><span className="text-lg">↗</span></TrackedPublicLink>)}</div></section>}
 
