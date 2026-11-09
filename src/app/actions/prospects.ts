@@ -55,7 +55,7 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
         activity_sector: input.sector === "Autre" ? input.sectorOther.trim() || "Autre" : input.sector,
         email,
         phone,
-        card_type: input.cardType === "google-review" ? "contact" : input.cardType,
+        card_type: input.cardType,
         reason: input.reason.trim() || null,
         customization_requested: input.customRequested,
         brand_name: input.brandName.trim() || null,
@@ -63,7 +63,7 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
         business_address: input.customRequested ? input.businessAddress.trim() || null : null,
         business_phone: input.customRequested ? input.businessPhone.trim() || null : null,
         social_links: (input.socialLinks ?? []).filter((item) => item.url.trim()).map((item) => ({ platform: item.platform, url: item.url.trim() })),
-        project_needs: { selected: (input.projectNeeds ?? []).slice(0, 1), reservation_mode: input.reservationMode || null, reservation_channels: [], management_needs: [] },
+        project_needs: { selected: (input.projectNeeds ?? []).slice(0, 1), reservation_mode: input.reservationMode || null, reservation_channels: (input.reservationChannels ?? []).slice(0, 10), management_needs: (input.managementNeeds ?? []).slice(0, 20) },
       },
     },
   });
@@ -136,7 +136,7 @@ export async function createProspectCustomer(formData: FormData) {
     redirect(`/dashboard/prospects/${id}/configure?error=${encodeURIComponent("Configuration invalide. Veuillez recommencer.")}`);
   }
 
-  const allowedTemplates = ["e-business", "contact", "service"];
+  const allowedTemplates = ["e-business", "contact", "service", "google-review"];
   const allowedModules = [
     "dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc",
     "company_profile", "service_catalog", "product_catalog", "orders",
@@ -168,7 +168,7 @@ export async function createProspectCustomer(formData: FormData) {
 
 
 export type ProspectWorkspaceAISuggestions = {
-  template: "contact" | "service" | "e-business";
+  template: "contact" | "service" | "e-business" | "google-review";
   modules: string[];
   profile_draft: {
     tagline: string;
