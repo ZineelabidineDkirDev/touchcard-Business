@@ -18,8 +18,9 @@ type Card = {
 type CardLink = { id: string; card_id: string; label: string; url: string; kind: string };
 type CatalogItem = { id: string; name: string; description: string | null; price: number; currency: string; image_url: string | null; is_active: boolean };
 
-export default async function ClientCardsPage() {
+export default async function ClientCardsPage({ searchParams }: { searchParams: Promise<{ card_saved?: string; card_error?: string }> }) {
   await connection();
+  const status = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
@@ -147,6 +148,15 @@ export default async function ClientCardsPage() {
         <Link href="/dashboard" className="text-sm font-semibold text-indigo-700">← Tableau de bord</Link>
       </header>
 
+      {status.card_saved === "1" && <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">Modifications enregistrées. Votre carte publique a été actualisée.</div>}
+      {status.card_error && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{({
+        workspace: "Aucun espace client n'est associé à cette session.",
+        module: "La gestion des cartes NFC n'est pas activée pour cet espace.",
+        missing: "La carte à modifier n'a pas été identifiée.",
+        fields: "Les rubriques personnalisées sont invalides. Vérifiez les champs puis réessayez.",
+        database: "Supabase a refusé l'enregistrement. Réessayez ; si le problème persiste, consultez les journaux serveur.",
+        permission: "Aucune carte de cet espace n'a été modifiée. Vérifiez les droits d'accès à cette carte.",
+      } as Record<string, string>)[status.card_error] ?? "L'enregistrement a échoué. Réessayez."}</div>}
       <CardTemplateGallery cardType={String(config.template ?? "contact")} modules={modules} existingStatus={designRequest?.status ?? null} existingTemplate={designRequest?.template_id ?? null} />
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
