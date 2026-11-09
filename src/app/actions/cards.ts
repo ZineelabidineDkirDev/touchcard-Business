@@ -97,7 +97,14 @@ export async function saveClientCardProfile(formData: FormData) {
     custom_fields: customFields,
   };
 
+  const { data: existingCard } = await supabase.from("cards").select("theme").eq("id", cardId).eq("organization_id", organizationId).maybeSingle();
+  const existingTheme = (existingCard?.theme ?? {}) as Record<string, unknown>;
+  const allowedAccents = ["#2563EB", "#1D4ED8", "#0891B2", "#16A34A", "#059669", "#7C3AED", "#DB2777", "#DC2626", "#EA580C", "#171717"];
+  const requestedAccent = String(formData.get("accent_color") ?? "").toUpperCase();
+  const nextTheme = allowedAccents.includes(requestedAccent) ? { ...existingTheme, accent: requestedAccent } : existingTheme;
+
   const { data: updatedCard, error } = await supabase.from("cards").update({
+    theme: nextTheme,
     full_name: String(formData.get("full_name") ?? "").trim().slice(0, 120),
     job_title: String(formData.get("job_title") ?? "").trim().slice(0, 120) || null,
     company_name: String(formData.get("company_name") ?? "").trim().slice(0, 120) || null,
