@@ -139,7 +139,7 @@ export async function createProspectCustomer(formData: FormData) {
   const allowedTemplates = ["e-business", "contact", "service", "google-review"];
   const allowedModules = [
     "dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc",
-    "company_profile", "service_catalog", "product_catalog", "orders",
+    "company_profile", "service_catalog", "product_catalog", "orders", "google_reviews",
     "quote_requests", "bookings", "availability_calendar", "team",
     "gallery", "crm_contacts", "analytics", "whatsapp",
   ];
@@ -212,7 +212,7 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
   const allowedTemplates = ["e-business", "contact", "service"];
   const allowedModules = [
     "dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc",
-    "company_profile", "service_catalog", "product_catalog", "orders",
+    "company_profile", "service_catalog", "product_catalog", "orders", "google_reviews",
     "quote_requests", "bookings", "availability_calendar", "team",
     "gallery", "crm_contacts", "analytics", "whatsapp",
   ];
@@ -289,7 +289,7 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
           parts: [{
             text: [
               "Tu es l'architecte produit IA de TouchCard Business. Analyse le brief et prépare une configuration initiale réellement utile.",
-              "Respecte strictement le type de carte demandé ET la formule unique choisie par le client dans selected_needs. Cette liste contient une seule formule : elle est la source de vérité. Ne combine jamais plusieurs formules. Déduis automatiquement tous les modules nécessaires à cette formule, sans demander au client de choisir les modules un par un. Si la formule contient boutique, active product_catalog et orders; si elle contient prestations, active service_catalog; si elle contient réservations, active bookings et availability_calendar; si elle contient plusieurs collaborateurs, active team.",
+              "Respecte strictement le type de carte demandé ET la formule unique choisie par le client dans selected_needs. Cette liste contient une seule formule : elle est la source de vérité. Ne combine jamais plusieurs formules. Déduis automatiquement tous les modules nécessaires à cette formule, sans demander au client de choisir les modules un par un. Si la formule contient boutique, active product_catalog et orders; si elle contient prestations, active service_catalog; si le type est google-review, active google_reviews et company_profile; si elle contient réservations, active bookings et availability_calendar; si elle contient plusieurs collaborateurs, active team.",
               "Sélectionne uniquement les modules autorisés. N'invente jamais de tarifs, d'adresses, de numéros, de certifications ou de faits. Laisse price vide si le tarif n'est pas fourni.",
               "Rédige tagline et description en français. Prépare aussi card_fields : champs de profil utiles et modifiables adaptés au secteur, sans champs personnels non nécessaires. Prépare suggested_buttons parmi WhatsApp, Telegram, réseaux sociaux, site et boutique ; enabled indique si le bouton est pertinent, sans inventer son URL ou ses coordonnées. Les catégories et éléments de catalogue sont des propositions à valider, pas des faits confirmés.",
               "Retourne un JSON conforme au schéma. Ne crée aucun compte, ne contacte personne et n'effectue aucune action externe.",
