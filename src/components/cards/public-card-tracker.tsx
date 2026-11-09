@@ -14,10 +14,10 @@ export function PublicCardTracker({ cardId, eventType = "view" }: { cardId: stri
   return null;
 }
 
-export function TrackedPublicLink({ cardId, linkId, href, children, className, eventType = "click" }: {
-  cardId: string; linkId?: string; href: string; children: React.ReactNode; className?: string; eventType?: "click" | "contact_save";
+export function TrackedPublicLink({ cardId, linkId, href, children, className, style, eventType = "click" }: {
+  cardId: string; linkId?: string; href: string; children: React.ReactNode; className?: string; style?: React.CSSProperties; eventType?: "click" | "contact_save";
 }) {
-  return <a href={href} className={className} target={href.startsWith("http") ? "_blank" : undefined}
+  return <a href={href} className={className} style={style} target={href.startsWith("http") ? "_blank" : undefined}
     rel={href.startsWith("http") ? "noreferrer" : undefined}
     onClick={() => {
       void fetch("/api/public-card-events", {
