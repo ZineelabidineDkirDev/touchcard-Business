@@ -67,6 +67,7 @@ export async function saveClientCardProfile(formData: FormData) {
     location: String(formData.get("location") ?? "").trim().slice(0, 180),
     hours: String(formData.get("hours") ?? "").trim().slice(0, 180),
     whatsapp: String(formData.get("whatsapp") ?? "").trim().replace(/[^+\d]/g, "").slice(0, 20),
+    google_review_url: safeHttpUrl(String(formData.get("google_review_url") ?? ""), 1000) ?? "",
     custom_fields: customFields,
   };
   const { error } = await supabase.from("cards").update({
@@ -183,13 +184,67 @@ export async function submitCardDesignRequest(templateId: string, notes: string)
 
 
 export async function reviewCardDesignRequest(formData: FormData) {
- const id=String(formData.get("id")??"").trim();
- const status=String(formData.get("status")??"");
- if(!id||!["approved","revision_requested","rejected"].includes(status)) return;
- const supabase=await createClient();
- const {data:{user}}=await supabase.auth.getUser();
- if(!user||!(await import("@/lib/auth/platform-admin")).isPlatformSuperAdmin(user.email)) return;
- const {error}=await supabase.from("card_design_requests").update({status,updated_at:new Date().toISOString()}).eq("id",id);
- if(error){console.error("Card design review failed",error);return;}
- revalidatePath("/dashboard/prospects");revalidatePath("/dashboard/cards");
+  const id = String(formData.get("id") ?? "").trim();
+  const status = String(formData.get("status") ?? "");
+  if (!id || !["approved", "revision_requested", "rejected"].includes(status)) return;
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user || !(await import("@/lib/auth/platform-admin")).isPlatformSuperAdmin(user.email)) return;
+
+  const { data, error } = await supabase.functions.invoke("review-card-design-request", {
+    body: { request_id: id, status },
+  });
+  if (error || !data?.ok) {
+    console.error("Card design review failed", { id, error: error?.message, details: data?.error });
+    return;
+  }
+  revalidatePath("/dashboard/prospects");
+  revalidatePath("/dashboard/cards");
+}
+
+
+export async function createCatalogItem(formData: FormData) {
+  const { supabase, user, organizationId } = await getWorkspace();
+  if (!user || !organizationId) return;
+
+  const name = String(formData.get("name") ?? "").trim().slice(0, 120);
+  const description = String(formData.get("description") ?? "").trim().slice(0, 1200);
+  const price = Number(String(formData.get("price") ?? "").replace(",", "."));
+  const imageUrl = safeHttpUrl(String(formData.get("image_url") ?? ""), 1000);
+  if (!name || !Number.isFinite(price) || price < 0 || price > 100000000) return;
+
+  const { data: organization } = await supabase.from("organizations")
+    .select("workspace_config").eq("id", organizationId).maybeSingle();
+  const config = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[] };
+  const modules = Array.isArray(config.modules) ? config.modules : [];
+  if (config.version && !modules.some((module) => ["product_catalog", "service_catalog"].includes(module))) return;
+
+  const { error } = await supabase.from("products").insert({
+    organization_id: organizationId,
+    name,
+    description: description || null,
+    price,
+    currency: "MAD",
+    image_url: imageUrl,
+    is_active: true,
+  });
+  if (error) {
+    console.error("Catalog item creation failed", error);
+    return;
+  }
+  revalidatePath("/dashboard/cards");
+}
+
+export async function deleteCatalogItem(formData: FormData) {
+  const { supabase, user, organizationId } = await getWorkspace();
+  if (!user || !organizationId) return;
+  const id = String(formData.get("id") ?? "").trim();
+  if (!id) return;
+  const { error } = await supabase.from("products").delete().eq("id", id).eq("organization_id", organizationId);
+  if (error) {
+    console.error("Catalog item deletion failed", error);
+    return;
+  }
+  revalidatePath("/dashboard/cards");
 }
