@@ -7,6 +7,7 @@ type RequestType = "order" | "booking" | "quote";
 type CatalogItem = { id: string; name: string; price: number; currency: string };
 type Props = {
   cardSlug: string;
+  accent?: string;
   products: CatalogItem[];
   allowOrders: boolean;
   allowBookings: boolean;
@@ -22,7 +23,7 @@ function RequestIcon({ type }: { type: RequestType }) {
   return <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[type]}</svg>;
 }
 
-export function PublicWorkspaceRequestForms({ cardSlug, products, allowOrders, allowBookings, allowQuotes }: Props) {
+export function PublicWorkspaceRequestForms({ cardSlug, accent = "#4f46e5", products, allowOrders, allowBookings, allowQuotes }: Props) {
   const types = useMemo(() => [
     ...(allowOrders ? [{ id: "order" as const, label: "Commander", hint: "Passer une commande" }] : []),
     ...(allowBookings ? [{ id: "booking" as const, label: "Réserver", hint: "Choisir une date" }] : []),
@@ -78,7 +79,7 @@ export function PublicWorkspaceRequestForms({ cardSlug, products, allowOrders, a
       <div><p className="text-xs font-bold uppercase tracking-wider text-slate-500">Besoin d'un service ?</p><h2 className="mt-1 text-base font-bold text-slate-900">Comment pouvons-nous vous aider ?</h2></div>
       <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
         {types.map((item) => <button key={item.id} type="button" onClick={() => { setType(item.id); setFeedback(null); setOpen(true); }} className="flex min-h-[66px] items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" style={{ ["--tw-ring-color" as string]: "var(--card-accent, #4f46e5)" }}>
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-900 text-white"><RequestIcon type={item.id}/></span>
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white" style={{ backgroundColor: accent }}><RequestIcon type={item.id}/></span>
           <span className="min-w-0"><span className="block text-sm font-bold text-slate-900">{item.label}</span><span className="mt-0.5 block text-[11px] text-slate-500">{item.hint}</span></span>
           <span className="ml-auto text-lg text-slate-400" aria-hidden="true">›</span>
         </button>)}
@@ -95,7 +96,7 @@ export function PublicWorkspaceRequestForms({ cardSlug, products, allowOrders, a
           <div className="grid gap-3 sm:grid-cols-2"><input required minLength={2} maxLength={160} value={name} onChange={(event) => setName(event.target.value)} placeholder="Votre nom complet" className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"/><input required minLength={6} maxLength={40} value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="Téléphone" className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"/></div>
           <input type="email" maxLength={254} value={email} onChange={(event) => setEmail(event.target.value)} placeholder="E-mail (facultatif)" className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"/>
           <textarea maxLength={2000} rows={3} value={message} onChange={(event) => setMessage(event.target.value)} placeholder={type === "quote" ? "Décrivez votre besoin pour recevoir un devis…" : "Message ou précision (facultatif)"} className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"/>
-          <button type="submit" disabled={loading || (type === "order" && selectedItems.length === 0)} className="w-full rounded-xl bg-slate-950 px-4 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50">{loading ? "Envoi en cours…" : type === "order" ? "Envoyer ma commande" : type === "booking" ? "Envoyer ma demande de réservation" : "Envoyer ma demande de devis"}</button>
+          <button type="submit" disabled={loading || (type === "order" && selectedItems.length === 0)} className="w-full rounded-xl px-4 py-3.5 text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50" style={{ backgroundColor: accent }}>{loading ? "Envoi en cours…" : type === "order" ? "Envoyer ma commande" : type === "booking" ? "Envoyer ma demande de réservation" : "Envoyer ma demande de devis"}</button>
         </form>
         {feedback && <p role="status" className={"mt-3 rounded-xl p-3 text-sm " + (feedback.ok ? "bg-slate-100 text-slate-800" : "bg-rose-50 text-rose-700")}>{feedback.text}</p>}
         <p className="mt-3 text-[11px] leading-5 text-slate-400">Votre demande est transmise à l'entreprise. Une commande ou réservation n'est confirmée qu'après validation par celle-ci.</p>
