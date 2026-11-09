@@ -20,7 +20,7 @@ export function CustomCardFieldsEditor({ initialFields }: { initialFields: Edita
   return (
     <section className="space-y-4 rounded-2xl border border-slate-200 p-4 sm:col-span-2">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div><h4 className="text-sm font-bold text-slate-900">Personnaliser les informations</h4><p className="mt-1 text-xs text-slate-500">Ajoutez les rubriques propres à votre activité. Elles seront enregistrées avec votre carte NFC.</p></div>
+        <div><h4 className="text-sm font-bold text-slate-900">Personnaliser les informations</h4><p className="mt-1 text-xs text-slate-500">Ajoutez les rubriques propres à votre activité. Pour une question fréquente, commencez le nom par « FAQ : ». Les liens YouTube alimentent la section vidéos ; les images de vos produits/prestations alimentent la galerie.</p></div>
         <button type="button" onClick={add} className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-3.5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-indigo-700"><span className="text-base leading-none">+</span> Ajouter un champ</button>
       </div>
       <input type="hidden" name="custom_fields" value={JSON.stringify(fields)} />
