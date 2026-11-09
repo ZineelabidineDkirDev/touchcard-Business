@@ -9,6 +9,7 @@ type ModulePreview = { title: string; description: string; fields: string[]; exa
 
 const previews: Record<string, ModulePreview> = {
   dashboard: { title: "Tableau de bord", description: "Vue quotidienne de l'activité et raccourcis de gestion.", fields: ["Période", "Indicateurs clés", "Activité récente", "Actions rapides"], examples: [{ title: "Vues de la carte", detail: "Nombre de consultations du profil public", meta: "Statistique de démonstration" }, { title: "Demandes reçues", detail: "Devis, réservations et nouveaux contacts", meta: "Statistique de démonstration" }, { title: "Taux de conversion", detail: "Interactions ayant abouti à une demande", meta: "Statistique de démonstration" }] },
+  google_reviews: { title: "Avis Google", description: "Lien officiel et collecte des avis clients.", fields: ["URL Google officielle", "Bouton avis", "Suivi des clics"], examples: [{ title: "Lien d’avis", detail: "Lien Google à renseigner dans la configuration de la carte" }] },
   digital_card: { title: "Carte digitale", description: "Carte publique consultée après un scan NFC ou QR code.", fields: ["Photo ou logo", "Nom affiché", "Fonction / activité", "Accroche", "Téléphone", "E-mail", "Adresse", "Boutons d'action"], examples: [{ title: "Aperçu de la carte publique", detail: "Logo · Nom de l'entreprise · Présentation · Appeler · WhatsApp · Itinéraire", meta: "Contenu fictif à personnaliser" }] },
   contact_profile: { title: "Profil de contact", description: "Informations personnelles et professionnelles affichées sur la carte.", fields: ["Prénom et nom", "Poste / fonction", "Téléphone professionnel", "E-mail professionnel", "Adresse", "Bio / présentation"], examples: [{ title: "Profil professionnel", detail: "Nom, fonction, coordonnées et courte présentation", meta: "Champs à compléter par le client" }] },
   social_links: { title: "Réseaux sociaux", description: "Liens externes visibles sur la carte publique.", fields: ["Plateforme", "URL du profil", "Libellé du bouton", "Ordre d'affichage"], examples: [{ title: "Instagram", detail: "Lien vers le compte professionnel" }, { title: "Facebook / LinkedIn", detail: "Liens des pages de l'entreprise" }] },
@@ -63,7 +64,7 @@ export default async function ClientWorkspacePreview({ params }: { params: Promi
     ? await supabase.from("products").select("id,name,description,price,currency,image_url")
       .eq("organization_id", organization.id).eq("is_active", true).order("created_at", { ascending: false })
     : { data: [] as { id: string; name: string; description: string | null; price: number; currency: string; image_url: string | null }[] };
-  const enabledPreviews = enabledModules.map((module) => ({ id: module, ...(previews[module] || {
+  const enabledPreviews = enabledModules.filter((module) => !["digital_card", "product_catalog", "service_catalog"].includes(module)).map((module) => ({ id: module, ...(previews[module] || {
     title: moduleLabels[module] || module.replaceAll("_", " "),
     description: "Module sélectionné dans la configuration du client.",
     fields: ["Paramètres du module", "Contenu", "Visibilité", "Statut"],
