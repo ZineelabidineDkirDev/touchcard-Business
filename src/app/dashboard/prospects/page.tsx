@@ -59,7 +59,7 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
       {error && <p className="mt-6 rounded-xl bg-rose-50 p-4 text-sm text-rose-700">Impossible de charger les demandes. Vérifiez que la migration prospect_requests est appliquée.</p>}
       <div className="mt-8 space-y-4">
         {(prospects ?? []).map((p) => (
-          <article key={p.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <article id={p.id} key={p.id} className="scroll-mt-28 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div><h2 className="text-lg font-bold text-slate-950">{p.full_name}</h2><p className="mt-1 text-sm text-slate-500">{p.brand_name || p.activity_sector} · {p.city}</p><p className="mt-1 text-[11px] text-slate-400">N° {p.id}</p></div>
               <span className="rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-700">{statuses.find(([key]) => key === p.status)?.[1] ?? p.status}</span>
