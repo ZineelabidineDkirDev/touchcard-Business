@@ -40,8 +40,21 @@ async function PublicCardContent({
   const accent = typeof theme.accent === "string" && /^#[0-9a-fA-F]{6}$/.test(theme.accent) ? theme.accent : "#4f46e5";
   const { data: organization } = await supabase.from("organizations").select("workspace_config")
     .eq("id", card.organization_id).maybeSingle();
-  const workspaceConfig = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[] };
+  const workspaceConfig = (organization?.workspace_config ?? {}) as {
+    version?: number;
+    modules?: string[];
+    ai_suggestions?: { profile_draft?: { categories?: string[]; suggested_buttons?: { kind: string; label: string; enabled: boolean }[] } | null } | null;
+    original_client_choices?: { project_needs?: { selected?: string[]; management_needs?: string[]; reservation_mode?: string | null; reservation_channels?: string[] } | null; activity_sector?: string; city?: string };
+  };
   const modules = Array.isArray(workspaceConfig.modules) ? workspaceConfig.modules : [];
+  const profileDraft = workspaceConfig.ai_suggestions?.profile_draft;
+  const originalNeeds = workspaceConfig.original_client_choices?.project_needs;
+  const selectedServices = Array.isArray(originalNeeds?.selected)
+    ? originalNeeds.selected.map((value) => String(value).trim()).filter(Boolean).slice(0, 12)
+    : [];
+  const profileCategories = Array.isArray(profileDraft?.categories)
+    ? profileDraft.categories.map((value) => String(value).trim()).filter(Boolean).slice(0, 8)
+    : [];
   const showCatalog = ["service", "e-business"].includes(template)
     && (!workspaceConfig.version || modules.some((module) => ["service_catalog", "product_catalog"].includes(module)));
   const allowOrders = modules.includes("orders");
@@ -73,6 +86,11 @@ async function PublicCardContent({
           {card.company_name && <p className="mt-1 text-sm text-slate-500">{card.company_name}</p>}
           {fields.tagline && <p className="mt-4 text-sm font-semibold text-slate-700">{fields.tagline}</p>}
           {card.bio && <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-600">{card.bio}</p>}
+          {(profileCategories.length > 0 || selectedServices.length > 0) && <section className="mt-5 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+            <h2 className="text-xs font-black uppercase tracking-wider text-slate-500">{template === "service" ? "Nos domaines de service" : template === "e-business" ? "Univers & spécialités" : template === "google-review" ? "Notre activité" : "Expertises"}</h2>
+            {profileCategories.length > 0 && <div className="mt-3 flex flex-wrap gap-2">{profileCategories.map((category) => <span key={category} className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-700 ring-1 ring-slate-200">{category}</span>)}</div>}
+            {selectedServices.length > 0 && <div className="mt-3 space-y-2">{selectedServices.map((service) => <div key={service} className="flex items-start gap-2 text-sm text-slate-700"><span className="mt-0.5 font-black" style={{ color: accent }}>✓</span><span>{service}</span></div>)}</div>}
+          </section>}
           {(fields.location || fields.hours) && <div className="mt-4 space-y-1 text-xs text-slate-500">{fields.location && <p>📍 {fields.location}</p>}{fields.hours && <p>🕒 {fields.hours}</p>}</div>}
           {fields.custom_fields?.some((field) => field.visible && field.label && field.value) && <section className="mt-5 space-y-2">{fields.custom_fields.filter((field) => field.visible && field.label && field.value).map((field) => <div key={field.key} className="rounded-xl bg-slate-50 px-4 py-3"><p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">{field.label}</p><p className="mt-1 whitespace-pre-line text-sm font-medium text-slate-800">{field.value}</p></div>)}</section>}
 
