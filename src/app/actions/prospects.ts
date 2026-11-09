@@ -209,7 +209,7 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
     return { ok: false as const, error: "La clé Gemini est absente de l'environnement serveur. Vérifie GEMINI_API_KEY dans Vercel." };
   }
 
-  const allowedTemplates = ["e-business", "contact", "service"];
+  const allowedTemplates = ["e-business", "contact", "service", "google-review"];
   const allowedModules = [
     "dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc",
     "company_profile", "service_catalog", "product_catalog", "orders", "google_reviews",
@@ -353,6 +353,7 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
     const formula = String(needs.selected?.[0] ?? "").toLocaleLowerCase("fr");
     const requiredModules = ["dashboard", "digital_card", "analytics"];
     if (template === "contact") requiredModules.push("contact_profile", "social_links", "qr_nfc");
+    if (template === "google-review") requiredModules.push("company_profile", "google_reviews", "qr_nfc");
     if (formula.includes("contact") || template === "contact") requiredModules.push("contact_profile");
     if (formula.includes("entreprise")) requiredModules.push("company_profile");
     if (formula.includes("prospect")) requiredModules.push("crm_contacts");
