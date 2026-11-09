@@ -69,6 +69,10 @@ async function PublicCardContent({
   const source = query.source === "nfc" ? "nfc_scan" : query.source === "qr" ? "qr_scan" : "view";
   const whatsapp = String(fields.whatsapp ?? "").replace(/[^+\d]/g, "").replace(/^\+/, "");
   const vcardUrl = "/api/cards/" + encodeURIComponent(slug) + "/vcard";
+  const organizationCity = workspaceConfig.original_client_choices?.city?.trim() ?? "";
+  const mapLocation = fields.location?.trim() || organizationCity || [card.company_name, "Maroc"].filter(Boolean).join(", ");
+  const mapEmbedUrl = "https://www.google.com/maps?q=" + encodeURIComponent(mapLocation) + "&output=embed";
+  const mapDirectionsUrl = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(mapLocation);
 
   return (
     <main className="min-h-screen bg-[#f4f6fb] px-3 py-6 sm:px-6 sm:py-10">
@@ -123,6 +127,27 @@ async function PublicCardContent({
           />}
 
           {links && links.length > 0 && <section className="mt-8 border-t border-slate-100 pt-7"><div className="flex flex-wrap items-end justify-between gap-2"><div><p className="text-xs font-black uppercase tracking-[.18em] text-indigo-600">Présence digitale</p><h2 className="mt-1 text-xl font-black text-slate-950">Réseaux sociaux & liens</h2></div><p className="text-xs text-slate-400">Retrouvez-nous sur nos plateformes</p></div><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{links.map((link: PublicLink) => <TrackedPublicLink key={link.id} cardId={card.id} linkId={link.id} href={link.url} className="group flex min-w-0 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm font-semibold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md"><span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xs font-black uppercase text-slate-700">{({instagram:"IG",facebook:"f",linkedin:"in",tiktok:"♪",youtube:"▶",x:"X",pinterest:"P",whatsapp:"WA",telegram:"TG",calendly:"↗",store:"SHOP",website:"WEB"} as Record<string,string>)[link.kind] ?? "↗"}</span><span className="min-w-0 flex-1 truncate">{link.label}</span><span className="text-indigo-600 transition group-hover:translate-x-0.5">↗</span></TrackedPublicLink>)}</div></section>}
+
+          <section className="mt-9 border-t border-slate-100 pt-8" aria-label="Localisation">
+            <div className="flex flex-wrap items-end justify-between gap-3">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[.18em]" style={{ color: accent }}>Nous trouver</p>
+                <h2 className="mt-1 text-xl font-black text-slate-950 sm:text-2xl">Notre localisation</h2>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">{fields.location?.trim() || organizationCity || "Localisation de l’entreprise"}</p>
+              </div>
+              <a href={mapDirectionsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:opacity-90" style={{ backgroundColor: accent }}>Itinéraire Google Maps ↗</a>
+            </div>
+            <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm">
+              <iframe
+                title={"Localisation de " + (card.company_name || card.full_name)}
+                src={mapEmbedUrl}
+                className="h-64 w-full sm:h-80"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
+              />
+            </div>
+          </section>
 
           <p className="mt-8 text-center text-xs text-slate-400"><I18nText message="powered" /></p>
         </div>
