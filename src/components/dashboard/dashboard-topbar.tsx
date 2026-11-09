@@ -94,15 +94,20 @@ export function DashboardTopbar({ name, email, notificationsEnabled = true, isSu
   }
 
   return (
-    <header className="dashboard-topbar sticky top-0 z-40 mb-6 flex min-h-[76px] items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur sm:px-6">
-      <div className="min-w-0">
+    <header className={"dashboard-topbar sticky top-0 z-40 mb-6 flex min-h-[64px] items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white/95 px-4 py-3 shadow-sm backdrop-blur sm:px-6 " + (!isSuperAdmin ? "mb-5" : "")}>
+      {isSuperAdmin && <div className="min-w-0">
         <p className="text-[10px] font-bold uppercase tracking-[.18em] text-indigo-600">TouchCard Business</p>
         <p className="mt-1 truncate text-base font-extrabold text-slate-900 sm:text-lg">{name || "Espace client"}</p>
-      </div>
+      </div>}
+      {!isSuperAdmin && <div className="min-w-0 flex-1"><p className="text-xs font-semibold text-slate-500">Votre espace professionnel</p></div>}
       <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         <button type="button" onClick={toggleTheme} aria-label={dark ? "Passer au thème clair" : "Passer au thème sombre"} title={dark ? "Mode clair" : "Mode sombre"} className="dashboard-icon-button flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100">
           <Icon name={dark ? "sun" : "moon"} />
         </button>
+        {!isSuperAdmin && <div className="relative">
+          <button type="button" onClick={() => { setNotificationsOpen(!notificationsOpen); setMenuOpen(false); }} aria-expanded={notificationsOpen} aria-label="Notifications" className="dashboard-icon-button relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100"><Icon name="bell" /></button>
+          {notificationsOpen && <div className="dashboard-popover absolute right-0 top-12 z-50 w-[min(320px,calc(100vw-2rem))] rounded-2xl border border-slate-200 bg-white p-5 shadow-xl"><p className="font-bold text-slate-900">Notifications</p><p className="mt-2 text-sm text-slate-500">Vous serez informé ici des nouvelles activités concernant votre espace.</p><div className="mt-4 rounded-xl bg-slate-50 p-3 text-xs text-slate-500">Aucune nouvelle notification.</div></div>}
+        </div>}
         {isSuperAdmin && <div className="relative">
           <button type="button" onClick={() => { const next = !notificationsOpen; setNotificationsOpen(next); setMenuOpen(false); if (next) void loadNotifications(); }} aria-expanded={notificationsOpen} aria-label={`Notifications : ${notificationCount} demande(s) en attente`} className="dashboard-icon-button relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100">
             <Icon name="bell" />
