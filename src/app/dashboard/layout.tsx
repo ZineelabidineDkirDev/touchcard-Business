@@ -11,7 +11,7 @@ import { DashboardTopbar } from "@/components/dashboard/dashboard-topbar";
 
 function DashboardLoading() {
   return (
-    <div className="min-h-screen bg-slate-50 p-8"><div className="mx-auto max-w-7xl animate-pulse"><div className="h-8 w-56 rounded bg-slate-200" /><div className="mt-6 h-4 w-80 rounded bg-slate-200" /><div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }, (_, index) => <div key={index} className="h-32 rounded-2xl bg-white" />)}</div></div>
+    <div className="min-h-screen bg-slate-50 p-8"><div className="mx-auto max-w-7xl animate-pulse"><div className="h-8 w-56 rounded bg-slate-200" /><div className="mt-6 h-4 w-80 rounded bg-slate-200" /><div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }, (_, index) => <div key={index} className="h-32 rounded-2xl bg-white" />)}</div></div></div>
   );
 }
 
