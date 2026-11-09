@@ -251,6 +251,25 @@ export async function createCatalogItem(formData: FormData) {
   revalidatePath("/dashboard/cards");
 }
 
+export async function updateCatalogItem(formData: FormData) {
+  const { supabase, user, organizationId } = await getWorkspace();
+  if (!user || !organizationId) return;
+  const id = String(formData.get("id") ?? "").trim();
+  const name = String(formData.get("name") ?? "").trim().slice(0, 120);
+  const description = String(formData.get("description") ?? "").trim().slice(0, 1200) || null;
+  const price = Number(String(formData.get("price") ?? "").replace(",", "."));
+  const imageUrl = safeHttpUrl(String(formData.get("image_url") ?? ""), 1000);
+  if (!id || !name || !Number.isFinite(price) || price < 0 || price > 100000000) return;
+  const canManageProducts = await hasWorkspaceModule(supabase, organizationId, "product_catalog");
+  const canManageServices = await hasWorkspaceModule(supabase, organizationId, "service_catalog");
+  if (!canManageProducts && !canManageServices) return;
+  const { error } = await supabase.from("products").update({
+    name, description, price, image_url: imageUrl, updated_at: new Date().toISOString(),
+  }).eq("id", id).eq("organization_id", organizationId);
+  if (error) { console.error("Catalog item update failed", error); return; }
+  revalidatePath("/dashboard/cards");
+}
+
 export async function deleteCatalogItem(formData: FormData) {
   const { supabase, user, organizationId } = await getWorkspace();
   if (!user || !organizationId) return;
