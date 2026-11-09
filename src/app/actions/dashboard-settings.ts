@@ -12,10 +12,15 @@ export async function updateClientProfile(formData: FormData) {
   const fullName = String(formData.get("full_name") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
   const jobTitle = String(formData.get("job_title") ?? "").trim();
+  const avatarRaw = String(formData.get("avatar_url") ?? "").trim();
+  let avatarUrl = "";
+  if (avatarRaw) {
+    try { const parsed = new URL(avatarRaw); if (["https:", "http:"].includes(parsed.protocol)) avatarUrl = parsed.toString(); } catch {}
+  }
   if (!fullName) redirect("/dashboard/profile?error=name");
 
   const { error } = await supabase.auth.updateUser({
-    data: { ...user.user_metadata, full_name: fullName, phone, job_title: jobTitle },
+    data: { ...user.user_metadata, full_name: fullName, phone, job_title: jobTitle, avatar_url: avatarUrl || null },
   });
   if (error) redirect("/dashboard/profile?error=save");
 
