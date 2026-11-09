@@ -4,7 +4,6 @@ import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
 import { createContact, updateContact, addContactActivity, completeContactActivity } from "@/app/actions/contacts";
-import { MediaImagePicker } from "@/components/dashboard/media-image-picker";
 import { PopupDialog } from "@/components/dashboard/popup-dialog";
 
 const statusLabels: Record<string,string> = { new: "Nouveau", to_contact: "À contacter", qualified: "Qualifié", negotiation: "En négociation", won: "Gagné", lost: "Perdu" };
