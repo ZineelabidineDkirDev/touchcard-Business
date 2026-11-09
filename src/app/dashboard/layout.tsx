@@ -44,20 +44,11 @@ async function AuthenticatedDashboard({ children }: Readonly<{ children: React.R
   if (!isSuperAdmin) {
     return (
       <div className="min-h-screen bg-[#f5f7fc]">
-        <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur">
-          <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-4 px-4 py-3 sm:px-7">
-            <Link href="/dashboard" className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 text-lg font-black text-white shadow-md shadow-indigo-200">T</span>
-              <span><span className="block text-lg font-black tracking-tight text-slate-950">Touch<span className="text-indigo-600">Card</span></span><span className="block text-[10px] font-bold uppercase tracking-[.18em] text-slate-400">Espace client</span></span>
-            </Link>
-            <div className="flex items-center gap-3"><LanguageSwitcher /><form action={signOut}><button className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600"><DashboardLogoutLabel /></button></form></div>
-          </div>
-          <div className="mx-auto max-w-[1500px] px-4 pb-3 sm:px-7">
+        <main className="mx-auto min-w-0 max-w-[1500px] px-4 py-4 sm:px-7 sm:py-6">
+          <DashboardTopbar name={clientDisplayName} email={user.email || ""} notificationsEnabled={preferences.notifications_enabled ?? true} isSuperAdmin={false} />
+          <div className="mb-6">
             <DashboardNavigation isSuperAdmin={false} enabledModules={enabledModules} hasWorkspaceConfig={hasWorkspaceConfig} hiddenModules={hiddenModules} />
           </div>
-        </header>
-        <main className="mx-auto min-w-0 max-w-[1500px] px-4 py-6 sm:px-7 sm:py-8">
-          <DashboardTopbar name={clientDisplayName} email={user.email || ""} notificationsEnabled={preferences.notifications_enabled ?? true} isSuperAdmin={false} />
           {children}
         </main>
       </div>
