@@ -7,6 +7,7 @@ import { PublicCardTracker, TrackedPublicLink } from "@/components/cards/public-
 
 type PublicFields = { tagline?: string; location?: string; hours?: string; whatsapp?: string; custom_fields?: { key: string; label: string; value: string; visible: boolean }[] };
 type PublicLink = { id: string; label: string; url: string; kind: string };
+type PublicCatalogItem = { id: string; name: string; description: string | null; price: number; currency: string; image_url: string | null };
 
 export default function PublicCardPage({
   params, searchParams,
@@ -27,13 +28,20 @@ async function PublicCardContent({
   const [{ slug }, query] = await Promise.all([params, searchParams]);
   const supabase = await createClient();
   const { data: card } = await supabase.from("cards")
-    .select("id,slug,full_name,job_title,company_name,bio,email,phone,website,avatar_url,cover_url,public_fields,public_settings")
+    .select("id,organization_id,slug,full_name,job_title,company_name,bio,email,phone,website,avatar_url,cover_url,theme,public_fields,public_settings")
     .eq("slug", slug).eq("is_published", true).maybeSingle();
   if (!card) notFound();
 
   const { data: links } = await supabase.from("card_links")
     .select("id,label,url,kind").eq("card_id", card.id).order("position");
-  const fields = (card.public_fields ?? {}) as PublicFields;
+  const theme = (card.theme ?? {}) as Record<string, unknown>;
+  const template = String(theme.template ?? "contact");
+  const showCatalog = ["service", "e-business"].includes(template);
+  const { data: catalogItems } = showCatalog
+    ? await supabase.from("products").select("id,name,description,price,currency,image_url")
+      .eq("organization_id", card.organization_id).eq("is_active", true).order("created_at", { ascending: false }).limit(24)
+    : { data: [] as PublicCatalogItem[] };
+  const fields = (card.public_fields ?? {}) as PublicFields & { google_review_url?: string };
   const settings = (card.public_settings ?? {}) as Record<string, boolean>;
   const source = query.source === "nfc" ? "nfc_scan" : query.source === "qr" ? "qr_scan" : "view";
   const whatsapp = String(fields.whatsapp ?? "").replace(/[^+\d]/g, "").replace(/^\+/, "");
@@ -64,7 +72,19 @@ async function PublicCardContent({
             {settings.show_email !== false && card.email && <TrackedPublicLink cardId={card.id} href={"mailto:" + card.email} className="btn-secondary text-center">Envoyer un e-mail</TrackedPublicLink>}
             {settings.show_website !== false && card.website && <TrackedPublicLink cardId={card.id} href={card.website} className="btn-secondary text-center">Site web</TrackedPublicLink>}
             {whatsapp && <TrackedPublicLink cardId={card.id} href={"https://wa.me/" + whatsapp} className="flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white">WhatsApp Business</TrackedPublicLink>}
+            {template === "google-review" && fields.google_review_url && <TrackedPublicLink cardId={card.id} href={fields.google_review_url} className="flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white">★ Laisser un avis Google</TrackedPublicLink>}
           </div>
+
+          {showCatalog && <section className="mt-8 border-t border-slate-100 pt-6">
+            <h2 className="mb-3 text-sm font-black uppercase tracking-wider text-slate-400">{template === "service" ? "Prestations" : "Catalogue"}</h2>
+            <div className="grid gap-3">
+              {(catalogItems ?? []).map((item) => <article key={item.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                {item.image_url && <img src={item.image_url} alt={item.name} loading="lazy" className="h-36 w-full object-cover"/>}
+                <div className="p-4"><h3 className="font-bold text-slate-900">{item.name}</h3>{item.description && <p className="mt-1 text-sm leading-6 text-slate-600">{item.description}</p>}<p className="mt-3 text-sm font-black text-indigo-700">{Number(item.price).toLocaleString("fr-MA")} {item.currency}</p></div>
+              </article>)}
+              {!(catalogItems?.length) && <p className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">{template === "service" ? "Les prestations seront bientôt disponibles." : "Le catalogue sera bientôt disponible."}</p>}
+            </div>
+          </section>}
 
           {links && links.length > 0 && <section className="mt-7 border-t border-slate-100 pt-6"><h2 className="mb-3 text-sm font-black uppercase tracking-wider text-slate-400">Me retrouver en ligne</h2><div className="grid gap-2">{links.map((link: PublicLink) => <TrackedPublicLink key={link.id} cardId={card.id} linkId={link.id} href={link.url} className="flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-800"><span>{link.label}</span><span className="text-indigo-600">↗</span></TrackedPublicLink>)}</div></section>}
 
