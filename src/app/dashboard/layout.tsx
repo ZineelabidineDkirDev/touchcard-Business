@@ -45,7 +45,7 @@ async function AuthenticatedDashboard({ children }: Readonly<{ children: React.R
     return (
       <div className="min-h-screen bg-[#f5f7fc]">
         <main className="mx-auto min-w-0 max-w-[1500px] px-4 py-4 sm:px-7 sm:py-6">
-          <DashboardTopbar name={clientDisplayName} email={user.email || ""} notificationsEnabled={preferences.notifications_enabled ?? true} isSuperAdmin={false} />
+          <DashboardTopbar name={clientDisplayName} email={user.email || ""} avatarUrl={String(user.user_metadata.avatar_url || "")} notificationsEnabled={preferences.notifications_enabled ?? true} isSuperAdmin={false} />
           <div className="mb-6">
             <DashboardNavigation isSuperAdmin={false} enabledModules={enabledModules} hasWorkspaceConfig={hasWorkspaceConfig} hiddenModules={hiddenModules} />
           </div>
@@ -68,7 +68,7 @@ async function AuthenticatedDashboard({ children }: Readonly<{ children: React.R
           <form action={signOut}><button className="mt-4 text-sm font-semibold text-rose-600"><DashboardLogoutLabel /></button></form>
         </div>
       </aside>
-      <main className="min-w-0 flex-1 p-4 sm:p-7 lg:ml-64"><DashboardTopbar name={clientDisplayName} email={user.email || ""} notificationsEnabled={preferences.notifications_enabled ?? true} isSuperAdmin={true} />{children}</main>
+      <main className="min-w-0 flex-1 p-4 sm:p-7 lg:ml-64"><DashboardTopbar name={clientDisplayName} email={user.email || ""} avatarUrl={String(user.user_metadata.avatar_url || "")} notificationsEnabled={preferences.notifications_enabled ?? true} isSuperAdmin={true} />{children}</main>
     </div>
   );
 }
