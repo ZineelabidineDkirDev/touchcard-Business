@@ -3,6 +3,8 @@ import { useState } from "react";
 import { submitCardDesignRequest } from "@/app/actions/cards";
 type Props={cardType:string;modules:string[];existingStatus?:string|null;existingTemplate?:string|null};
 const designs=[
+{id:"google-review-pro",name:"Review Signature",type:"google-review",tag:"Avis Google",desc:"Page professionnelle centrée sur la confiance et la collecte d’avis Google.",bg:"#10231d",accent:"#34d399",modules:["google_reviews","company_profile","qr_nfc"]},
+{id:"google-review-minimal",name:"Review Minimal",type:"google-review",tag:"Minimal",desc:"Une page claire avec accès immédiat au lien d’avis Google.",bg:"#f8fafc",accent:"#16a34a",modules:["google_reviews","qr_nfc"]},
 {id:"midnight",name:"Midnight Executive",type:"contact",tag:"Premium",desc:"Profil professionnel sombre, contraste violet et boutons directs.",bg:"#101426",accent:"#a78bfa",modules:["contact_profile","social_links","qr_nfc"]},
 {id:"minimal",name:"Pure Minimal",type:"contact",tag:"Épuré",desc:"Présentation claire, typographie élégante et coordonnées au premier plan.",bg:"#f8fafc",accent:"#334155",modules:["contact_profile","social_links","qr_nfc"]},
 {id:"studio",name:"Studio Creative",type:"contact",tag:"Créatif",desc:"Mise en page expressive pour indépendants et créatifs.",bg:"#25143d",accent:"#d8b4fe",modules:["contact_profile","social_links","gallery"]},
@@ -12,7 +14,7 @@ const designs=[
 {id:"market",name:"Market Modern",type:"e-business",tag:"E-commerce",desc:"Vitrine dynamique pensée pour convertir les visiteurs en clients.",bg:"#312e81",accent:"#a5b4fc",modules:["product_catalog","orders","crm_contacts","whatsapp"]}];
 export function CardTemplateGallery({cardType,modules,existingStatus}:Props){
 const [selected,setSelected]=useState("");const [notes,setNotes]=useState("");const [state,setState]=useState("idle");const [message,setMessage]=useState("");
-const core:Record<string,string>={contact:"contact_profile",service:"service_catalog","e-business":"product_catalog"};
+const core:Record<string,string>={contact:"contact_profile",service:"service_catalog","e-business":"product_catalog","google-review":"google_reviews"};
 const available=designs.filter(d=>d.type===cardType&&(!modules.length||modules.includes(core[cardType])));
 async function send(){if(!selected)return;setState("sending");const r=await submitCardDesignRequest(selected,notes);if(r.ok){setState("sent");setMessage("Demande transmise au Super Admin. Le modèle reste en attente de validation.");}else{setState("error");setMessage(r.error);}}
 return <section className="space-y-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
