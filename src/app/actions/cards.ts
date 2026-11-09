@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 async function getWorkspace() {
   const supabase = await createClient();
@@ -65,8 +66,15 @@ export async function createClientCard(formData: FormData) {
 
 export async function saveClientCardProfile(formData: FormData) {
   const { supabase, user, organizationId } = await getWorkspace();
-  if (!user || !organizationId || !(await hasWorkspaceModule(supabase, organizationId, "digital_card"))) return;
-  const cardId = String(formData.get("card_id") ?? "");
+  if (!user) redirect("/login?next=/dashboard/cards");
+  if (!organizationId) redirect("/dashboard/cards?card_error=workspace");
+  if (!(await hasWorkspaceModule(supabase, organizationId, "digital_card"))) {
+    redirect("/dashboard/cards?card_error=module");
+  }
+
+  const cardId = String(formData.get("card_id") ?? "").trim();
+  if (!cardId) redirect("/dashboard/cards?card_error=missing");
+
   let customFields: { key: string; label: string; value: string; visible: boolean }[] = [];
   try {
     const parsed = JSON.parse(String(formData.get("custom_fields") ?? "[]"));
@@ -76,16 +84,20 @@ export async function saveClientCardProfile(formData: FormData) {
       value: String(field.value ?? "").trim().slice(0, 500),
       visible: Boolean(field.visible),
     })).filter((field) => field.key && field.label);
-  } catch { customFields = []; }
+  } catch {
+    redirect("/dashboard/cards?card_error=fields");
+  }
+
   const fields = {
     tagline: String(formData.get("tagline") ?? "").trim().slice(0, 180),
     location: String(formData.get("location") ?? "").trim().slice(0, 180),
     hours: String(formData.get("hours") ?? "").trim().slice(0, 180),
-    whatsapp: String(formData.get("whatsapp") ?? "").trim().replace(/[^+\d]/g, "").slice(0, 20),
+    whatsapp: String(formData.get("whatsapp") ?? "").trim().replace(/[^+\\d]/g, "").slice(0, 20),
     google_review_url: safeHttpUrl(String(formData.get("google_review_url") ?? ""), 1000) ?? "",
     custom_fields: customFields,
   };
-  const { error } = await supabase.from("cards").update({
+
+  const { data: updatedCard, error } = await supabase.from("cards").update({
     full_name: String(formData.get("full_name") ?? "").trim().slice(0, 120),
     job_title: String(formData.get("job_title") ?? "").trim().slice(0, 120) || null,
     company_name: String(formData.get("company_name") ?? "").trim().slice(0, 120) || null,
@@ -102,8 +114,20 @@ export async function saveClientCardProfile(formData: FormData) {
       show_save_contact: true,
     },
     updated_at: new Date().toISOString(),
-  }).eq("id", cardId).eq("organization_id", organizationId);
-  if (!error) revalidatePath("/dashboard/cards");
+  }).eq("id", cardId).eq("organization_id", organizationId).select("id,slug").maybeSingle();
+
+  if (error) {
+    console.error("Client card profile update failed", { cardId, code: error.code, message: error.message, details: error.details });
+    redirect("/dashboard/cards?card_error=database");
+  }
+  if (!updatedCard) {
+    console.error("Client card profile update affected no row", { cardId, organizationId });
+    redirect("/dashboard/cards?card_error=permission");
+  }
+
+  revalidatePath("/dashboard/cards");
+  revalidatePath("/p/" + updatedCard.slug);
+  redirect("/dashboard/cards?card_saved=1");
 }
 
 export async function addClientCardLink(formData: FormData) {
