@@ -7,6 +7,8 @@ import { CustomCardFieldsEditor, type EditableCardField } from "@/components/car
 import { CardTemplateGallery } from "@/components/cards/card-template-gallery";
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
 import { AdminClientCards } from "@/components/dashboard/admin-client-cards";
+import { MediaImagePicker } from "@/components/dashboard/media-image-picker";
+import { PopupDialog } from "@/components/dashboard/popup-dialog";
 
 type Card = {
   id: string; slug: string; full_name: string; job_title: string | null; company_name: string | null;
@@ -155,13 +157,13 @@ export default async function ClientCardsPage() {
 
       {catalogEnabled && <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-wider text-indigo-600">Catalogue client</p><h2 className="mt-1 text-xl font-black text-slate-950">{catalogLabel}</h2><p className="mt-1 text-sm text-slate-500">Ajoutez les éléments qui seront visibles sur votre page publique. Les prix sont exprimés en MAD.</p></div><span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">{catalogItems?.length ?? 0} élément(s)</span></div>
-        <form action={createCatalogItem} className="mt-5 grid gap-3 rounded-2xl bg-slate-50 p-4 sm:grid-cols-2">
+        <PopupDialog title={catalogLabel === "Prestations" ? "Ajouter une prestation" : "Ajouter un produit"} description="Ajoutez les informations et la photo qui seront visibles sur votre page publique." triggerLabel={catalogLabel === "Prestations" ? "+ Ajouter une prestation" : "+ Ajouter un produit"} triggerClassName="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700"><form action={createCatalogItem} className="grid gap-3 sm:grid-cols-2">
           <input name="name" required maxLength={120} placeholder={catalogLabel === "Prestations" ? "Nom de la prestation" : "Nom du produit"} className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"/>
           <input name="price" required type="number" min="0" max="100000000" step="0.01" placeholder="Prix en MAD" className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"/>
           <textarea name="description" maxLength={1200} rows={2} placeholder="Description (facultatif)" className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm sm:col-span-2"/>
-          <input name="image_url" type="url" placeholder="URL de l'image (facultatif)" className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"/>
+          <div className="sm:col-span-2"><MediaImagePicker organizationId={organizationId!} name="image_url" label="Photo du produit / couverture"/></div>
           <button className="btn-primary">Ajouter au catalogue</button>
-        </form>
+        </form></PopupDialog>
         <div className="mt-4 grid gap-3 md:grid-cols-2">
           {(catalogItems ?? []).map((item) => <article key={item.id} className="flex items-start gap-3 rounded-xl border border-slate-100 p-3">
             {item.image_url ? <img src={item.image_url} alt="" className="h-16 w-16 rounded-lg object-cover"/> : <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-slate-100 text-xl">▧</div>}
@@ -203,6 +205,7 @@ export default async function ClientCardsPage() {
               </div>
             </div>
             <div className="grid gap-6 p-5 xl:grid-cols-[1.15fr_.85fr]">
+              <PopupDialog title="Modifier ma carte NFC" description="Modifiez les coordonnées, la photo et les rubriques affichées après un scan." triggerLabel="Modifier ma carte">
               <form action={saveClientCardProfile} className="space-y-3">
                 <input type="hidden" name="card_id" value={card.id}/>
                 <h3 className="font-bold text-slate-900">Informations de la carte</h3>
@@ -210,7 +213,7 @@ export default async function ClientCardsPage() {
                   <label className="text-xs font-semibold text-slate-600">Nom affiché<input name="full_name" required defaultValue={card.full_name} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600">Fonction<input name="job_title" defaultValue={card.job_title ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600">Entreprise<input name="company_name" defaultValue={card.company_name ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
-                  <label className="text-xs font-semibold text-slate-600">Photo de profil (URL)<input name="avatar_url" defaultValue={card.avatar_url ?? ""} placeholder="https://..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
+                  <div className="sm:col-span-2"><MediaImagePicker organizationId={organizationId!} name="avatar_url" initialUrl={card.avatar_url} label="Photo de profil de la carte"/></div>
                   <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Présentation<textarea name="bio" defaultValue={card.bio ?? ""} rows={3} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600">Téléphone<input name="phone" defaultValue={card.phone ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600">E-mail<input name="email" type="email" defaultValue={card.email ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
@@ -225,6 +228,7 @@ export default async function ClientCardsPage() {
                 </div>
                 <button className="btn-primary">Enregistrer les modifications</button>
               </form>
+              </PopupDialog>
 
               <div className="space-y-5">
                 <div><h3 className="font-bold text-slate-900">Liens et boutons publics</h3><p className="mt-1 text-xs text-slate-500">WhatsApp, Telegram, réseaux sociaux, boutique et autres liens.</p>
