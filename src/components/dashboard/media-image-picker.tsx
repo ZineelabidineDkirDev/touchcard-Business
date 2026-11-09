@@ -51,12 +51,12 @@ export function MediaImagePicker({ organizationId, name, label, initialUrl = "",
     <div className="space-y-2">
       <input type="hidden" name={name} value={url} />
       <div className="flex items-center gap-3">
-        {url ? <img src={url} alt={label} className={shape === "wide" ? "h-16 w-28 rounded-xl object-cover" : "h-16 w-16 rounded-2xl object-cover"} /> : <div className={shape === "wide" ? "flex h-16 w-28 items-center justify-center rounded-xl bg-slate-100 text-xs text-slate-400" : "flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-xs text-slate-400"}>Image</div>}
+        {url ? <img src={url} alt={label} className={shape === "wide" ? "h-20 w-36 rounded-xl border border-slate-200 object-cover" : "h-16 w-16 rounded-2xl object-cover"} /> : <div className={shape === "wide" ? "flex h-20 w-36 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 text-xs text-slate-400" : "flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-xs text-slate-400"}>Image</div>}
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold text-slate-700">{label}</p>
+          <p className="text-xs font-semibold text-slate-800">{label}</p>{shape === "wide" && <p className="mt-1 text-[10px] leading-4 text-slate-500">Format horizontal conseillé · 16:9</p>}
           <div className="mt-1 flex flex-wrap gap-2">
-            <button type="button" disabled={busy} onClick={() => inputRef.current?.click()} className="rounded-lg bg-indigo-600 px-3 py-2 text-xs font-bold text-white disabled:opacity-50">{busy ? "Envoi…" : url ? "Modifier l’image" : "Ajouter une image"}</button>
-            {url && <button type="button" disabled={busy} onClick={() => { setUrl(""); if (inputRef.current) inputRef.current.value = ""; }} className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-rose-600">Retirer</button>}
+            <button type="button" disabled={busy} onClick={() => inputRef.current?.click()} className="rounded-full bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-indigo-700 disabled:opacity-50">{busy ? "Envoi…" : url ? "Modifier l’image" : "Ajouter une image"}</button>
+            {url && <button type="button" disabled={busy} onClick={() => { setUrl(""); if (inputRef.current) inputRef.current.value = ""; }} className="rounded-full border border-rose-200 px-4 py-2.5 text-xs font-semibold text-rose-600 transition hover:bg-rose-50">Retirer</button>}
           </div>
         </div>
         <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/avif" className="hidden" onChange={(event) => void upload(event.target.files?.[0])} />
