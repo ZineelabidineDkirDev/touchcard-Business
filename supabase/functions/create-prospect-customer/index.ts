@@ -3,7 +3,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 const PLATFORM_SUPER_ADMIN_EMAIL = "zainmawada@gmail.com";
 const allowedModules = new Set([
-  "dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc",
+  "dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc", "google_reviews",
   "company_profile", "service_catalog", "product_catalog", "orders",
   "quote_requests", "bookings", "availability_calendar", "team",
   "gallery", "crm_contacts", "analytics", "whatsapp",
@@ -80,7 +80,7 @@ Deno.serve(async (req: Request) => {
     if (!requestId) return json({ error: "Missing prospect request ID" }, 400);
     const submitted = body.workspace_config ?? {};
     const cardType = String(submitted.template ?? "");
-    if (!["e-business", "contact", "service"].includes(cardType)) return json({ error: "Invalid card template" }, 400);
+    if (!["e-business", "contact", "service", "google-review"].includes(cardType)) return json({ error: "Invalid card template" }, 400);
     const selectedModules = Array.isArray(submitted.modules) ? [...new Set(submitted.modules.map((value: unknown) => String(value)))] : [];
     if (selectedModules.some((module) => !allowedModules.has(module))) return json({ error: "Unknown workspace module" }, 400);
     if (!selectedModules.includes("dashboard")) selectedModules.unshift("dashboard");
