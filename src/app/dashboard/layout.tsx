@@ -46,10 +46,7 @@ async function AuthenticatedDashboard({ children }: Readonly<{ children: React.R
       <div className="min-h-screen bg-[#f5f7fc]">
         <main className="mx-auto min-w-0 max-w-[1500px] px-4 pb-6 sm:px-7 sm:pb-8">
           <div className="sticky top-0 z-40 -mx-4 mb-6 border-b border-slate-200/80 bg-[#f5f7fc]/95 px-4 pb-3 pt-4 shadow-sm backdrop-blur-xl sm:-mx-7 sm:px-7">
-            <DashboardTopbar name={clientDisplayName} email={user.email || ""} avatarUrl={String(user.user_metadata.avatar_url || "")} notificationsEnabled={preferences.notifications_enabled ?? true} isSuperAdmin={false} />
-            <div className="mt-3">
-              <DashboardNavigation isSuperAdmin={false} enabledModules={enabledModules} hasWorkspaceConfig={hasWorkspaceConfig} hiddenModules={hiddenModules} />
-            </div>
+            <DashboardTopbar name={clientDisplayName} email={user.email || ""} avatarUrl={String(user.user_metadata.avatar_url || "")} notificationsEnabled={preferences.notifications_enabled ?? true} isSuperAdmin={false} navigation={<DashboardNavigation isSuperAdmin={false} enabledModules={enabledModules} hasWorkspaceConfig={hasWorkspaceConfig} hiddenModules={hiddenModules} />} />
           </div>
           {children}
         </main>
