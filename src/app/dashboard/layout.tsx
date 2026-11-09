@@ -41,20 +41,43 @@ async function AuthenticatedDashboard({ children }: Readonly<{ children: React.R
   const preferences = (user.user_metadata?.dashboard_preferences ?? {}) as { hidden_modules?: string[]; notifications_enabled?: boolean };
   const hiddenModules = Array.isArray(preferences.hidden_modules) ? preferences.hidden_modules : [];
 
+  if (!isSuperAdmin) {
+    return (
+      <div className="min-h-screen bg-[#f5f7fc]">
+        <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur">
+          <div className="mx-auto flex max-w-[1500px] flex-wrap items-center justify-between gap-4 px-4 py-3 sm:px-7">
+            <Link href="/dashboard" className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 text-lg font-black text-white shadow-md shadow-indigo-200">T</span>
+              <span><span className="block text-lg font-black tracking-tight text-slate-950">Touch<span className="text-indigo-600">Card</span></span><span className="block text-[10px] font-bold uppercase tracking-[.18em] text-slate-400">Espace client</span></span>
+            </Link>
+            <div className="flex items-center gap-3"><LanguageSwitcher /><form action={signOut}><button className="rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600"><DashboardLogoutLabel /></button></form></div>
+          </div>
+          <div className="mx-auto max-w-[1500px] px-4 pb-3 sm:px-7">
+            <DashboardNavigation isSuperAdmin={false} enabledModules={enabledModules} hasWorkspaceConfig={hasWorkspaceConfig} hiddenModules={hiddenModules} />
+          </div>
+        </header>
+        <main className="mx-auto min-w-0 max-w-[1500px] px-4 py-6 sm:px-7 sm:py-8">
+          <DashboardTopbar name={clientDisplayName} email={user.email || ""} notificationsEnabled={preferences.notifications_enabled ?? true} isSuperAdmin={false} />
+          {children}
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 lg:flex">
       <aside className="w-full border-b border-slate-200 bg-white p-5 lg:fixed lg:inset-y-0 lg:w-64 lg:border-b-0 lg:border-r">
         <Link href="/" className="text-2xl font-black tracking-tight text-slate-950">Touch<span className="text-indigo-600">Card</span></Link>
         <p className="mt-1 text-xs text-slate-400">BUSINESS WORKSPACE</p>
         <div className="mt-4"><LanguageSwitcher /></div>
-        <DashboardNavigation isSuperAdmin={isSuperAdmin} enabledModules={enabledModules} hasWorkspaceConfig={hasWorkspaceConfig} hiddenModules={hiddenModules} />
+        <DashboardNavigation isSuperAdmin={true} enabledModules={enabledModules} hasWorkspaceConfig={hasWorkspaceConfig} hiddenModules={hiddenModules} />
         <div className="mt-8 border-t border-slate-100 pt-5 lg:absolute lg:inset-x-5 lg:bottom-6">
           <p className="truncate text-sm font-semibold text-slate-800">{String(user.user_metadata.full_name || user.email)}</p>
           <p className="mt-1 truncate text-xs text-slate-400">{user.email}</p>
           <form action={signOut}><button className="mt-4 text-sm font-semibold text-rose-600"><DashboardLogoutLabel /></button></form>
         </div>
       </aside>
-      <main className="min-w-0 flex-1 p-4 sm:p-7 lg:ml-64"><DashboardTopbar name={clientDisplayName} email={user.email || ""} notificationsEnabled={preferences.notifications_enabled ?? true} isSuperAdmin={isSuperAdmin} />{children}</main>
+      <main className="min-w-0 flex-1 p-4 sm:p-7 lg:ml-64"><DashboardTopbar name={clientDisplayName} email={user.email || ""} notificationsEnabled={preferences.notifications_enabled ?? true} isSuperAdmin={true} />{children}</main>
     </div>
   );
 }
