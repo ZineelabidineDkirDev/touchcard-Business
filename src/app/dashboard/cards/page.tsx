@@ -200,6 +200,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
           const cardEvents = (events ?? []).filter((event) => event.card_id === card.id);
           const fields = (card.public_fields ?? {}) as Record<string, any>;
           const settings = card.public_settings ?? {};
+          const currentAccent = typeof card.theme?.accent === "string" ? card.theme.accent : "#2563EB";
           const initialCustomFields: EditableCardField[] = Array.isArray(fields.custom_fields) && fields.custom_fields.length
             ? fields.custom_fields
             : (profileDraft?.card_fields ?? []).map((field) => ({ key: field.key, label: field.label, value: "", visible: field.visible }));
