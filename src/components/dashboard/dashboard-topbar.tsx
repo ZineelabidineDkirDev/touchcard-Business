@@ -16,6 +16,7 @@ type AdminNotification = {
 type Props = {
   name: string;
   email: string;
+  avatarUrl?: string;
   notificationsEnabled?: boolean;
   isSuperAdmin?: boolean;
 };
@@ -43,7 +44,7 @@ const cardLabels: Record<string, string> = {
   "google-review": "Avis Google",
 };
 
-export function DashboardTopbar({ name, email, notificationsEnabled = true, isSuperAdmin = false }: Props) {
+export function DashboardTopbar({ name, email, avatarUrl = "", notificationsEnabled = true, isSuperAdmin = false }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [dark, setDark] = useState(false);
@@ -129,7 +130,7 @@ export function DashboardTopbar({ name, email, notificationsEnabled = true, isSu
         </div>}
         <div className="relative">
           <button type="button" onClick={() => { setMenuOpen(!menuOpen); setNotificationsOpen(false); }} aria-expanded={menuOpen} className="flex max-w-[190px] items-center gap-2 rounded-xl border border-slate-200 bg-white px-2 py-2 text-left transition hover:bg-slate-50 sm:px-3">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-indigo-700"><Icon name="user" size={17} /></span>
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-indigo-100 text-indigo-700">{avatarUrl ? <img src={avatarUrl} alt="" className="h-full w-full object-cover"/> : <Icon name="user" size={17} />}</span>
             <span className="hidden min-w-0 sm:block"><span className="block truncate text-xs font-bold text-slate-900">{name || "Mon compte"}</span><span className="block max-w-[112px] truncate text-[10px] text-slate-400">{email}</span></span>
             <Icon name="chevron" size={15} />
           </button>
