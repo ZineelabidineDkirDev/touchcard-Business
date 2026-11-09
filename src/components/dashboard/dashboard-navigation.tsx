@@ -31,19 +31,19 @@ export function DashboardNavigation({
 
   if (!isSuperAdmin) {
     const clientItems = [
-      { label: "Vue d’ensemble", href: "/dashboard", visible: true },
-      { label: "Ma carte NFC", href: "/dashboard/cards", visible: !hasWorkspaceConfig || enabledModules.includes("digital_card") },
-      { label: "Demandes reçues", href: "/dashboard/requests", visible: !hasWorkspaceConfig || enabledModules.some((value) => ["orders", "bookings", "quote_requests"].includes(value)) },
-      { label: "Mes contacts", href: "/dashboard/contacts", visible: !hasWorkspaceConfig || enabledModules.includes("crm_contacts") },
-      { label: "Statistiques", href: "/dashboard/analytics", visible: !hasWorkspaceConfig || enabledModules.includes("analytics") },
-      { label: "Mon profil", href: "/dashboard/profile", visible: true },
-    ].filter((item) => item.visible && !hiddenModules.includes(item.href === "/dashboard/cards" ? "digital_card" : item.href === "/dashboard/contacts" ? "crm_contacts" : item.href === "/dashboard/analytics" ? "analytics" : item.href === "/dashboard/requests" ? "requests" : ""));
+      { label: "Vue d’ensemble", href: "/dashboard" },
+      { label: "Ma carte NFC", href: "/dashboard/cards" },
+      { label: "Demandes reçues", href: "/dashboard/requests" },
+      { label: "Mes contacts", href: "/dashboard/contacts" },
+      { label: "Statistiques", href: "/dashboard/analytics" },
+      { label: "Mon profil", href: "/dashboard/profile" },
+    ];
 
     return (
-      <nav aria-label="Navigation de l’espace client" className="flex flex-wrap items-center gap-2">
+      <nav aria-label="Navigation de l’espace client" className="flex w-full flex-nowrap items-center gap-2 overflow-x-auto overscroll-x-contain whitespace-nowrap pb-1 [scrollbar-width:thin]">
         {clientItems.map((item) => {
           const active = item.href === "/dashboard" ? pathname === item.href : pathname === item.href || pathname.startsWith(item.href + "/");
-          return <Link key={item.href} href={item.href} className={`rounded-xl px-3.5 py-2.5 text-sm font-bold transition ${active ? "bg-indigo-600 text-white shadow-md shadow-indigo-200" : "text-slate-600 hover:bg-indigo-50 hover:text-indigo-700"}`}>{item.label}</Link>;
+          return <Link key={item.href} href={item.href} className={`shrink-0 rounded-xl px-3.5 py-2.5 text-sm font-bold transition ${active ? "bg-indigo-600 text-white shadow-md shadow-indigo-200" : "text-slate-600 hover:bg-indigo-50 hover:text-indigo-700"}`}>{item.label}</Link>;
         })}
       </nav>
     );
