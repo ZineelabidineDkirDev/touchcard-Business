@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { createClientCard, saveClientCardProfile, addClientCardLink, deleteClientCardLink, toggleClientCardPublication } from "@/app/actions/cards";
+import { createClientCard, saveClientCardProfile, addClientCardLink, deleteClientCardLink, toggleClientCardPublication, createCatalogItem, deleteCatalogItem } from "@/app/actions/cards";
 import { createClient } from "@/lib/supabase/server";
 import { CustomCardFieldsEditor, type EditableCardField } from "@/components/cards/custom-card-fields-editor";
 import { CardTemplateGallery } from "@/components/cards/card-template-gallery";
@@ -11,9 +11,10 @@ import { AdminClientCards } from "@/components/dashboard/admin-client-cards";
 type Card = {
   id: string; slug: string; full_name: string; job_title: string | null; company_name: string | null;
   bio: string | null; email: string | null; phone: string | null; website: string | null;
-  avatar_url: string | null; is_published: boolean; public_fields: Record<string, string> | null; public_settings: Record<string, boolean> | null;
+  avatar_url: string | null; is_published: boolean; theme: Record<string, unknown> | null; public_fields: Record<string, string> | null; public_settings: Record<string, boolean> | null;
 };
 type CardLink = { id: string; card_id: string; label: string; url: string; kind: string };
+type CatalogItem = { id: string; name: string; description: string | null; price: number; currency: string; image_url: string | null; is_active: boolean };
 
 export default async function ClientCardsPage() {
   await connection();
@@ -109,7 +110,7 @@ export default async function ClientCardsPage() {
     ? await supabase.from("organizations").select("id,name,workspace_config").eq("id", organizationId).maybeSingle()
     : { data: null };
   const { data: cards } = organizationId
-    ? await supabase.from("cards").select("id,slug,full_name,job_title,company_name,bio,email,phone,website,avatar_url,is_published,public_fields,public_settings")
+    ? await supabase.from("cards").select("id,slug,full_name,job_title,company_name,bio,email,phone,website,avatar_url,is_published,theme,public_fields,public_settings")
       .eq("organization_id", organizationId).order("created_at", { ascending: false })
     : { data: [] as Card[] };
   const cardIds = (cards ?? []).map((card) => card.id);
@@ -122,6 +123,12 @@ export default async function ClientCardsPage() {
   const config = (organization?.workspace_config ?? {}) as { version?: number; template?: string; modules?: string[]; ai_suggestions?: { profile_draft?: { tagline?: string; description?: string; card_fields?: { key: string; label: string; type: string; visible: boolean }[]; suggested_buttons?: { kind: string; label: string; enabled: boolean }[] } } };
   const modules = Array.isArray(config.modules) ? config.modules : [];
   if (config.version && !modules.includes("digital_card")) notFound();
+  const catalogEnabled = !config.version || modules.some((module) => ["product_catalog", "service_catalog"].includes(module));
+  const catalogLabel = config.template === "service" ? "Prestations" : "Produits";
+  const { data: catalogItems } = catalogEnabled && organizationId
+    ? await supabase.from("products").select("id,name,description,price,currency,image_url,is_active")
+      .eq("organization_id", organizationId).order("created_at", { ascending: false })
+    : { data: [] as CatalogItem[] };
   const profileDraft = config.ai_suggestions?.profile_draft;
   const { data: designRequest } = await supabase.from("card_design_requests").select("status,template_id").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
   const totalViews = (events ?? []).filter((event) => ["view", "qr_scan", "nfc_scan"].includes(event.event_type)).length;
@@ -145,6 +152,25 @@ export default async function ClientCardsPage() {
       </section>
 
       {profileDraft?.tagline && <aside className="rounded-2xl border border-indigo-100 bg-indigo-50 p-4 text-sm text-indigo-950"><strong>Suggestion IA approuvée :</strong> {profileDraft.tagline}{profileDraft.description ? " — " + profileDraft.description : ""}{profileDraft.suggested_buttons?.length ? <p className="mt-2 text-xs">Boutons recommandés à configurer : {profileDraft.suggested_buttons.filter((button) => button.enabled).map((button) => button.label).join(" · ")}</p> : null}</aside>}
+
+      {catalogEnabled && <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-wider text-indigo-600">Catalogue client</p><h2 className="mt-1 text-xl font-black text-slate-950">{catalogLabel}</h2><p className="mt-1 text-sm text-slate-500">Ajoutez les éléments qui seront visibles sur votre page publique. Les prix sont exprimés en MAD.</p></div><span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">{catalogItems?.length ?? 0} élément(s)</span></div>
+        <form action={createCatalogItem} className="mt-5 grid gap-3 rounded-2xl bg-slate-50 p-4 sm:grid-cols-2">
+          <input name="name" required maxLength={120} placeholder={catalogLabel === "Prestations" ? "Nom de la prestation" : "Nom du produit"} className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"/>
+          <input name="price" required type="number" min="0" max="100000000" step="0.01" placeholder="Prix en MAD" className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"/>
+          <textarea name="description" maxLength={1200} rows={2} placeholder="Description (facultatif)" className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm sm:col-span-2"/>
+          <input name="image_url" type="url" placeholder="URL de l'image (facultatif)" className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"/>
+          <button className="btn-primary">Ajouter au catalogue</button>
+        </form>
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          {(catalogItems ?? []).map((item) => <article key={item.id} className="flex items-start gap-3 rounded-xl border border-slate-100 p-3">
+            {item.image_url ? <img src={item.image_url} alt="" className="h-16 w-16 rounded-lg object-cover"/> : <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-slate-100 text-xl">▧</div>}
+            <div className="min-w-0 flex-1"><p className="font-bold text-slate-900">{item.name}</p><p className="mt-1 line-clamp-2 text-xs text-slate-500">{item.description || "Sans description"}</p><p className="mt-2 text-sm font-black text-indigo-700">{Number(item.price).toLocaleString("fr-MA")} {item.currency}</p></div>
+            <form action={deleteCatalogItem}><input type="hidden" name="id" value={item.id}/><button className="text-xs font-bold text-rose-600">Supprimer</button></form>
+          </article>)}
+          {!(catalogItems?.length) && <p className="rounded-xl border border-dashed border-slate-200 p-5 text-sm text-slate-500 md:col-span-2">Votre catalogue est vide. Ajoutez votre premier élément ci-dessus.</p>}
+        </div>
+      </section>}
 
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="text-lg font-bold text-slate-950">Créer une carte</h2>
@@ -193,6 +219,7 @@ export default async function ClientCardsPage() {
                   <label className="text-xs font-semibold text-slate-600">Ville / adresse<input name="location" defaultValue={fields.location ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600">Horaires<input name="hours" defaultValue={fields.hours ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600 sm:col-span-2">WhatsApp Business (numéro)<input name="whatsapp" defaultValue={fields.whatsapp ?? ""} placeholder="+212..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
+                  {config.template === "google-review" && <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Lien officiel Google Avis<input name="google_review_url" type="url" defaultValue={fields.google_review_url ?? ""} placeholder="https://g.page/r/..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>}
                   <CustomCardFieldsEditor initialFields={initialCustomFields}/>
                   <div className="flex flex-wrap gap-4 rounded-xl bg-slate-50 p-3 sm:col-span-2"><span className="w-full text-xs font-bold text-slate-700">Champs visibles sur la page publique</span><label className="flex items-center gap-2 text-xs"><input type="checkbox" name="show_phone" defaultChecked={settings.show_phone !== false}/> Téléphone</label><label className="flex items-center gap-2 text-xs"><input type="checkbox" name="show_email" defaultChecked={settings.show_email !== false}/> E-mail</label><label className="flex items-center gap-2 text-xs"><input type="checkbox" name="show_website" defaultChecked={settings.show_website !== false}/> Site web</label></div>
                 </div>
