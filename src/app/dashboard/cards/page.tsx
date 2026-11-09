@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { createClientCard, saveClientCardProfile, addClientCardLink, deleteClientCardLink, toggleClientCardPublication, createCatalogItem, deleteCatalogItem } from "@/app/actions/cards";
+import { createClientCard, saveClientCardProfile, addClientCardLink, deleteClientCardLink, toggleClientCardPublication, createCatalogItem, updateCatalogItem, deleteCatalogItem } from "@/app/actions/cards";
 import { createClient } from "@/lib/supabase/server";
 import { CustomCardFieldsEditor, type EditableCardField } from "@/components/cards/custom-card-fields-editor";
 import { CardTemplateGallery } from "@/components/cards/card-template-gallery";
@@ -167,7 +167,7 @@ export default async function ClientCardsPage() {
         <div className="mt-4 grid gap-3 md:grid-cols-2">
           {(catalogItems ?? []).map((item) => <article key={item.id} className="flex items-start gap-3 rounded-xl border border-slate-100 p-3">
             {item.image_url ? <img src={item.image_url} alt="" className="h-16 w-16 rounded-lg object-cover"/> : <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-slate-100 text-xl">▧</div>}
-            <div className="min-w-0 flex-1"><p className="font-bold text-slate-900">{item.name}</p><p className="mt-1 line-clamp-2 text-xs text-slate-500">{item.description || "Sans description"}</p><p className="mt-2 text-sm font-black text-indigo-700">{Number(item.price).toLocaleString("fr-MA")} {item.currency}</p></div>
+            <div className="min-w-0 flex-1"><p className="font-bold text-slate-900">{item.name}</p><p className="mt-1 line-clamp-2 text-xs text-slate-500">{item.description || "Sans description"}</p><p className="mt-2 text-sm font-black text-indigo-700">{Number(item.price).toLocaleString("fr-MA")} {item.currency}</p><div className="mt-2"><PopupDialog title="Modifier le produit" description="Modifiez les informations et remplacez sa photo de couverture." triggerLabel="Modifier" triggerClassName="text-xs font-bold text-indigo-700 hover:underline"><form action={updateCatalogItem} className="space-y-3"><input type="hidden" name="id" value={item.id}/><label className="block text-xs font-semibold text-slate-600">Nom<input name="name" required defaultValue={item.name} className="mt-1 w-full rounded-xl border border-slate-200 p-3 text-sm"/></label><label className="block text-xs font-semibold text-slate-600">Prix en MAD<input name="price" required type="number" min="0" step="0.01" defaultValue={item.price} className="mt-1 w-full rounded-xl border border-slate-200 p-3 text-sm"/></label><label className="block text-xs font-semibold text-slate-600">Description<textarea name="description" rows={3} defaultValue={item.description || ""} className="mt-1 w-full rounded-xl border border-slate-200 p-3 text-sm"/></label><MediaImagePicker organizationId={organizationId!} name="image_url" initialUrl={item.image_url} label="Photo / couverture du produit"/><button className="btn-primary">Enregistrer</button></form></PopupDialog></div></div>
             <form action={deleteCatalogItem}><input type="hidden" name="id" value={item.id}/><button className="text-xs font-bold text-rose-600">Supprimer</button></form>
           </article>)}
           {!(catalogItems?.length) && <p className="rounded-xl border border-dashed border-slate-200 p-5 text-sm text-slate-500 md:col-span-2">Votre catalogue est vide. Ajoutez votre premier élément ci-dessus.</p>}
