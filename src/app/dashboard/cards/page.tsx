@@ -223,6 +223,23 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                   <label className="text-xs font-semibold text-slate-600">Fonction<input name="job_title" defaultValue={card.job_title ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600">Entreprise<input name="company_name" defaultValue={card.company_name ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <div className="sm:col-span-2 grid gap-4 md:grid-cols-[.8fr_1.2fr]"><MediaImagePicker organizationId={organizationId!} name="avatar_url" initialUrl={card.avatar_url} label="Photo de profil"/><MediaImagePicker organizationId={organizationId!} name="cover_url" initialUrl={card.cover_url} label="Couverture de la carte" shape="wide"/></div>
+                  <div className="sm:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <p className="text-xs font-bold text-slate-800">Couleur de ma carte</p>
+                    <p className="mt-1 text-[11px] text-slate-500">Choisissez la couleur principale utilisée pour les boutons, icônes et accents de votre carte publique.</p>
+                    <div className="mt-3 flex flex-wrap gap-3">
+                      {[
+                        { name: "Bleu royal", value: "#2563EB" }, { name: "Bleu nuit", value: "#1D4ED8" },
+                        { name: "Turquoise", value: "#0891B2" }, { name: "Vert", value: "#16A34A" },
+                        { name: "Émeraude", value: "#059669" }, { name: "Violet", value: "#7C3AED" },
+                        { name: "Rose", value: "#DB2777" }, { name: "Rouge", value: "#DC2626" },
+                        { name: "Orange", value: "#EA580C" }, { name: "Noir", value: "#171717" },
+                      ].map((color) => <label key={color.value} title={color.name} className="flex cursor-pointer flex-col items-center gap-1.5 text-[10px] font-semibold text-slate-600">
+                        <input type="radio" name="accent_color" value={color.value} defaultChecked={currentAccent.toLowerCase() === color.value.toLowerCase()} className="peer sr-only"/>
+                        <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white shadow ring-1 ring-slate-300 peer-checked:ring-2 peer-checked:ring-slate-900" style={{ backgroundColor: color.value }}><span className="hidden text-sm font-black text-white peer-checked:inline">✓</span></span>
+                        {color.name}
+                      </label>)}
+                    </div>
+                  </div>
                   <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Présentation / bio<textarea name="bio" defaultValue={card.bio ?? ""} rows={3} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600">Téléphone<input name="phone" defaultValue={card.phone ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600">E-mail<input name="email" type="email" defaultValue={card.email ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
