@@ -46,7 +46,7 @@ Deno.serve(async (req: Request) => {
     const forwardedFor = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "";
     const clientIp = forwardedFor || req.headers.get("x-real-ip") || "unknown";
     const ipHash = await sha256(clientIp + ":" + (Deno.env.get("SUPABASE_ANON_KEY") ?? ""));
-    const { data: allowed, error: rateError } = await admin.schema("private").rpc("consume_workspace_request_rate_limit", {
+    const { data: allowed, error: rateError } = await admin.rpc("consume_workspace_request_rate_limit", {
       p_ip_hash: ipHash, p_limit: 12, p_window_seconds: 3600,
     });
     if (rateError || allowed !== true) return json({ error: "Trop de demandes ont été envoyées depuis cette connexion. Réessayez plus tard." }, 429);
