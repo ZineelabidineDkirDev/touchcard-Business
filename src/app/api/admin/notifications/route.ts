@@ -12,9 +12,9 @@ export async function GET() {
     return NextResponse.json({ notifications: [], count: 0 }, { status: 403 });
   }
 
-  const { data, error } = await supabase
+  const { data, error, count } = await supabase
     .from("prospect_requests")
-    .select("id, full_name, brand_name, card_type, city, created_at")
+    .select("id, full_name, brand_name, card_type, city, created_at", { count: "exact" })
     .eq("status", "new")
     .order("created_at", { ascending: false })
     .limit(12);
@@ -25,7 +25,7 @@ export async function GET() {
   }
 
   return NextResponse.json(
-    { notifications: data ?? [], count: data?.length ?? 0 },
+    { notifications: data ?? [], count: count ?? 0 },
     { headers: { "Cache-Control": "no-store, max-age=0" } },
   );
 }
