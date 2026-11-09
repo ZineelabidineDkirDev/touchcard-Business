@@ -153,9 +153,11 @@ Deno.serve(async (req: Request) => {
       hours: "",
       whatsapp: "",
       google_review_url: "",
-      custom_fields: (profileDraft?.card_fields ?? []).map((field: any) => ({
-        key: field.key, label: field.label, value: "", visible: field.visible,
-      })),
+      custom_fields: (profileDraft?.card_fields ?? [])
+        .filter((field: any) => !["tagline", "location", "hours", "whatsapp", "google_review_url"].includes(field.key))
+        .map((field: any) => ({
+          key: field.key, label: field.label, value: "", visible: field.visible,
+        })),
     };
     const { data: card, error: cardError } = await admin.from("cards").insert({
       organization_id: organization.id,
@@ -167,7 +169,7 @@ Deno.serve(async (req: Request) => {
       avatar_url: logoUrl,
       theme: {
         accent: cardType === "google-review" ? "#16a34a" : cardType === "service" ? "#0ea5e9" : cardType === "e-business" ? "#10b981" : "#6366f1",
-        layout: "classic",
+        layout: cardType === "google-review" ? "review" : cardType === "e-business" ? "commerce" : cardType === "service" ? "service" : "classic",
         template: cardType,
         design_id: "default-" + cardType,
         schema_version: 1,
