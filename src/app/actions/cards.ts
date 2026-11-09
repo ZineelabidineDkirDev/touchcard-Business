@@ -16,6 +16,13 @@ async function getWorkspace() {
   return { supabase, user, organizationId: membership?.organization_id ?? null };
 }
 
+async function hasWorkspaceModule(supabase: Awaited<ReturnType<typeof createClient>>, organizationId: string, moduleId: string) {
+  const { data: organization } = await supabase.from("organizations")
+    .select("workspace_config").eq("id", organizationId).maybeSingle();
+  const config = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[] };
+  return !config.version || (Array.isArray(config.modules) && config.modules.includes(moduleId));
+}
+
 function safeHttpUrl(value: string, maxLength: number) {
   const raw = value.trim().slice(0, maxLength);
   if (!raw) return null;
@@ -32,7 +39,7 @@ function cleanSlug(value: string) {
 
 export async function createClientCard(formData: FormData) {
   const { supabase, user, organizationId } = await getWorkspace();
-  if (!user || !organizationId) return;
+  if (!user || !organizationId || !(await hasWorkspaceModule(supabase, organizationId, "digital_card"))) return;
   const fullName = String(formData.get("full_name") ?? "").trim().slice(0, 120);
   if (!fullName) return;
   const { data: organization } = await supabase.from("organizations")
@@ -58,7 +65,7 @@ export async function createClientCard(formData: FormData) {
 
 export async function saveClientCardProfile(formData: FormData) {
   const { supabase, user, organizationId } = await getWorkspace();
-  if (!user || !organizationId) return;
+  if (!user || !organizationId || !(await hasWorkspaceModule(supabase, organizationId, "digital_card"))) return;
   const cardId = String(formData.get("card_id") ?? "");
   let customFields: { key: string; label: string; value: string; visible: boolean }[] = [];
   try {
@@ -101,7 +108,7 @@ export async function saveClientCardProfile(formData: FormData) {
 
 export async function addClientCardLink(formData: FormData) {
   const { supabase, user, organizationId } = await getWorkspace();
-  if (!user || !organizationId) return;
+  if (!user || !organizationId || !(await hasWorkspaceModule(supabase, organizationId, "digital_card"))) return;
   const cardId = String(formData.get("card_id") ?? "");
   const label = String(formData.get("label") ?? "").trim().slice(0, 60);
   const rawUrl = String(formData.get("url") ?? "").trim().slice(0, 500);
@@ -124,7 +131,7 @@ export async function addClientCardLink(formData: FormData) {
 
 export async function deleteClientCardLink(formData: FormData) {
   const { supabase, user, organizationId } = await getWorkspace();
-  if (!user || !organizationId) return;
+  if (!user || !organizationId || !(await hasWorkspaceModule(supabase, organizationId, "digital_card"))) return;
   const cardId = String(formData.get("card_id") ?? "");
   const linkId = String(formData.get("link_id") ?? "");
   const { data: card } = await supabase.from("cards").select("id")
@@ -136,7 +143,7 @@ export async function deleteClientCardLink(formData: FormData) {
 
 export async function toggleClientCardPublication(formData: FormData) {
   const { supabase, user, organizationId } = await getWorkspace();
-  if (!user || !organizationId) return;
+  if (!user || !organizationId || !(await hasWorkspaceModule(supabase, organizationId, "digital_card"))) return;
   const cardId = String(formData.get("card_id") ?? "");
   const publish = String(formData.get("publish") ?? "") === "true";
   const { data: card } = await supabase.from("cards").select("id,slug")
@@ -246,7 +253,7 @@ export async function createCatalogItem(formData: FormData) {
 
 export async function deleteCatalogItem(formData: FormData) {
   const { supabase, user, organizationId } = await getWorkspace();
-  if (!user || !organizationId) return;
+  if (!user || !organizationId || !(await hasWorkspaceModule(supabase, organizationId, "digital_card"))) return;
   const id = String(formData.get("id") ?? "").trim();
   if (!id) return;
   const { error } = await supabase.from("products").delete().eq("id", id).eq("organization_id", organizationId);
