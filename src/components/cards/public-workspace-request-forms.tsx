@@ -77,13 +77,14 @@ export function PublicWorkspaceRequestForms({ cardSlug, accent = "#4f46e5", prod
   return <>
     <section className="rounded-2xl bg-white p-4">
       <div><p className="text-xs font-bold uppercase tracking-wider text-slate-500">Besoin d'un service ?</p><h2 className="mt-1 text-base font-bold text-slate-900">Comment pouvons-nous vous aider ?</h2></div>
-      <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
-        {types.map((item) => <button key={item.id} type="button" onClick={() => { setType(item.id); setFeedback(null); setOpen(true); }} className="flex min-h-[66px] items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" style={{ ["--tw-ring-color" as string]: "var(--card-accent, #4f46e5)" }}>
+      <div className="mt-4 flex flex-col gap-2.5">
+        {types.map((item) => <button key={item.id} type="button" onClick={() => { setType(item.id); setFeedback(null); setOpen(true); }} className="flex min-h-[68px] w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-left shadow-sm transition hover:border-slate-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2" style={{ ["--tw-ring-color" as string]: "var(--card-accent, #4f46e5)" }}>
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white" style={{ backgroundColor: accent }}><RequestIcon type={item.id}/></span>
           <span className="min-w-0"><span className="block text-sm font-bold text-slate-900">{item.label}</span><span className="mt-0.5 block text-[11px] text-slate-500">{item.hint}</span></span>
-          <span className="ml-auto text-lg text-slate-400" aria-hidden="true">›</span>
+          <span className="ml-auto flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-50 text-lg text-slate-500" aria-hidden="true">›</span>
         </button>)}
       </div>
+      <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2.5 text-xs leading-5 text-slate-500">Choisissez une action pour ouvrir un formulaire sécurisé et transmettre votre demande directement à l’entreprise.</p>
     </section>
     {open && <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-950/60 p-0 backdrop-blur-sm sm:items-center sm:p-5" onClick={() => !loading && setOpen(false)}>
       <section role="dialog" aria-modal="true" aria-labelledby="public-request-title" className="max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl sm:rounded-3xl" onClick={(event) => event.stopPropagation()}>
