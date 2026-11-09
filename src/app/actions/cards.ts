@@ -253,7 +253,10 @@ export async function createCatalogItem(formData: FormData) {
 
 export async function deleteCatalogItem(formData: FormData) {
   const { supabase, user, organizationId } = await getWorkspace();
-  if (!user || !organizationId || !(await hasWorkspaceModule(supabase, organizationId, "digital_card"))) return;
+  if (!user || !organizationId) return;
+  const canManageProducts = await hasWorkspaceModule(supabase, organizationId, "product_catalog");
+  const canManageServices = await hasWorkspaceModule(supabase, organizationId, "service_catalog");
+  if (!canManageProducts && !canManageServices) return;
   const id = String(formData.get("id") ?? "").trim();
   if (!id) return;
   const { error } = await supabase.from("products").delete().eq("id", id).eq("organization_id", organizationId);
