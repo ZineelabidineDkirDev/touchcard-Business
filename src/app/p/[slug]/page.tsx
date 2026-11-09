@@ -36,6 +36,7 @@ async function PublicCardContent({
     .select("id,label,url,kind").eq("card_id", card.id).order("position");
   const theme = (card.theme ?? {}) as Record<string, unknown>;
   const template = String(theme.template ?? "contact");
+  const accent = typeof theme.accent === "string" && /^#[0-9a-fA-F]{6}$/.test(theme.accent) ? theme.accent : "#4f46e5";
   const showCatalog = ["service", "e-business"].includes(template);
   const { data: catalogItems } = showCatalog
     ? await supabase.from("products").select("id,name,description,price,currency,image_url")
@@ -51,7 +52,7 @@ async function PublicCardContent({
     <main className="min-h-screen bg-slate-100 px-4 py-8 sm:py-12">
       <PublicCardTracker cardId={card.id} eventType={source} />
       <article className="mx-auto w-full max-w-md overflow-hidden rounded-[2rem] bg-white shadow-2xl shadow-slate-300/60">
-        <div className="relative h-36 bg-gradient-to-br from-indigo-950 via-indigo-700 to-violet-500">
+        <div className="relative h-36" style={{ background: `linear-gradient(135deg, #0f172a, ${accent})` }}>
           {card.cover_url && <img src={card.cover_url} alt="" className="h-full w-full object-cover" />}
         </div>
         <div className="-mt-14 px-7 pb-8">
@@ -59,7 +60,7 @@ async function PublicCardContent({
             {card.avatar_url ? <img src={card.avatar_url} alt={card.full_name} className="h-full w-full object-cover" /> : card.full_name.slice(0, 1).toUpperCase()}
           </div>
           <h1 className="mt-5 text-2xl font-black text-slate-950">{card.full_name}</h1>
-          {card.job_title && <p className="mt-1 font-semibold text-indigo-700">{card.job_title}</p>}
+          {card.job_title && <p className="mt-1 font-semibold" style={{ color: accent }}>{card.job_title}</p>}
           {card.company_name && <p className="mt-1 text-sm text-slate-500">{card.company_name}</p>}
           {fields.tagline && <p className="mt-4 text-sm font-semibold text-slate-700">{fields.tagline}</p>}
           {card.bio && <p className="mt-3 whitespace-pre-line text-sm leading-6 text-slate-600">{card.bio}</p>}
@@ -67,12 +68,12 @@ async function PublicCardContent({
           {fields.custom_fields?.some((field) => field.visible && field.label && field.value) && <section className="mt-5 space-y-2">{fields.custom_fields.filter((field) => field.visible && field.label && field.value).map((field) => <div key={field.key} className="rounded-xl bg-slate-50 px-4 py-3"><p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">{field.label}</p><p className="mt-1 whitespace-pre-line text-sm font-medium text-slate-800">{field.value}</p></div>)}</section>}
 
           <div className="mt-7 grid gap-3">
-            <TrackedPublicLink cardId={card.id} href={vcardUrl} eventType="contact_save" className="btn-primary text-center">Enregistrer le contact</TrackedPublicLink>
+            <TrackedPublicLink cardId={card.id} href={vcardUrl} eventType="contact_save" className="block rounded-xl px-4 py-3 text-center text-sm font-bold text-white" style={{ backgroundColor: accent }}>Enregistrer le contact</TrackedPublicLink>
             {settings.show_phone !== false && card.phone && <TrackedPublicLink cardId={card.id} href={"tel:" + card.phone} className="btn-secondary text-center">Appeler</TrackedPublicLink>}
             {settings.show_email !== false && card.email && <TrackedPublicLink cardId={card.id} href={"mailto:" + card.email} className="btn-secondary text-center">Envoyer un e-mail</TrackedPublicLink>}
             {settings.show_website !== false && card.website && <TrackedPublicLink cardId={card.id} href={card.website} className="btn-secondary text-center">Site web</TrackedPublicLink>}
             {whatsapp && <TrackedPublicLink cardId={card.id} href={"https://wa.me/" + whatsapp} className="flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white">WhatsApp Business</TrackedPublicLink>}
-            {template === "google-review" && fields.google_review_url && <TrackedPublicLink cardId={card.id} href={fields.google_review_url} className="flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white">★ Laisser un avis Google</TrackedPublicLink>}
+            {template === "google-review" && <div className="rounded-2xl bg-emerald-50 p-4 text-center"><p className="text-sm font-bold text-emerald-950">Votre avis compte pour nous</p><p className="mt-1 text-2xl tracking-[.2em] text-amber-500" aria-label="5 étoiles">★★★★★</p>{fields.google_review_url ? <TrackedPublicLink cardId={card.id} href={fields.google_review_url} className="mt-3 flex items-center justify-center rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white">Laisser un avis Google</TrackedPublicLink> : <p className="mt-2 text-xs text-emerald-800">Le lien Google sera ajouté prochainement.</p>}</div>}
           </div>
 
           {showCatalog && <section className="mt-8 border-t border-slate-100 pt-6">
