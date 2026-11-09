@@ -16,6 +16,7 @@ export function DashboardTopbar({ name, email }: Props) {
     const enabled = saved === "dark";
     setDark(enabled);
     document.documentElement.dataset.theme = enabled ? "dark" : "light";
+    return () => { document.documentElement.dataset.theme = "light"; };
   }, []);
 
   function toggleTheme() {
