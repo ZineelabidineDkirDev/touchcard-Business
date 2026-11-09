@@ -32,7 +32,6 @@ export async function createContact(formData: FormData) {
   const city = String(formData.get("city") ?? "").trim().slice(0, 100) || null;
   const source = String(formData.get("source") ?? "manual");
   const notes = String(formData.get("notes") ?? "").trim().slice(0, 2000) || null;
-  const avatar_url = String(formData.get("avatar_url") ?? "").trim().slice(0, 1000) || null;
   const priority = String(formData.get("priority") ?? "normal");
   const cardId = String(formData.get("card_id") ?? "").trim() || null;
   if (!full_name || (!email && !phone)) return;
@@ -46,7 +45,7 @@ export async function createContact(formData: FormData) {
   const safeSource = allowedSources.includes(source) ? source : "manual";
   const { data, error } = await workspace.supabase.from("contacts").insert({
     organization_id: workspace.organizationId, card_id: cardId, full_name, email, phone,
-    company, job_title, city, source: safeSource, notes, priority, status: "new", avatar_url,
+    company, job_title, city, source: safeSource, notes, priority, status: "new",
   }).select("id").single();
   if (error || !data) {
     console.error("CRM contact creation failed", error);
@@ -66,15 +65,12 @@ export async function updateContact(formData: FormData) {
   const status = String(formData.get("status") ?? "new");
   const priority = String(formData.get("priority") ?? "normal");
   const nextFollowUp = String(formData.get("next_follow_up_at") ?? "").trim();
-  const avatarUrlRaw = String(formData.get("avatar_url") ?? "").trim().slice(0, 1000);
-  let avatar_url: string | null = null;
-  if (avatarUrlRaw) { try { const parsed = new URL(avatarUrlRaw); if (["https:", "http:"].includes(parsed.protocol)) avatar_url = parsed.toString(); } catch {} }
   if (!id || !statuses.includes(status) || !priorities.includes(priority)) return;
   const { data: existing } = await workspace.supabase.from("contacts").select("status")
     .eq("id", id).eq("organization_id", workspace.organizationId).maybeSingle();
   if (!existing) return;
   const { error } = await workspace.supabase.from("contacts").update({
-    status, priority, avatar_url, next_follow_up_at: nextFollowUp ? new Date(nextFollowUp).toISOString() : null,
+    status, priority, next_follow_up_at: nextFollowUp ? new Date(nextFollowUp).toISOString() : null,
     updated_at: new Date().toISOString(),
   }).eq("id", id).eq("organization_id", workspace.organizationId);
   if (error) {
