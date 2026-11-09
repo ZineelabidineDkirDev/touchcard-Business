@@ -57,14 +57,16 @@ async function AuthenticatedDashboard({ children }: Readonly<{ children: React.R
     .maybeSingle();
   let enabledModules: string[] = [];
   let hasWorkspaceConfig = false;
+  let clientDisplayName = String(user.user_metadata.full_name || user.user_metadata.name || "");
   if (membership?.organization_id) {
     const { data: organization } = await supabase
       .from("organizations")
-      .select("workspace_config")
+      .select("name, workspace_config")
       .eq("id", membership.organization_id)
       .maybeSingle();
     const config = organization?.workspace_config as { version?: number; modules?: string[] } | null;
     hasWorkspaceConfig = Boolean(config?.version);
+    if (organization?.name) clientDisplayName = organization.name;
     enabledModules = Array.isArray(config?.modules) ? config.modules : [];
   }
 
@@ -81,7 +83,7 @@ async function AuthenticatedDashboard({ children }: Readonly<{ children: React.R
           <form action={signOut}><button className="mt-4 text-sm font-semibold text-rose-600"><DashboardLogoutLabel /></button></form>
         </div>
       </aside>
-      <main className="min-w-0 flex-1 p-4 sm:p-7 lg:ml-64"><DashboardTopbar name={String(user.user_metadata.full_name || user.user_metadata.name || "")} email={user.email || ""} />{children}</main>
+      <main className="min-w-0 flex-1 p-4 sm:p-7 lg:ml-64"><DashboardTopbar name={clientDisplayName} email={user.email || ""} />{children}</main>
     </div>
   );
 }
