@@ -24,6 +24,29 @@ async function hasWorkspaceModule(supabase: Awaited<ReturnType<typeof createClie
   return !config.version || (Array.isArray(config.modules) && config.modules.includes(moduleId));
 }
 
+async function hasSectorCatalogAccess(supabase: Awaited<ReturnType<typeof createClient>>, organizationId: string) {
+  const { data: organization } = await supabase.from("organizations").select("workspace_config").eq("id", organizationId).maybeSingle();
+  const config = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[]; original_client_choices?: { activity_sector?: string } };
+  const modules = Array.isArray(config.modules) ? config.modules : [];
+  const sector = String(config.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
+  const sectorCatalog = /beaute|cosmetique|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage|restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(sector);
+  return !config.version || modules.some((module) => ["product_catalog", "service_catalog"].includes(module)) || sectorCatalog;
+}
+
+function parseCsvRow(line: string) {
+  const values: string[] = [];
+  let value = "", quoted = false;
+  for (let index = 0; index < line.length; index++) {
+    const char = line[index];
+    if (char === '"' && quoted && line[index + 1] === '"') { value += '"'; index++; }
+    else if (char === '"') quoted = !quoted;
+    else if (char === "," && !quoted) { values.push(value.trim()); value = ""; }
+    else value += char;
+  }
+  values.push(value.trim());
+  return values;
+}
+
 function safeHttpUrl(value: string, maxLength: number) {
   const raw = value.trim().slice(0, maxLength);
   if (!raw) return null;
@@ -268,9 +291,8 @@ export async function createCatalogItem(formData: FormData) {
 
   const { data: organization } = await supabase.from("organizations")
     .select("workspace_config").eq("id", organizationId).maybeSingle();
-  const config = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[] };
-  const modules = Array.isArray(config.modules) ? config.modules : [];
-  if (config.version && !modules.some((module) => ["product_catalog", "service_catalog"].includes(module))) return;
+  const config = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[]; original_client_choices?: { activity_sector?: string } };
+  if (!(await hasSectorCatalogAccess(supabase, organizationId))) return;
 
   const { error } = await supabase.from("products").insert({
     organization_id: organizationId,
@@ -297,9 +319,7 @@ export async function updateCatalogItem(formData: FormData) {
   const price = Number(String(formData.get("price") ?? "").replace(",", "."));
   const imageUrl = safeHttpUrl(String(formData.get("image_url") ?? ""), 1000);
   if (!id || !name || !Number.isFinite(price) || price < 0 || price > 100000000) return;
-  const canManageProducts = await hasWorkspaceModule(supabase, organizationId, "product_catalog");
-  const canManageServices = await hasWorkspaceModule(supabase, organizationId, "service_catalog");
-  if (!canManageProducts && !canManageServices) return;
+  if (!(await hasSectorCatalogAccess(supabase, organizationId))) return;
   const { error } = await supabase.from("products").update({
     name, description, price, image_url: imageUrl, updated_at: new Date().toISOString(),
   }).eq("id", id).eq("organization_id", organizationId);
@@ -310,9 +330,7 @@ export async function updateCatalogItem(formData: FormData) {
 export async function deleteCatalogItem(formData: FormData) {
   const { supabase, user, organizationId } = await getWorkspace();
   if (!user || !organizationId) return;
-  const canManageProducts = await hasWorkspaceModule(supabase, organizationId, "product_catalog");
-  const canManageServices = await hasWorkspaceModule(supabase, organizationId, "service_catalog");
-  if (!canManageProducts && !canManageServices) return;
+  if (!(await hasSectorCatalogAccess(supabase, organizationId))) return;
   const id = String(formData.get("id") ?? "").trim();
   if (!id) return;
   const { error } = await supabase.from("products").delete().eq("id", id).eq("organization_id", organizationId);
@@ -320,5 +338,33 @@ export async function deleteCatalogItem(formData: FormData) {
     console.error("Catalog item deletion failed", error);
     return;
   }
+  revalidatePath("/dashboard/cards");
+}
+
+
+export async function importCatalogItems(formData: FormData) {
+  const { supabase, user, organizationId } = await getWorkspace();
+  if (!user || !organizationId || !(await hasSectorCatalogAccess(supabase, organizationId))) return;
+  const file = formData.get("catalog_file");
+  if (!(file instanceof File) || file.size === 0 || file.size > 500_000 || !file.name.toLowerCase().endsWith(".csv")) return;
+  const raw = (await file.text()).replace(/^\\uFEFF/, "");
+  const lines = raw.split(/\\r?\\n/).filter((line) => line.trim()).slice(0, 252);
+  if (lines.length < 2) return;
+  const headers = parseCsvRow(lines[0]).map((value) => value.toLowerCase().trim());
+  const nameIndex = headers.findIndex((value) => ["name", "nom", "prestation", "produit"].includes(value));
+  const descriptionIndex = headers.findIndex((value) => ["description", "details", "détails"].includes(value));
+  const priceIndex = headers.findIndex((value) => ["price", "prix", "tarif"].includes(value));
+  const imageIndex = headers.findIndex((value) => ["image_url", "image", "photo"].includes(value));
+  if (nameIndex < 0 || priceIndex < 0) return;
+  const rows = lines.slice(1).map((line) => parseCsvRow(line)).map((values) => {
+    const name = String(values[nameIndex] ?? "").trim().slice(0, 120);
+    const price = Number(String(values[priceIndex] ?? "").replace(",", "."));
+    const description = descriptionIndex >= 0 ? String(values[descriptionIndex] ?? "").trim().slice(0, 1200) : "";
+    const imageUrl = imageIndex >= 0 ? safeHttpUrl(String(values[imageIndex] ?? ""), 1000) : null;
+    return { organization_id: organizationId, name, description: description || null, price, currency: "MAD", image_url: imageUrl, is_active: true };
+  }).filter((item) => item.name && Number.isFinite(item.price) && item.price >= 0 && item.price <= 100000000).slice(0, 250);
+  if (!rows.length) return;
+  const { error } = await supabase.from("products").insert(rows);
+  if (error) { console.error("Catalog CSV import failed", error); return; }
   revalidatePath("/dashboard/cards");
 }
