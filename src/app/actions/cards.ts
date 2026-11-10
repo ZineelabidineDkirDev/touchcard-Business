@@ -28,8 +28,9 @@ async function hasSectorCatalogAccess(supabase: Awaited<ReturnType<typeof create
   const { data: organization } = await supabase.from("organizations").select("workspace_config").eq("id", organizationId).maybeSingle();
   const config = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[]; original_client_choices?: { activity_sector?: string; project_needs?: { selected?: string[] } } };
   const modules = Array.isArray(config.modules) ? config.modules : [];
-  const sector = String(config.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
-  const sectorCatalog = /beaute|cosmetique|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage|immobilier|agence immobiliere|promotion immobiliere|location immobiliere|restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(sector);
+  const sector = String(config.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const needs = (config.original_client_choices?.project_needs?.selected ?? []).join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const sectorCatalog = /beaute|cosmetique?s?|cosmetics?|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage|immobilier|agence immobiliere|promotion immobiliere|location immobiliere|restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(sector + " " + needs);
   return !config.version || modules.some((module) => ["product_catalog", "service_catalog"].includes(module)) || sectorCatalog;
 }
 
