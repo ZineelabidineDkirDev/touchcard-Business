@@ -57,7 +57,7 @@ async function PublicCardContent({
   const isHealth = /sante|medical|medecin|dentiste|clinique|cabinet medical|kinesitherapie|bien.?etre/.test(activitySector);
   const isHospitality = /hotel|riad|maison d.?hotes|hebergement|residence touristique|auberge/.test(activitySector);
   const isRealEstate = /immobilier|agence immobiliere|promotion immobiliere|location immobiliere/.test(activitySector);
-  const isBeauty = /beaute|cosmetique?s?|cosmetics?|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage/.test(activitySector + " " + selectedNeed);
+  const isBeauty = /beaute|cosmetique?s?|cosmetics?|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage|barber|barbier|barbershop/.test(activitySector + " " + selectedNeed);
   const isRestaurant = /restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(activitySector + " " + selectedNeed);
   const hasRoomCatalog = modules.includes("room_catalog");
   const profileDraft = workspaceConfig.ai_suggestions?.profile_draft;
@@ -77,6 +77,10 @@ async function PublicCardContent({
     ? await supabase.from("products").select("id,name,description,price,currency,image_url")
       .eq("organization_id", card.organization_id).eq("is_active", true).order("created_at", { ascending: false }).limit(24)
     : { data: [] as PublicCatalogItem[] };
+  const { data: catalogDocument } = showCatalog
+    ? await supabase.from("organization_catalog_documents").select("file_url,file_name")
+      .eq("organization_id", card.organization_id).maybeSingle()
+    : { data: null as { file_url: string; file_name: string } | null };
   const fields = (card.public_fields ?? {}) as PublicFields & { google_review_url?: string };
   const settings = (card.public_settings ?? {}) as Record<string, boolean>;
   const source = query.source === "nfc" ? "nfc_scan" : query.source === "qr" ? "qr_scan" : "view";
@@ -156,6 +160,7 @@ async function PublicCardContent({
 
           {template === "google-review" && <section className="rounded-2xl bg-white p-4 text-center"><p className="text-sm font-bold text-slate-900">Votre avis compte pour nous</p><p className="mt-1 text-2xl tracking-[.2em] text-amber-500" aria-label="5 étoiles">★★★★★</p>{fields.google_review_url ? <TrackedPublicLink cardId={card.id} href={fields.google_review_url} className="mt-3 flex items-center justify-center rounded-xl px-4 py-3 text-sm font-bold text-white" style={{ backgroundColor: accent }}>Laisser un avis Google</TrackedPublicLink> : <p className="mt-2 text-xs text-slate-600">Le lien Google sera ajouté prochainement.</p>}</section>}
 
+          {showCatalog && catalogDocument?.file_url && <section className="rounded-2xl bg-white p-4"><a href={catalogDocument.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-xl border border-indigo-100 bg-indigo-50 p-4 text-indigo-950 shadow-sm transition hover:bg-indigo-100"><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white"><svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v6h5M9 15h6M9 18h6"/></svg></span><span className="min-w-0 flex-1"><strong className="block text-sm font-black">Consulter notre catalogue PDF</strong><span className="mt-1 block truncate text-xs text-indigo-700">{catalogDocument.file_name || "Voir les prestations et tarifs"}</span></span><span className="text-lg font-black">↗</span></a></section>}
           {showCatalog && (!isEcommerce || template !== "e-business") && <section className="rounded-2xl bg-white p-4">
             <h2 className="mb-3 text-base font-bold text-black">{hasRoomCatalog ? "Nos chambres" : isBeauty ? "Nos prestations beauté" : isRestaurant ? "Notre menu" : template === "service" ? "Prestations" : isRealEstate ? "Nos projets" : "Nos réalisations"}</h2>
             {showCatalog && (catalogItems?.length ?? 0) > 0 ? <div className="grid grid-cols-2 gap-3">
