@@ -78,7 +78,7 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
                   <select name="status" defaultValue={p.status} className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700">{statuses.map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select><input name="admin_notes" defaultValue={p.admin_notes ?? ""} placeholder="Note / correction à communiquer" maxLength={2000} className="min-w-52 rounded-lg border border-slate-200 px-3 py-2 text-sm"/>
                   <button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white hover:bg-indigo-500">Enregistrer</button>
                 </form>
-                {["approved", "in_production"].includes(p.status) && p.user_id && !workspaceOwnerIds.has(p.user_id) && (
+                {["approved", "in_production", "completed"].includes(p.status) && p.user_id && !workspaceOwnerIds.has(p.user_id) && (
                   <Link href={`/dashboard/prospects/${p.id}/configure`} className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700">Configurer l'espace client →</Link>
                 )}
                 {p.user_id && !p.password_initialized && <span className="rounded-lg bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-800">Compte créé · changement du mot de passe à la première connexion</span>}
