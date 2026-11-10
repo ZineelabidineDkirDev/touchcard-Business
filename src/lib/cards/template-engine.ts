@@ -44,7 +44,7 @@ export function generateTemplateBlueprint(input: {
   const template: CardTemplate = input.template in baseModules ? input.template as CardTemplate : "contact";
   const text = normalizedText(input.needs ?? null, input.sector ?? "", input.reason ?? "");
   const modules = new Set(baseModules[template]);
-  const sectorText = (input.sector ?? "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
+  const sectorText = (input.sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const isCommerce = /e.?commerce|commerce|boutique|vente au detail|magasin|retail|vetement|habillement|cosmetique|parfumerie|epicerie|artisanat/.test(sectorText)
     || /boutique en ligne|vente en ligne|e.?commerce|catalogue de produits|commande de produits/.test(text);
   const isRealEstate = /immobilier|agence immobiliere|promotion immobiliere|location immobiliere/.test(sectorText);
