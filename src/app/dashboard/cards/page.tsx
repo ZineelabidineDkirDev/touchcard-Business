@@ -17,7 +17,7 @@ type Card = {
 type CardLink = { id: string; card_id: string; label: string; url: string; kind: string };
 type CatalogItem = { id: string; name: string; description: string | null; price: number; currency: string; image_url: string | null; is_active: boolean };
 
-export default async function ClientCardsPage({ searchParams }: { searchParams: Promise<{ card_saved?: string; card_error?: string }> }) {
+export default async function ClientCardsPage({ searchParams }: { searchParams: Promise<{ card_saved?: string; card_created?: string; card_error?: string }> }) {
   await connection();
   const status = await searchParams;
   const supabase = await createClient();
@@ -152,6 +152,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
         <Link href="/dashboard" className="text-sm font-semibold text-indigo-700">← Tableau de bord</Link>
       </header>
 
+      {status.card_created === "1" && <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">Votre nouvelle carte NFC a été créée en brouillon. Vous pouvez maintenant la personnaliser.</div>}
       {status.card_saved === "1" && <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">Modifications enregistrées. Votre carte publique a été actualisée.</div>}
       {status.card_error && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{({
         workspace: "Aucun espace client n'est associé à cette session.",
