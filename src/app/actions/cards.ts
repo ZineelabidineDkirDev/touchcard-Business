@@ -31,7 +31,7 @@ async function hasSectorCatalogAccess(supabase: Awaited<ReturnType<typeof create
   const sector = String(config.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const needs = (config.original_client_choices?.project_needs?.selected ?? []).join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const isBeautyTemplate = config.template === "contact" || config.template === "service";
-  const beautyCatalog = isBeautyTemplate && /beaute|cosmetique?s?|cosmetics?|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage/.test(sector + " " + needs);
+  const beautyCatalog = isBeautyTemplate && /beaute|cosmetique?s?|cosmetics?|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage|barber|barbier|barbershop/.test(sector + " " + needs);
   const otherSectorCatalog = /immobilier|agence immobiliere|promotion immobiliere|location immobiliere|restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(sector + " " + needs);
   const sectorCatalog = beautyCatalog || otherSectorCatalog;
   return !config.version || modules.some((module) => ["product_catalog", "service_catalog"].includes(module)) || sectorCatalog;
@@ -352,6 +352,35 @@ export async function deleteCatalogItem(formData: FormData) {
   revalidatePath("/dashboard/cards");
 }
 
+
+export async function uploadCatalogPdf(formData: FormData) {
+  const { supabase, user, organizationId } = await getWorkspace();
+  if (!user || !organizationId || !(await hasSectorCatalogAccess(supabase, organizationId))) return;
+  const file = formData.get("catalog_pdf");
+  if (!(file instanceof File) || file.size === 0 || file.size > 15 * 1024 * 1024 || file.type !== "application/pdf" || !file.name.toLowerCase().endsWith(".pdf")) return;
+
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-").slice(-100) || "catalogue.pdf";
+  const storagePath = organizationId + "/catalogues/" + crypto.randomUUID() + "-" + safeName;
+  const { error: uploadError } = await supabase.storage.from("client-media").upload(storagePath, file, {
+    cacheControl: "3600", contentType: "application/pdf", upsert: false,
+  });
+  if (uploadError) {
+    console.error("Catalog PDF upload failed", uploadError);
+    return;
+  }
+  const { data: publicUrl } = supabase.storage.from("client-media").getPublicUrl(storagePath);
+  const { error: saveError } = await supabase.from("organization_catalog_documents").upsert({
+    organization_id: organizationId,
+    file_url: publicUrl.publicUrl,
+    file_name: safeName,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: "organization_id" });
+  if (saveError) {
+    console.error("Catalog PDF metadata save failed", saveError);
+    return;
+  }
+  revalidatePath("/dashboard/cards");
+}
 
 export async function importCatalogItems(formData: FormData) {
   const { supabase, user, organizationId } = await getWorkspace();
