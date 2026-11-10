@@ -17,7 +17,7 @@ type Card = {
 type CardLink = { id: string; card_id: string; label: string; url: string; kind: string };
 type CatalogItem = { id: string; name: string; description: string | null; price: number; currency: string; image_url: string | null; is_active: boolean };
 
-export default async function ClientCardsPage({ searchParams }: { searchParams: Promise<{ card_saved?: string; card_created?: string; card_error?: string }> }) {
+export default async function ClientCardsPage({ searchParams }: { searchParams: Promise<{ card_saved?: string; card_created?: string; card_error?: string; catalog_import?: string; imported?: string; skipped?: string }> }) {
   await connection();
   const status = await searchParams;
   const supabase = await createClient();
@@ -159,6 +159,18 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
 
       {status.card_created === "1" && <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">Votre nouvelle carte NFC a été créée en brouillon. Vous pouvez maintenant la personnaliser.</div>}
       {status.card_saved === "1" && <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">Modifications enregistrées. Votre carte publique a été actualisée.</div>}
+      {status.catalog_import === "success" && <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">Import réussi : {status.imported ?? "0"} élément(s) ajouté(s). {Number(status.skipped ?? 0) > 0 ? status.skipped + " ligne(s) ignorée(s) car les données étaient invalides." : ""}</div>}
+      {status.catalog_import && status.catalog_import !== "success" && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{({
+        workspace: "Aucun espace client n'est associé à cette session.",
+        access: "L'import catalogue n'est pas activé pour votre secteur.",
+        file: "Choisissez un fichier CSV non vide avant de lancer l'import.",
+        format: "Format non accepté : sélectionnez un fichier .csv de 2 Mo maximum.",
+        empty: "Le fichier CSV est vide ou ne contient aucune ligne de données.",
+        headers: "Colonnes manquantes. Le fichier doit contenir : name, description, price, image_url.",
+        limit: "Limite dépassée : importez au maximum 250 éléments à la fois.",
+        invalid: "Aucune ligne valide. Vérifiez que chaque ligne contient un nom et un prix numérique.",
+        database: "Supabase a refusé l'import. Vérifiez les droits de votre espace puis réessayez.",
+      } as Record<string, string>)[status.catalog_import] ?? "L'import du catalogue a échoué. Vérifiez le fichier puis réessayez."}</div>}
       {status.card_error && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{({
         workspace: "Aucun espace client n'est associé à cette session.",
         module: "La gestion des cartes NFC n'est pas activée pour cet espace.",
