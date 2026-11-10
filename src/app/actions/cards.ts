@@ -33,14 +33,14 @@ async function hasSectorCatalogAccess(supabase: Awaited<ReturnType<typeof create
   return !config.version || modules.some((module) => ["product_catalog", "service_catalog"].includes(module)) || sectorCatalog;
 }
 
-function parseCsvRow(line: string) {
+function parseCsvRow(line: string, delimiter = ",") {
   const values: string[] = [];
   let value = "", quoted = false;
   for (let index = 0; index < line.length; index++) {
     const char = line[index];
     if (char === '"' && quoted && line[index + 1] === '"') { value += '"'; index++; }
     else if (char === '"') quoted = !quoted;
-    else if (char === "," && !quoted) { values.push(value.trim()); value = ""; }
+    else if (char === delimiter && !quoted) { values.push(value.trim()); value = ""; }
     else value += char;
   }
   values.push(value.trim());
@@ -347,13 +347,14 @@ export async function importCatalogItems(formData: FormData) {
   const raw = (await file.text()).replace(/^\\uFEFF/, "");
   const lines = raw.split(/\\r?\\n/).filter((line) => line.trim()).slice(0, 252);
   if (lines.length < 2) return;
-  const headers = parseCsvRow(lines[0]).map((value) => value.toLowerCase().trim());
+  const delimiter = (lines[0].match(/;/g) ?? []).length > (lines[0].match(/,/g) ?? []).length ? ";" : ",";
+  const headers = parseCsvRow(lines[0], delimiter).map((value) => value.toLowerCase().trim());
   const nameIndex = headers.findIndex((value) => ["name", "nom", "prestation", "produit"].includes(value));
   const descriptionIndex = headers.findIndex((value) => ["description", "details", "détails"].includes(value));
   const priceIndex = headers.findIndex((value) => ["price", "prix", "tarif"].includes(value));
   const imageIndex = headers.findIndex((value) => ["image_url", "image", "photo"].includes(value));
   if (nameIndex < 0 || priceIndex < 0) return;
-  const rows = lines.slice(1).map((line) => parseCsvRow(line)).map((values) => {
+  const rows = lines.slice(1).map((line) => parseCsvRow(line, delimiter)).map((values) => {
     const name = String(values[nameIndex] ?? "").trim().slice(0, 120);
     const price = Number(String(values[priceIndex] ?? "").replace(",", "."));
     const description = descriptionIndex >= 0 ? String(values[descriptionIndex] ?? "").trim().slice(0, 1200) : "";
