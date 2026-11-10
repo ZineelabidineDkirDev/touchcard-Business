@@ -51,6 +51,8 @@ export function generateTemplateBlueprint(input: {
   const isTraining = /formation|centre de formation|ecole|enseignement|coaching|cours/.test(sectorText);
   const isHealth = /sante|medical|medecin|dentiste|clinique|cabinet medical|kinesitherapie|bien.?etre/.test(sectorText);
   const isHospitality = /hotel|riad|maison d.?hotes|hebergement|residence touristique|auberge/.test(sectorText);
+  const isBeauty = /beaute|cosmetique|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage/.test(sectorText);
+  const isRestaurant = /restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(sectorText);
   const explicitlyRequestsCommerce = /boutique en ligne|vente en ligne|e.?commerce|catalogue de produits|commande de produits/.test(text);
 
   // Le modèle E-Business ne signifie pas automatiquement "boutique e-commerce".
@@ -66,6 +68,8 @@ export function generateTemplateBlueprint(input: {
   if (template === "e-business" && isHealth) {
     modules.add("gallery"); modules.add("bookings"); modules.add("availability_calendar");
   }
+  if (isBeauty || isRestaurant) modules.add("service_catalog");
+  if (isBeauty) { modules.add("bookings"); modules.add("availability_calendar"); modules.add("whatsapp"); }
   if (template === "e-business" && isHospitality) {
     modules.add("room_catalog"); modules.add("bookings"); modules.add("availability_calendar"); modules.add("crm_contacts");
   }
@@ -80,7 +84,7 @@ export function generateTemplateBlueprint(input: {
   if (/equipe|collaborateur/.test(text)) modules.add("team");
   if (/photo|realisation|contenu/.test(text) || isRealEstate || isTraining || isHealth || isHospitality) modules.add("gallery");
   if (/prospect|client|contact/.test(text) || isRealEstate) modules.add("crm_contacts");
-  if (/service|tarif|prestation/.test(text) || template === "service") modules.add("service_catalog");
+  if (/service|tarif|prestation/.test(text) || template === "service" || isBeauty || isRestaurant) modules.add("service_catalog");
   if (template === "google-review") {
     modules.add("google_reviews"); modules.add("company_profile"); modules.add("qr_nfc");
   }
