@@ -64,14 +64,18 @@ function cleanSlug(value: string) {
 
 export async function createClientCard(formData: FormData) {
   const { supabase, user, organizationId } = await getWorkspace();
-  if (!user || !organizationId || !(await hasWorkspaceModule(supabase, organizationId, "digital_card"))) return;
+  if (!user) redirect("/login?next=/dashboard/cards");
+  if (!organizationId) redirect("/dashboard/cards?card_error=workspace");
+  if (!(await hasWorkspaceModule(supabase, organizationId, "digital_card"))) {
+    redirect("/dashboard/cards?card_error=module");
+  }
   const fullName = String(formData.get("full_name") ?? "").trim().slice(0, 120);
-  if (!fullName) return;
+  if (!fullName) redirect("/dashboard/cards?card_error=missing");
   const { data: organization } = await supabase.from("organizations")
     .select("workspace_config").eq("id", organizationId).maybeSingle();
   const config = (organization?.workspace_config ?? {}) as { version?: number; template?: string; modules?: string[] };
   const modules = Array.isArray(config.modules) ? config.modules : [];
-  if (config.version && !modules.includes("digital_card")) return;
+  if (config.version && !modules.includes("digital_card")) redirect("/dashboard/cards?card_error=module");
   const template = config.template ?? "contact";
   const accent = template === "google-review" ? "#16a34a" : template === "service" ? "#0ea5e9" : template === "e-business" ? "#10b981" : "#6366f1";
   const suffix = crypto.randomUUID().slice(0, 7);
@@ -85,7 +89,13 @@ export async function createClientCard(formData: FormData) {
     job_title: String(formData.get("job_title") ?? "").trim().slice(0, 120) || null,
     is_published: false,
   });
-  if (!error) revalidatePath("/dashboard");
+  if (error) {
+    console.error("Client NFC card creation failed", { userId: user.id, organizationId, code: error.code, message: error.message });
+    redirect("/dashboard/cards?card_error=database");
+  }
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/cards");
+  redirect("/dashboard/cards?card_created=1");
 }
 
 export async function saveClientCardProfile(formData: FormData) {
