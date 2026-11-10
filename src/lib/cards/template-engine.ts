@@ -68,7 +68,7 @@ export function generateTemplateBlueprint(input: {
   if (template === "e-business" && isHealth) {
     modules.add("gallery"); modules.add("bookings"); modules.add("availability_calendar");
   }
-  if (isBeauty || isRestaurant) modules.add("service_catalog");
+  if (isBeauty || isRestaurant || isRealEstate) modules.add("service_catalog");
   if (isBeauty) { modules.add("bookings"); modules.add("availability_calendar"); modules.add("whatsapp"); }
   if (template === "e-business" && isHospitality) {
     modules.add("room_catalog"); modules.add("bookings"); modules.add("availability_calendar"); modules.add("crm_contacts");
@@ -113,7 +113,7 @@ export function generateTemplateBlueprint(input: {
   );
 
   const labels: Record<CardTemplate, { tagline: string; description: string }> = {
-    contact: { tagline: "Restons en contact", description: "Retrouvez les coordonnées, les informations professionnelles et les liens utiles sur cette carte digitale." },
+    contact: { tagline: isBeauty ? "Révélez votre beauté" : isRestaurant ? "Découvrez notre carte" : "Restons en contact", description: isBeauty ? "Découvrez nos soins, nos prestations beauté et prenez rendez-vous en quelques instants." : isRestaurant ? "Découvrez notre menu, nos spécialités et nos informations pratiques." : "Retrouvez les coordonnées, les informations professionnelles et les liens utiles sur cette carte digitale." },
     service: { tagline: "Des services adaptés à vos besoins", description: "Découvrez les prestations, les informations pratiques et les moyens de demander un devis ou un rendez-vous." },
     "e-business": {
       tagline: isCommerce ? "Votre boutique en ligne" : isRealEstate ? "Découvrez nos biens immobiliers" : isTraining ? "Développez vos compétences" : isHealth ? "Votre santé, notre priorité" : isHospitality ? "Préparez votre séjour" : "Découvrez notre activité",
@@ -130,6 +130,7 @@ export function generateTemplateBlueprint(input: {
     card_fields: profileFields,
     suggested_buttons: [
       { kind: "whatsapp", label: "WhatsApp Business", enabled: true },
+      ...(isBeauty ? [{ kind: "calendly", label: "Prendre rendez-vous", enabled: true }] : []),
       { kind: "instagram", label: "Instagram", enabled: false },
       { kind: "website", label: "Site web", enabled: false },
       ...(template === "e-business" && isCommerce ? [{ kind: "store", label: "Boutique en ligne", enabled: true }] : []),
