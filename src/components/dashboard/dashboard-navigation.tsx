@@ -31,13 +31,18 @@ export function DashboardNavigation({
 
   if (!isSuperAdmin) {
     const clientItems = [
-      { label: "Vue d’ensemble", href: "/dashboard" },
-      { label: "Ma carte NFC", href: "/dashboard/cards" },
-      { label: "Demandes reçues", href: "/dashboard/requests" },
-      { label: "Mes contacts", href: "/dashboard/contacts" },
-      { label: "Statistiques", href: "/dashboard/analytics" },
-      { label: "Mon profil", href: "/dashboard/profile" },
-    ];
+      { label: "Vue d’ensemble", href: "/dashboard", modules: [] as string[] },
+      { label: "Ma carte NFC", href: "/dashboard/cards", modules: ["digital_card"] },
+      { label: "Demandes reçues", href: "/dashboard/requests", modules: ["orders", "bookings", "quote_requests"] },
+      { label: "Mes contacts", href: "/dashboard/contacts", modules: ["crm_contacts"] },
+      { label: "Mon équipe", href: "/dashboard/team", modules: ["team"] },
+      { label: "Statistiques", href: "/dashboard/analytics", modules: ["analytics"] },
+      { label: "Mon profil", href: "/dashboard/profile", modules: ["company_profile", "contact_profile"] },
+    ].filter((item) => {
+      if (!hasWorkspaceConfig || item.modules.length === 0) return true;
+      if (item.modules.some((module) => hiddenModules.includes(module))) return false;
+      return item.modules.some((module) => enabledModules.includes(module));
+    });
 
     return (
       <nav aria-label="Navigation de l’espace client" className="flex w-full flex-nowrap items-center gap-2 overflow-x-auto overscroll-x-contain whitespace-nowrap pb-1 [scrollbar-width:thin]">
