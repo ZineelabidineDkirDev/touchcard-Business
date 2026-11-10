@@ -8,6 +8,7 @@ import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
 import { AdminClientCards } from "@/components/dashboard/admin-client-cards";
 import { MediaImagePicker } from "@/components/dashboard/media-image-picker";
 import { PopupDialog } from "@/components/dashboard/popup-dialog";
+import { CardVisibilityPreview } from "@/components/cards/card-visibility-preview";
 
 type Card = {
   id: string; slug: string; full_name: string; job_title: string | null; company_name: string | null;
@@ -264,70 +265,23 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                   <label className="text-xs font-semibold text-slate-600">Fonction<input name="job_title" defaultValue={card.job_title ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600">Entreprise<input name="company_name" defaultValue={card.company_name ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <div className="sm:col-span-2 grid gap-4 md:grid-cols-[.8fr_1.2fr]"><MediaImagePicker organizationId={organizationId!} name="avatar_url" initialUrl={card.avatar_url} label="Photo de profil"/><MediaImagePicker organizationId={organizationId!} name="cover_url" initialUrl={card.cover_url} label="Couverture de la carte" shape="wide"/></div>
-                  <div className="sm:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <p className="text-xs font-bold text-slate-800">Couleur de ma carte</p>
-                    <p className="mt-1 text-[11px] text-slate-500">Choisissez la couleur principale utilisée pour les boutons, icônes et accents de votre carte publique.</p>
-                    <div className="mt-3 flex flex-wrap gap-3">
-                      {[
-                        { name: "Bleu royal", value: "#2563EB" }, { name: "Bleu nuit", value: "#1D4ED8" },
-                        { name: "Turquoise", value: "#0891B2" }, { name: "Vert", value: "#16A34A" },
-                        { name: "Émeraude", value: "#059669" }, { name: "Violet", value: "#7C3AED" },
-                        { name: "Rose", value: "#DB2777" }, { name: "Rouge", value: "#DC2626" },
-                        { name: "Orange", value: "#EA580C" }, { name: "Noir", value: "#171717" },
-                      ].map((color) => <label key={color.value} title={color.name} className="flex cursor-pointer flex-col items-center gap-1.5 text-[10px] font-semibold text-slate-600">
-                        <input type="radio" name="accent_color" value={color.value} defaultChecked={currentAccent.toLowerCase() === color.value.toLowerCase()} className="peer sr-only"/>
-                        <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-white shadow ring-1 ring-slate-300 peer-checked:ring-2 peer-checked:ring-slate-900" style={{ backgroundColor: color.value }}><span className="hidden text-sm font-black text-white peer-checked:inline">✓</span></span>
-                        {color.name}
-                      </label>)}
-                    </div>
-                  </div>
-                  <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Code NFC affiché sur la couverture<input name="nfc_display_code" defaultValue={fields.nfc_display_code ?? `TC-${card.id.slice(0,8).toUpperCase()}`} maxLength={24} placeholder="Ex. TC-CLIENT-001" className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/><span className="mt-1 block text-[11px] font-normal text-slate-400">Ce code est un identifiant visuel personnalisable. Le QR code à côté renvoie automatiquement vers votre carte publique.</span></label>
-                  <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Présentation / bio<textarea name="bio" defaultValue={card.bio ?? ""} rows={3} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
-                  <label className="text-xs font-semibold text-slate-600">Téléphone<input name="phone" defaultValue={card.phone ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
-                  <label className="text-xs font-semibold text-slate-600">E-mail<input name="email" type="email" defaultValue={card.email ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
-                  <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Site web<input name="website" defaultValue={card.website ?? ""} placeholder="https://..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
-                  <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Phrase d'accroche<input name="tagline" defaultValue={fields.tagline ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
-                  <label className="text-xs font-semibold text-slate-600">Adresse exacte (rue, numéro, quartier, ville)<input name="location" defaultValue={fields.location ?? ""} placeholder="Ex. 12 rue ..., quartier ..., Salé, Maroc" className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
-                  <label className="text-xs font-semibold text-slate-600">Horaires d’ouverture<input name="hours" defaultValue={fields.hours ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
-                  <label className="text-xs font-semibold text-slate-600 sm:col-span-2">WhatsApp Business (numéro)<input name="whatsapp" defaultValue={fields.whatsapp ?? ""} placeholder="+212..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
-                  {config.template === "e-business" && <div className="sm:col-span-2 rounded-2xl border border-indigo-100 bg-indigo-50/60 p-4">
-                    <div className="mb-3"><h3 className="text-sm font-black text-indigo-950">2. Company Info · Informations de l’entreprise</h3><p className="mt-1 text-xs leading-5 text-indigo-800">Ces coordonnées sont distinctes de vos coordonnées personnelles et apparaîtront sur la carte e-business uniquement si elles sont renseignées.</p></div>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <label className="text-xs font-semibold text-slate-600">Téléphone de l’entreprise<input name="company_phone" type="tel" defaultValue={fields.company_phone ?? ""} placeholder="+212..." className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm"/></label>
-                      <label className="text-xs font-semibold text-slate-600">E-mail de l’entreprise<input name="company_email" type="email" defaultValue={fields.company_email ?? ""} placeholder="contact@entreprise.ma" className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm"/></label>
-                      <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Adresse de l’entreprise<input name="company_address" defaultValue={fields.company_address ?? ""} placeholder="Adresse complète, ville, pays" className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm"/></label>
-                      <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Secteur d’activité<input name="industry" defaultValue={fields.industry ?? ""} placeholder="Ex. Immobilier, restauration, commerce..." className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm"/></label>
-                    </div>
-                  </div>}
-                  {config.template === "google-review" && <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Lien officiel Google Avis<input name="google_review_url" type="url" defaultValue={fields.google_review_url ?? ""} placeholder="https://g.page/r/..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>}
-                  <CustomCardFieldsEditor initialFields={initialCustomFields}/>
-                  <div className="sm:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                    <div><h3 className="text-sm font-black text-slate-900">Sections visibles sur ma carte NFC</h3><p className="mt-1 text-xs leading-5 text-slate-500">Désactivez les sections inutiles. Elles seront masquées sur votre page publique, sans supprimer leur contenu. Vous pourrez les réactiver à tout moment.</p></div>
-                    <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                      {[
-                        ["show_about", "Présentation / À propos"],
-                        ["show_contact", "Coordonnées / Contact"],
-                        ["show_company_info", "Informations entreprise"],
-                        ["show_categories", "Domaines et spécialités"],
-                        ["show_info_fields", "Informations complémentaires"],
-                        ["show_google_reviews", "Avis Google"],
-                        ["show_catalog_pdf", "Catalogue PDF"],
-                        ["show_catalog", "Prestations / Menu / Produits"],
-                        ["show_request_forms", "Réservation / Commande / Demande"],
-                        ["show_social_links", "Réseaux sociaux"],
-                        ["show_featured_links", "Liens mis en avant"],
-                        ["show_faq", "Questions fréquentes (FAQ)"],
-                        ["show_videos", "Vidéos"],
-                        ["show_location", "Adresse et carte"],
-                      ].map(([name, label]) => <label key={name} className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-semibold text-slate-700 transition hover:border-indigo-300">
-                        <input type="checkbox" name={name} defaultChecked={settings[name] !== false} className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"/>
-                        {label}
-                      </label>)}
-                    </div>
-                    <div className="mt-4 border-t border-slate-200 pt-3">
-                      <p className="mb-2 text-xs font-bold text-slate-700">Visibilité des coordonnées</p>
-                      <div className="flex flex-wrap gap-4"><label className="flex items-center gap-2 text-xs"><input type="checkbox" name="show_phone" defaultChecked={settings.show_phone !== false}/> Téléphone</label><label className="flex items-center gap-2 text-xs"><input type="checkbox" name="show_email" defaultChecked={settings.show_email !== false}/> E-mail</label><label className="flex items-center gap-2 text-xs"><input type="checkbox" name="show_website" defaultChecked={settings.show_website !== false}/> Site web</label></div>
-                    </div>
+                  <div className="sm:col-span-2">
+                    <CardVisibilityPreview
+                      initialSettings={settings}
+                      cardName={card.full_name}
+                      companyName={card.company_name ?? ""}
+                      jobTitle={card.job_title ?? ""}
+                      bio={card.bio ?? ""}
+                      phone={card.phone ?? ""}
+                      email={card.email ?? ""}
+                      website={card.website ?? ""}
+                      accent={currentAccent}
+                      catalogLabel={catalogLabel}
+                      catalogCount={catalogItems?.length ?? 0}
+                      hasCatalogPdf={Boolean(catalogDocument?.file_url)}
+                      socialCount={cardLinks.filter((link) => ["instagram", "facebook", "linkedin", "tiktok", "youtube", "x", "pinterest", "whatsapp", "telegram"].includes(link.kind)).length}
+                      featuredCount={cardLinks.filter((link) => !["instagram", "facebook", "linkedin", "tiktok", "youtube", "x", "pinterest", "whatsapp", "telegram"].includes(link.kind)).length}
+                    />
                   </div>
                 </div>
                 <div className="sticky bottom-0 -mx-1 border-t border-slate-100 bg-white/95 px-1 py-3 backdrop-blur"><button className="btn-primary w-full rounded-full py-3 text-sm">✓ Enregistrer ma carte</button><p className="mt-2 text-center text-[10px] text-slate-400">Vos modifications seront visibles après enregistrement.</p></div>
