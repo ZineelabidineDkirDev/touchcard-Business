@@ -187,7 +187,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
             <h2 className="mt-2 text-2xl font-black text-slate-950">Personnalisation de ma carte</h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">Votre carte est préparée selon votre activité et les fonctionnalités validées dans votre espace. Personnalisez son apparence et son contenu sans changer les outils liés à votre métier.</p>
           </div>
-          <a href="#mes-cartes-nfc" className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700">Personnaliser ma carte</a>
+          <a href="#mes-cartes-nfc" className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-6 py-4 text-sm font-extrabold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:bg-indigo-700 sm:w-auto"><span aria-hidden="true" className="text-lg">✦</span> Personnaliser ma carte <span aria-hidden="true">→</span></a>
         </div>
         <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {[
@@ -235,7 +235,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
         </form></PopupDialog>
       </section>
 
-      <div className="space-y-6">
+      <div id="mes-cartes-nfc" className="scroll-mt-24 space-y-6">
         {(cards ?? []).map((card) => {
           const cardLinks = (links ?? []).filter((link) => link.card_id === card.id);
           const cardEvents = (events ?? []).filter((event) => event.card_id === card.id);
@@ -256,7 +256,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
               </div>
             </div>
             <div className="grid gap-6 p-5 xl:grid-cols-[1.15fr_.85fr]">
-              <PopupDialog title="Personnaliser ma carte NFC" description="Modifiez votre identité, votre couverture, vos coordonnées et les contenus visibles après un scan." triggerLabel="Personnaliser ma carte">
+              <div className="w-full"><PopupDialog title="Personnaliser ma carte NFC" description="Modifiez votre identité, votre couverture, vos coordonnées et les contenus visibles après un scan." triggerLabel="✦  Personnaliser ma carte" triggerClassName="flex w-full items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-4 text-base font-extrabold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:from-indigo-700 hover:to-violet-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-200">
               <form action={saveClientCardProfile} className="space-y-3">
                 <input type="hidden" name="card_id" value={card.id}/>
                 <div className="rounded-xl bg-indigo-50 p-3"><h3 className="text-sm font-bold text-indigo-950">1. Identité et couverture</h3><p className="mt-1 text-xs leading-5 text-indigo-800">Choisissez une photo de profil et une bannière horizontale. Vous pouvez remplacer ou retirer chaque image à tout moment.</p></div>
@@ -286,7 +286,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                 </div>
                 <div className="sticky bottom-0 -mx-1 border-t border-slate-100 bg-white/95 px-1 py-3 backdrop-blur"><button className="btn-primary w-full rounded-full py-3 text-sm">✓ Enregistrer ma carte</button><p className="mt-2 text-center text-[10px] text-slate-400">Vos modifications seront visibles après enregistrement.</p></div>
               </form>
-              </PopupDialog>
+              </PopupDialog></div>
 
               <div className="space-y-5">
                 <div><h3 className="font-bold text-slate-900">Réseaux sociaux & liens</h3><p className="mt-1 text-xs text-slate-500">Ajoutez Instagram, TikTok, YouTube, LinkedIn, vos projets, une boutique ou un lien de réservation.</p>
