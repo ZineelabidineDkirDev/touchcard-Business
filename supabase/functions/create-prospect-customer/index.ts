@@ -90,7 +90,7 @@ Deno.serve(async (req: Request) => {
       .select("id,user_id,full_name,email,phone,city,status,brand_name,logo_url,card_type,activity_sector,project_needs")
       .eq("id", requestId).maybeSingle();
     if (prospectError || !prospect) return json({ error: "Prospect not found" }, 404);
-    if (prospect.status !== "approved") return json({ error: "Approve the prospect before creating an account" }, 409);
+    if (!["approved", "in_production"].includes(prospect.status)) return json({ error: "Validez la demande avant de configurer l’espace client." }, 409);
     if (!prospect.user_id) return json({ error: "The customer account must be created when the prospect submits the request" }, 409);
     if (prospect.card_type !== cardType) return json({ error: "The selected template must match the prospect's original card choice" }, 400);
 
@@ -146,6 +146,14 @@ Deno.serve(async (req: Request) => {
     if (organizationError || !organization) throw new Error("The customer workspace could not be created.");
     organizationId = organization.id;
 
+    // Link the customer to the shared dashboard shell and their own workspace.
+    const { error: membershipError } = await admin.from("organization_members").insert({
+      organization_id: organization.id,
+      user_id: customerUserId,
+      role: "organization_admin",
+    });
+    if (membershipError) throw new Error("L’espace client n’a pas pu être associé au compte.");
+
     const cardSlug = `${slugBase}-${crypto.randomUUID().slice(0, 8)}`;
     const publicFields = {
       tagline: profileDraft?.tagline ?? "",
@@ -187,7 +195,7 @@ Deno.serve(async (req: Request) => {
     if (nfcError) throw new Error("The NFC link could not be prepared.");
 
     const { data: linked, error: linkError } = await admin.from("prospect_requests")
-      .update({ status: "in_production", client_access_enabled: false, updated_at: new Date().toISOString() })
+      .update({ status: "in_production", updated_at: new Date().toISOString() })
       .eq("id", prospect.id).eq("user_id", customerUserId).select("id").maybeSingle();
     if (linkError || !linked) throw new Error("The customer workspace could not be linked to the approved request.");
 
