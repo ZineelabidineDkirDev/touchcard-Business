@@ -1,4 +1,46 @@
-"use server";
+export async function importCatalogItems(formData: FormData) {
+  const { supabase, user, organizationId } = await getWorkspace();
+  if (!user) redirect("/login?next=/dashboard/cards");
+  if (!organizationId) redirect("/dashboard/cards?catalog_import=workspace");
+  if (!(await hasSectorCatalogAccess(supabase, organizationId))) redirect("/dashboard/cards?catalog_import=access");
+
+  const file = formData.get("catalog_file");
+  if (!(file instanceof File) || file.size === 0) redirect("/dashboard/cards?catalog_import=file");
+  if (file.size > 2 * 1024 * 1024 || !file.name.toLowerCase().endsWith(".csv")) redirect("/dashboard/cards?catalog_import=format");
+
+  const raw = (await file.text()).replace(/^\\uFEFF/, "");
+  const delimiter = detectCsvDelimiter(raw);
+  const records = parseCsvRecords(raw, delimiter);
+  if (records.length < 2) redirect("/dashboard/cards?catalog_import=empty");
+  const headers = records[0].map((value) => value.replace(/^\\uFEFF/, "").trim().toLowerCase());
+  const nameIndex = headers.findIndex((value) => ["name", "nom", "prestation", "produit"].includes(value));
+  const descriptionIndex = headers.findIndex((value) => ["description", "details", "détails"].includes(value));
+  const priceIndex = headers.findIndex((value) => ["price", "prix", "tarif"].includes(value));
+  const imageIndex = headers.findIndex((value) => ["image_url", "image", "photo"].includes(value));
+  if (nameIndex < 0 || descriptionIndex < 0 || priceIndex < 0 || imageIndex < 0) {
+    redirect("/dashboard/cards?catalog_import=headers");
+  }
+
+  const dataRecords = records.slice(1).filter((row) => row.some((cell) => cell.trim()));
+  if (dataRecords.length > 250) redirect("/dashboard/cards?catalog_import=limit");
+  const rows = dataRecords.map((values) => {
+    const name = String(values[nameIndex] ?? "").trim().slice(0, 120);
+    const description = String(values[descriptionIndex] ?? "").trim().slice(0, 1200);
+    const rawPrice = String(values[priceIndex] ?? "").replace(/[\\s\\u00a0]/g, "").replace(",", ".");
+    const price = Number(rawPrice);
+    const imageUrl = safeHttpUrl(String(values[imageIndex] ?? ""), 1000);
+    return { organization_id: organizationId, name, description: description || null, price, currency: "MAD", image_url: imageUrl, is_active: true };
+  });
+  const validRows = rows.filter((item) => item.name && Number.isFinite(item.price) && item.price >= 0 && item.price <= 100000000);
+  if (!validRows.length) redirect("/dashboard/cards?catalog_import=invalid");
+  const { error } = await supabase.from("products").insert(validRows);
+  if (error) {
+    console.error("Catalog CSV import failed", { code: error.code, message: error.message, details: error.details, organizationId });
+    redirect("/dashboard/cards?catalog_import=database");
+  }
+  revalidatePath("/dashboard/cards");
+  redirect("/dashboard/cards?catalog_import=success&imported=" + validRows.length + "&skipped=" + (rows.length - validRows.length));
+}"use server";
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
@@ -37,18 +79,37 @@ async function hasSectorCatalogAccess(supabase: Awaited<ReturnType<typeof create
   return !config.version || modules.some((module) => ["product_catalog", "service_catalog"].includes(module)) || sectorCatalog;
 }
 
-function parseCsvRow(line: string, delimiter = ",") {
-  const values: string[] = [];
-  let value = "", quoted = false;
-  for (let index = 0; index < line.length; index++) {
-    const char = line[index];
-    if (char === '"' && quoted && line[index + 1] === '"') { value += '"'; index++; }
+function parseCsvRecords(input: string, delimiter: string) {
+  const records: string[][] = [];
+  let row: string[] = [], value = "", quoted = false;
+  for (let index = 0; index < input.length; index++) {
+    const char = input[index];
+    if (char === '"' && quoted && input[index + 1] === '"') { value += '"'; index++; }
     else if (char === '"') quoted = !quoted;
-    else if (char === delimiter && !quoted) { values.push(value.trim()); value = ""; }
-    else value += char;
+    else if (char === delimiter && !quoted) { row.push(value.trim()); value = ""; }
+    else if ((char === "\\n" || char === "\\r") && !quoted) {
+      if (char === "\\r" && input[index + 1] === "\\n") index++;
+      row.push(value.trim()); value = "";
+      if (row.some((cell) => cell.length)) records.push(row);
+      row = [];
+    } else value += char;
   }
-  values.push(value.trim());
-  return values;
+  row.push(value.trim());
+  if (row.some((cell) => cell.length)) records.push(row);
+  return records;
+}
+
+function detectCsvDelimiter(input: string) {
+  let quoted = false, commas = 0, semicolons = 0;
+  for (let index = 0; index < input.length; index++) {
+    const char = input[index];
+    if (char === '"' && quoted && input[index + 1] === '"') index++;
+    else if (char === '"') quoted = !quoted;
+    else if (!quoted && (char === "\\n" || char === "\\r")) break;
+    else if (!quoted && char === ",") commas++;
+    else if (!quoted && char === ";") semicolons++;
+  }
+  return semicolons > commas ? ";" : ",";
 }
 
 function safeHttpUrl(value: string, maxLength: number) {
