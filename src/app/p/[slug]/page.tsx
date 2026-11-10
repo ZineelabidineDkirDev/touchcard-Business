@@ -68,8 +68,8 @@ async function PublicCardContent({
   const profileCategories = Array.isArray(profileDraft?.categories)
     ? profileDraft.categories.map((value) => String(value).trim()).filter(Boolean).slice(0, 8)
     : [];
-  const showCatalog = (["service", "e-business"].includes(template) || isBeauty || isRestaurant)
-    && (!workspaceConfig.version || modules.some((module) => module === "service_catalog" || module === "room_catalog" || (module === "product_catalog" && isEcommerce)) || isBeauty || isRestaurant);
+  const showCatalog = (["service", "e-business"].includes(template) || isBeauty || isRestaurant || isRealEstate)
+    && (!workspaceConfig.version || modules.some((module) => module === "service_catalog" || module === "room_catalog" || (module === "product_catalog" && isEcommerce)) || isBeauty || isRestaurant || isRealEstate);
   const allowOrders = isEcommerce && modules.includes("orders");
   const allowBookings = modules.includes("bookings") || isBeauty;
   const allowQuotes = modules.includes("quote_requests");
@@ -156,7 +156,7 @@ async function PublicCardContent({
 
           {template === "google-review" && <section className="rounded-2xl bg-white p-4 text-center"><p className="text-sm font-bold text-slate-900">Votre avis compte pour nous</p><p className="mt-1 text-2xl tracking-[.2em] text-amber-500" aria-label="5 étoiles">★★★★★</p>{fields.google_review_url ? <TrackedPublicLink cardId={card.id} href={fields.google_review_url} className="mt-3 flex items-center justify-center rounded-xl px-4 py-3 text-sm font-bold text-white" style={{ backgroundColor: accent }}>Laisser un avis Google</TrackedPublicLink> : <p className="mt-2 text-xs text-slate-600">Le lien Google sera ajouté prochainement.</p>}</section>}
 
-          {(!isEcommerce || template !== "e-business") && <section className="rounded-2xl bg-white p-4">
+          {showCatalog && (!isEcommerce || template !== "e-business") && <section className="rounded-2xl bg-white p-4">
             <h2 className="mb-3 text-base font-bold text-black">{hasRoomCatalog ? "Nos chambres" : isBeauty ? "Nos prestations beauté" : isRestaurant ? "Notre menu" : template === "service" ? "Prestations" : isRealEstate ? "Nos projets" : "Nos réalisations"}</h2>
             {showCatalog && (catalogItems?.length ?? 0) > 0 ? <div className="grid grid-cols-2 gap-3">
               {(catalogItems ?? []).map((item) => <article key={item.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
