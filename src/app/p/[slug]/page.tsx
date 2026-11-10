@@ -50,8 +50,8 @@ async function PublicCardContent({
   const activitySector = String(workspaceConfig.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const selectedNeed = String(workspaceConfig.original_client_choices?.project_needs?.selected?.[0] ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const isEcommerce = template === "e-business" && (
-    /e.?commerce|commerce|boutique|vente au detail|magasin|retail|vetement|habillement|cosmetique|parfumerie|epicerie|artisanat/.test(activitySector)
-    || /boutique en ligne|vente en ligne|e.?commerce|catalogue de produits|commande de produits/.test(selectedNeed)
+    /e.?commerce|commerce en ligne|boutique en ligne|vente en ligne/.test(activitySector)
+    || /boutique en ligne|vente en ligne|e.?commerce|commerce en ligne|catalogue de produits|commande de produits/.test(selectedNeed)
   );
   const isTraining = /formation|centre de formation|ecole|enseignement|coaching|cours/.test(activitySector);
   const isHealth = /sante|medical|medecin|dentiste|clinique|cabinet medical|kinesitherapie|bien.?etre/.test(activitySector);
