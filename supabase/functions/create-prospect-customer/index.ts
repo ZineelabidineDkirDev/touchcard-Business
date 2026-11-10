@@ -180,15 +180,16 @@ Deno.serve(async (req: Request) => {
       return [{ label: platform.slice(0, 60), url, kind: kindByPlatform[normalizedPlatform] ?? "other", position: index }];
     });
     const businessAddress = String(prospect.business_address ?? "").trim();
+    const displayAddress = businessAddress && !safeHttpUrl(businessAddress) ? businessAddress : (prospect.city || "");
     const businessPhone = String(prospect.business_phone ?? "").trim();
     const publicFields = {
       tagline: profileDraft?.tagline ?? "",
-      location: businessAddress || prospect.city || "",
+      location: displayAddress,
       hours: "",
       whatsapp: businessPhone,
       company_phone: businessPhone,
       company_email: prospect.email ?? "",
-      company_address: businessAddress || prospect.city || "",
+      company_address: displayAddress,
       industry: prospect.activity_sector ?? "",
       google_review_url: "",
       custom_fields: (profileDraft?.card_fields ?? [])
