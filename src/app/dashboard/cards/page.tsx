@@ -4,7 +4,6 @@ import { connection } from "next/server";
 import { createClientCard, saveClientCardProfile, addClientCardLink, deleteClientCardLink, toggleClientCardPublication, createCatalogItem, updateCatalogItem, deleteCatalogItem } from "@/app/actions/cards";
 import { createClient } from "@/lib/supabase/server";
 import { CustomCardFieldsEditor, type EditableCardField } from "@/components/cards/custom-card-fields-editor";
-import { CardTemplateGallery } from "@/components/cards/card-template-gallery";
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
 import { AdminClientCards } from "@/components/dashboard/admin-client-cards";
 import { MediaImagePicker } from "@/components/dashboard/media-image-picker";
@@ -136,7 +135,6 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
       .eq("organization_id", organizationId).order("created_at", { ascending: false })
     : { data: [] as CatalogItem[] };
   const profileDraft = config.ai_suggestions?.profile_draft;
-  const { data: designRequest } = await supabase.from("card_design_requests").select("status,template_id").eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
   const totalViews = (events ?? []).filter((event) => ["view", "qr_scan", "nfc_scan"].includes(event.event_type)).length;
   const totalNfc = (events ?? []).filter((event) => event.event_type === "nfc_scan").length;
   const totalQr = (events ?? []).filter((event) => event.event_type === "qr_scan").length;
@@ -160,7 +158,25 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
         database: "Supabase a refusé l'enregistrement. Réessayez ; si le problème persiste, consultez les journaux serveur.",
         permission: "Aucune carte de cet espace n'a été modifiée. Vérifiez les droits d'accès à cette carte.",
       } as Record<string, string>)[status.card_error] ?? "L'enregistrement a échoué. Réessayez."}</div>}
-      <CardTemplateGallery cardType={String(config.template ?? "contact")} modules={modules} existingStatus={designRequest?.status ?? null} existingTemplate={designRequest?.template_id ?? null} />
+      <section className="overflow-hidden rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-6 shadow-sm sm:p-7">
+        <div className="flex flex-wrap items-start justify-between gap-5">
+          <div className="max-w-2xl">
+            <p className="text-xs font-black uppercase tracking-[.2em] text-indigo-700">Votre espace de personnalisation</p>
+            <h2 className="mt-2 text-2xl font-black text-slate-950">Personnalisation de ma carte</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">Votre carte est préparée selon votre activité et les fonctionnalités validées dans votre espace. Personnalisez son apparence et son contenu sans changer les outils liés à votre métier.</p>
+          </div>
+          <a href="#mes-cartes-nfc" className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700">Personnaliser ma carte</a>
+        </div>
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {[
+            { title: "Identité visuelle", detail: "Logo, photo de profil et couverture", icon: "◈" },
+            { title: "Style graphique", detail: "Couleurs et présentation de la carte", icon: "✦" },
+            { title: "Contenu", detail: "Coordonnées, textes et informations", icon: "▤" },
+            { title: "Boutons & liens", detail: "WhatsApp, réseaux sociaux et liens utiles", icon: "↗" },
+          ].map((item) => <div key={item.title} className="rounded-2xl border border-white bg-white/85 p-4 shadow-sm"><span className="text-xl text-indigo-600">{item.icon}</span><h3 className="mt-2 text-sm font-black text-slate-900">{item.title}</h3><p className="mt-1 text-xs leading-5 text-slate-500">{item.detail}</p></div>)}
+        </div>
+        <p className="mt-4 text-xs text-slate-500">La structure et les fonctionnalités de votre espace restent adaptées à votre secteur d’activité. Vous pouvez consulter votre carte publique à tout moment.</p>
+      </section>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {[["Visites & scans", totalViews], ["Scans NFC", totalNfc], ["Contacts enregistrés", totalSaves], ["Clics sur les boutons", totalClicks]].map(([label, value]) => <article key={String(label)} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"><p className="text-sm text-slate-500">{label}</p><p className="mt-3 text-3xl font-black text-slate-950">{value}</p><p className="mt-1 text-xs text-slate-400">Événements réels enregistrés</p></article>)}
