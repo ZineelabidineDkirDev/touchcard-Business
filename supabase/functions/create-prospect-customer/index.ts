@@ -6,7 +6,7 @@ const allowedModules = new Set([
   "dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc", "google_reviews",
   "company_profile", "service_catalog", "product_catalog", "orders",
   "quote_requests", "bookings", "availability_calendar", "team",
-  "gallery", "crm_contacts", "analytics", "whatsapp",
+  "gallery", "room_catalog", "crm_contacts", "analytics", "whatsapp",
   "edit_business_details", "manage_services_prices", "manage_bookings",
   "manage_content", "view_analytics", "manage_team",
 ]);
