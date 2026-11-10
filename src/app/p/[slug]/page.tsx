@@ -158,9 +158,9 @@ async function PublicCardContent({
 
           {(!isEcommerce || template !== "e-business") && <section className="rounded-2xl bg-white p-4">
             <h2 className="mb-3 text-base font-bold text-black">{hasRoomCatalog ? "Nos chambres" : isBeauty ? "Nos prestations beauté" : isRestaurant ? "Notre menu" : template === "service" ? "Prestations" : isRealEstate ? "Nos projets" : "Nos réalisations"}</h2>
-            {showCatalog && (catalogItems?.length ?? 0) > 0 ? <div className="flex snap-x gap-3 overflow-x-auto pb-2">
-              {(catalogItems ?? []).map((item) => <article key={item.id} className="w-[245px] shrink-0 snap-start overflow-hidden rounded-xl border border-slate-200 bg-white">
-                {item.image_url && <img src={item.image_url} alt={item.name} loading="lazy" className="h-40 w-full object-cover"/>}
+            {showCatalog && (catalogItems?.length ?? 0) > 0 ? <div className="grid grid-cols-2 gap-3">
+              {(catalogItems ?? []).map((item) => <article key={item.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                {item.image_url ? <img src={item.image_url} alt={item.name} loading="lazy" className="h-32 w-full object-cover"/> : <div className="flex h-24 items-center justify-center bg-slate-50 text-3xl text-slate-300">✦</div>}
                 <div className="p-4"><h3 className="font-bold text-slate-900">{item.name}</h3>{item.description && <p className="mt-1 text-sm leading-6 text-slate-600">{item.description}</p>}<p className="mt-3 text-sm font-black text-slate-700">{Number(item.price).toLocaleString("fr-MA")} {item.currency}</p></div>
               </article>)}
             </div> : <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-xs leading-5 text-slate-500">Aucun élément publié pour le moment.</p>}
