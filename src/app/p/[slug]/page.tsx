@@ -47,8 +47,8 @@ async function PublicCardContent({
     original_client_choices?: { project_needs?: { selected?: string[]; management_needs?: string[]; reservation_mode?: string | null; reservation_channels?: string[] } | null; activity_sector?: string; city?: string };
   };
   const modules = Array.isArray(workspaceConfig.modules) ? workspaceConfig.modules : [];
-  const activitySector = String(workspaceConfig.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
-  const selectedNeed = String(workspaceConfig.original_client_choices?.project_needs?.selected?.[0] ?? "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
+  const activitySector = String(workspaceConfig.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const selectedNeed = String(workspaceConfig.original_client_choices?.project_needs?.selected?.[0] ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const isEcommerce = template === "e-business" && (
     /e.?commerce|commerce|boutique|vente au detail|magasin|retail|vetement|habillement|cosmetique|parfumerie|epicerie|artisanat/.test(activitySector)
     || /boutique en ligne|vente en ligne|e.?commerce|catalogue de produits|commande de produits/.test(selectedNeed)
