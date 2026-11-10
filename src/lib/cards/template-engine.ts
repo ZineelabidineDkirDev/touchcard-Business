@@ -51,7 +51,7 @@ export function generateTemplateBlueprint(input: {
   const isTraining = /formation|centre de formation|ecole|enseignement|coaching|cours/.test(sectorText);
   const isHealth = /sante|medical|medecin|dentiste|clinique|cabinet medical|kinesitherapie|bien.?etre/.test(sectorText);
   const isHospitality = /hotel|riad|maison d.?hotes|hebergement|residence touristique|auberge/.test(sectorText);
-  const isBeauty = /beaute|cosmetique|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage/.test(sectorText) || /beaute|cosmetique|esthetique|spa|hammam|onglerie|maquillage|massage/.test(text);
+  const isBeauty = /beaute|cosmetique?s?|cosmetics?|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage/.test(sectorText) || /beaute|cosmetique|esthetique|spa|hammam|onglerie|maquillage|massage/.test(text);
   const isRestaurant = /restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(sectorText) || /restaurant|restauration|menu|plats|cuisine|traiteur|pizzeria/.test(text);
   const explicitlyRequestsCommerce = /boutique en ligne|vente en ligne|e.?commerce|catalogue de produits|commande de produits/.test(text);
 
