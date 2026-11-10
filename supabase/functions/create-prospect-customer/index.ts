@@ -20,7 +20,11 @@ const corsHeaders = {
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 }
-function normalizeSiteUrl(value: string) { return value.endsWith("/") ? value.slice(0, -1) : value; }
+function normalizeText(value: unknown) { return String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); }
+function isBeautySector(sector: unknown, needs: unknown) {
+  const selected = Array.isArray((needs as any)?.selected) ? (needs as any).selected.join(" ") : "";
+  return /beaute|cosmetique?s?|cosmetics?|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage/.test(normalizeText(String(sector ?? "") + " " + selected));
+}
 function safeHttpUrl(value: unknown) {
   if (typeof value !== "string" || !value.trim()) return null;
   try {
@@ -81,18 +85,23 @@ Deno.serve(async (req: Request) => {
     const submitted = body.workspace_config ?? {};
     const cardType = String(submitted.template ?? "");
     if (!["e-business", "contact", "service", "google-review"].includes(cardType)) return json({ error: "Invalid card template" }, 400);
-    const selectedModules = Array.isArray(submitted.modules) ? [...new Set(submitted.modules.map((value: unknown) => String(value)))] : [];
+    let selectedModules = Array.isArray(submitted.modules) ? [...new Set(submitted.modules.map((value: unknown) => String(value)))] : [];
     if (selectedModules.some((module) => !allowedModules.has(module))) return json({ error: "Unknown workspace module" }, 400);
     if (!selectedModules.includes("dashboard")) selectedModules.unshift("dashboard");
     if (!selectedModules.includes("digital_card")) return json({ error: "The public digital card module is required" }, 400);
 
     const { data: prospect, error: prospectError } = await admin.from("prospect_requests")
-      .select("id,user_id,full_name,email,phone,city,status,brand_name,logo_url,card_type,activity_sector,project_needs")
+      .select("id,user_id,full_name,email,phone,city,status,brand_name,logo_url,card_type,activity_sector,project_needs,client_access_enabled,password_initialized")
       .eq("id", requestId).maybeSingle();
     if (prospectError || !prospect) return json({ error: "Prospect not found" }, 404);
     if (!["approved", "in_production", "completed"].includes(prospect.status)) return json({ error: "Validez la demande avant de configurer l’espace client." }, 409);
     if (!prospect.user_id) return json({ error: "The customer account must be created when the prospect submits the request" }, 409);
     if (prospect.card_type !== cardType) return json({ error: "The selected template must match the prospect's original card choice" }, 400);
+
+    // Beauté/Cosmétique business rules are intentionally limited to Contact and E-Service.
+    const beautyWorkspace = ["contact", "service"].includes(cardType) && isBeautySector(prospect.activity_sector, prospect.project_needs);
+    const requiredBeautyModules = beautyWorkspace ? ["service_catalog", "bookings", "availability_calendar", "whatsapp"] : [];
+    selectedModules = [...new Set([...selectedModules, ...requiredBeautyModules])];
 
     const profileDraft = safeProfileDraft(submitted.ai_suggestions?.profile_draft);
     const aiSuggestions = profileDraft ? {
@@ -194,12 +203,56 @@ Deno.serve(async (req: Request) => {
     });
     if (nfcError) throw new Error("The NFC link could not be prepared.");
 
+    // Post-creation verification: never report success unless every required relation exists.
+    const [{ data: verifiedOrganization, error: verifyOrganizationError },
+      { data: verifiedMembership, error: verifyMembershipError },
+      { data: verifiedCard, error: verifyCardError },
+      { data: verifiedTag, error: verifyTagError }] = await Promise.all([
+      admin.from("organizations").select("id,owner_id,workspace_config").eq("id", organization.id).maybeSingle(),
+      admin.from("organization_members").select("organization_id,user_id,role").eq("organization_id", organization.id).eq("user_id", customerUserId).maybeSingle(),
+      admin.from("cards").select("id,organization_id,created_by,slug").eq("id", card.id).maybeSingle(),
+      admin.from("nfc_tags").select("id,card_id,is_active").eq("card_id", card.id).maybeSingle(),
+    ]);
+    const verifiedConfig = (verifiedOrganization?.workspace_config ?? {}) as { template?: string; modules?: string[] };
+    const verifiedModules = Array.isArray(verifiedConfig.modules) ? verifiedConfig.modules : [];
+    const missingBeautyModules = requiredBeautyModules.filter((module) => !verifiedModules.includes(module));
+    const verificationOk = !verifyOrganizationError && !verifyMembershipError && !verifyCardError && !verifyTagError
+      && verifiedOrganization?.owner_id === customerUserId
+      && verifiedMembership?.user_id === customerUserId
+      && verifiedMembership?.organization_id === organization.id
+      && verifiedCard?.organization_id === organization.id
+      && verifiedCard?.created_by === customerUserId
+      && verifiedTag?.card_id === card.id
+      && verifiedConfig.template === cardType
+      && verifiedModules.includes("dashboard")
+      && verifiedModules.includes("digital_card")
+      && missingBeautyModules.length === 0;
+    if (!verificationOk) throw new Error("La vérification après création a échoué : espace, adhésion, carte NFC ou modules requis incomplets.");
+
     const { data: linked, error: linkError } = await admin.from("prospect_requests")
       .update({ status: "in_production", updated_at: new Date().toISOString() })
-      .eq("id", prospect.id).eq("user_id", customerUserId).select("id").maybeSingle();
-    if (linkError || !linked) throw new Error("The customer workspace could not be linked to the approved request.");
+      .eq("id", prospect.id).eq("user_id", customerUserId).select("id,status").maybeSingle();
+    if (linkError || !linked || linked.status !== "in_production") throw new Error("L’espace client a été créé mais le rattachement de la demande n’a pas pu être vérifié.");
 
-    return json({ ok: true, user_id: customerUserId, organization_id: organization.id, card_id: card.id, card_slug: card.slug, published: false });
+    return json({
+      ok: true,
+      verified: true,
+      verification: {
+        account_exists: Boolean(prospect.user_id),
+        client_access_enabled: Boolean(prospect.client_access_enabled),
+        password_initialized: Boolean(prospect.password_initialized),
+        organization_linked: true,
+        membership_linked: true,
+        card_created: true,
+        beauty_modules: beautyWorkspace ? requiredBeautyModules : [],
+        beauty_modules_verified: missingBeautyModules.length === 0,
+      },
+      user_id: customerUserId,
+      organization_id: organization.id,
+      card_id: card.id,
+      card_slug: card.slug,
+      published: false,
+    });
   } catch (error) {
     if (organizationId) await admin.from("organizations").delete().eq("id", organizationId);
     return json({ error: error instanceof Error ? error.message : "Unexpected error" }, 400);
