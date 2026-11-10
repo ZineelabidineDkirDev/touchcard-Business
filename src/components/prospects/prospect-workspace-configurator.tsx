@@ -39,6 +39,7 @@ const moduleCatalog = [
   { id: "company_profile", label: "Présentation entreprise", description: "Identité, horaires et informations", group: "Vitrine" },
   { id: "service_catalog", label: "Catalogue de services", description: "Prestations, catégories et tarifs", group: "Vitrine" },
   { id: "product_catalog", label: "Catalogue produits", description: "Produits, descriptions et prix", group: "Commerce" },
+  { id: "room_catalog", label: "Catalogue des chambres", description: "Chambres, photos, capacité et tarifs", group: "Hébergement" },
   { id: "orders", label: "Commandes", description: "Réception et suivi des commandes", group: "Commerce" },
   { id: "quote_requests", label: "Demandes de devis", description: "Collecte et suivi des demandes", group: "Relation client" },
   { id: "bookings", label: "Réservations", description: "Demandes et gestion des réservations", group: "Relation client" },
