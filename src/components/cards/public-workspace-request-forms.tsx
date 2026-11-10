@@ -41,7 +41,7 @@ export function PublicWorkspaceRequestForms({ cardSlug, accent = "#4f46e5", prod
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null);
 
-  if (!types.length && !(shopMode && products.length)) return null;
+  if (!types.length && !shopMode) return null;
   const selectedItems = Object.entries(quantities)
     .filter(([, quantity]) => quantity > 0)
     .map(([product_id, quantity]) => ({ product_id, quantity }));
