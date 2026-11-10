@@ -301,7 +301,34 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                   </div>}
                   {config.template === "google-review" && <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Lien officiel Google Avis<input name="google_review_url" type="url" defaultValue={fields.google_review_url ?? ""} placeholder="https://g.page/r/..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>}
                   <CustomCardFieldsEditor initialFields={initialCustomFields}/>
-                  <div className="flex flex-wrap gap-4 rounded-xl bg-slate-50 p-3 sm:col-span-2"><span className="w-full text-xs font-bold text-slate-700">Champs visibles sur la page publique</span><label className="flex items-center gap-2 text-xs"><input type="checkbox" name="show_phone" defaultChecked={settings.show_phone !== false}/> Téléphone</label><label className="flex items-center gap-2 text-xs"><input type="checkbox" name="show_email" defaultChecked={settings.show_email !== false}/> E-mail</label><label className="flex items-center gap-2 text-xs"><input type="checkbox" name="show_website" defaultChecked={settings.show_website !== false}/> Site web</label></div>
+                  <div className="sm:col-span-2 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div><h3 className="text-sm font-black text-slate-900">Sections visibles sur ma carte NFC</h3><p className="mt-1 text-xs leading-5 text-slate-500">Désactivez les sections inutiles. Elles seront masquées sur votre page publique, sans supprimer leur contenu. Vous pourrez les réactiver à tout moment.</p></div>
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      {[
+                        ["show_about", "Présentation / À propos"],
+                        ["show_contact", "Coordonnées / Contact"],
+                        ["show_company_info", "Informations entreprise"],
+                        ["show_categories", "Domaines et spécialités"],
+                        ["show_info_fields", "Informations complémentaires"],
+                        ["show_google_reviews", "Avis Google"],
+                        ["show_catalog_pdf", "Catalogue PDF"],
+                        ["show_catalog", "Prestations / Menu / Produits"],
+                        ["show_request_forms", "Réservation / Commande / Demande"],
+                        ["show_social_links", "Réseaux sociaux"],
+                        ["show_featured_links", "Liens mis en avant"],
+                        ["show_faq", "Questions fréquentes (FAQ)"],
+                        ["show_videos", "Vidéos"],
+                        ["show_location", "Adresse et carte"],
+                      ].map(([name, label]) => <label key={name} className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-semibold text-slate-700 transition hover:border-indigo-300">
+                        <input type="checkbox" name={name} defaultChecked={settings[name] !== false} className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"/>
+                        {label}
+                      </label>)}
+                    </div>
+                    <div className="mt-4 border-t border-slate-200 pt-3">
+                      <p className="mb-2 text-xs font-bold text-slate-700">Visibilité des coordonnées</p>
+                      <div className="flex flex-wrap gap-4"><label className="flex items-center gap-2 text-xs"><input type="checkbox" name="show_phone" defaultChecked={settings.show_phone !== false}/> Téléphone</label><label className="flex items-center gap-2 text-xs"><input type="checkbox" name="show_email" defaultChecked={settings.show_email !== false}/> E-mail</label><label className="flex items-center gap-2 text-xs"><input type="checkbox" name="show_website" defaultChecked={settings.show_website !== false}/> Site web</label></div>
+                    </div>
+                  </div>
                 </div>
                 <div className="sticky bottom-0 -mx-1 border-t border-slate-100 bg-white/95 px-1 py-3 backdrop-blur"><button className="btn-primary w-full rounded-full py-3 text-sm">✓ Enregistrer ma carte</button><p className="mt-2 text-center text-[10px] text-slate-400">Vos modifications seront visibles après enregistrement.</p></div>
               </form>
