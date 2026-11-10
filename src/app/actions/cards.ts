@@ -289,9 +289,6 @@ export async function createCatalogItem(formData: FormData) {
   const imageUrl = safeHttpUrl(String(formData.get("image_url") ?? ""), 1000);
   if (!name || !Number.isFinite(price) || price < 0 || price > 100000000) return;
 
-  const { data: organization } = await supabase.from("organizations")
-    .select("workspace_config").eq("id", organizationId).maybeSingle();
-  const config = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[]; original_client_choices?: { activity_sector?: string } };
   if (!(await hasSectorCatalogAccess(supabase, organizationId))) return;
 
   const { error } = await supabase.from("products").insert({
