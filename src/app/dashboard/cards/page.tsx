@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { createClientCard, saveClientCardProfile, addClientCardLink, deleteClientCardLink, toggleClientCardPublication, createCatalogItem, updateCatalogItem, deleteCatalogItem } from "@/app/actions/cards";
+import { createClientCard, saveClientCardProfile, addClientCardLink, deleteClientCardLink, toggleClientCardPublication, createCatalogItem, updateCatalogItem, deleteCatalogItem, importCatalogItems } from "@/app/actions/cards";
 import { createClient } from "@/lib/supabase/server";
 import { CustomCardFieldsEditor, type EditableCardField } from "@/components/cards/custom-card-fields-editor";
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
@@ -128,8 +128,11 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
   const activitySector = String((organization?.workspace_config as any)?.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const selectedNeed = String((organization?.workspace_config as any)?.original_client_choices?.project_needs?.selected?.[0] ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const isEcommerce = config.template === "e-business" && (/e.?commerce|commerce en ligne|boutique en ligne|vente en ligne/.test(activitySector) || /boutique en ligne|vente en ligne|e.?commerce|commerce en ligne|catalogue de produits|commande de produits/.test(selectedNeed));
-  const catalogEnabled = !config.version || modules.some((module) => module === "service_catalog" || module === "room_catalog" || (module === "product_catalog" && isEcommerce));
-  const catalogLabel = modules.includes("room_catalog") ? "Chambres" : config.template === "service" ? "Prestations" : isEcommerce ? "Shop" : "Projets";
+  const isBeauty = /beaute|cosmetique|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage/.test(activitySector);
+  const isRestaurant = /restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(activitySector);
+  const isRealEstate = /immobilier|agence immobiliere|promotion immobiliere|location immobiliere/.test(activitySector);
+  const catalogEnabled = !config.version || modules.some((module) => module === "service_catalog" || module === "room_catalog" || (module === "product_catalog" && isEcommerce)) || isBeauty || isRestaurant;
+  const catalogLabel = modules.includes("room_catalog") ? "Chambres" : isBeauty ? "Prestations beauté" : isRestaurant ? "Menu" : config.template === "service" ? "Prestations" : isEcommerce ? "Shop" : isRealEstate ? "Projets" : "Catalogue";
   const { data: catalogItems } = catalogEnabled && organizationId
     ? await supabase.from("products").select("id,name,description,price,currency,image_url,is_active")
       .eq("organization_id", organizationId).order("created_at", { ascending: false })
@@ -186,11 +189,11 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
 
       {catalogEnabled && <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-wider text-indigo-600">Catalogue client</p><h2 className="mt-1 text-xl font-black text-slate-950">{catalogLabel}</h2><p className="mt-1 text-sm text-slate-500">Ajoutez les éléments qui seront visibles sur votre page publique. Les prix sont exprimés en MAD.</p></div><span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">{catalogItems?.length ?? 0} élément(s)</span></div>
-        <PopupDialog title={catalogLabel === "Prestations" ? "Ajouter une prestation" : catalogLabel === "Shop" ? "Ajouter un article au Shop" : catalogLabel === "Chambres" ? "Ajouter une chambre" : "Ajouter un projet"} description="Ajoutez les informations et la photo qui seront visibles sur votre page publique." triggerLabel={catalogLabel === "Prestations" ? "+ Ajouter une prestation" : catalogLabel === "Shop" ? "+ Ajouter un article" : catalogLabel === "Chambres" ? "+ Ajouter une chambre" : "+ Ajouter un projet"} triggerClassName="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700"><form action={createCatalogItem} className="grid gap-3 sm:grid-cols-2">
+        <form action={importCatalogItems} className="mt-4 flex flex-wrap items-end gap-3 rounded-xl border border-dashed border-indigo-200 bg-indigo-50/60 p-3"><label className="min-w-0 flex-1 text-xs font-bold text-slate-700">Importer un catalogue CSV<input name="catalog_file" type="file" accept=".csv,text/csv" required className="mt-2 block w-full rounded-lg border border-indigo-100 bg-white p-2 text-xs font-normal"/></label><button className="rounded-xl border border-indigo-200 bg-white px-4 py-2.5 text-sm font-bold text-indigo-700 hover:bg-indigo-100">Importer le fichier</button><p className="w-full text-[11px] text-slate-500">Colonnes attendues : name, description, price, image_url. Jusqu’à 250 éléments par import.</p></form><PopupDialog title={catalogLabel === "Prestations" ? "Ajouter une prestation" : catalogLabel === "Shop" ? "Ajouter un article au Shop" : catalogLabel === "Chambres" ? "Ajouter une chambre" : "Ajouter un projet"} description="Ajoutez les informations et la photo qui seront visibles sur votre page publique." triggerLabel={catalogLabel === "Prestations" ? "+ Ajouter une prestation" : catalogLabel === "Shop" ? "+ Ajouter un article" : catalogLabel === "Chambres" ? "+ Ajouter une chambre" : "+ Ajouter un projet"} triggerClassName="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700"><form action={createCatalogItem} className="grid gap-3 sm:grid-cols-2">
           <input name="name" required maxLength={120} placeholder={catalogLabel === "Prestations" ? "Nom de la prestation" : catalogLabel === "Shop" ? "Nom de l'article" : catalogLabel === "Chambres" ? "Nom de la chambre" : "Nom du projet"} className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"/>
           <input name="price" required type="number" min="0" max="100000000" step="0.01" placeholder="Prix en MAD" className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"/>
           <textarea name="description" maxLength={1200} rows={2} placeholder="Description (facultatif)" className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm sm:col-span-2"/>
-          <div className="sm:col-span-2"><MediaImagePicker organizationId={organizationId!} name="image_url" label="Photo du produit / couverture"/></div>
+          <div className="sm:col-span-2"><MediaImagePicker organizationId={organizationId!} name="image_url" label="Photo de la prestation / produit"/></div>
           <button className="btn-primary">Ajouter au catalogue</button>
         </form></PopupDialog>
         <div className="mt-4 grid gap-3 md:grid-cols-2">
