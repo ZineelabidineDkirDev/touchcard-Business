@@ -48,7 +48,7 @@ async function PublicCardContent({
   };
   const modules = Array.isArray(workspaceConfig.modules) ? workspaceConfig.modules : [];
   const activitySector = String(workspaceConfig.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  const selectedNeed = String(workspaceConfig.original_client_choices?.project_needs?.selected?.[0] ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const selectedNeed = (workspaceConfig.original_client_choices?.project_needs?.selected ?? []).join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const isEcommerce = template === "e-business" && (
     /e.?commerce|commerce en ligne|boutique en ligne|vente en ligne/.test(activitySector)
     || /boutique en ligne|vente en ligne|e.?commerce|commerce en ligne|catalogue de produits|commande de produits/.test(selectedNeed)
@@ -57,8 +57,8 @@ async function PublicCardContent({
   const isHealth = /sante|medical|medecin|dentiste|clinique|cabinet medical|kinesitherapie|bien.?etre/.test(activitySector);
   const isHospitality = /hotel|riad|maison d.?hotes|hebergement|residence touristique|auberge/.test(activitySector);
   const isRealEstate = /immobilier|agence immobiliere|promotion immobiliere|location immobiliere/.test(activitySector);
-  const isBeauty = /beaute|cosmetique|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage/.test(activitySector);
-  const isRestaurant = /restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(activitySector);
+  const isBeauty = /beaute|cosmetique|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage/.test(activitySector + " " + selectedNeed);
+  const isRestaurant = /restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(activitySector + " " + selectedNeed);
   const hasRoomCatalog = modules.includes("room_catalog");
   const profileDraft = workspaceConfig.ai_suggestions?.profile_draft;
   const originalNeeds = workspaceConfig.original_client_choices?.project_needs;
