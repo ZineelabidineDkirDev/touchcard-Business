@@ -159,16 +159,8 @@ Deno.serve(async (req: Request) => {
     }
     organizationId = organization.id;
 
-    // Link the customer to the shared dashboard shell and their own workspace.
-    const { error: membershipError } = await admin.from("organization_members").insert({
-      organization_id: organization.id,
-      user_id: customerUserId,
-      role: "organization_admin",
-    });
-    if (membershipError) {
-      console.error("Prospect workspace membership insert failed", { code: membershipError.code, message: membershipError.message, details: membershipError.details, hint: membershipError.hint });
-      throw new Error(membershipError.message || "L’espace client n’a pas pu être associé au compte.");
-    }
+    // The database trigger on organizations automatically creates the owner membership.
+    // Do not insert it again here: the (organization_id, user_id) primary key would conflict.
 
     const cardSlug = `${slugBase}-${crypto.randomUUID().slice(0, 8)}`;
     const publicFields = {
