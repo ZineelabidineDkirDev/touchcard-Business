@@ -31,7 +31,7 @@ export default async function ConfigureProspectPage({
       .select("id").eq("owner_id", prospect.user_id).maybeSingle();
     if (existingOrganization) redirect("/dashboard/prospects?already_created=1");
   }
-  if (!["approved", "in_production"].includes(prospect.status)) redirect("/dashboard/prospects?approval_required=1");
+  if (!["approved", "in_production", "completed"].includes(prospect.status)) redirect("/dashboard/prospects?approval_required=1");
 
   return (
     <ProspectWorkspaceConfigurator
