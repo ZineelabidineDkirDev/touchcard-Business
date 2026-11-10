@@ -59,10 +59,19 @@ Deno.serve(async (req: Request) => {
     const { data: organization, error: organizationError } = await admin.from("organizations")
       .select("workspace_config").eq("id", card.organization_id).maybeSingle();
     if (organizationError || !organization) return json({ error: "Espace client introuvable." }, 404);
-    const config = (organization.workspace_config ?? {}) as { version?: number; modules?: string[] };
+    const config = (organization.workspace_config ?? {}) as {
+      version?: number;
+      modules?: string[];
+      original_client_choices?: { activity_sector?: string; project_needs?: { selected?: string[] } };
+    };
     const modules = Array.isArray(config.modules) ? config.modules : [];
     const requiredModule = requestType === "order" ? "orders" : requestType === "booking" ? "bookings" : "quote_requests";
-    if (config.version && !modules.includes(requiredModule)) return json({ error: "Cette fonctionnalité n'est pas activée pour cette carte." }, 403);
+    const selectedNeeds = config.original_client_choices?.project_needs?.selected ?? [];
+    const sectorIntent = [config.original_client_choices?.activity_sector ?? "", ...selectedNeeds].join(" ")
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const isBeauty = /beaute|cosmetique|esthetique|spa|hammam|coiffure|onglerie|maquillage|institut de beaute|massage/.test(sectorIntent);
+    const sectorBookingAllowed = requestType === "booking" && isBeauty;
+    if (config.version && !modules.includes(requiredModule) && !sectorBookingAllowed) return json({ error: "Cette fonctionnalité n'est pas activée pour cette carte." }, 403);
 
     let requestedAt: string | null = null;
     if (requestType === "booking") {
