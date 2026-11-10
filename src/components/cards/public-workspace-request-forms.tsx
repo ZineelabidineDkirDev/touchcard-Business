@@ -69,8 +69,20 @@ export function PublicWorkspaceRequestForms({ cardSlug, accent = "#4f46e5", prod
         },
       });
       if (error || !data?.ok) throw new Error(data?.error || error?.message || "La demande n'a pas pu être envoyée.");
-      setFeedback({ ok: true, text: "Votre demande a bien été transmise. L'entreprise vous recontactera." });
-      setName(""); setPhone(""); setEmail(""); setMessage(""); setRequestedAt(""); setCheckoutDate(""); setQuantities({});
+      const chosenService = products.find((item) => item.id === selectedService);
+      const whatsappMessage = [
+        "Bonjour, je souhaite confirmer une demande de rendez-vous.",
+        chosenService ? "Prestation : " + chosenService.name + " (" + Number(chosenService.price).toLocaleString("fr-MA") + " " + chosenService.currency + ")" : "",
+        requestedAt ? "Date et heure souhaitées : " + requestedAt.replace("T", " à ") : "",
+        "Nom : " + name,
+        "Téléphone : " + phone,
+        email ? "E-mail : " + email : "",
+        message ? "Précisions : " + message : "",
+      ].filter(Boolean).join("\\n");
+      const cleanWhatsApp = whatsappPhone.replace(/[^+\\d]/g, "").replace(/^\\+/, "");
+      setWhatsappUrl(cleanWhatsApp ? "https://wa.me/" + cleanWhatsApp + "?text=" + encodeURIComponent(whatsappMessage) : "");
+      setFeedback({ ok: true, text: "Votre demande a été enregistrée. Terminez la confirmation avec l'entreprise sur WhatsApp." });
+      setName(""); setPhone(""); setEmail(""); setMessage(""); setRequestedAt(""); setCheckoutDate(""); setQuantities({}); setSelectedService("");
     } catch (error) {
       setFeedback({ ok: false, text: error instanceof Error ? error.message : "Une erreur est survenue." });
     } finally {
@@ -111,9 +123,9 @@ export function PublicWorkspaceRequestForms({ cardSlug, accent = "#4f46e5", prod
           <div className="grid gap-3 sm:grid-cols-2"><input required minLength={2} maxLength={160} value={name} onChange={(event) => setName(event.target.value)} placeholder="Votre nom complet" className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"/><input required minLength={6} maxLength={40} value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="Téléphone" className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"/></div>
           <input type="email" maxLength={254} required={type === "booking" && bookingDateMode === "stay"} value={email} onChange={(event) => setEmail(event.target.value)} placeholder={type === "booking" && bookingDateMode === "stay" ? "E-mail obligatoire" : "E-mail (facultatif)"} className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"/>
           <textarea maxLength={2000} rows={3} value={message} onChange={(event) => setMessage(event.target.value)} placeholder={type === "quote" ? "Décrivez votre besoin pour recevoir un devis…" : "Message ou précision (facultatif)"} className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"/>
-          <button type="submit" disabled={loading || (type === "order" && selectedItems.length === 0) || (type === "booking" && bookingDateMode === "stay" && (!requestedAt || !checkoutDate || checkoutDate <= requestedAt || selectedItems.length === 0))} className="w-full rounded-xl px-4 py-3.5 text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50" style={{ backgroundColor: accent }}>{loading ? "Envoi en cours…" : type === "order" ? "Envoyer ma commande" : type === "booking" ? "Envoyer ma demande de réservation" : "Envoyer ma demande de devis"}</button>
+          <button type="submit" disabled={loading || (type === "order" && selectedItems.length === 0) || (type === "booking" && bookingDateMode === "stay" && (!requestedAt || !checkoutDate || checkoutDate <= requestedAt || selectedItems.length === 0)) || (serviceMode && type === "booking" && (!selectedService || !requestedAt))} className="w-full rounded-xl px-4 py-3.5 text-sm font-bold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50" style={{ backgroundColor: accent }}>{loading ? "Envoi en cours…" : type === "order" ? "Envoyer ma commande" : type === "booking" ? (serviceMode ? "Envoyer ma demande de rendez-vous" : "Envoyer ma demande de réservation") : "Envoyer ma demande de devis"}</button>
         </form>
-        {feedback && <p role="status" className={"mt-3 rounded-xl p-3 text-sm " + (feedback.ok ? "bg-slate-100 text-slate-800" : "bg-rose-50 text-rose-700")}>{feedback.text}</p>}
+        {feedback && <div role="status" className={"mt-3 rounded-xl p-3 text-sm " + (feedback.ok ? "bg-slate-100 text-slate-800" : "bg-rose-50 text-rose-700")}>{feedback.text}{whatsappUrl && <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="mt-3 flex items-center justify-center rounded-xl bg-[#25D366] px-4 py-3 text-sm font-bold text-white">Confirmer sur WhatsApp ↗</a>}</div>}
         <p className="mt-3 text-[11px] leading-5 text-slate-400">Votre demande est transmise à l'entreprise. Une commande ou réservation n'est confirmée qu'après validation par celle-ci.</p>
       </section>
     </div>}
