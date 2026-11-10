@@ -6,9 +6,6 @@ import { I18nText } from "@/i18n/provider";
 import { PublicCardTracker, TrackedPublicLink } from "@/components/cards/public-card-tracker";
 import { PublicWorkspaceRequestForms } from "@/components/cards/public-workspace-request-forms";
 
-// Public cards must be resolved at request time so newly published cards never cache a 404.
-export const dynamic = "force-dynamic";
-
 type PublicFields = { nfc_display_code?: string; tagline?: string; location?: string; hours?: string; whatsapp?: string; company_phone?: string; company_email?: string; company_address?: string; industry?: string; custom_fields?: { key: string; label: string; value: string; visible: boolean }[] };
 type PublicLink = { id: string; label: string; url: string; kind: string };
 type PublicCatalogItem = { id: string; name: string; description: string | null; price: number; currency: string; image_url: string | null };
