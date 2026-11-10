@@ -57,6 +57,8 @@ async function PublicCardContent({
   const isHealth = /sante|medical|medecin|dentiste|clinique|cabinet medical|kinesitherapie|bien.?etre/.test(activitySector);
   const isHospitality = /hotel|riad|maison d.?hotes|hebergement|residence touristique|auberge/.test(activitySector);
   const isRealEstate = /immobilier|agence immobiliere|promotion immobiliere|location immobiliere/.test(activitySector);
+  const isBeauty = /beaute|cosmetique|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage/.test(activitySector);
+  const isRestaurant = /restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(activitySector);
   const hasRoomCatalog = modules.includes("room_catalog");
   const profileDraft = workspaceConfig.ai_suggestions?.profile_draft;
   const originalNeeds = workspaceConfig.original_client_choices?.project_needs;
@@ -66,10 +68,10 @@ async function PublicCardContent({
   const profileCategories = Array.isArray(profileDraft?.categories)
     ? profileDraft.categories.map((value) => String(value).trim()).filter(Boolean).slice(0, 8)
     : [];
-  const showCatalog = ["service", "e-business"].includes(template)
-    && (!workspaceConfig.version || modules.some((module) => module === "service_catalog" || module === "room_catalog" || (module === "product_catalog" && isEcommerce)));
+  const showCatalog = (["service", "e-business"].includes(template) || isBeauty || isRestaurant)
+    && (!workspaceConfig.version || modules.some((module) => module === "service_catalog" || module === "room_catalog" || (module === "product_catalog" && isEcommerce)) || isBeauty || isRestaurant);
   const allowOrders = isEcommerce && modules.includes("orders");
-  const allowBookings = modules.includes("bookings");
+  const allowBookings = modules.includes("bookings") || isBeauty;
   const allowQuotes = modules.includes("quote_requests");
   const { data: catalogItems } = showCatalog
     ? await supabase.from("products").select("id,name,description,price,currency,image_url")
@@ -155,13 +157,13 @@ async function PublicCardContent({
           {template === "google-review" && <section className="rounded-2xl bg-white p-4 text-center"><p className="text-sm font-bold text-slate-900">Votre avis compte pour nous</p><p className="mt-1 text-2xl tracking-[.2em] text-amber-500" aria-label="5 étoiles">★★★★★</p>{fields.google_review_url ? <TrackedPublicLink cardId={card.id} href={fields.google_review_url} className="mt-3 flex items-center justify-center rounded-xl px-4 py-3 text-sm font-bold text-white" style={{ backgroundColor: accent }}>Laisser un avis Google</TrackedPublicLink> : <p className="mt-2 text-xs text-slate-600">Le lien Google sera ajouté prochainement.</p>}</section>}
 
           {(!isEcommerce || template !== "e-business") && <section className="rounded-2xl bg-white p-4">
-            <h2 className="mb-3 text-base font-bold text-black">{hasRoomCatalog ? "Nos chambres" : template === "service" ? "Prestations" : "Projets"}</h2>
+            <h2 className="mb-3 text-base font-bold text-black">{hasRoomCatalog ? "Nos chambres" : isBeauty ? "Nos prestations beauté" : isRestaurant ? "Notre menu" : template === "service" ? "Prestations" : isRealEstate ? "Nos projets" : "Nos réalisations"}</h2>
             {showCatalog && (catalogItems?.length ?? 0) > 0 ? <div className="flex snap-x gap-3 overflow-x-auto pb-2">
               {(catalogItems ?? []).map((item) => <article key={item.id} className="w-[245px] shrink-0 snap-start overflow-hidden rounded-xl border border-slate-200 bg-white">
                 {item.image_url && <img src={item.image_url} alt={item.name} loading="lazy" className="h-40 w-full object-cover"/>}
                 <div className="p-4"><h3 className="font-bold text-slate-900">{item.name}</h3>{item.description && <p className="mt-1 text-sm leading-6 text-slate-600">{item.description}</p>}<p className="mt-3 text-sm font-black text-slate-700">{Number(item.price).toLocaleString("fr-MA")} {item.currency}</p></div>
               </article>)}
-            </div> : <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-xs leading-5 text-slate-500">Aucun projet publié pour le moment.</p>}
+            </div> : <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-xs leading-5 text-slate-500">Aucun élément publié pour le moment.</p>}
           </section>}
 
           {(allowOrders || allowBookings || allowQuotes || (isEcommerce && showCatalog) || (hasRoomCatalog && allowBookings)) && <PublicWorkspaceRequestForms
@@ -175,6 +177,8 @@ async function PublicCardContent({
             bookingLabel={isTraining ? "S'inscrire" : isHealth ? "Prendre rendez-vous" : isHospitality ? "Réserver une chambre" : "Réserver"}
             bookingHint={isTraining ? "Demander une inscription à une formation" : isHealth ? "Choisir une date de consultation" : isHospitality ? "Choisir les dates de votre séjour" : "Choisir une date"}
             bookingDateMode={isHospitality ? "stay" : "datetime"}
+            serviceMode={isBeauty}
+            whatsappPhone={fields.whatsapp || card.phone || ""}
           />}
 
           {<section className="rounded-2xl bg-white p-4"><div className="flex flex-wrap items-end justify-between gap-2"><div><h2 className="text-base font-bold text-black">Réseaux sociaux</h2></div></div>{socialLinks.length > 0 ? <div className="mt-4 grid grid-cols-5 gap-2">{socialLinks.map((link: PublicLink) => <TrackedPublicLink key={link.id} cardId={card.id} linkId={link.id} href={link.url} className="flex aspect-square min-w-0 items-center justify-center rounded-xl text-lg font-black text-white shadow-sm transition hover:-translate-y-0.5" style={{ backgroundColor: ({instagram:"#E4405F",facebook:"#1877F2",linkedin:"#0A66C2",tiktok:"#111111",youtube:"#FF0000",x:"#000000",pinterest:"#BD081C",whatsapp:"#25D366",telegram:"#229ED9"} as Record<string,string>)[link.kind] ?? "#64748b" }}><span>{({instagram:"◎",facebook:"f",linkedin:"in",tiktok:"♪",youtube:"▶",x:"𝕏",pinterest:"P",whatsapp:"◉",telegram:"➤"} as Record<string,string>)[link.kind] ?? "↗"}</span></TrackedPublicLink>)}</div> : <p className="mt-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-center text-xs leading-5 text-slate-500">Les réseaux sociaux ajoutés par le client apparaîtront ici.</p>}</section>}
