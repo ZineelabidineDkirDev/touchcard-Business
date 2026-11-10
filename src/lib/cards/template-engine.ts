@@ -45,8 +45,8 @@ export function generateTemplateBlueprint(input: {
   const text = normalizedText(input.needs ?? null, input.sector ?? "", input.reason ?? "");
   const modules = new Set(baseModules[template]);
   const sectorText = (input.sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  const isCommerce = /e.?commerce|commerce|boutique|vente au detail|magasin|retail|vetement|habillement|cosmetique|parfumerie|epicerie|artisanat/.test(sectorText)
-    || /boutique en ligne|vente en ligne|e.?commerce|catalogue de produits|commande de produits/.test(text);
+  const isCommerce = /e.?commerce|commerce en ligne|boutique en ligne|vente en ligne/.test(sectorText)
+    || /boutique en ligne|vente en ligne|e.?commerce|commerce en ligne|catalogue de produits|commande de produits/.test(text);
   const isRealEstate = /immobilier|agence immobiliere|promotion immobiliere|location immobiliere/.test(sectorText);
   const isTraining = /formation|centre de formation|ecole|enseignement|coaching|cours/.test(sectorText);
   const isHealth = /sante|medical|medecin|dentiste|clinique|cabinet medical|kinesitherapie|bien.?etre/.test(sectorText);
