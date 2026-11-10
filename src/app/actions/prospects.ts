@@ -141,7 +141,7 @@ export async function createProspectCustomer(formData: FormData) {
     "dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc",
     "company_profile", "service_catalog", "product_catalog", "orders", "google_reviews",
     "quote_requests", "bookings", "availability_calendar", "team",
-    "gallery", "crm_contacts", "analytics", "whatsapp",
+    "gallery", "room_catalog", "crm_contacts", "analytics", "whatsapp",
   ];
   if (!allowedTemplates.includes(workspaceConfig.template) || !Array.isArray(workspaceConfig.modules)
     || workspaceConfig.modules.some((module) => !allowedModules.includes(module))) {
