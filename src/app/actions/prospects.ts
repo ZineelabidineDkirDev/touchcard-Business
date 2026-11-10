@@ -214,7 +214,7 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
     "dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc",
     "company_profile", "service_catalog", "product_catalog", "orders", "google_reviews",
     "quote_requests", "bookings", "availability_calendar", "team",
-    "gallery", "crm_contacts", "analytics", "whatsapp",
+    "gallery", "room_catalog", "crm_contacts", "analytics", "whatsapp",
   ];
   const template = allowedTemplates.includes(prospect.card_type) ? prospect.card_type : "contact";
   const needs = (prospect.project_needs ?? {}) as {
