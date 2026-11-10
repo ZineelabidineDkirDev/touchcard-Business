@@ -155,15 +155,15 @@ export async function createProspectCustomer(formData: FormData) {
   const { data, error } = await supabase.functions.invoke("create-prospect-customer", {
     body: { request_id: id, workspace_config: workspaceConfig },
   });
-  if (error || !data?.ok) {
-    const message = error?.message || data?.error || "La création du compte a échoué.";
+  if (error || !data?.ok || !data?.verified) {
+    const message = error?.message || data?.error || "La création n’a pas passé la vérification finale de l’espace client.";
     console.error("Customer workspace provisioning failed", { id, message });
     redirect(`/dashboard/prospects/${id}/configure?error=${encodeURIComponent(message)}`);
   }
 
   revalidatePath("/dashboard/prospects");
   revalidatePath("/dashboard/admin");
-  redirect("/dashboard/prospects?created=1");
+  redirect("/dashboard/prospects?created=1&verified=1");
 }
 
 
