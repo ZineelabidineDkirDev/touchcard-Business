@@ -129,7 +129,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
   const catalogEnabled = !config.version || modules.some((module) => ["product_catalog", "service_catalog", "room_catalog"].includes(module));
   const activitySector = String((organization?.workspace_config as any)?.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const selectedNeed = String((organization?.workspace_config as any)?.original_client_choices?.project_needs?.selected?.[0] ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  const isEcommerce = config.template === "e-business" && (/e.?commerce|commerce|boutique|vente au detail|magasin|retail|vetement|habillement|cosmetique|parfumerie|epicerie|artisanat/.test(activitySector) || /boutique en ligne|vente en ligne|e.?commerce|catalogue de produits|commande de produits/.test(selectedNeed));
+  const isEcommerce = config.template === "e-business" && (/e.?commerce|commerce en ligne|boutique en ligne|vente en ligne/.test(activitySector) || /boutique en ligne|vente en ligne|e.?commerce|commerce en ligne|catalogue de produits|commande de produits/.test(selectedNeed));
   const catalogLabel = modules.includes("room_catalog") ? "Chambres" : config.template === "service" ? "Prestations" : isEcommerce ? "Shop" : "Projets";
   const { data: catalogItems } = catalogEnabled && organizationId
     ? await supabase.from("products").select("id,name,description,price,currency,image_url,is_active")
