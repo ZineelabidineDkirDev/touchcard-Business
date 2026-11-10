@@ -13,7 +13,7 @@ const statuses = [
   ["completed", "Terminé"], ["rejected", "Refusé"], ["cancelled", "Annulé"],
 ];
 
-export default async function ProspectsPage({ searchParams }: { searchParams: Promise<{ created?: string; already_created?: string; approval_required?: string }> }) {
+export default async function ProspectsPage({ searchParams }: { searchParams: Promise<{ created?: string; verified?: string; already_created?: string; approval_required?: string }> }) {
   await connection();
   const query = await searchParams;
   const supabase = await createClient();
@@ -39,7 +39,7 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
       <p className="text-sm font-semibold uppercase tracking-[.18em] text-indigo-600">TouchCard Business · CRM</p>
       <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950">Prospects & demandes</h1>
       <p className="mt-2 text-slate-500">Toutes les demandes reçues depuis le parcours « Créer votre carte ».</p>
-      {query.created === "1" && <div role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">L'espace client a été configuré. Il reste verrouillé jusqu'à l'activation par le Super Admin.</div>}
+      {query.created === "1" && <div role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">{query.verified === "1" ? "Création vérifiée : compte client, accès activé, organisation, adhésion, carte NFC et modules requis confirmés." : "L’espace client a été créé."}</div>}
       {query.already_created === "1" && <div className="mt-6 rounded-2xl bg-slate-100 p-4 text-sm text-slate-700">Cette demande est déjà liée à un compte client.</div>}
       {query.approval_required === "1" && <div className="mt-6 rounded-2xl bg-amber-50 p-4 text-sm text-amber-800">Validez d'abord la demande avant de configurer son espace client.</div>}
       <section className="mt-10 space-y-4">
