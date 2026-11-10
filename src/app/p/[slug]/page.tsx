@@ -67,8 +67,8 @@ async function PublicCardContent({
     ? profileDraft.categories.map((value) => String(value).trim()).filter(Boolean).slice(0, 8)
     : [];
   const showCatalog = ["service", "e-business"].includes(template)
-    && (!workspaceConfig.version || modules.some((module) => ["service_catalog", "product_catalog", "room_catalog"].includes(module)));
-  const allowOrders = modules.includes("orders");
+    && (!workspaceConfig.version || modules.some((module) => module === "service_catalog" || module === "room_catalog" || (module === "product_catalog" && isEcommerce)));
+  const allowOrders = isEcommerce && modules.includes("orders");
   const allowBookings = modules.includes("bookings");
   const allowQuotes = modules.includes("quote_requests");
   const { data: catalogItems } = showCatalog
