@@ -67,7 +67,7 @@ export function generateTemplateBlueprint(input: {
     modules.add("gallery"); modules.add("bookings"); modules.add("availability_calendar");
   }
   if (template === "e-business" && isHospitality) {
-    modules.add("gallery"); modules.add("bookings"); modules.add("availability_calendar");
+    modules.add("room_catalog"); modules.add("bookings"); modules.add("availability_calendar"); modules.add("crm_contacts");
   }
   if (template !== "e-business" && /commande|achat|vente|e-commerce|boutique/.test(text)) {
     modules.add("product_catalog"); modules.add("orders");
