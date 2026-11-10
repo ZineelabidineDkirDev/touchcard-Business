@@ -64,6 +64,7 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   let organizationId: string | null = null;
+  let createdCardId: string | null = null;
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
@@ -152,7 +153,10 @@ Deno.serve(async (req: Request) => {
       logo_url: logoUrl,
       workspace_config: workspaceConfig,
     }).select("id").single();
-    if (organizationError || !organization) throw new Error("The customer workspace could not be created.");
+    if (organizationError || !organization) {
+      console.error("Prospect workspace organization insert failed", { code: organizationError?.code, message: organizationError?.message, details: organizationError?.details, hint: organizationError?.hint });
+      throw new Error(organizationError?.message || "The customer workspace could not be created.");
+    }
     organizationId = organization.id;
 
     // Link the customer to the shared dashboard shell and their own workspace.
@@ -161,7 +165,10 @@ Deno.serve(async (req: Request) => {
       user_id: customerUserId,
       role: "organization_admin",
     });
-    if (membershipError) throw new Error("L’espace client n’a pas pu être associé au compte.");
+    if (membershipError) {
+      console.error("Prospect workspace membership insert failed", { code: membershipError.code, message: membershipError.message, details: membershipError.details, hint: membershipError.hint });
+      throw new Error(membershipError.message || "L’espace client n’a pas pu être associé au compte.");
+    }
 
     const cardSlug = `${slugBase}-${crypto.randomUUID().slice(0, 8)}`;
     const publicFields = {
@@ -194,14 +201,21 @@ Deno.serve(async (req: Request) => {
       public_fields: publicFields,
       is_published: false,
     }).select("id,slug").single();
-    if (cardError || !card) throw new Error("The first NFC card draft could not be created.");
+    if (cardError || !card) {
+      console.error("Prospect first card insert failed", { code: cardError?.code, message: cardError?.message, details: cardError?.details, hint: cardError?.hint });
+      throw new Error(cardError?.message || "The first NFC card draft could not be created.");
+    }
+    createdCardId = card.id;
 
     const { error: nfcError } = await admin.from("nfc_tags").insert({
       card_id: card.id,
       public_url: `${siteUrl}/p/${card.slug}?source=nfc`,
       is_active: false,
     });
-    if (nfcError) throw new Error("The NFC link could not be prepared.");
+    if (nfcError) {
+      console.error("Prospect NFC tag insert failed", { code: nfcError.code, message: nfcError.message, details: nfcError.details, hint: nfcError.hint });
+      throw new Error(nfcError.message || "The NFC link could not be prepared.");
+    }
 
     // Post-creation verification: never report success unless every required relation exists.
     const [{ data: verifiedOrganization, error: verifyOrganizationError },
@@ -229,7 +243,10 @@ Deno.serve(async (req: Request) => {
       && verifiedModules.includes("dashboard")
       && verifiedModules.includes("digital_card")
       && missingBeautyModules.length === 0;
-    if (!verificationOk) throw new Error("La vérification après création a échoué : espace, adhésion, carte NFC ou modules requis incomplets.");
+    if (!verificationOk) {
+      console.error("Prospect workspace verification failed", { verifyOrganizationError, verifyMembershipError, verifyCardError, verifyTagError, hasOrganization: Boolean(verifiedOrganization), hasMembership: Boolean(verifiedMembership), hasCard: Boolean(verifiedCard), hasTag: Boolean(verifiedTag), missingBeautyModules, verifiedTemplate: verifiedConfig.template, verifiedModules });
+      throw new Error("La vérification après création a échoué : espace, adhésion, carte NFC ou modules requis incomplets.");
+    }
 
     const { data: linked, error: linkError } = await admin.from("prospect_requests")
       .update({ status: "in_production", updated_at: new Date().toISOString() })
@@ -256,7 +273,15 @@ Deno.serve(async (req: Request) => {
       published: false,
     });
   } catch (error) {
-    if (organizationId) await admin.from("organizations").delete().eq("id", organizationId);
+    console.error("create-prospect-customer failed", { message: error instanceof Error ? error.message : String(error), organizationId, createdCardId });
+    if (createdCardId) {
+      await admin.from("nfc_tags").delete().eq("card_id", createdCardId);
+      await admin.from("cards").delete().eq("id", createdCardId);
+    }
+    if (organizationId) {
+      await admin.from("organization_members").delete().eq("organization_id", organizationId);
+      await admin.from("organizations").delete().eq("id", organizationId);
+    }
     return json({ error: error instanceof Error ? error.message : "Unexpected error" }, 400);
   }
 });
