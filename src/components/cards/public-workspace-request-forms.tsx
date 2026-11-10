@@ -16,6 +16,8 @@ type Props = {
   bookingLabel?: string;
   bookingHint?: string;
   bookingDateMode?: "datetime" | "stay";
+  serviceMode?: boolean;
+  whatsappPhone?: string;
 };
 
 function RequestIcon({ type }: { type: RequestType }) {
@@ -27,7 +29,7 @@ function RequestIcon({ type }: { type: RequestType }) {
   return <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[type]}</svg>;
 }
 
-export function PublicWorkspaceRequestForms({ cardSlug, accent = "#4f46e5", products, allowOrders, allowBookings, allowQuotes, shopMode = false, bookingLabel = "Réserver", bookingHint = "Choisir une date", bookingDateMode = "datetime" }: Props) {
+export function PublicWorkspaceRequestForms({ cardSlug, accent = "#4f46e5", products, allowOrders, allowBookings, allowQuotes, shopMode = false, bookingLabel = "Réserver", bookingHint = "Choisir une date", bookingDateMode = "datetime", serviceMode = false, whatsappPhone = "" }: Props) {
   const types = useMemo(() => [
     ...(allowOrders ? [{ id: "order" as const, label: "Commander", hint: "Passer une commande" }] : []),
     ...(allowBookings ? [{ id: "booking" as const, label: bookingLabel, hint: bookingHint }] : []),
@@ -42,13 +44,13 @@ export function PublicWorkspaceRequestForms({ cardSlug, accent = "#4f46e5", prod
   const [requestedAt, setRequestedAt] = useState("");
   const [checkoutDate, setCheckoutDate] = useState("");
   const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [selectedService, setSelectedService] = useState("");
+  const [whatsappUrl, setWhatsappUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState<{ ok: boolean; text: string } | null>(null);
 
   if (!types.length && !shopMode) return null;
-  const selectedItems = Object.entries(quantities)
-    .filter(([, quantity]) => quantity > 0)
-    .map(([product_id, quantity]) => ({ product_id, quantity }));
+  const selectedItems = serviceMode && type === "booking" ? (selectedService ? [{ product_id: selectedService, quantity: 1 }] : []) : Object.entries(quantities).filter(([, quantity]) => quantity > 0).map(([product_id, quantity]) => ({ product_id, quantity }));
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -116,8 +118,8 @@ export function PublicWorkspaceRequestForms({ cardSlug, accent = "#4f46e5", prod
       <section role="dialog" aria-modal="true" aria-labelledby="public-request-title" className="max-h-[92dvh] w-full max-w-lg overflow-y-auto rounded-t-3xl bg-white p-5 shadow-2xl sm:rounded-3xl" onClick={(event) => event.stopPropagation()}>
         <div className="flex items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-wider text-slate-500">Demande en ligne</p><h2 id="public-request-title" className="mt-1 text-xl font-black text-slate-950">{activeLabel}</h2><p className="mt-1 text-sm text-slate-500">Remplissez ces informations pour contacter l'entreprise.</p></div><button type="button" onClick={() => setOpen(false)} disabled={loading} aria-label="Fermer" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xl text-slate-700 hover:bg-slate-200">×</button></div>
         <form onSubmit={submit} className="mt-5 space-y-3">
-          {type !== "quote" && products.length > 0 && <div className="space-y-2 rounded-2xl bg-slate-50 p-3"><p className="text-xs font-bold text-slate-700">{type === "booking" ? (bookingDateMode === "stay" ? "Choisissez votre chambre" : "Choisissez une prestation (facultatif)") : "Votre commande"}</p>
-            {products.map((product) => <div key={product.id} className="flex items-center justify-between gap-3 rounded-xl bg-white p-3"><div className="min-w-0"><p className="text-sm font-semibold text-slate-900">{product.name}</p><p className="mt-1 text-xs text-slate-500">{Number(product.price).toLocaleString("fr-MA")} {product.currency}</p></div><input aria-label={"Quantité " + product.name} type="number" min="0" max="20" value={quantities[product.id] ?? 0} onChange={(event) => setQuantities((current) => ({ ...current, [product.id]: Math.max(0, Math.min(20, Number(event.target.value) || 0)) }))} className="w-20 rounded-lg border border-slate-200 px-2 py-2 text-sm"/></div>)}
+          {type !== "quote" && products.length > 0 && <div className="space-y-2 rounded-2xl bg-slate-50 p-3"><p className="text-xs font-bold text-slate-700">{serviceMode && type === "booking" ? "Choisissez votre prestation" : type === "booking" ? (bookingDateMode === "stay" ? "Choisissez votre chambre" : "Choisissez une prestation (facultatif)") : "Votre commande"}</p>
+            {products.map((product) => serviceMode && type === "booking" ? <label key={product.id} className={"flex cursor-pointer items-center gap-3 rounded-xl border bg-white p-3 transition " + (selectedService === product.id ? "border-indigo-400 ring-2 ring-indigo-100" : "border-slate-200")}><input type="radio" name="selected_service" checked={selectedService === product.id} onChange={() => setSelectedService(product.id)} className="h-4 w-4 shrink-0"/>{product.image_url ? <img src={product.image_url} alt="" className="h-14 w-14 rounded-lg object-cover"/> : <span className="flex h-14 w-14 items-center justify-center rounded-lg bg-slate-100 text-xl">✦</span>}<span className="min-w-0 flex-1"><span className="block text-sm font-bold text-slate-900">{product.name}</span>{product.description && <span className="mt-0.5 block line-clamp-2 text-xs text-slate-500">{product.description}</span>}<span className="mt-1 block text-sm font-black text-slate-900">{Number(product.price).toLocaleString("fr-MA")} {product.currency}</span></span></label> : <div key={product.id} className="flex items-center justify-between gap-3 rounded-xl bg-white p-3"><div className="min-w-0"><p className="text-sm font-semibold text-slate-900">{product.name}</p><p className="mt-1 text-xs text-slate-500">{Number(product.price).toLocaleString("fr-MA")} {product.currency}</p></div><input aria-label={"Quantité " + product.name} type="number" min="0" max="20" value={quantities[product.id] ?? 0} onChange={(event) => setQuantities((current) => ({ ...current, [product.id]: Math.max(0, Math.min(20, Number(event.target.value) || 0)) }))} className="w-20 rounded-lg border border-slate-200 px-2 py-2 text-sm"/></div>)}
           </div>}
           {type === "booking" && (bookingDateMode === "stay" ? <div className="grid gap-3 sm:grid-cols-2"><label className="block text-xs font-semibold text-slate-600">Date d'arrivée<input required type="date" value={requestedAt} onChange={(event) => setRequestedAt(event.target.value)} min={new Date().toISOString().slice(0, 10)} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"/></label><label className="block text-xs font-semibold text-slate-600">Date de départ<input required type="date" value={checkoutDate} onChange={(event) => setCheckoutDate(event.target.value)} min={requestedAt || new Date().toISOString().slice(0, 10)} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"/></label></div> : <label className="block text-xs font-semibold text-slate-600">Date et heure souhaitées<input required type="datetime-local" value={requestedAt} onChange={(event) => setRequestedAt(event.target.value)} min={new Date(Date.now() + 60 * 60 * 1000).toISOString().slice(0, 16)} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"/></label>)}
           <div className="grid gap-3 sm:grid-cols-2"><input required minLength={2} maxLength={160} value={name} onChange={(event) => setName(event.target.value)} placeholder="Votre nom complet" className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"/><input required minLength={6} maxLength={40} value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="Téléphone" className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"/></div>
