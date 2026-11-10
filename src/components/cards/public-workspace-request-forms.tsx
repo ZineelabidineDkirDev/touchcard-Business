@@ -80,8 +80,8 @@ export function PublicWorkspaceRequestForms({ cardSlug, accent = "#4f46e5", prod
         "Téléphone : " + phone,
         email ? "E-mail : " + email : "",
         message ? "Précisions : " + message : "",
-      ].filter(Boolean).join("\\n");
-      const cleanWhatsApp = whatsappPhone.replace(/[^+\\d]/g, "").replace(/^\\+/, "");
+      ].filter(Boolean).join("\n");
+      const cleanWhatsApp = whatsappPhone.replace(/[^+\d]/g, "").replace(/^\+/, "");
       setWhatsappUrl(cleanWhatsApp ? "https://wa.me/" + cleanWhatsApp + "?text=" + encodeURIComponent(whatsappMessage) : "");
       setFeedback({ ok: true, text: cleanWhatsApp ? "Votre demande a été enregistrée. Terminez la confirmation avec WhatsApp." : "Votre demande a été enregistrée. Contactez directement l’établissement pour confirmer le rendez-vous." });
       setName(""); setPhone(""); setEmail(""); setMessage(""); setRequestedAt(""); setCheckoutDate(""); setQuantities({}); setSelectedService("");
