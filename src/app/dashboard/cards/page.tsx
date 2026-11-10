@@ -127,7 +127,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
   const modules = Array.isArray(config.modules) ? config.modules : [];
   if (config.version && !modules.includes("digital_card")) notFound();
   const catalogEnabled = !config.version || modules.some((module) => ["product_catalog", "service_catalog"].includes(module));
-  const catalogLabel = config.template === "service" ? "Prestations" : "Produits";
+  const catalogLabel = config.template === "service" ? "Prestations" : config.template === "e-business" ? "Shop" : "Produits";
   const { data: catalogItems } = catalogEnabled && organizationId
     ? await supabase.from("products").select("id,name,description,price,currency,image_url,is_active")
       .eq("organization_id", organizationId).order("created_at", { ascending: false })
@@ -167,8 +167,8 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
 
       {catalogEnabled && <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3"><div><p className="text-xs font-black uppercase tracking-wider text-indigo-600">Catalogue client</p><h2 className="mt-1 text-xl font-black text-slate-950">{catalogLabel}</h2><p className="mt-1 text-sm text-slate-500">Ajoutez les éléments qui seront visibles sur votre page publique. Les prix sont exprimés en MAD.</p></div><span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">{catalogItems?.length ?? 0} élément(s)</span></div>
-        <PopupDialog title={catalogLabel === "Prestations" ? "Ajouter une prestation" : "Ajouter un produit"} description="Ajoutez les informations et la photo qui seront visibles sur votre page publique." triggerLabel={catalogLabel === "Prestations" ? "+ Ajouter une prestation" : "+ Ajouter un produit"} triggerClassName="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700"><form action={createCatalogItem} className="grid gap-3 sm:grid-cols-2">
-          <input name="name" required maxLength={120} placeholder={catalogLabel === "Prestations" ? "Nom de la prestation" : "Nom du produit"} className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"/>
+        <PopupDialog title={catalogLabel === "Prestations" ? "Ajouter une prestation" : catalogLabel === "Shop" ? "Ajouter un article au Shop" : "Ajouter un produit"} description="Ajoutez les informations et la photo qui seront visibles sur votre page publique." triggerLabel={catalogLabel === "Prestations" ? "+ Ajouter une prestation" : catalogLabel === "Shop" ? "+ Ajouter un article" : "+ Ajouter un produit"} triggerClassName="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700"><form action={createCatalogItem} className="grid gap-3 sm:grid-cols-2">
+          <input name="name" required maxLength={120} placeholder={catalogLabel === "Prestations" ? "Nom de la prestation" : catalogLabel === "Shop" ? "Nom de l'article" : "Nom du produit"} className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"/>
           <input name="price" required type="number" min="0" max="100000000" step="0.01" placeholder="Prix en MAD" className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"/>
           <textarea name="description" maxLength={1200} rows={2} placeholder="Description (facultatif)" className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm sm:col-span-2"/>
           <div className="sm:col-span-2"><MediaImagePicker organizationId={organizationId!} name="image_url" label="Photo du produit / couverture"/></div>
