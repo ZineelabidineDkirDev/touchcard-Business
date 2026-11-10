@@ -143,14 +143,14 @@ async function PublicCardContent({
 
           {template === "google-review" && <section className="rounded-2xl bg-white p-4 text-center"><p className="text-sm font-bold text-slate-900">Votre avis compte pour nous</p><p className="mt-1 text-2xl tracking-[.2em] text-amber-500" aria-label="5 étoiles">★★★★★</p>{fields.google_review_url ? <TrackedPublicLink cardId={card.id} href={fields.google_review_url} className="mt-3 flex items-center justify-center rounded-xl px-4 py-3 text-sm font-bold text-white" style={{ backgroundColor: accent }}>Laisser un avis Google</TrackedPublicLink> : <p className="mt-2 text-xs text-slate-600">Le lien Google sera ajouté prochainement.</p>}</section>}
 
-          {showCatalog && (catalogItems?.length ?? 0) > 0 && <section className="rounded-2xl bg-white p-4">
+          {<section className="rounded-2xl bg-white p-4">
             <h2 className="mb-3 text-base font-bold text-black">{template === "service" ? "Prestations" : "Projets"}</h2>
-            <div className="flex snap-x gap-3 overflow-x-auto pb-2">
+            {showCatalog && (catalogItems?.length ?? 0) > 0 ? <div className="flex snap-x gap-3 overflow-x-auto pb-2">
               {(catalogItems ?? []).map((item) => <article key={item.id} className="w-[245px] shrink-0 snap-start overflow-hidden rounded-xl border border-slate-200 bg-white">
                 {item.image_url && <img src={item.image_url} alt={item.name} loading="lazy" className="h-40 w-full object-cover"/>}
                 <div className="p-4"><h3 className="font-bold text-slate-900">{item.name}</h3>{item.description && <p className="mt-1 text-sm leading-6 text-slate-600">{item.description}</p>}<p className="mt-3 text-sm font-black text-slate-700">{Number(item.price).toLocaleString("fr-MA")} {item.currency}</p></div>
               </article>)}
-            </div>
+            </div> : <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-xs leading-5 text-slate-500">Aucun projet publié pour le moment.</p>}
           </section>}
 
           {(allowOrders || allowBookings || allowQuotes) && <PublicWorkspaceRequestForms
@@ -162,7 +162,7 @@ async function PublicCardContent({
             allowQuotes={allowQuotes}
           />}
 
-          {socialLinks.length > 0 && <section className="rounded-2xl bg-white p-4"><div className="flex flex-wrap items-end justify-between gap-2"><div><h2 className="text-base font-bold text-black">Réseaux sociaux</h2></div></div><div className="mt-4 grid grid-cols-5 gap-2">{socialLinks.map((link: PublicLink) => <TrackedPublicLink key={link.id} cardId={card.id} linkId={link.id} href={link.url} className="flex aspect-square min-w-0 items-center justify-center rounded-xl text-lg font-black text-white shadow-sm transition hover:-translate-y-0.5" style={{ backgroundColor: ({instagram:"#E4405F",facebook:"#1877F2",linkedin:"#0A66C2",tiktok:"#111111",youtube:"#FF0000",x:"#000000",pinterest:"#BD081C",whatsapp:"#25D366",telegram:"#229ED9"} as Record<string,string>)[link.kind] ?? "#64748b" }}><span>{({instagram:"◎",facebook:"f",linkedin:"in",tiktok:"♪",youtube:"▶",x:"𝕏",pinterest:"P",whatsapp:"◉",telegram:"➤"} as Record<string,string>)[link.kind] ?? "↗"}</span></TrackedPublicLink>)}</div></section>}
+          {<section className="rounded-2xl bg-white p-4"><div className="flex flex-wrap items-end justify-between gap-2"><div><h2 className="text-base font-bold text-black">Réseaux sociaux</h2></div></div>{socialLinks.length > 0 ? <div className="mt-4 grid grid-cols-5 gap-2">{socialLinks.map((link: PublicLink) => <TrackedPublicLink key={link.id} cardId={card.id} linkId={link.id} href={link.url} className="flex aspect-square min-w-0 items-center justify-center rounded-xl text-lg font-black text-white shadow-sm transition hover:-translate-y-0.5" style={{ backgroundColor: ({instagram:"#E4405F",facebook:"#1877F2",linkedin:"#0A66C2",tiktok:"#111111",youtube:"#FF0000",x:"#000000",pinterest:"#BD081C",whatsapp:"#25D366",telegram:"#229ED9"} as Record<string,string>)[link.kind] ?? "#64748b" }}><span>{({instagram:"◎",facebook:"f",linkedin:"in",tiktok:"♪",youtube:"▶",x:"𝕏",pinterest:"P",whatsapp:"◉",telegram:"➤"} as Record<string,string>)[link.kind] ?? "↗"}</span></TrackedPublicLink>)}</div> : <p className="mt-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-center text-xs leading-5 text-slate-500">Les réseaux sociaux ajoutés par le client apparaîtront ici.</p>}</section>}
 
           {featuredLinks.length > 0 && <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-black">Featured</h2><div className="mt-3 grid grid-cols-2 gap-2">{featuredLinks.map((link) => <TrackedPublicLink key={link.id} cardId={card.id} linkId={link.id} href={link.url} className="flex min-h-24 items-end justify-between rounded-xl bg-slate-100 p-3 text-sm font-bold text-slate-800"><span className="max-w-[85%]">{link.label}</span><span className="text-lg">↗</span></TrackedPublicLink>)}</div></section>}
 
