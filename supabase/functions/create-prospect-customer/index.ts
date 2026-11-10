@@ -92,7 +92,7 @@ Deno.serve(async (req: Request) => {
     if (!selectedModules.includes("digital_card")) return json({ error: "The public digital card module is required" }, 400);
 
     const { data: prospect, error: prospectError } = await admin.from("prospect_requests")
-      .select("id,user_id,full_name,email,phone,city,status,brand_name,logo_url,card_type,activity_sector,project_needs,client_access_enabled,password_initialized")
+      .select("id,user_id,full_name,email,phone,city,status,brand_name,logo_url,business_address,business_phone,social_links,card_type,activity_sector,project_needs,client_access_enabled,password_initialized")
       .eq("id", requestId).maybeSingle();
     if (prospectError || !prospect) return json({ error: "Prospect not found" }, 404);
     if (!["approved", "in_production", "completed"].includes(prospect.status)) return json({ error: "Validez la demande avant de configurer l’espace client." }, 409);
@@ -149,7 +149,7 @@ Deno.serve(async (req: Request) => {
       name: organizationName,
       slug: organizationSlug,
       owner_id: customerUserId,
-      phone: prospect.phone,
+      phone: prospect.business_phone || prospect.phone,
       logo_url: logoUrl,
       workspace_config: workspaceConfig,
     }).select("id").single();
@@ -163,14 +163,36 @@ Deno.serve(async (req: Request) => {
     // Do not insert it again here: the (organization_id, user_id) primary key would conflict.
 
     const cardSlug = `${slugBase}-${crypto.randomUUID().slice(0, 8)}`;
+    const submittedSocialLinks = Array.isArray(prospect.social_links) ? prospect.social_links : [];
+    const websiteLink = submittedSocialLinks.find((item: any) =>
+      normalizeText(item?.platform) === "site web" || normalizeText(item?.platform) === "website"
+    );
+    const socialLinkRows = submittedSocialLinks.flatMap((item: any, index: number) => {
+      const platform = String(item?.platform ?? "").trim();
+      const url = safeHttpUrl(item?.url);
+      if (!platform || !url) return [];
+      const normalizedPlatform = normalizeText(platform);
+      const kindByPlatform: Record<string, string> = {
+        instagram: "instagram", facebook: "facebook", tiktok: "tiktok",
+        linkedin: "linkedin", youtube: "youtube", whatsapp: "whatsapp",
+        "site web": "website", website: "website", autre: "other",
+      };
+      return [{ label: platform.slice(0, 60), url, kind: kindByPlatform[normalizedPlatform] ?? "other", position: index }];
+    });
+    const businessAddress = String(prospect.business_address ?? "").trim();
+    const businessPhone = String(prospect.business_phone ?? "").trim();
     const publicFields = {
       tagline: profileDraft?.tagline ?? "",
-      location: prospect.city ?? "",
+      location: businessAddress || prospect.city || "",
       hours: "",
-      whatsapp: "",
+      whatsapp: businessPhone,
+      company_phone: businessPhone,
+      company_email: prospect.email ?? "",
+      company_address: businessAddress || prospect.city || "",
+      industry: prospect.activity_sector ?? "",
       google_review_url: "",
       custom_fields: (profileDraft?.card_fields ?? [])
-        .filter((field: any) => !["tagline", "location", "hours", "whatsapp", "google_review_url"].includes(field.key))
+        .filter((field: any) => !["tagline", "location", "hours", "whatsapp", "google_review_url", "company_phone", "company_email", "company_address", "industry"].includes(field.key))
         .map((field: any) => ({
           key: field.key, label: field.label, value: "", visible: field.visible,
         })),
@@ -181,6 +203,9 @@ Deno.serve(async (req: Request) => {
       slug: cardSlug,
       full_name: cardType === "contact" ? prospect.full_name : organizationName,
       company_name: organizationName,
+      email: prospect.email ?? null,
+      phone: prospect.phone ?? null,
+      website: safeHttpUrl(websiteLink?.url),
       bio: profileDraft?.description || null,
       avatar_url: logoUrl,
       theme: {
@@ -198,6 +223,16 @@ Deno.serve(async (req: Request) => {
       throw new Error(cardError?.message || "The first NFC card draft could not be created.");
     }
     createdCardId = card.id;
+
+    if (socialLinkRows.length) {
+      const { error: socialLinksError } = await admin.from("card_links").insert(
+        socialLinkRows.map((link: any) => ({ card_id: card.id, ...link }))
+      );
+      if (socialLinksError) {
+        console.error("Prospect social links seed failed", { code: socialLinksError.code, message: socialLinksError.message });
+        throw new Error("Les liens professionnels fournis dans la demande n'ont pas pu être ajoutés à la carte.");
+      }
+    }
 
     const { error: nfcError } = await admin.from("nfc_tags").insert({
       card_id: card.id,
