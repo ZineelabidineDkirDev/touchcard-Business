@@ -90,7 +90,7 @@ Deno.serve(async (req: Request) => {
       .select("id,user_id,full_name,email,phone,city,status,brand_name,logo_url,card_type,activity_sector,project_needs")
       .eq("id", requestId).maybeSingle();
     if (prospectError || !prospect) return json({ error: "Prospect not found" }, 404);
-    if (!["approved", "in_production"].includes(prospect.status)) return json({ error: "Validez la demande avant de configurer l’espace client." }, 409);
+    if (!["approved", "in_production", "completed"].includes(prospect.status)) return json({ error: "Validez la demande avant de configurer l’espace client." }, 409);
     if (!prospect.user_id) return json({ error: "The customer account must be created when the prospect submits the request" }, 409);
     if (prospect.card_type !== cardType) return json({ error: "The selected template must match the prospect's original card choice" }, 400);
 
