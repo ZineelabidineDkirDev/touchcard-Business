@@ -1,46 +1,4 @@
-export async function importCatalogItems(formData: FormData) {
-  const { supabase, user, organizationId } = await getWorkspace();
-  if (!user) redirect("/login?next=/dashboard/cards");
-  if (!organizationId) redirect("/dashboard/cards?catalog_import=workspace");
-  if (!(await hasSectorCatalogAccess(supabase, organizationId))) redirect("/dashboard/cards?catalog_import=access");
-
-  const file = formData.get("catalog_file");
-  if (!(file instanceof File) || file.size === 0) redirect("/dashboard/cards?catalog_import=file");
-  if (file.size > 2 * 1024 * 1024 || !file.name.toLowerCase().endsWith(".csv")) redirect("/dashboard/cards?catalog_import=format");
-
-  const raw = (await file.text()).replace(/^\\uFEFF/, "");
-  const delimiter = detectCsvDelimiter(raw);
-  const records = parseCsvRecords(raw, delimiter);
-  if (records.length < 2) redirect("/dashboard/cards?catalog_import=empty");
-  const headers = records[0].map((value) => value.replace(/^\\uFEFF/, "").trim().toLowerCase());
-  const nameIndex = headers.findIndex((value) => ["name", "nom", "prestation", "produit"].includes(value));
-  const descriptionIndex = headers.findIndex((value) => ["description", "details", "détails"].includes(value));
-  const priceIndex = headers.findIndex((value) => ["price", "prix", "tarif"].includes(value));
-  const imageIndex = headers.findIndex((value) => ["image_url", "image", "photo"].includes(value));
-  if (nameIndex < 0 || descriptionIndex < 0 || priceIndex < 0 || imageIndex < 0) {
-    redirect("/dashboard/cards?catalog_import=headers");
-  }
-
-  const dataRecords = records.slice(1).filter((row) => row.some((cell) => cell.trim()));
-  if (dataRecords.length > 250) redirect("/dashboard/cards?catalog_import=limit");
-  const rows = dataRecords.map((values) => {
-    const name = String(values[nameIndex] ?? "").trim().slice(0, 120);
-    const description = String(values[descriptionIndex] ?? "").trim().slice(0, 1200);
-    const rawPrice = String(values[priceIndex] ?? "").replace(/[\\s\\u00a0]/g, "").replace(",", ".");
-    const price = Number(rawPrice);
-    const imageUrl = safeHttpUrl(String(values[imageIndex] ?? ""), 1000);
-    return { organization_id: organizationId, name, description: description || null, price, currency: "MAD", image_url: imageUrl, is_active: true };
-  });
-  const validRows = rows.filter((item) => item.name && Number.isFinite(item.price) && item.price >= 0 && item.price <= 100000000);
-  if (!validRows.length) redirect("/dashboard/cards?catalog_import=invalid");
-  const { error } = await supabase.from("products").insert(validRows);
-  if (error) {
-    console.error("Catalog CSV import failed", { code: error.code, message: error.message, details: error.details, organizationId });
-    redirect("/dashboard/cards?catalog_import=database");
-  }
-  revalidatePath("/dashboard/cards");
-  redirect("/dashboard/cards?catalog_import=success&imported=" + validRows.length + "&skipped=" + (rows.length - validRows.length));
-}"use server";
+"use server";
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
@@ -87,8 +45,8 @@ function parseCsvRecords(input: string, delimiter: string) {
     if (char === '"' && quoted && input[index + 1] === '"') { value += '"'; index++; }
     else if (char === '"') quoted = !quoted;
     else if (char === delimiter && !quoted) { row.push(value.trim()); value = ""; }
-    else if ((char === "\\n" || char === "\\r") && !quoted) {
-      if (char === "\\r" && input[index + 1] === "\\n") index++;
+    else if ((char === "\n" || char === "\r") && !quoted) {
+      if (char === "\r" && input[index + 1] === "\n") index++;
       row.push(value.trim()); value = "";
       if (row.some((cell) => cell.length)) records.push(row);
       row = [];
@@ -105,7 +63,7 @@ function detectCsvDelimiter(input: string) {
     const char = input[index];
     if (char === '"' && quoted && input[index + 1] === '"') index++;
     else if (char === '"') quoted = !quoted;
-    else if (!quoted && (char === "\\n" || char === "\\r")) break;
+    else if (!quoted && (char === "\n" || char === "\r")) break;
     else if (!quoted && char === ",") commas++;
     else if (!quoted && char === ";") semicolons++;
   }
@@ -445,28 +403,43 @@ export async function uploadCatalogPdf(formData: FormData) {
 
 export async function importCatalogItems(formData: FormData) {
   const { supabase, user, organizationId } = await getWorkspace();
-  if (!user || !organizationId || !(await hasSectorCatalogAccess(supabase, organizationId))) return;
+  if (!user) redirect("/login?next=/dashboard/cards");
+  if (!organizationId) redirect("/dashboard/cards?catalog_import=workspace");
+  if (!(await hasSectorCatalogAccess(supabase, organizationId))) redirect("/dashboard/cards?catalog_import=access");
+
   const file = formData.get("catalog_file");
-  if (!(file instanceof File) || file.size === 0 || file.size > 500_000 || !file.name.toLowerCase().endsWith(".csv")) return;
-  const raw = (await file.text()).replace(/^\\uFEFF/, "");
-  const lines = raw.split(/\\r?\\n/).filter((line) => line.trim()).slice(0, 252);
-  if (lines.length < 2) return;
-  const delimiter = (lines[0].match(/;/g) ?? []).length > (lines[0].match(/,/g) ?? []).length ? ";" : ",";
-  const headers = parseCsvRow(lines[0], delimiter).map((value) => value.toLowerCase().trim());
+  if (!(file instanceof File) || file.size === 0) redirect("/dashboard/cards?catalog_import=file");
+  if (file.size > 2 * 1024 * 1024 || !file.name.toLowerCase().endsWith(".csv")) redirect("/dashboard/cards?catalog_import=format");
+
+  const raw = (await file.text()).replace(/^\uFEFF/, "");
+  const records = parseCsvRecords(raw, detectCsvDelimiter(raw));
+  if (records.length < 2) redirect("/dashboard/cards?catalog_import=empty");
+  const headers = records[0].map((value) => value.replace(/^\uFEFF/, "").trim().toLowerCase());
   const nameIndex = headers.findIndex((value) => ["name", "nom", "prestation", "produit"].includes(value));
   const descriptionIndex = headers.findIndex((value) => ["description", "details", "détails"].includes(value));
   const priceIndex = headers.findIndex((value) => ["price", "prix", "tarif"].includes(value));
   const imageIndex = headers.findIndex((value) => ["image_url", "image", "photo"].includes(value));
-  if (nameIndex < 0 || priceIndex < 0) return;
-  const rows = lines.slice(1).map((line) => parseCsvRow(line, delimiter)).map((values) => {
+  if (nameIndex < 0 || descriptionIndex < 0 || priceIndex < 0 || imageIndex < 0) {
+    redirect("/dashboard/cards?catalog_import=headers");
+  }
+
+  const dataRecords = records.slice(1).filter((row) => row.some((cell) => cell.trim()));
+  if (dataRecords.length > 250) redirect("/dashboard/cards?catalog_import=limit");
+  const rows = dataRecords.map((values) => {
     const name = String(values[nameIndex] ?? "").trim().slice(0, 120);
-    const price = Number(String(values[priceIndex] ?? "").replace(",", "."));
-    const description = descriptionIndex >= 0 ? String(values[descriptionIndex] ?? "").trim().slice(0, 1200) : "";
-    const imageUrl = imageIndex >= 0 ? safeHttpUrl(String(values[imageIndex] ?? ""), 1000) : null;
+    const description = String(values[descriptionIndex] ?? "").trim().slice(0, 1200);
+    const rawPrice = String(values[priceIndex] ?? "").replace(/[\s\u00a0]/g, "").replace(",", ".");
+    const price = Number(rawPrice);
+    const imageUrl = safeHttpUrl(String(values[imageIndex] ?? ""), 1000);
     return { organization_id: organizationId, name, description: description || null, price, currency: "MAD", image_url: imageUrl, is_active: true };
-  }).filter((item) => item.name && Number.isFinite(item.price) && item.price >= 0 && item.price <= 100000000).slice(0, 250);
-  if (!rows.length) return;
-  const { error } = await supabase.from("products").insert(rows);
-  if (error) { console.error("Catalog CSV import failed", error); return; }
+  });
+  const validRows = rows.filter((item) => item.name && Number.isFinite(item.price) && item.price >= 0 && item.price <= 100000000);
+  if (!validRows.length) redirect("/dashboard/cards?catalog_import=invalid");
+  const { error } = await supabase.from("products").insert(validRows);
+  if (error) {
+    console.error("Catalog CSV import failed", { code: error.code, message: error.message, details: error.details, organizationId });
+    redirect("/dashboard/cards?catalog_import=database");
+  }
   revalidatePath("/dashboard/cards");
+  redirect("/dashboard/cards?catalog_import=success&imported=" + validRows.length + "&skipped=" + (rows.length - validRows.length));
 }
