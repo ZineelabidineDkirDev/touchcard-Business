@@ -10,6 +10,9 @@ create table if not exists public.organization_catalog_documents (
 
 alter table public.organization_catalog_documents enable row level security;
 
+grant select on public.organization_catalog_documents to anon, authenticated;
+grant insert, update, delete on public.organization_catalog_documents to authenticated;
+
 drop policy if exists "Public can view organization catalog documents" on public.organization_catalog_documents;
 create policy "Public can view organization catalog documents"
 on public.organization_catalog_documents for select to anon, authenticated
