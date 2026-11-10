@@ -29,7 +29,7 @@ async function hasSectorCatalogAccess(supabase: Awaited<ReturnType<typeof create
   const config = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[]; original_client_choices?: { activity_sector?: string } };
   const modules = Array.isArray(config.modules) ? config.modules : [];
   const sector = String(config.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
-  const sectorCatalog = /beaute|cosmetique|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage|restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(sector);
+  const sectorCatalog = /beaute|cosmetique|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage|immobilier|agence immobiliere|promotion immobiliere|location immobiliere|restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(sector);
   return !config.version || modules.some((module) => ["product_catalog", "service_catalog"].includes(module)) || sectorCatalog;
 }
 
