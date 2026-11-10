@@ -126,10 +126,10 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
   const config = (organization?.workspace_config ?? {}) as { version?: number; template?: string; modules?: string[]; ai_suggestions?: { profile_draft?: { tagline?: string; description?: string; card_fields?: { key: string; label: string; type: string; visible: boolean }[]; suggested_buttons?: { kind: string; label: string; enabled: boolean }[] } } };
   const modules = Array.isArray(config.modules) ? config.modules : [];
   if (config.version && !modules.includes("digital_card")) notFound();
-  const catalogEnabled = !config.version || modules.some((module) => module === "service_catalog" || module === "room_catalog" || (module === "product_catalog" && isEcommerce));
   const activitySector = String((organization?.workspace_config as any)?.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const selectedNeed = String((organization?.workspace_config as any)?.original_client_choices?.project_needs?.selected?.[0] ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const isEcommerce = config.template === "e-business" && (/e.?commerce|commerce en ligne|boutique en ligne|vente en ligne/.test(activitySector) || /boutique en ligne|vente en ligne|e.?commerce|commerce en ligne|catalogue de produits|commande de produits/.test(selectedNeed));
+  const catalogEnabled = !config.version || modules.some((module) => module === "service_catalog" || module === "room_catalog" || (module === "product_catalog" && isEcommerce));
   const catalogLabel = modules.includes("room_catalog") ? "Chambres" : config.template === "service" ? "Prestations" : isEcommerce ? "Shop" : "Projets";
   const { data: catalogItems } = catalogEnabled && organizationId
     ? await supabase.from("products").select("id,name,description,price,currency,image_url,is_active")
