@@ -102,8 +102,9 @@ export function ProspectIntake() {
           const restoredForm = { ...draft.form, logoUrl: savedLogoUrl.startsWith("https://") || savedLogoUrl.startsWith("http://") ? savedLogoUrl : "" };
           const restoredStep = Number.isInteger(draft.step) ? Number(draft.step) : 0;
           const safeStep = Math.min(8, Math.max(0, restoredStep));
+          const migratedStep = safeStep === 5 && restoredForm.cardType !== "e-business" && restoredForm.cardType !== "service" ? 6 : safeStep;
           setForm((current) => ({ ...current, ...restoredForm }));
-          setStep(safeStep);
+          setStep(migratedStep);
         }
         if (!draftIsFresh) {
           window.localStorage.removeItem(DRAFT_KEY);
@@ -148,6 +149,14 @@ export function ProspectIntake() {
     });
   }
 
+  function selectCard(cardId: string) {
+    setForm((current) => {
+      const next = { ...current, cardType: cardId, projectNeeds: [], reservationMode: "", reservationChannels: [], managementNeeds: [] };
+      persistDraft(step, next);
+      return next;
+    });
+  }
+
   function onLogoChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -181,7 +190,7 @@ export function ProspectIntake() {
     const validation = validateStep();
     if (validation) { setError(validation); return; }
     if (step < 8) {
-      const nextStep = step + 1;
+      const nextStep = step === 4 && !serviceChoiceRequired ? 6 : step + 1;
       persistDraft(nextStep, form);
       setStep(nextStep);
       return;
@@ -244,8 +253,11 @@ export function ProspectIntake() {
   }
 
   const l = INTRO[locale];
-  const activeGroup = GROUP_OF_STEP[step] ?? 0;
-  const question = step === 5 ? (serviceChoiceRequired ? l.q5a : l.q5b) : l.q[step];
+  const visibleSteps = serviceChoiceRequired ? l.steps : l.steps.filter((_, index) => index !== 3);
+  const activeGroup = serviceChoiceRequired
+    ? (GROUP_OF_STEP[step] ?? 0)
+    : (step <= 4 ? (GROUP_OF_STEP[step] ?? 0) : Math.max(0, (GROUP_OF_STEP[step] ?? 0) - 1));
+  const question = step === 5 ? l.q5a : l.q[step];
   const languages = [["fr", "🇫🇷", "FR"], ["en", "🇬🇧", "EN"], ["ar", "🇲🇦", "AR"]] as const;
 
   return (
@@ -264,7 +276,7 @@ export function ProspectIntake() {
           {languages.map(([code, flag, label]) => (
             <button key={code} type="button" aria-pressed={locale === code} onClick={() => setLocale(code)} className={`inline-flex items-center gap-1 rounded-full border bg-[#0a1a45]/70 px-2.5 py-1.5 text-xs font-bold text-white backdrop-blur-md transition sm:gap-2 sm:px-3 sm:py-2 sm:text-sm lg:px-4 ${locale === code ? "border-cyan-300 shadow-[0_0_0_2px_rgba(0,200,255,.25)]" : "border-white/20 hover:border-white/40"}`}><span aria-hidden="true">{flag}</span>{label}</button>
           ))}
-          <Link href="/" aria-label="Fermer et revenir à l’accueil" title="Fermer" className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/25 bg-[#0a1a45]/80 text-lg font-semibold text-white shadow-lg backdrop-blur-md transition hover:border-rose-300/70 hover:bg-rose-500/20 hover:text-rose-100 sm:h-10 sm:w-10" >
+          <Link href="/" onClick={() => persistDraft(step, form)} aria-label="Fermer et revenir à l’accueil" title="Fermer — votre demande sera sauvegardée" className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/25 bg-[#0a1a45]/80 text-lg font-semibold text-white shadow-lg backdrop-blur-md transition hover:border-rose-300/70 hover:bg-rose-500/20 hover:text-rose-100 sm:h-10 sm:w-10" >
             <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="m18 6-12 12M6 6l12 12" /></svg>
           </Link>
         </div>
@@ -280,8 +292,8 @@ export function ProspectIntake() {
 
           <ol className="relative mt-8 flex items-start justify-between">
             <div aria-hidden="true" className="absolute inset-x-[8%] top-[22px] h-px bg-blue-300/30 sm:top-[26px]" />
-            <div aria-hidden="true" className="absolute start-[8%] top-[22px] h-px bg-cyan-400 transition-all duration-500 sm:top-[26px]" style={{ width: `${(activeGroup / 5) * 84}%` }} />
-            {l.steps.map((label, index) => (
+            <div aria-hidden="true" className="absolute start-[8%] top-[22px] h-px bg-cyan-400 transition-all duration-500 sm:top-[26px]" style={{ width: `${(activeGroup / (visibleSteps.length - 1)) * 84}%` }} />
+            {visibleSteps.map((label, index) => (
               <li key={label} aria-current={index === activeGroup ? "step" : undefined} className="relative z-10 flex w-1/6 min-w-0 flex-col items-center text-center">
                 <span className={`flex h-11 w-11 items-center justify-center rounded-full border-2 transition sm:h-[52px] sm:w-[52px] ${index === activeGroup ? "border-transparent bg-gradient-to-br from-cyan-400 to-blue-600 text-white shadow-[0_0_28px_rgba(0,200,255,.65)]" : index < activeGroup ? "border-cyan-300/80 bg-[#0a1a45] text-cyan-200" : "border-blue-300/60 bg-[#0a1a45] text-blue-100"}`}><StepIcon index={index} /></span>
                 <span className="mt-2 text-sm font-bold">{index + 1}</span>
@@ -299,7 +311,7 @@ export function ProspectIntake() {
           {step === 1 && <Field label="Ville" value={form.city} onChange={(v) => update("city", v)} placeholder="Ex. : Casablanca" />}
           {step === 2 && <div className="space-y-4"><Field label="Nom de votre activité / marque (facultatif pour E-Contact et Avis Google)" value={form.brandName} onChange={(v) => update("brandName", v)} placeholder="Ex. : MMC Event" autoComplete="organization"/><p className="text-sm text-slate-600">Sélectionnez un seul domaine correspondant à votre activité principale. Facultatif pour E-Contact et Avis Google.</p><div className="grid gap-3 sm:grid-cols-2">{sectors.map((sector) => <label key={sector} className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 text-left transition ${form.sector === sector ? "border-violet-500 bg-violet-50 ring-2 ring-violet-200" : "border-slate-200 bg-white hover:border-violet-300 hover:bg-violet-50"}`}><input type="radio" name="professional_sector" value={sector} checked={form.sector === sector} onChange={() => update("sector", sector)} className="h-4 w-4 accent-violet-700"/><span className="font-semibold text-slate-800">{sector}</span>{form.sector === sector && <span className="ml-auto text-xs font-bold text-violet-700">Choisi ✓</span>}</label>)}</div>{form.sector === "Autre" && <Field label="Précisez votre activité" value={form.sectorOther} onChange={(v) => update("sectorOther", v)} placeholder="Votre secteur d'activité"/>}</div>}
           {step === 3 && <div className="grid gap-5"><Field label="Adresse e-mail" type="email" value={form.email} onChange={(v) => update("email", v)} placeholder="vous@exemple.com" autoComplete="email"/><Field label="Téléphone" type="tel" value={form.phone} onChange={(v) => update("phone", v)} placeholder="+212 6 XX XX XX XX" autoComplete="tel"/></div>}
-          {step === 4 && <div className="space-y-5"><div className="grid gap-5 sm:grid-cols-2">{cards.map((card) => <div key={card.id} role="checkbox" aria-checked={form.cardType === card.id} tabIndex={0} onClick={() => setForm((current) => ({ ...current, cardType: card.id, projectNeeds: [], reservationMode: "", reservationChannels: [], managementNeeds: [] }))} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setForm((current) => ({ ...current, cardType: card.id, projectNeeds: [], reservationMode: "", reservationChannels: [], managementNeeds: [] })); } }} className={`group cursor-pointer rounded-2xl border p-3 text-left transition focus:outline-none focus:ring-2 focus:ring-violet-400 ${form.cardType === card.id ? "border-violet-500 bg-violet-50 ring-2 ring-violet-200" : "border-slate-200 bg-white hover:border-violet-300 hover:bg-violet-50"}`}><div className="relative aspect-[1.586/1] w-full"><PhysicalNfcCard title={card.title} cardType={card.id} clientName={form.fullName || "M./Mme Client"}/>{form.cardType === card.id && <span className="absolute -right-2 -top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-violet-700 text-lg font-black text-white shadow-lg" aria-label="Sélectionné">✓</span>}</div><div className="mt-4 flex items-center justify-between gap-2"><h3 className="font-extrabold text-slate-900">{card.title}</h3>{form.cardType === card.id && <span className="text-xs font-bold text-violet-700">Choisie ✓</span>}</div><p className="mt-1 text-xs leading-5 text-slate-600">{card.desc}</p></div>)}</div><div><label className="mb-2 block text-sm font-semibold text-slate-800">Pourquoi avez-vous choisi cette carte ?</label><textarea value={form.reason} onChange={(event) => update("reason", event.target.value)} rows={3} placeholder="Expliquez-nous votre besoin..." className="w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-400/20"/></div></div>}{serviceChoiceRequired && step === 5 && <div className="space-y-5">
+          {step === 4 && <div className="space-y-5"><div className="grid gap-5 sm:grid-cols-2">{cards.map((card) => <div key={card.id} role="checkbox" aria-checked={form.cardType === card.id} tabIndex={0} onClick={() => selectCard(card.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); selectCard(card.id); } }} className={`group cursor-pointer rounded-2xl border p-3 text-left transition focus:outline-none focus:ring-2 focus:ring-violet-400 ${form.cardType === card.id ? "border-violet-500 bg-violet-50 ring-2 ring-violet-200" : "border-slate-200 bg-white hover:border-violet-300 hover:bg-violet-50"}`}><div className="relative aspect-[1.586/1] w-full"><PhysicalNfcCard title={card.title} cardType={card.id} clientName={form.fullName || "M./Mme Client"}/>{form.cardType === card.id && <span className="absolute -right-2 -top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-violet-700 text-lg font-black text-white shadow-lg" aria-label="Sélectionné">✓</span>}</div><div className="mt-4 flex items-center justify-between gap-2"><h3 className="font-extrabold text-slate-900">{card.title}</h3>{form.cardType === card.id && <span className="text-xs font-bold text-violet-700">Choisie ✓</span>}</div><p className="mt-1 text-xs leading-5 text-slate-600">{card.desc}</p></div>)}</div><div><label className="mb-2 block text-sm font-semibold text-slate-800">Pourquoi avez-vous choisi cette carte ?</label><textarea value={form.reason} onChange={(event) => update("reason", event.target.value)} rows={3} placeholder="Expliquez-nous votre besoin..." className="w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-400/20"/></div></div>}{serviceChoiceRequired && step === 5 && <div className="space-y-5">
   <div className="rounded-2xl border border-violet-100 bg-violet-50/60 p-5">
     <p className="text-sm font-bold text-slate-900">Choisissez une seule formule de service</p>
     <p className="mt-1 text-sm leading-6 text-slate-600">Cette étape apparaît uniquement après le choix E-Business ou Personnalisée. Les fonctionnalités seront préparées selon votre activité.</p>
@@ -316,9 +328,6 @@ export function ProspectIntake() {
       </label>
     ))}
   </div>
-</div>}{!serviceChoiceRequired && step === 5 && <div className="space-y-4 rounded-2xl border border-violet-100 bg-violet-50/60 p-5">
-  <p className="text-sm leading-6 text-slate-600">Cette adresse sera utilisée pour préparer votre espace et rattacher votre carte à votre établissement. Elle ne remplace pas vos liens sociaux.</p>
-  <Field label="Adresse de l’établissement (rue, quartier et ville)" value={form.businessAddress} onChange={(v) => update("businessAddress", v)} placeholder="Ex. : 12 rue..., quartier..., Casablanca"/>
 </div>}{step === 6 && <div className="space-y-5"><p className="text-sm leading-6 text-slate-600">{form.cardType === "contact" ? "Ajoutez votre site web personnel, votre CV / portfolio et vos réseaux sociaux." : "Ajoutez les liens de vos pages professionnelles et réseaux sociaux. Vous pouvez en ajouter plusieurs ou supprimer ceux qui ne sont pas utiles."}</p><div className="space-y-3">{form.socialLinks.map((item, index) => <div key={index} className="grid gap-2 rounded-2xl border border-violet-100 bg-violet-50/60 p-3 sm:grid-cols-[.8fr_1.4fr_auto] sm:items-end"><div><label className="mb-2 block text-xs font-bold text-slate-700">Plateforme</label><select value={item.platform} onChange={(event) => update("socialLinks", form.socialLinks.map((link, i) => i === index ? { ...link, platform: event.target.value } : link))} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm text-slate-900 outline-none focus:border-violet-400"><option>Instagram</option><option>Facebook</option><option>TikTok</option><option>LinkedIn</option><option>YouTube</option><option>WhatsApp</option><option>Site web</option><option>CV / Portfolio</option><option>Autre</option></select></div><div><label className="mb-2 block text-xs font-bold text-slate-700">Lien de votre page</label><input type="url" value={item.url} onChange={(event) => update("socialLinks", form.socialLinks.map((link, i) => i === index ? { ...link, url: event.target.value } : link))} placeholder="https://..." className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-violet-400"/></div><div className="flex gap-2"><button type="button" aria-label="Ajouter un lien" onClick={() => update("socialLinks", [...form.socialLinks, { platform: "Instagram", url: "" }])} className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-700 text-2xl text-white shadow-md hover:bg-violet-800">+</button><button type="button" aria-label="Supprimer ce lien" disabled={form.socialLinks.length === 1} onClick={() => update("socialLinks", form.socialLinks.filter((_, i) => i !== index))} className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-300 bg-white text-2xl text-slate-600 hover:bg-rose-50 disabled:opacity-30">−</button></div></div>)}</div></div>}{step === 7 && <div className="space-y-5">
   <p className="text-sm text-slate-600">{form.cardType === "contact" ? "Personnalisez votre carte personnelle avec une photo ou un logo. Vos coordonnées et votre portfolio restent au centre de la carte." : "Nous pouvons adapter le design et les informations de votre carte à votre marque."}</p>
   <div className="grid grid-cols-2 gap-3"><Choice selected={form.customRequested} onClick={() => update("customRequested", true)}>Oui, personnaliser</Choice><Choice selected={!form.customRequested} onClick={() => update("customRequested", false)}>Non, passer</Choice></div>
@@ -330,7 +339,7 @@ export function ProspectIntake() {
           {error && <p role="alert" className="mt-5 rounded-xl border border-rose-400/20 bg-rose-400/10 p-3 text-sm text-rose-700">{error}</p>}
           <div className="mt-8 flex flex-col items-center gap-5">
             <div className="flex flex-wrap items-center justify-center gap-3">
-              {step > 0 && <button type="button" disabled={busy} onClick={() => { setError(""); setStep((value) => value === 8 ? 7 : value === 6 && !serviceChoiceRequired ? 5 : value - 1); }} className="rounded-full border border-white/25 bg-white/5 px-7 py-4 text-base font-bold text-white transition hover:bg-white/10 disabled:opacity-30">{l.prev}</button>}
+              {step > 0 && <button type="button" disabled={busy} onClick={() => { setError(""); setStep((value) => value === 8 ? 7 : value === 6 && !serviceChoiceRequired ? 4 : value - 1); }} className="rounded-full border border-white/25 bg-white/5 px-7 py-4 text-base font-bold text-white transition hover:bg-white/10 disabled:opacity-30">{l.prev}</button>}
               <button type="submit" disabled={busy} className="inline-flex min-w-[250px] items-center justify-center gap-2 rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-600 px-10 py-4 text-xl font-bold text-white shadow-[0_10px_34px_rgba(0,140,255,.45)] transition hover:-translate-y-0.5 hover:brightness-110 disabled:opacity-60">{busy ? l.saving : step === 8 ? l.send : l.next}<span aria-hidden="true">{locale === "ar" ? "←" : "→"}</span></button>
             </div>
             <Link href="/" className="inline-flex items-center gap-2 text-base text-white/85 transition hover:text-white"><ExitIcon />{l.later}</Link>
