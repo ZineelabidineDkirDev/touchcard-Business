@@ -52,7 +52,6 @@ export function ProspectIntake() {
         if (draftIsFresh && draft.form && typeof draft.form === "object") {
           const savedLogoUrl = String(draft.form.logoUrl ?? "");
           const restoredForm = { ...draft.form, logoUrl: savedLogoUrl.startsWith("https://") || savedLogoUrl.startsWith("http://") ? savedLogoUrl : "" };
-          const restoredCardType = String(restoredForm.cardType || "");
           const restoredStep = Number.isInteger(draft.step) ? Number(draft.step) : 0;
           const safeStep = Math.min(8, Math.max(0, restoredStep));
           setForm((current) => ({ ...current, ...restoredForm }));
