@@ -7,6 +7,7 @@ import { CustomCardFieldsEditor, type EditableCardField } from "@/components/car
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
 import { AdminClientCards } from "@/components/dashboard/admin-client-cards";
 import { MediaImagePicker } from "@/components/dashboard/media-image-picker";
+import { CardCvManager } from "@/components/dashboard/card-cv-manager";
 import { PopupDialog } from "@/components/dashboard/popup-dialog";
 import { CardColorPicker } from "@/components/cards/card-color-picker";
 
@@ -262,6 +263,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
           const currentAccent = typeof card.theme?.accent === "string" ? card.theme.accent : "#2563EB";
           const currentTextColor = typeof card.theme?.text_color === "string" ? card.theme.text_color : "#111827";
           const storedCustomFields: EditableCardField[] = Array.isArray(fields.custom_fields) ? fields.custom_fields : [];
+          const cvField = storedCustomFields.find((field) => /cv professionnel|^cv$/i.test(field.label.trim()) && /^https?:\\/\\//i.test(field.value.trim()));
           const initialCustomFields: EditableCardField[] = storedCustomFields.length
             ? storedCustomFields.filter((field) => galleryEnabled || !/portfolio|cv professionnel/i.test(field.key + " " + field.label))
             : (profileDraft?.card_fields ?? []).filter((field) => galleryEnabled || !/portfolio|cv/i.test(field.key + " " + field.label)).map((field) => ({ key: field.key, label: field.label, value: "", visible: field.visible }));
@@ -320,6 +322,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                     <div className="flex gap-2"><select name="kind" className="min-w-0 flex-1 rounded-lg border border-slate-200 px-3 py-2 text-sm"><option value="whatsapp">WhatsApp</option><option value="telegram">Telegram</option><option value="instagram">Instagram</option><option value="facebook">Facebook</option><option value="linkedin">LinkedIn</option><option value="tiktok">TikTok</option><option value="youtube">YouTube</option><option value="x">X / Twitter</option><option value="pinterest">Pinterest</option>{config.template === "contact" ? <><option value="website">Site web personnel</option><option value="other">CV / Portfolio</option></> : <><option value="calendly">Prendre rendez-vous</option><option value="store">Boutique / Store</option><option value="website">Site web</option><option value="other">Autre</option></>}</select><button className="btn-primary">Ajouter</button></div>
                   </form></PopupDialog>
                 </div>
+                {galleryEnabled && <CardCvManager organizationId={organizationId!} cardId={card.id} initialUrl={cvField?.value ?? ""}/>}
                 <div className="rounded-2xl bg-slate-950 p-4 text-white"><p className="text-xs font-bold uppercase tracking-wider text-indigo-300">Statistiques de cette carte</p><div className="mt-3 grid grid-cols-2 gap-3"><div><p className="text-2xl font-black">{cardEvents.filter(e => ["view","qr_scan","nfc_scan"].includes(e.event_type)).length}</p><p className="text-xs text-slate-300">Visites</p></div><div><p className="text-2xl font-black">{cardEvents.filter(e => e.event_type === "nfc_scan").length}</p><p className="text-xs text-slate-300">Scans NFC</p></div></div><p className="mt-2 text-xs text-slate-400">Les statistiques commencent à la publication et à l'enregistrement des événements.</p><div className="mt-4 border-t border-white/10 pt-3"><p className="text-xs font-bold text-white">URL à encoder sur la puce NFC</p><p className="mt-1 break-all text-[11px] text-slate-300">${publicSiteUrl}/p/${card.slug}?source=nfc</p><p className="mt-3 text-xs font-bold text-white">QR code de partage</p><img alt="QR code de la carte" loading="lazy" className="mt-2 h-28 w-28 rounded-lg bg-white p-1" src={"https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=" + encodeURIComponent(publicSiteUrl + "/p/" + card.slug + "?source=qr")}/></div></div>
                 <p className="text-xs text-slate-400">Modules autorisés : {modules.join(" · ") || "Configuration standard"}</p>
               </div>
