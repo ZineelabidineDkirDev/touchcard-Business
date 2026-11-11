@@ -263,11 +263,6 @@ export async function saveClientCardCv(cardId: string, cvUrl: string) {
   if (!user || !organizationId || !(await hasWorkspaceModule(supabase, organizationId, "digital_card"))) {
     return { ok: false as const, error: "Accès refusé." };
   }
-  const { data: organization } = await supabase.from("organizations")
-    .select("workspace_config").eq("id", organizationId).maybeSingle();
-  const config = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[]; original_client_choices?: { activity_sector?: string } };
-  const sector = String(config.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  const isCreativeProfile = /designer|design graphique|graphiste|photographe|photography/.test(sector);
   // Le CV est un document indépendant du module Portfolio & galerie.
   const { data: card } = await supabase.from("cards").select("id,slug,public_fields,public_settings")
     .eq("id", cardId).eq("organization_id", organizationId).maybeSingle();
