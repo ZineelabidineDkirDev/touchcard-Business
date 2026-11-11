@@ -52,8 +52,6 @@ export function generateTemplateBlueprint(input: {
   const isHealth = /sante|medical|medecin|dentiste|clinique|cabinet medical|kinesitherapie|bien.?etre/.test(sectorText);
   const isHospitality = /hotel|riad|maison d.?hotes|hebergement|residence touristique|auberge/.test(sectorText);
   const isBeautySector = /beaute|cosmetique?s?|cosmetics?|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage/.test(sectorText) || /beaute|cosmetique|esthetique|spa|hammam|onglerie|maquillage|massage/.test(text);
-  // Les règles métier Beauté/Cosmétique ne concernent que Contact et E-Service.
-  const isBeautySector = /beaute|cosmetique?s?|cosmetics?|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage/.test(sectorText) || /beaute|cosmetique|esthetique|spa|hammam|onglerie|maquillage|massage/.test(text);
   // E-Contact reste strictement personnel. Les règles commerciales ne s’appliquent qu’aux modèles E-Service et E-Business.
   const isBeauty = isBeautySector && ["service", "e-business"].includes(template);
   const isRestaurant = template !== "contact" && (/restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(sectorText) || /restaurant|restauration|menu|plats|cuisine|traiteur|pizzeria/.test(text));
