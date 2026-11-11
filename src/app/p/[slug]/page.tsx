@@ -124,7 +124,7 @@ async function PublicCardContent({
     ? (fields.custom_fields ?? []).find((field) => field.visible && /cv professionnel|^cv$/i.test(field.label.trim()) && /^https?:\/\//i.test(field.value.trim()))
     : null;
   // Le CV est rendu comme un bouton dédié dans "À propos", jamais comme une URL brute dans "Informations".
-  const infoFields = (fields.custom_fields ?? []).filter((field) => field.visible && field !== cvField && !faqFields.includes(field) && !galleryFields.includes(field) && field.label && field.value);
+  const infoFields = (fields.custom_fields ?? []).filter((field) => field.visible && field !== cvField && !/cv professionnel|^cv$/i.test((field.label ?? "").trim()) && !faqFields.includes(field) && !galleryFields.includes(field) && field.label && field.value);
 
   return (
     <main className="min-h-screen bg-slate-100 px-0 py-0 sm:px-5 sm:py-8"><style>{`.touchcard-public{--card-accent:${accent};--card-text:${textColor}}.touchcard-public h1,.touchcard-public h2,.touchcard-public h3{color:var(--card-text)!important}.touchcard-public p{color:var(--card-text)}.touchcard-public .text-indigo-950,.touchcard-public .text-indigo-800,.touchcard-public .text-indigo-700,.touchcard-public .text-indigo-600{color:var(--card-accent)!important}.touchcard-public .bg-indigo-600{background-color:var(--card-accent)!important}.touchcard-public .bg-indigo-50{background-color:color-mix(in srgb,var(--card-accent) 9%,white)!important}.touchcard-public .border-indigo-100{border-color:color-mix(in srgb,var(--card-accent) 25%,white)!important}`}</style>
