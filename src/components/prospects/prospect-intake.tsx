@@ -35,7 +35,7 @@ export function ProspectIntake() {
   const reduceMotion = useReducedMotion();
   const [logoName, setLogoName] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
-remove password form state  const serviceChoiceRequired = form.cardType === "e-business" || form.cardType === "service";
+  const serviceChoiceRequired = form.cardType === "e-business" || form.cardType === "service";
   const visibleSteps = useMemo(() => serviceChoiceRequired ? [0, 1, 2, 3, 4, 5, 6, 7, 8] : [0, 1, 2, 3, 4, 6, 7, 8], [serviceChoiceRequired]);
   const progress = ((Math.max(0, visibleSteps.indexOf(step)) + 1) / visibleSteps.length) * 100;
 
