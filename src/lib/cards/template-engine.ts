@@ -72,7 +72,7 @@ export function generateTemplateBlueprint(input: {
     if (/reserv|rendez|calendrier|creneau/.test(text) || isHealth || isHospitality || isTraining) { modules.add("bookings"); modules.add("availability_calendar"); }
     if (/devis/.test(text) || isRealEstate) modules.add("quote_requests");
     if (/equipe|collaborateur/.test(text)) modules.add("team");
-    if (/photo|realisation|contenu/.test(text) || isRealEstate || isTraining || isHealth || isHospitality) modules.add("gallery");
+    if (/photo|realisation|contenu|portfolio|galerie|gallery|cv/.test(text) || isRealEstate || isTraining || isHealth || isHospitality) modules.add("gallery");
     if (/prospect|client|contact/.test(text) || isRealEstate) modules.add("crm_contacts");
     if (/service|tarif|prestation/.test(text) || template === "service" || isBeauty || isRestaurant) modules.add("service_catalog");
     if (template === "google-review") { modules.add("google_reviews"); modules.add("company_profile"); modules.add("qr_nfc"); }
