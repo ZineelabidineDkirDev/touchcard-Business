@@ -8,6 +8,7 @@ const clientItems = [
   { label: "Vue d’ensemble", href: "/dashboard", modules: [] as string[] },
   { label: "Ma carte NFC", href: "/dashboard/cards", modules: ["digital_card"] },
   { label: "Demandes reçues", href: "/dashboard/requests", modules: ["orders", "bookings", "quote_requests"] },
+  { label: "Mes modules métier", href: "/dashboard/modules", modules: ["service_catalog", "room_catalog", "bookings", "availability_calendar", "doctor_appointments", "gym_registration", "school_registration"] },
   { label: "Mes contacts", href: "/dashboard/contacts", modules: ["crm_contacts"] },
   { label: "Mon équipe", href: "/dashboard/team", modules: ["team"] },
   { label: "Statistiques", href: "/dashboard/analytics", modules: ["analytics"] },
