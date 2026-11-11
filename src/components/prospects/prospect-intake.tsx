@@ -165,20 +165,33 @@ export function ProspectIntake() {
   const subtitles = ["Comment pouvons-nous vous appeler ?", "Dans quelle ville exercez-vous ?", "Quel est votre domaine professionnel ?", "Comment pouvons-nous vous joindre ?", "Quelle solution correspond à votre besoin ?", "Choisissez une formule adaptée à votre activité. Cette étape concerne E-Business et Personnalisée uniquement.", "Ajoutez votre site web, votre CV / portfolio et vos réseaux sociaux.", "Souhaitez-vous une carte personnalisée ?", "Relisez votre demande avant de l’envoyer."];
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#080a19] px-4 py-10 text-slate-900 sm:px-6 sm:py-14">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,rgba(79,70,229,.34),transparent_34%),radial-gradient(circle_at_88%_78%,rgba(124,58,237,.28),transparent_36%),linear-gradient(135deg,#10132c_0%,#171936_48%,#080a19_100%)]" />
+    <main className="relative grid min-h-screen overflow-hidden bg-[#071326] px-4 py-6 text-slate-900 sm:px-6 sm:py-8 lg:grid-cols-[.92fr_1.08fr] lg:grid-rows-[auto_1fr] lg:gap-x-8 lg:px-10 lg:py-8">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_14%_18%,rgba(0,166,255,.24),transparent_34%),radial-gradient(ellipse_at_90%_80%,rgba(91,55,255,.3),transparent_42%),linear-gradient(120deg,#06101e_0%,#101d36_52%,#101638_100%)]" />
       <motion.div aria-hidden="true" animate={reduceMotion ? undefined : { x: [0, 34, 0], y: [0, -24, 0] }} transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }} className="pointer-events-none absolute -left-32 top-24 h-96 w-96 rounded-full bg-indigo-500/20 blur-[110px]" />
       <motion.div aria-hidden="true" animate={reduceMotion ? undefined : { x: [0, -28, 0], y: [0, 30, 0] }} transition={{ duration: 17, repeat: Infinity, ease: "easeInOut" }} className="pointer-events-none absolute -right-32 bottom-0 h-[28rem] w-[28rem] rounded-full bg-violet-500/20 blur-[120px]" />
-      <header className="relative mx-auto flex max-w-5xl items-center justify-between">
-        <Link href="/" className="flex items-center gap-3"><img src="/brand/touchcard-mark.svg" alt="" className="h-10 w-10"/><span className="text-xl font-black">Touch<span className="text-violet-700">Card</span><span className="ml-2 text-[9px] tracking-[.18em] text-violet-700">BUSINESS</span></span></Link>
-        <Link href="/" className="text-sm font-semibold text-slate-600 hover:text-violet-700">Quitter</Link>
+      <aside className="relative z-10 hidden min-h-[calc(100vh-4rem)] flex-col justify-between py-6 text-white lg:row-span-2 lg:flex">
+        <div>
+          <Link href="/" className="inline-flex items-center gap-4"><img src="/brand/touchcard-mark.svg" alt="TouchCard Business" className="h-16 w-16 object-contain"/><span className="flex flex-col leading-none"><strong className="text-3xl font-black tracking-tight">TouchCard</strong><span className="mt-1 text-xl font-medium tracking-wide text-white/85">Business</span></span></Link>
+          <p className="mt-10 max-w-md text-3xl font-semibold leading-tight">Votre présence digitale,<br/><span className="bg-gradient-to-r from-cyan-300 via-blue-400 to-violet-400 bg-clip-text text-transparent">plus proche</span> que jamais.</p>
+          <div className="mt-6 h-1.5 w-28 rounded-full bg-gradient-to-r from-cyan-400 to-violet-500"/>
+        </div>
+        <div className="relative mx-auto my-8 w-full max-w-[560px]">
+          <div className="absolute -inset-10 rounded-full bg-blue-500/20 blur-3xl"/>
+          <div className="relative aspect-[1.586/1] w-full rotate-[-8deg] drop-shadow-[0_35px_55px_rgba(0,0,0,.55)]"><PhysicalNfcCard title="TouchCard Business" cardType="e-business" clientName="Votre présence digitale"/></div>
+          <div className="absolute -bottom-12 right-4 h-36 w-36 rounded-full border-[12px] border-cyan-400/20 shadow-[0_0_55px_rgba(0,174,255,.35)]"/>
+        </div>
+        <div className="flex flex-wrap gap-6 border-t border-white/15 pt-6 text-xs font-medium text-white/80"><span>✓ Sécurisé et fiable</span><span>ϟ Rapide et simple</span><span>▯ Accessible sur vos appareils</span></div>
+      </aside>
+      <header className="relative z-10 mx-auto flex w-full max-w-5xl items-center justify-between lg:col-start-2 lg:row-start-1">
+        <Link href="/" className="flex items-center gap-3 lg:invisible"><img src="/brand/touchcard-mark.svg" alt="" className="h-9 w-9"/><span className="flex flex-col leading-none text-white"><strong className="text-lg font-black">TouchCard</strong><span className="mt-1 text-[10px] tracking-[.16em] text-white/70">BUSINESS</span></span></Link>
+        <Link href="/" onClick={() => { try { window.localStorage.setItem("touchcard-prospect-draft-v2", JSON.stringify({ savedAt: Date.now(), step, form })); } catch { /* Keep navigation available if storage is disabled. */ } }} className="rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-white/90 backdrop-blur hover:bg-white/10">Quitter et revenir plus tard ↗</Link>
       </header>
 
-      <section className="relative mx-auto mt-10 max-w-3xl rounded-[2rem] border border-slate-200/90 bg-white/95 p-6 shadow-[0_24px_80px_rgba(30,27,75,.12)] sm:mt-12 sm:p-10">
-        <div className="flex items-center justify-between gap-4 text-xs font-bold uppercase tracking-[.18em] text-violet-700"><span>Votre projet TouchCard</span><span>Étape {Math.max(0, visibleSteps.indexOf(step)) + 1} / {visibleSteps.length}</span></div>
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 transition-all duration-500" style={{ width: `${progress}%` }}/></div>
-        <p className="mt-9 text-xs font-black uppercase tracking-[.22em] text-violet-700">{titles[step]}</p>
-        <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">{subtitles[step]}</h1>
+      <section className="relative z-10 mx-auto mt-7 w-full max-w-3xl rounded-[2rem] border border-white/20 bg-slate-950/45 p-6 text-white shadow-[0_30px_90px_rgba(0,0,0,.35)] backdrop-blur-2xl sm:p-9 lg:col-start-2 lg:row-start-2 lg:mt-5">
+        <div className="flex items-center justify-between gap-4 text-xs font-bold uppercase tracking-[.18em] text-cyan-200"><span>Votre projet TouchCard</span><span>Étape {Math.max(0, visibleSteps.indexOf(step)) + 1} / {visibleSteps.length}</span></div>
+        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500 transition-all duration-500" style={{ width: `${progress}%` }}/></div>
+        <p className="mt-9 text-xs font-black uppercase tracking-[.22em] text-cyan-200">{titles[step]}</p>
+        <h1 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">{subtitles[step]}</h1>
         <form onSubmit={submit} className="mt-8">
           {step === 0 && <Field label="Nom et prénom" value={form.fullName} onChange={(v) => update("fullName", v)} placeholder="Ex. : Zine El Abidine Dkir" autoComplete="name"/>}
           {step === 1 && <Field label="Ville" value={form.city} onChange={(v) => update("city", v)} placeholder="Ex. : Casablanca" />}
@@ -212,7 +225,7 @@ export function ProspectIntake() {
           {error && <p role="alert" className="mt-5 rounded-xl border border-rose-400/20 bg-rose-400/10 p-3 text-sm text-rose-700">{error}</p>}
           <div className="mt-9 flex flex-col-reverse justify-between gap-3 sm:flex-row"><button type="button" disabled={step === 0 || busy} onClick={() => { setError(""); setStep((value) => value === 8 ? 7 : value === 6 && !serviceChoiceRequired ? 4 : value - 1); }} className="rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 transition hover:border-violet-300 hover:bg-violet-50 disabled:opacity-30">Précédent</button><button type="submit" disabled={busy} className="rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-7 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-indigo-950/30 transition hover:-translate-y-0.5 hover:brightness-110 disabled:opacity-60">{busy ? "Enregistrement..." : step === 8 ? "Envoyer ma demande" : "Suivant →"}</button></div>
         </form>
-        <p className="mt-7 text-center text-[11px] leading-5 text-slate-500">En confirmant, vous acceptez que TouchCard utilise ces informations pour traiter votre demande et vous contacter à ce sujet.</p>
+        <p className="mt-7 text-center text-[11px] leading-5 text-white/55">En confirmant, vous acceptez que TouchCard utilise ces informations pour traiter votre demande et vous contacter à ce sujet.</p>
       </section>
     </main>
   );
