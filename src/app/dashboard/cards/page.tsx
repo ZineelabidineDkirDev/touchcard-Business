@@ -328,7 +328,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                     <div className="mb-4">
                       <p className="text-xs font-black uppercase tracking-wider text-indigo-600">3. Organisation de la carte publique</p>
                       <h4 className="mt-1 text-base font-black text-slate-900">Modules visibles de ma carte</h4>
-                      <p className="mt-1 text-xs leading-5 text-slate-500">Choisissez ici les rubriques que vos visiteurs verront après un scan. Ces réglages sont enregistrés avec le reste de votre personnalisation.</p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">Choisissez ici les rubriques que vos visiteurs verront après un scan. Ces réglages sont indépendants du formulaire de personnalisation et peuvent être enregistrés séparément.</p>
                     </div>
                     <form action={saveClientCardVisibility} className="space-y-4"><input type="hidden" name="card_id" value={card.id}/><div className="space-y-4">
                       {[
