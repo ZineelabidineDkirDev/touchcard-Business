@@ -57,8 +57,8 @@ async function AuthenticatedDashboard({ children }: Readonly<{ children: React.R
   return (
     <div className="min-h-screen bg-slate-50 lg:flex">
       <aside className="w-full border-b border-slate-200 bg-white p-5 lg:fixed lg:inset-y-0 lg:w-64 lg:border-b-0 lg:border-r">
-        <Link href="/" className="text-2xl font-black tracking-tight text-slate-950">Touch<span className="text-indigo-600">Card</span></Link>
-        <p className="mt-1 text-xs text-slate-400">BUSINESS WORKSPACE</p>
+        <Link href="/" className="inline-flex items-center gap-3" aria-label="TouchCard Business - accueil"><img src="/brand/touchcard-mark.svg" alt="" className="h-11 w-11 object-contain"/><span className="flex flex-col leading-none"><strong className="text-2xl font-black tracking-tight text-slate-950">TouchCard</strong><span className="mt-1 text-[11px] font-semibold tracking-[.18em] text-slate-500">BUSINESS</span></span></Link>
+        <p className="mt-2 text-[10px] font-semibold uppercase tracking-[.16em] text-slate-400">Business workspace</p>
         <div className="mt-4"><LanguageSwitcher /></div>
         <DashboardNavigation isSuperAdmin={true} enabledModules={enabledModules} hasWorkspaceConfig={hasWorkspaceConfig} hiddenModules={hiddenModules} />
         <div className="mt-8 border-t border-slate-100 pt-5 lg:absolute lg:inset-x-5 lg:bottom-6">
