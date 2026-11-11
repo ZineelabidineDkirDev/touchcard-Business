@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createProspectCustomer, generateProspectWorkspaceAI } from "@/app/actions/prospects";
 import { generateTemplateBlueprint } from "@/lib/cards/template-engine";
 import { CARD_MODULES, getModuleDefaults } from "@/lib/cards/module-registry";
+import { getServiceChoice } from "@/lib/cards/service-choice-registry";
 import { ModuleConfigurationEditor } from "@/components/prospects/module-configuration-editor";
 
 type ProjectNeeds = {
