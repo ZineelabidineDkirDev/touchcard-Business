@@ -278,7 +278,7 @@ Deno.serve(async (req: Request) => {
       && verifiedTag?.card_id === card.id
       && verifiedConfig.template === cardType
       && prospect.client_access_enabled === true
-remove password setup prerequisite      && verifiedModules.includes("dashboard")
+      && verifiedModules.includes("dashboard")
       && verifiedModules.includes("digital_card")
       && missingBeautyModules.length === 0;
     if (!verificationOk) {
