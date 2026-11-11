@@ -165,6 +165,8 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
 
       {status.card_created === "1" && <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">Votre nouvelle carte NFC a été créée en brouillon. Vous pouvez maintenant la personnaliser.</div>}
       {status.card_saved === "1" && <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">Modifications enregistrées. Votre carte publique a été actualisée.</div>}
+      {status.card_error === "cv_format" && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">Le CV doit être un fichier PDF de 10 Mo maximum.</div>}
+      {status.card_error === "cv_upload" && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">Le téléversement du CV a échoué. Vérifiez le stockage puis réessayez.</div>}
       {status.catalog_import === "success" && <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">Import réussi : {status.imported ?? "0"} élément(s) ajouté(s). {Number(status.skipped ?? 0) > 0 ? status.skipped + " ligne(s) ignorée(s) car les données étaient invalides." : ""}</div>}
       {status.catalog_import && status.catalog_import !== "success" && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{({
         workspace: "Aucun espace client n'est associé à cette session.",
@@ -299,7 +301,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                   <label className="text-xs font-semibold text-slate-600">WhatsApp professionnel<input name="whatsapp" defaultValue={fields.whatsapp ?? card.phone ?? ""} placeholder="+212..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   {config.template === "google-review" && <label className="text-xs font-semibold text-slate-600">Lien Google Avis<input name="google_review_url" type="url" defaultValue={fields.google_review_url ?? ""} placeholder="https://..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>}
                   <div className="sm:col-span-2"><CustomCardFieldsEditor initialFields={initialCustomFields} showPortfolioActions={galleryEnabled}/></div>
-                  {galleryEnabled && <div className="sm:col-span-2 rounded-2xl border border-violet-200 bg-violet-50/60 p-4"><h4 className="text-sm font-black text-violet-950">Portfolio professionnel & CV</h4><p className="mt-1 text-xs leading-5 text-violet-800">Ajoutez vos réalisations dans les champs « Portfolio — Projet » avec leurs liens d’images, puis ajoutez votre CV au format PDF via son lien public. Cette rubrique est disponible car le module Portfolio / galerie a été autorisé par l’administrateur.</p></div>}
+
                   <section className="sm:col-span-2 rounded-2xl border border-slate-200 bg-white p-4">
                     <div className="mb-4">
                       <p className="text-xs font-black uppercase tracking-wider text-indigo-600">3. Organisation de la carte publique</p>
