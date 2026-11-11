@@ -25,6 +25,12 @@ function json(req: Request, data: unknown, status = 200) {
   });
 }
 
+function generateTemporaryPassword() {
+  const bytes = new Uint8Array(24);
+  crypto.getRandomValues(bytes);
+  return "TC-" + Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("") + "a1!";
+}
+
 async function sha256(value: string) {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
   return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
@@ -48,7 +54,7 @@ Deno.serve(async (req: Request) => {
   try {
     const body = await req.json();
     const requestId = String(body.request_id ?? "").trim();
-    const password = String(body.password ?? "");
+    const temporaryPassword = generateTemporaryPassword();
     const prospect = body.prospect ?? {};
     const fullName = String(prospect.full_name ?? "").trim();
     const email = String(prospect.email ?? "").trim().toLowerCase();
@@ -63,10 +69,7 @@ Deno.serve(async (req: Request) => {
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json(req, { error: "Adresse e-mail invalide." }, 400);
     if (email === PLATFORM_SUPER_ADMIN_EMAIL) return json(req, { error: "Cette adresse est réservée au compte Super Admin." }, 403);
-    if (password.length < 10 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
-      return json(req, { error: "Le mot de passe doit contenir au moins 10 caractères, avec des lettres et des chiffres." }, 400);
-    }
-    if (fullName.length > 160 || brandName.length > 160 || email.length > 254 || phone.length > 60 || city.length > 120 || sector.length > 160) {
+remove client password check    if (fullName.length > 160 || brandName.length > 160 || email.length > 254 || phone.length > 60 || city.length > 120 || sector.length > 160) {
       return json(req, { error: "Une information dépasse la longueur autorisée." }, 400);
     }
 
@@ -108,7 +111,7 @@ Deno.serve(async (req: Request) => {
           return json(req, { error: "L'adresse e-mail de la demande doit correspondre au compte connecté." }, 403);
         }
         linkedUserId = user.id;
-        const { error: passwordError } = await admin.auth.admin.updateUserById(user.id, { password });
+        const { error: passwordError } = await admin.auth.admin.updateUserById(user.id, { password: temporaryPassword });
         if (passwordError) return json(req, { error: "Impossible de mettre à jour le mot de passe du compte connecté." }, 400);
       }
     }
@@ -116,7 +119,7 @@ Deno.serve(async (req: Request) => {
     if (!linkedUserId) {
       const { data: created, error: createError } = await admin.auth.admin.createUser({
         email,
-        password,
+        password: temporaryPassword,
         email_confirm: true,
         user_metadata: { full_name: fullName, prospect_request_id: requestId, account_state: "pending_admin_approval" },
       });
@@ -174,7 +177,7 @@ Deno.serve(async (req: Request) => {
       return json(req, { error: "La demande n'a pas pu être enregistrée. Aucun compte client n'a été conservé." }, 400);
     }
 
-    return json(req, { ok: true, user_id: linkedUserId, request_id: requestId });
+    return json(req, { ok: true, user_id: linkedUserId, request_id: requestId, temporary_password: temporaryPassword });
   } catch (error) {
     console.error("Prospect account creation failed", error);
     return json(req, { error: "Une erreur technique est survenue. Veuillez réessayer." }, 500);
