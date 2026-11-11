@@ -45,7 +45,7 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { ok: false as const, error: "Veuillez saisir une adresse e-mail valide." };
   }
-remove password validation  const supabase = await createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.functions.invoke("create-prospect-account", {
     body: {
       request_id: requestId,
