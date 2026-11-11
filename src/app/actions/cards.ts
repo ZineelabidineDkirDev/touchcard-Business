@@ -191,14 +191,13 @@ export async function saveClientCardProfile(formData: FormData) {
 
   const { data: existingCard } = await supabase.from("cards").select("theme").eq("id", cardId).eq("organization_id", organizationId).maybeSingle();
   const existingTheme = (existingCard?.theme ?? {}) as Record<string, unknown>;
-  const allowedAccents = ["#2563EB", "#1D4ED8", "#0891B2", "#16A34A", "#059669", "#7C3AED", "#DB2777", "#DC2626", "#EA580C", "#171717"];
-  const requestedAccent = String(formData.get("accent_color") ?? "").toUpperCase();
-  const allowedTextColors = ["#111827", "#1F2937", "#334155", "#1E3A8A", "#312E81", "#14532D", "#7F1D1D", "#7C2D12"];
-  const requestedTextColor = String(formData.get("text_color") ?? "").toUpperCase();
+  const requestedAccent = String(formData.get("accent_color") ?? "").trim().toUpperCase();
+  const requestedTextColor = String(formData.get("text_color") ?? "").trim().toUpperCase();
+  const validHexColor = (value: string) => /^#[0-9A-F]{6}$/.test(value);
   const nextTheme = {
     ...existingTheme,
-    ...(allowedAccents.includes(requestedAccent) ? { accent: requestedAccent } : {}),
-    ...(allowedTextColors.includes(requestedTextColor) ? { text_color: requestedTextColor } : {}),
+    ...(validHexColor(requestedAccent) ? { accent: requestedAccent } : {}),
+    ...(validHexColor(requestedTextColor) ? { text_color: requestedTextColor } : {}),
   };
 
   const { data: updatedCard, error } = await supabase.from("cards").update({
