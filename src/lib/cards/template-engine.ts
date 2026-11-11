@@ -17,7 +17,7 @@ export type TemplateProfileDraft = {
 };
 
 const baseModules: Record<CardTemplate, string[]> = {
-  contact: ["dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc", "whatsapp", "analytics"],
+  contact: ["dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc", "gallery", "analytics"],
   service: ["dashboard", "digital_card", "company_profile", "service_catalog", "quote_requests", "bookings", "availability_calendar", "crm_contacts", "whatsapp", "analytics"],
   "e-business": ["dashboard", "digital_card", "company_profile", "gallery", "whatsapp", "analytics"],
   "google-review": ["dashboard", "digital_card", "company_profile", "qr_nfc", "google_reviews", "analytics"],
@@ -53,54 +53,43 @@ export function generateTemplateBlueprint(input: {
   const isHospitality = /hotel|riad|maison d.?hotes|hebergement|residence touristique|auberge/.test(sectorText);
   const isBeautySector = /beaute|cosmetique?s?|cosmetics?|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage/.test(sectorText) || /beaute|cosmetique|esthetique|spa|hammam|onglerie|maquillage|massage/.test(text);
   // Les règles métier Beauté/Cosmétique ne concernent que Contact et E-Service.
-  const isBeauty = isBeautySector && (template === "contact" || template === "service");
-  const isRestaurant = /restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(sectorText) || /restaurant|restauration|menu|plats|cuisine|traiteur|pizzeria/.test(text);
+  const isBeautySector = /beaute|cosmetique?s?|cosmetics?|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage/.test(sectorText) || /beaute|cosmetique|esthetique|spa|hammam|onglerie|maquillage|massage/.test(text);
+  // E-Contact reste strictement personnel. Les règles commerciales ne s’appliquent qu’aux modèles E-Service et E-Business.
+  const isBeauty = isBeautySector && ["service", "e-business"].includes(template);
+  const isRestaurant = template !== "contact" && (/restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(sectorText) || /restaurant|restauration|menu|plats|cuisine|traiteur|pizzeria/.test(text));
   const explicitlyRequestsCommerce = /boutique en ligne|vente en ligne|e.?commerce|catalogue de produits|commande de produits/.test(text);
 
-  // Le modèle E-Business ne signifie pas automatiquement "boutique e-commerce".
-  if (template === "e-business" && (isCommerce || explicitlyRequestsCommerce)) {
-    modules.add("product_catalog"); modules.add("orders");
-  }
-  if (template === "e-business" && isRealEstate) {
-    modules.add("gallery"); modules.add("quote_requests"); modules.add("crm_contacts");
-  }
-  if (template === "e-business" && isTraining) {
-    modules.add("gallery"); modules.add("bookings"); modules.add("availability_calendar"); modules.add("crm_contacts");
-  }
-  if (template === "e-business" && isHealth) {
-    modules.add("gallery"); modules.add("bookings"); modules.add("availability_calendar");
-  }
-  if (isBeauty || isRestaurant || isRealEstate) modules.add("service_catalog");
-  if (isBeauty) { modules.add("bookings"); modules.add("availability_calendar"); modules.add("whatsapp"); }
-  if (template === "e-business" && isHospitality) {
-    modules.add("room_catalog"); modules.add("bookings"); modules.add("availability_calendar"); modules.add("crm_contacts");
-  }
-  if (template !== "e-business" && /commande|achat|vente|e-commerce|boutique/.test(text)) {
-    modules.add("product_catalog"); modules.add("orders");
-  }
-  if (template !== "e-business" && /catalogue|produit/.test(text)) modules.add("product_catalog");
-  if (/reserv|rendez|calendrier|creneau/.test(text) || isHealth || isHospitality || isTraining) {
-    modules.add("bookings"); modules.add("availability_calendar");
-  }
-  if (/devis/.test(text) || isRealEstate) modules.add("quote_requests");
-  if (/equipe|collaborateur/.test(text)) modules.add("team");
-  if (/photo|realisation|contenu/.test(text) || isRealEstate || isTraining || isHealth || isHospitality) modules.add("gallery");
-  if (/prospect|client|contact/.test(text) || isRealEstate) modules.add("crm_contacts");
-  if (/service|tarif|prestation/.test(text) || template === "service" || isBeauty || isRestaurant) modules.add("service_catalog");
-  if (template === "google-review") {
-    modules.add("google_reviews"); modules.add("company_profile"); modules.add("qr_nfc");
+  if (template !== "contact") {
+    if (template === "e-business" && (isCommerce || explicitlyRequestsCommerce)) { modules.add("product_catalog"); modules.add("orders"); }
+    if (template === "e-business" && isRealEstate) { modules.add("gallery"); modules.add("quote_requests"); modules.add("crm_contacts"); }
+    if (template === "e-business" && isTraining) { modules.add("gallery"); modules.add("bookings"); modules.add("availability_calendar"); modules.add("crm_contacts"); }
+    if (template === "e-business" && isHealth) { modules.add("gallery"); modules.add("bookings"); modules.add("availability_calendar"); }
+    if (isBeauty || isRestaurant || isRealEstate) modules.add("service_catalog");
+    if (isBeauty) { modules.add("bookings"); modules.add("availability_calendar"); modules.add("whatsapp"); }
+    if (template === "e-business" && isHospitality) { modules.add("room_catalog"); modules.add("bookings"); modules.add("availability_calendar"); modules.add("crm_contacts"); }
+    if (template !== "e-business" && /commande|achat|vente|e-commerce|boutique/.test(text)) { modules.add("product_catalog"); modules.add("orders"); }
+    if (template !== "e-business" && /catalogue|produit/.test(text)) modules.add("product_catalog");
+    if (/reserv|rendez|calendrier|creneau/.test(text) || isHealth || isHospitality || isTraining) { modules.add("bookings"); modules.add("availability_calendar"); }
+    if (/devis/.test(text) || isRealEstate) modules.add("quote_requests");
+    if (/equipe|collaborateur/.test(text)) modules.add("team");
+    if (/photo|realisation|contenu/.test(text) || isRealEstate || isTraining || isHealth || isHospitality) modules.add("gallery");
+    if (/prospect|client|contact/.test(text) || isRealEstate) modules.add("crm_contacts");
+    if (/service|tarif|prestation/.test(text) || template === "service" || isBeauty || isRestaurant) modules.add("service_catalog");
+    if (template === "google-review") { modules.add("google_reviews"); modules.add("company_profile"); modules.add("qr_nfc"); }
   }
 
   const sector = (input.sector ?? "").trim();
-  const profileFields: TemplateProfileDraft["card_fields"] = [
-    { key: "tagline", label: "Accroche professionnelle", type: "text", visible: true },
-    { key: "location", label: "Adresse ou zone desservie", type: "text", visible: true },
-    { key: "hours", label: "Horaires d'ouverture", type: "text", visible: true },
-  ];
-  if (template === "contact") profileFields.push(
-    { key: "expertise", label: "Expertises principales", type: "textarea", visible: true },
-    { key: "appointment", label: "Lien de prise de rendez-vous", type: "url", visible: false },
-  );
+  const profileFields: TemplateProfileDraft["card_fields"] = template === "contact"
+    ? [
+        { key: "tagline", label: "Accroche personnelle", type: "text", visible: true },
+        { key: "expertise", label: "Présentation / compétences", type: "textarea", visible: true },
+        { key: "portfolio_url", label: "Lien CV / portfolio", type: "url", visible: false },
+      ]
+    : [
+        { key: "tagline", label: "Accroche professionnelle", type: "text", visible: true },
+        { key: "location", label: "Adresse ou zone desservie", type: "text", visible: true },
+        { key: "hours", label: "Horaires d’ouverture", type: "text", visible: true },
+      ];
   if (template === "service") profileFields.push(
     { key: "service_area", label: "Zone d'intervention", type: "text", visible: true },
     { key: "booking_url", label: "Lien de réservation", type: "url", visible: false },
@@ -115,7 +104,7 @@ export function generateTemplateBlueprint(input: {
   );
 
   const labels: Record<CardTemplate, { tagline: string; description: string }> = {
-    contact: { tagline: isBeauty ? "Révélez votre beauté" : isRestaurant ? "Découvrez notre carte" : "Restons en contact", description: isBeauty ? "Découvrez nos soins, nos prestations beauté et prenez rendez-vous en quelques instants." : isRestaurant ? "Découvrez notre menu, nos spécialités et nos informations pratiques." : "Retrouvez les coordonnées, les informations professionnelles et les liens utiles sur cette carte digitale." },
+    contact: { tagline: isBeauty ? "Révélez votre beauté" : isRestaurant ? "Découvrez notre carte" : "Restons en contact", description: "Retrouvez vos coordonnées, votre portfolio et vos réseaux sociaux sur une carte digitale personnelle." },
     service: { tagline: "Des services adaptés à vos besoins", description: "Découvrez les prestations, les informations pratiques et les moyens de demander un devis ou un rendez-vous." },
     "e-business": {
       tagline: isCommerce ? "Votre boutique en ligne" : isRealEstate ? "Découvrez nos biens immobiliers" : isTraining ? "Développez vos compétences" : isHealth ? "Votre santé, notre priorité" : isHospitality ? "Préparez votre séjour" : "Découvrez notre activité",
@@ -131,7 +120,7 @@ export function generateTemplateBlueprint(input: {
     catalog_items: [],
     card_fields: profileFields,
     suggested_buttons: [
-      { kind: "whatsapp", label: "WhatsApp Business", enabled: true },
+      ...(template !== "contact" ? [{ kind: "whatsapp", label: "WhatsApp Business", enabled: true }] : []),
       ...(isBeauty ? [{ kind: "calendly", label: "Prendre rendez-vous", enabled: true }] : []),
       { kind: "instagram", label: "Instagram", enabled: false },
       { kind: "website", label: "Site web", enabled: false },
