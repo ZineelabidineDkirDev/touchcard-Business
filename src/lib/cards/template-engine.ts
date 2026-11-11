@@ -56,6 +56,7 @@ export function generateTemplateBlueprint(input: {
   const isBeauty = isBeautySector && ["service", "e-business"].includes(template);
   const isRestaurant = template !== "contact" && (/restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(sectorText) || /restaurant|restauration|menu|plats|cuisine|traiteur|pizzeria/.test(text));
   const explicitlyRequestsCommerce = /boutique en ligne|vente en ligne|e.?commerce|catalogue de produits|commande de produits/.test(text);
+  const portfolioProfessional = /developpeur|developer|developpement web|freelance|marketer|marketing digital|media buyer|media buying|photographe|photography|photographer|graphiste|graphic designer|designer|community manager|consultant independant/.test(sectorText + " " + text);
 
   if (template !== "contact") {
     if (template === "e-business" && (isCommerce || explicitlyRequestsCommerce)) { modules.add("product_catalog"); modules.add("orders"); }
@@ -75,6 +76,8 @@ export function generateTemplateBlueprint(input: {
     if (/service|tarif|prestation/.test(text) || template === "service" || isBeauty || isRestaurant) modules.add("service_catalog");
     if (template === "google-review") { modules.add("google_reviews"); modules.add("company_profile"); modules.add("qr_nfc"); }
   }
+
+  if (portfolioProfessional) modules.add("gallery");
 
   const sector = (input.sector ?? "").trim();
   const profileFields: TemplateProfileDraft["card_fields"] = template === "contact"
@@ -99,6 +102,10 @@ export function generateTemplateBlueprint(input: {
   if (template === "google-review") profileFields.push(
     { key: "google_review_url", label: "Lien officiel des avis Google", type: "url", visible: true },
     { key: "review_message", label: "Message de remerciement", type: "textarea", visible: true },
+  );
+  if (portfolioProfessional) profileFields.push(
+    { key: "portfolio_project_1", label: "Portfolio — Projet 1 (URL image ou réalisation)", type: "url", visible: true },
+    { key: "cv_url", label: "CV professionnel (lien PDF)", type: "url", visible: true },
   );
 
   const labels: Record<CardTemplate, { tagline: string; description: string }> = {
