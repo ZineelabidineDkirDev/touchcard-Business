@@ -98,9 +98,13 @@ export function DashboardTopbar({ name, email, avatarUrl = "", notificationsEnab
 
   return (
     <header className={"dashboard-topbar " + (isSuperAdmin ? "sticky top-0 z-40 mb-6 " : "mb-0 ") + "relative flex min-h-[64px] flex-wrap items-center justify-between gap-x-4 gap-y-3 rounded-2xl border border-slate-200 bg-white/95 px-3 py-3 shadow-sm backdrop-blur sm:px-5"}>
-      {isSuperAdmin && <div className="min-w-0">
-        <p className="text-[10px] font-bold uppercase tracking-[.18em] text-indigo-600">TouchCard Business</p>
-        <p className="mt-1 truncate text-base font-extrabold text-slate-900 sm:text-lg">{name || "Espace client"}</p>
+      {isSuperAdmin && <div className="flex min-w-0 items-center gap-3">
+        <Link href="/dashboard/admin" aria-label="TouchCard Business - tableau de bord" className="flex shrink-0 items-center gap-2">
+          <img src="/brand/touchcard-mark.svg" alt="" className="h-10 w-10 object-contain"/>
+          <span className="flex flex-col leading-none"><strong className="text-base font-black tracking-tight text-slate-900">TouchCard</strong><span className="mt-1 text-[9px] font-bold tracking-[.16em] text-slate-500">BUSINESS</span></span>
+        </Link>
+        <span className="hidden h-8 w-px bg-slate-200 sm:block"/>
+        <p className="min-w-0 truncate text-sm font-extrabold text-slate-900 sm:text-base">{name || "Super Admin"}</p>
       </div>}
       {!isSuperAdmin && <Link href="/dashboard" className="hidden min-w-0 shrink-0 items-center gap-2 xl:flex" aria-label="TouchCard Business - tableau de bord"><img src="/brand/touchcard-mark.svg" alt="" className="h-9 w-9 object-contain"/><span className="flex flex-col leading-none"><strong className="text-sm font-black tracking-tight text-slate-900">TouchCard</strong><span className="mt-1 text-[9px] font-bold tracking-[.16em] text-slate-500">BUSINESS</span></span></Link>}
       {!isSuperAdmin && navigation && <div className="order-3 w-full min-w-0 xl:order-2 xl:w-auto xl:flex-1">{navigation}</div>}
