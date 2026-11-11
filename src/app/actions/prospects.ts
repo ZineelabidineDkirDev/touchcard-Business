@@ -31,12 +31,13 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
   const fullName = input.fullName.trim();
   const email = input.email.trim().toLowerCase();
   const phone = input.phone.trim();
-  const isPersonalContact = input.cardType === "contact";
-  const activitySector = isPersonalContact ? input.sector.trim() || "Personnel" : input.sector === "Autre" ? input.sectorOther.trim() || "Autre" : input.sector.trim();
-  const brandName = input.brandName.trim() || (isPersonalContact ? fullName : "");
-  const selectedProjectNeeds = ["e-business", "service"].includes(input.cardType) ? (input.projectNeeds ?? []).slice(0, 1) : [];
+  const isBusinessCard = ["e-business", "service"].includes(input.cardType);
+  const isContactOrReviewCard = ["contact", "google-review"].includes(input.cardType);
+  const activitySector = isContactOrReviewCard ? input.sector.trim() || (input.cardType === "contact" ? "Personnel" : "Avis Google") : input.sector === "Autre" ? input.sectorOther.trim() || "Autre" : input.sector.trim();
+  const brandName = input.brandName.trim() || (isContactOrReviewCard ? fullName : "");
+  const selectedProjectNeeds = isBusinessCard ? (input.projectNeeds ?? []).slice(0, 1) : [];
 
-  if (!fullName || !input.city || (!isPersonalContact && (!activitySector || !brandName)) || !email || !phone || !input.cardType) {
+  if (!fullName || !input.city || (isBusinessCard && (!activitySector || !brandName)) || (isContactOrReviewCard && !input.businessAddress.trim()) || !email || !phone || !input.cardType) {
     return { ok: false as const, error: "Veuillez compléter tous les champs obligatoires." };
   }
   if (input.sector.includes("|")) {
@@ -60,7 +61,7 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
         customization_requested: input.customRequested,
         brand_name: brandName || null,
         logo_url: input.customRequested ? input.logoUrl.trim() || null : null,
-        business_address: input.customRequested ? input.businessAddress.trim() || null : null,
+        business_address: (!isBusinessCard || input.customRequested) ? input.businessAddress.trim() || null : null,
         business_phone: input.customRequested ? input.businessPhone.trim() || null : null,
         social_links: (input.socialLinks ?? []).filter((item) => item.url.trim()).map((item) => ({ platform: item.platform, url: item.url.trim() })),
         project_needs: { selected: selectedProjectNeeds, reservation_mode: selectedProjectNeeds.length ? input.reservationMode || null : null, reservation_channels: selectedProjectNeeds.length ? (input.reservationChannels ?? []).slice(0, 10) : [], management_needs: selectedProjectNeeds.length ? (input.managementNeeds ?? []).slice(0, 20) : [] },
