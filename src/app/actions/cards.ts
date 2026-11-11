@@ -133,7 +133,7 @@ export async function saveClientCardVisibility(formData: FormData) {
     .select("slug,public_settings").eq("id", cardId).eq("organization_id", organizationId).maybeSingle();
   if (readError || !card) redirect("/dashboard/cards?card_error=not_found");
 
-  const keys = ["show_phone", "show_email", "show_website", "show_about", "show_contact", "show_company_info", "show_categories", "show_info_fields", "show_google_reviews", "show_catalog_pdf", "show_catalog", "show_request_forms", "show_orders", "show_bookings", "show_quotes", "show_social_links", "show_featured_links", "show_faq", "show_videos", "show_location"];
+  const keys = ["show_phone", "show_email", "show_website", "show_about", "show_contact", "show_company_info", "show_categories", "show_info_fields", "show_google_reviews", "show_catalog_pdf", "show_catalog", "show_request_forms", "show_orders", "show_bookings", "show_quotes", "show_social_links", "show_featured_links", "show_faq", "show_videos", "show_location", "show_gallery", "show_cv"];
   const current = (card.public_settings ?? {}) as Record<string, boolean>;
   const nextSettings: Record<string, boolean> = { ...current, show_save_contact: true };
   for (const key of keys) nextSettings[key] = formData.get(key) === "on";
@@ -189,7 +189,14 @@ export async function saveClientCardProfile(formData: FormData) {
     intake_profile_synced: true,
   };
 
-  const { data: existingCard } = await supabase.from("cards").select("theme,public_settings").eq("id", cardId).eq("organization_id", organizationId).maybeSingle();
+  const { data: organization } = await supabase.from("organizations").select("workspace_config").eq("id", organizationId).maybeSingle();
+  const workspaceConfig = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[] };
+  const galleryEnabled = !workspaceConfig.version || (Array.isArray(workspaceConfig.modules) && workspaceConfig.modules.includes("gallery"));
+  const { data: existingCard } = await supabase.from("cards").select("theme,public_settings,public_fields").eq("id", cardId).eq("organization_id", organizationId).maybeSingle();
+  if (!galleryEnabled) {
+    const existingFields = ((existingCard?.public_fields as any)?.custom_fields ?? []) as typeof customFields;
+    customFields = [...customFields, ...existingFields.filter((field) => /portfolio|cv professionnel/i.test(field.key + " " + field.label))].slice(0, 20);
+  }
   const existingTheme = (existingCard?.theme ?? {}) as Record<string, unknown>;
   const requestedAccent = String(formData.get("accent_color") ?? "").trim().toUpperCase();
   const requestedTextColor = String(formData.get("text_color") ?? "").trim().toUpperCase();
