@@ -37,9 +37,8 @@ async function PublicCardContent({
     .select("id,label,url,kind").eq("card_id", card.id).order("position");
   const theme = (card.theme ?? {}) as Record<string, unknown>;
   const template = String(theme.template ?? "contact");
-  const accent = typeof theme.accent === "string" && /^#[0-9a-fA-F]{6}$/.test(theme.accent) ? theme.accent : "#4f46e5";
-  const allowedTextColors = ["#111827", "#1F2937", "#334155", "#1E3A8A", "#312E81", "#14532D", "#7F1D1D", "#7C2D12"];
-  const textColor = typeof theme.text_color === "string" && allowedTextColors.includes(theme.text_color.toUpperCase()) ? theme.text_color : "#111827";
+  const accent = typeof theme.accent === "string" && /^#[0-9a-fA-F]{6}$/.test(theme.accent) ? theme.accent : "#2563EB";
+  const textColor = typeof theme.text_color === "string" && /^#[0-9a-fA-F]{6}$/.test(theme.text_color) ? theme.text_color : "#111827";
   const { data: organization } = await supabase.from("organizations").select("workspace_config")
     .eq("id", card.organization_id).maybeSingle();
   const workspaceConfig = (organization?.workspace_config ?? {}) as {
@@ -107,9 +106,9 @@ async function PublicCardContent({
   const infoFields = (fields.custom_fields ?? []).filter((field) => field.visible && !faqFields.includes(field) && !galleryFields.includes(field) && field.label && field.value);
 
   return (
-    <main className="min-h-screen bg-slate-100 px-0 py-0 sm:px-5 sm:py-8">
+    <main className="min-h-screen bg-slate-100 px-0 py-0 sm:px-5 sm:py-8"><style>{`.touchcard-public{--card-accent:${accent};--card-text:${textColor}}.touchcard-public h1,.touchcard-public h2,.touchcard-public h3{color:var(--card-text)!important}.touchcard-public p{color:var(--card-text)}.touchcard-public .text-indigo-950,.touchcard-public .text-indigo-800,.touchcard-public .text-indigo-700,.touchcard-public .text-indigo-600{color:var(--card-accent)!important}.touchcard-public .bg-indigo-600{background-color:var(--card-accent)!important}.touchcard-public .bg-indigo-50{background-color:color-mix(in srgb,var(--card-accent) 9%,white)!important}.touchcard-public .border-indigo-100{border-color:color-mix(in srgb,var(--card-accent) 25%,white)!important}`}</style>
       <PublicCardTracker cardId={card.id} eventType={source} />
-      <article className="mx-auto w-full max-w-[440px] overflow-hidden rounded-none bg-[#111111] p-0 shadow-[0_28px_90px_rgba(0,0,0,.28)] sm:rounded-[2.4rem] sm:p-2">
+      <article className="touchcard-public mx-auto w-full max-w-[440px] overflow-hidden rounded-none bg-[#111111] p-0 shadow-[0_28px_90px_rgba(0,0,0,.28)] sm:rounded-[2.4rem] sm:p-2">
         <div className="relative h-[230px] overflow-hidden rounded-b-[1.5rem] bg-cover bg-center sm:h-[270px]" style={{ background: `linear-gradient(120deg, #0f172a, ${accent})` }}>
           {card.cover_url && <img src={card.cover_url} alt="" className="h-full w-full object-cover" />}
           <div className="absolute right-3 top-3 flex items-center gap-2 rounded-2xl border border-white/30 bg-black/70 p-2 text-white shadow-xl backdrop-blur-md"><div className="flex min-w-0 items-center gap-2 px-1"><svg viewBox="0 0 24 24" className="h-6 w-6 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M7 7v10M17 7v10M4 9v6M20 9v6M10 4v16M14 4v16"/></svg><span className="min-w-0"><span className="block text-[9px] font-bold uppercase tracking-[.14em] text-white/70">NFC</span><span className="block max-w-[104px] truncate text-[11px] font-black tracking-wide">{fields.nfc_display_code?.trim() || `TC-${card.id.slice(0,8).toUpperCase()}`}</span></span></div><div className="h-14 w-14 shrink-0 rounded-lg bg-white p-1"><img alt="QR code pour ouvrir cette carte" loading="lazy" className="h-full w-full object-contain" src={"https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=" + encodeURIComponent(publicSiteUrl + "/p/" + card.slug + "?source=qr")}/></div></div>
