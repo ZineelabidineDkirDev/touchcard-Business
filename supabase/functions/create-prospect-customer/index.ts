@@ -108,7 +108,14 @@ Deno.serve(async (req: Request) => {
     const requiredBeautyModules = beautyWorkspace ? ["service_catalog", "bookings", "availability_calendar", "whatsapp"] : [];
     selectedModules = [...new Set([...selectedModules, ...requiredBeautyModules])];
 
-    const profileDraft = safeProfileDraft(submitted.ai_suggestions?.profile_draft);
+    const rawProfileDraft = safeProfileDraft(submitted.ai_suggestions?.profile_draft);
+    const profileDraft = cardType === "contact" && rawProfileDraft ? {
+      ...rawProfileDraft,
+      categories: [],
+      catalog_items: [],
+      suggested_buttons: rawProfileDraft.suggested_buttons.filter((button: any) => ["whatsapp", "telegram", "instagram", "facebook", "linkedin", "tiktok", "youtube", "website"].includes(button.kind)),
+      card_fields: rawProfileDraft.card_fields.filter((field: any) => !/appointment|booking|reservation|service|catalog|company|store|price/i.test(field.key + " " + field.label)),
+    } : rawProfileDraft;
     const aiSuggestions = profileDraft ? {
       template: cardType,
       modules: selectedModules,
