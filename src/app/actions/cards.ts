@@ -165,7 +165,13 @@ export async function saveClientCardProfile(formData: FormData) {
   const existingTheme = (existingCard?.theme ?? {}) as Record<string, unknown>;
   const allowedAccents = ["#2563EB", "#1D4ED8", "#0891B2", "#16A34A", "#059669", "#7C3AED", "#DB2777", "#DC2626", "#EA580C", "#171717"];
   const requestedAccent = String(formData.get("accent_color") ?? "").toUpperCase();
-  const nextTheme = allowedAccents.includes(requestedAccent) ? { ...existingTheme, accent: requestedAccent } : existingTheme;
+  const allowedTextColors = ["#111827", "#1F2937", "#334155", "#1E3A8A", "#312E81", "#14532D", "#7F1D1D", "#7C2D12"];
+  const requestedTextColor = String(formData.get("text_color") ?? "").toUpperCase();
+  const nextTheme = {
+    ...existingTheme,
+    ...(allowedAccents.includes(requestedAccent) ? { accent: requestedAccent } : {}),
+    ...(allowedTextColors.includes(requestedTextColor) ? { text_color: requestedTextColor } : {}),
+  };
 
   const { data: updatedCard, error } = await supabase.from("cards").update({
     theme: nextTheme,
