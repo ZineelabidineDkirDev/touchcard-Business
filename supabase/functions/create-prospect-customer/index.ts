@@ -277,7 +277,6 @@ Deno.serve(async (req: Request) => {
       && verifiedCard?.created_by === customerUserId
       && verifiedTag?.card_id === card.id
       && verifiedConfig.template === cardType
-      && prospect.client_access_enabled === true
       && verifiedModules.includes("dashboard")
       && verifiedModules.includes("digital_card")
       && missingBeautyModules.length === 0;
