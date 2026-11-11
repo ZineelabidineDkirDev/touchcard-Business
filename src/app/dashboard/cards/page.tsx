@@ -264,13 +264,13 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                 <div className="grid gap-3 sm:grid-cols-2">
                   <label className="text-xs font-semibold text-slate-600">Nom affiché<input name="full_name" required defaultValue={card.full_name} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600">Fonction<input name="job_title" defaultValue={card.job_title ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
-                  <label className="text-xs font-semibold text-slate-600">Entreprise<input name="company_name" defaultValue={card.company_name ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
+                  {config.template !== "contact" && <label className="text-xs font-semibold text-slate-600">Entreprise<input name="company_name" defaultValue={card.company_name ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>}
                   <div className="sm:col-span-2 grid gap-4 md:grid-cols-[.8fr_1.2fr]"><MediaImagePicker organizationId={organizationId!} name="avatar_url" initialUrl={card.avatar_url} label="Photo de profil"/><MediaImagePicker organizationId={organizationId!} name="cover_url" initialUrl={card.cover_url} label="Couverture de la carte" shape="wide"/></div>
                   <div className="sm:col-span-2">
                     <CardVisibilityPreview
                       initialSettings={settings}
                       cardName={card.full_name}
-                      companyName={card.company_name ?? ""}
+                      companyName={config.template === "contact" ? "" : card.company_name ?? ""}
                       jobTitle={card.job_title ?? ""}
                       bio={card.bio ?? ""}
                       phone={card.phone ?? ""}
