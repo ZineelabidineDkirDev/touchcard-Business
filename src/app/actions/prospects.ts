@@ -49,7 +49,7 @@ remove password validation  const supabase = await createClient();
   const { data, error } = await supabase.functions.invoke("create-prospect-account", {
     body: {
       request_id: requestId,
-remove password payload      prospect: {
+      prospect: {
         full_name: fullName,
         city: input.city.trim(),
         activity_sector: activitySector,
