@@ -285,9 +285,8 @@ export function ProspectIntake() {
         </div>
       </header>
 
-      <div dir="ltr" className="relative z-10 grid min-h-screen items-center px-4 pb-10 pt-28 sm:px-8 lg:grid-cols-2 lg:gap-6 lg:px-10 lg:pt-24">
-        <div aria-hidden="true" className="hidden lg:block" />
-        <section dir={locale === "ar" ? "rtl" : "ltr"} className="relative mx-auto w-full max-w-[860px] rounded-[2.25rem] border border-blue-400/50 bg-[linear-gradient(145deg,rgba(14,32,84,.74),rgba(8,16,46,.68)_55%,rgba(52,40,140,.62))] p-6 text-white shadow-[0_0_60px_rgba(40,110,255,.35),inset_0_0_0_1px_rgba(255,255,255,.05)] backdrop-blur-2xl sm:p-9 lg:ml-auto lg:px-12 lg:py-10">
+      <div dir="ltr" className="relative z-10 flex min-h-screen items-center justify-center px-4 pb-10 pt-28 sm:px-8 lg:px-10 lg:pt-24">
+        <section dir={locale === "ar" ? "rtl" : "ltr"} className="relative mx-auto w-full max-w-[860px] rounded-[2.25rem] border border-blue-400/50 bg-[linear-gradient(145deg,rgba(14,32,84,.74),rgba(8,16,46,.68)_55%,rgba(52,40,140,.62))] p-6 text-white shadow-[0_0_60px_rgba(40,110,255,.35),inset_0_0_0_1px_rgba(255,255,255,.05)] backdrop-blur-2xl sm:p-9 lg:px-12 lg:py-10">
           <div className="text-center">
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-[3.4rem]">{l.title} <span className="tc-gradient-text">{l.accent}</span></h1>
             <p className="mx-auto mt-3 max-w-xl text-base font-medium leading-snug text-white sm:text-xl">{l.sub}</p>
