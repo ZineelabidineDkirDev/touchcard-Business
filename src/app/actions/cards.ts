@@ -35,7 +35,7 @@ async function hasSectorCatalogAccess(supabase: Awaited<ReturnType<typeof create
   const beautyCatalog = supportsBusinessCatalog && /beaute|cosmetique?s?|cosmetics?|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage|barber|barbier|barbershop/.test(sector + " " + needs);
   const otherSectorCatalog = supportsBusinessCatalog && /immobilier|agence immobiliere|promotion immobiliere|location immobiliere|restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(sector + " " + needs);
   const sectorCatalog = beautyCatalog || otherSectorCatalog;
-  return !config.version || modules.some((module) => ["product_catalog", "service_catalog"].includes(module)) || sectorCatalog;
+  return config.version ? modules.some((module) => ["product_catalog", "service_catalog", "room_catalog"].includes(module)) : modules.some((module) => ["product_catalog", "service_catalog"].includes(module)) || sectorCatalog;
 }
 
 function parseCsvRecords(input: string, delimiter: string) {
