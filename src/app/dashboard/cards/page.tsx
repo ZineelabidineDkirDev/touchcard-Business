@@ -256,6 +256,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
           };
           const settings = card.public_settings ?? {};
           const currentAccent = typeof card.theme?.accent === "string" ? card.theme.accent : "#2563EB";
+          const currentTextColor = typeof card.theme?.text_color === "string" ? card.theme.text_color : "#111827";
           const initialCustomFields: EditableCardField[] = Array.isArray(fields.custom_fields) && fields.custom_fields.length
             ? fields.custom_fields
             : (profileDraft?.card_fields ?? []).map((field) => ({ key: field.key, label: field.label, value: "", visible: field.visible }));
@@ -279,6 +280,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                   <label className="text-xs font-semibold text-slate-600">Fonction<input name="job_title" defaultValue={card.job_title ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   {config.template !== "contact" && <label className="text-xs font-semibold text-slate-600">Entreprise<input name="company_name" defaultValue={card.company_name ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>}
                   <div className="sm:col-span-2 grid gap-4 md:grid-cols-[.8fr_1.2fr]"><MediaImagePicker organizationId={organizationId!} name="avatar_url" initialUrl={card.avatar_url} label="Photo de profil"/><MediaImagePicker organizationId={organizationId!} name="cover_url" initialUrl={card.cover_url} label="Couverture de la carte" shape="wide"/></div>
+                  <div className="sm:col-span-2 rounded-xl border border-slate-200 bg-white p-4"><div className="mb-3"><h4 className="text-sm font-bold text-slate-900">Style graphique de la carte</h4><p className="mt-1 text-xs text-slate-500">Choisissez la couleur du texte affiché sur votre carte publique. Les teintes proposées restent lisibles sur le fond clair.</p></div><label className="block text-xs font-semibold text-slate-600">Couleur du texte<select name="text_color" defaultValue={currentTextColor} className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm sm:max-w-sm"><option value="#111827">Noir profond</option><option value="#1F2937">Gris anthracite</option><option value="#334155">Gris ardoise</option><option value="#1E3A8A">Bleu nuit</option><option value="#312E81">Indigo</option><option value="#14532D">Vert forêt</option><option value="#7F1D1D">Rouge bordeaux</option><option value="#7C2D12">Brun</option></select></label><div className="mt-3 flex flex-wrap items-center gap-2">{["#111827","#1F2937","#334155","#1E3A8A","#312E81","#14532D","#7F1D1D","#7C2D12"].map((color)=><span key={color} title={color} className="h-7 w-7 rounded-full border border-slate-200" style={{backgroundColor:color}}/>)}</div></div>
                   <div className="sm:col-span-2 rounded-xl bg-slate-50 p-3"><h4 className="text-sm font-bold text-slate-900">2. Coordonnées et présentation</h4><p className="mt-1 text-xs text-slate-500">Les informations saisies dans votre demande sont reprises ici. Vous pouvez les corriger avant publication.</p></div>
                   <label className="text-xs font-semibold text-slate-600">E-mail public<input name="email" type="email" defaultValue={card.email ?? intakeProfile?.email ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600">Téléphone public<input name="phone" defaultValue={card.phone ?? intakeProfile?.phone ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
@@ -308,6 +310,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                       email={card.email ?? ""}
                       website={card.website ?? ""}
                       accent={currentAccent}
+                      textColor={currentTextColor}
                       catalogLabel={catalogLabel}
                       catalogCount={catalogItems?.length ?? 0}
                       hasCatalogPdf={Boolean(catalogDocument?.file_url)}
