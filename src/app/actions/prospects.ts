@@ -181,14 +181,14 @@ export async function createProspectCustomer(formData: FormData) {
   const rawConfig = String(formData.get("workspace_config") ?? "");
   if (!id || !rawConfig) return;
 
-  let workspaceConfig: { template: string; modules: string[]; plan_code?: string };
+  let workspaceConfig: { version?: number; template: string; modules: string[]; module_settings?: Record<string, Record<string, string | boolean>>; plan_code?: string };
   try {
     workspaceConfig = JSON.parse(rawConfig);
   } catch {
     redirect(`/dashboard/prospects/${id}/configure?error=${encodeURIComponent("Configuration invalide. Veuillez recommencer.")}`);
   }
 
-  const allowedTemplates = ["e-business", "contact", "service", "google-review"];
+  workspaceConfig.version = 2;\n  const allowedTemplates = ["e-business", "contact", "service", "google-review"];
   const allowedModules = [
     "dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc",
     "company_profile", "service_catalog", "product_catalog", "orders", "google_reviews",
