@@ -4,7 +4,7 @@ import { useState } from "react";
 
 export type EditableCardField = { key: string; label: string; value: string; visible: boolean };
 
-export function CustomCardFieldsEditor({ initialFields }: { initialFields: EditableCardField[] }) {
+export function CustomCardFieldsEditor({ initialFields, showPortfolioActions = false }: { initialFields: EditableCardField[]; showPortfolioActions?: boolean }) {
   const [fields, setFields] = useState(initialFields);
   function update(index: number, patch: Partial<EditableCardField>) {
     setFields((current) => current.map((field, i) => i === index ? { ...field, ...patch } : field));
@@ -32,11 +32,13 @@ export function CustomCardFieldsEditor({ initialFields }: { initialFields: Edita
   return (
     <section className="space-y-4 rounded-2xl border border-slate-200 p-4 sm:col-span-2">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div><h4 className="text-sm font-bold text-slate-900">Portfolio professionnel & CV</h4><p className="mt-1 text-xs text-slate-500">Ajoutez vos projets et votre CV directement depuis ce profil. Les éléments cochés seront visibles sur votre carte publique.</p></div>
+        <div><h4 className="text-sm font-bold text-slate-900">{showPortfolioActions ? "Portfolio professionnel & CV" : "Personnaliser les informations"}</h4><p className="mt-1 text-xs text-slate-500">{showPortfolioActions ? "Ajoutez vos projets et votre CV directement depuis ce profil. Les éléments cochés seront visibles sur votre carte publique." : "Ajoutez les informations propres à votre activité. Pour une FAQ, commencez le nom par « FAQ : ». Les liens YouTube alimentent la section vidéos."}</p></div>
         <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={addPortfolio} disabled={fields.length >= 20} className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-3.5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-indigo-700 disabled:opacity-50">＋ Ajouter portfolio</button>
-          <button type="button" onClick={addCv} disabled={fields.length >= 20 || fields.some((field) => /cv professionnel|^cv$/i.test(field.label.trim()))} className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2.5 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100 disabled:opacity-50">＋ Ajouter CV</button>
-          <button type="button" onClick={add} disabled={fields.length >= 20} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-bold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50">＋ Autre champ</button>
+          {showPortfolioActions && <>
+            <button type="button" onClick={addPortfolio} disabled={fields.length >= 20} className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-3.5 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-indigo-700 disabled:opacity-50">＋ Ajouter portfolio</button>
+            <button type="button" onClick={addCv} disabled={fields.length >= 20 || fields.some((field) => /cv professionnel|^cv$/i.test(field.label.trim()))} className="inline-flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-2.5 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100 disabled:opacity-50">＋ Ajouter CV</button>
+          </>}
+          <button type="button" onClick={add} disabled={fields.length >= 20} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 px-3.5 py-2.5 text-xs font-bold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50">＋ Ajouter un champ</button>
         </div>
       </div>
       <input type="hidden" name="custom_fields" value={JSON.stringify(fields)} />
