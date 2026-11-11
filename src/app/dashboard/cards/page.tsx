@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { createClientCard, saveClientCardProfile, addClientCardLink, deleteClientCardLink, toggleClientCardPublication, createCatalogItem, updateCatalogItem, deleteCatalogItem, importCatalogItems, uploadCatalogPdf } from "@/app/actions/cards";
+import { createClientCard, saveClientCardProfile, saveClientCardVisibility, addClientCardLink, deleteClientCardLink, toggleClientCardPublication, createCatalogItem, updateCatalogItem, deleteCatalogItem, importCatalogItems, uploadCatalogPdf } from "@/app/actions/cards";
 import { createClient } from "@/lib/supabase/server";
 import { CustomCardFieldsEditor, type EditableCardField } from "@/components/cards/custom-card-fields-editor";
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
@@ -128,7 +128,8 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
     : { data: [] as { card_id: string; event_type: string }[] };
   const config = (organization?.workspace_config ?? {}) as { version?: number; template?: string; modules?: string[]; ai_suggestions?: { profile_draft?: { tagline?: string; description?: string; card_fields?: { key: string; label: string; type: string; visible: boolean }[]; suggested_buttons?: { kind: string; label: string; enabled: boolean }[] } } };
   const modules = Array.isArray(config.modules) ? config.modules : [];
-  const galleryEnabled = !config.version || modules.includes("gallery");
+  const isCreativeProfile = /designer|design graphique|graphiste|photographe|photography/.test(activitySector);
+  const galleryEnabled = isCreativeProfile || !config.version || modules.includes("gallery");
   if (config.version && !modules.includes("digital_card")) notFound();
   const activitySector = String((organization?.workspace_config as any)?.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const selectedNeed = String(((organization?.workspace_config as any)?.original_client_choices?.project_needs?.selected ?? []).join(" ")).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -138,7 +139,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
   const isBarber = /barber|barbier|barbershop/.test(activitySector + " " + selectedNeed);
   const isRestaurant = supportsBusinessCatalog && /restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(activitySector + " " + selectedNeed);
   const isRealEstate = supportsBusinessCatalog && /immobilier|agence immobiliere|promotion immobiliere|location immobiliere/.test(activitySector);
-  const catalogEnabled = supportsBusinessCatalog && (!config.version || modules.some((module) => module === "service_catalog" || module === "room_catalog" || (module === "product_catalog" && isEcommerce)) || isBeauty || isRestaurant || isRealEstate);
+  const catalogEnabled = !isCreativeProfile && supportsBusinessCatalog && (!config.version || modules.some((module) => module === "service_catalog" || module === "room_catalog" || (module === "product_catalog" && isEcommerce)) || isBeauty || isRestaurant || isRealEstate);
   const catalogLabel = modules.includes("room_catalog") ? "Chambres" : isBarber ? "Prestations barber" : isBeauty ? "Prestations beauté" : isRestaurant ? "Menu" : config.template === "service" ? "Prestations" : isEcommerce ? "Shop" : isRealEstate ? "Projets" : "Catalogue";
   const { data: catalogItems } = catalogEnabled && organizationId
     ? await supabase.from("products").select("id,name,description,price,currency,image_url,is_active")
@@ -299,20 +300,27 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                   <label className="text-xs font-semibold text-slate-600">E-mail professionnel<input name="company_email" type="email" defaultValue={fields.company_email ?? card.email ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Adresse professionnelle complète<input name="company_address" defaultValue={fields.company_address ?? fields.location ?? intakeProfile?.business_address ?? ""} placeholder="Adresse, quartier, ville, pays" className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   <label className="text-xs font-semibold text-slate-600">WhatsApp professionnel<input name="whatsapp" defaultValue={fields.whatsapp ?? card.phone ?? ""} placeholder="+212..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
-                  {config.template === "google-review" && <label className="text-xs font-semibold text-slate-600">Lien Google Avis<input name="google_review_url" type="url" defaultValue={fields.google_review_url ?? ""} placeholder="https://..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>}
+                  {(config.template === "google-review" || config.template === "e-business") && <label className="text-xs font-semibold text-slate-600">Lien Google Avis<input name="google_review_url" type="url" defaultValue={fields.google_review_url ?? ""} placeholder="https://..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>}
                   <div className="sm:col-span-2"><CustomCardFieldsEditor initialFields={initialCustomFields} showPortfolioActions={galleryEnabled}/></div>
 
-                  <section className="sm:col-span-2 rounded-2xl border border-slate-200 bg-white p-4">
+
+                </div>
+                <div className="sticky bottom-0 -mx-1 border-t border-slate-100 bg-white/95 px-1 py-3 backdrop-blur"><button className="btn-primary w-full rounded-full py-3 text-sm">✓ Enregistrer ma carte</button><p className="mt-2 text-center text-[10px] text-slate-400">Vos modifications seront visibles après enregistrement.</p></div>
+              </form>
+              </PopupDialog>
+              </div>
+
+                                <section className="mt-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                     <div className="mb-4">
                       <p className="text-xs font-black uppercase tracking-wider text-indigo-600">3. Organisation de la carte publique</p>
                       <h4 className="mt-1 text-base font-black text-slate-900">Modules visibles de ma carte</h4>
                       <p className="mt-1 text-xs leading-5 text-slate-500">Choisissez ici les rubriques que vos visiteurs verront après un scan. Ces réglages sont enregistrés avec le reste de votre personnalisation.</p>
                     </div>
-                    <div className="space-y-4">
+                    <form action={saveClientCardVisibility} className="space-y-4"><input type="hidden" name="card_id" value={card.id}/>
                       {[
                         { title: "Présentation & identité", items: [["show_about", "Présentation / À propos"], ["show_company_info", "Informations entreprise"], ["show_categories", "Domaines et spécialités"], ["show_info_fields", "Informations complémentaires"]] },
                         { title: "Coordonnées", items: [["show_contact", "Bloc de contact"], ["show_phone", "Téléphone"], ["show_email", "E-mail"], ["show_website", "Site web"]] },
-                        { title: "Services & demandes", items: [["show_catalog", catalogLabel], ["show_catalog_pdf", "Catalogue PDF"], ["show_orders", "Commandes boutique"], ["show_bookings", "Réservations"], ["show_quotes", "Demandes de devis"], ["show_request_forms", "Formulaires de demande"]] },
+                        ...(!isCreativeProfile ? [{ title: "Services & demandes", items: [["show_catalog", catalogLabel], ["show_catalog_pdf", "Catalogue PDF"], ["show_orders", "Commandes boutique"], ["show_bookings", "Réservations"], ["show_quotes", "Demandes de devis"], ["show_request_forms", "Formulaires de demande"]] }] : []),
                         { title: "Communication & découverte", items: [...(galleryEnabled ? [["show_gallery", "Portfolio & galerie"], ["show_cv", "CV professionnel"]] : []), ["show_google_reviews", "Avis Google"], ["show_social_links", "Réseaux sociaux"], ["show_featured_links", "Liens mis en avant"], ["show_faq", "Questions fréquentes (FAQ)"], ["show_videos", "Vidéos"], ["show_location", "Adresse et carte"]] },
                       ].map((group) => (
                         <div key={group.title}>
@@ -327,13 +335,8 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                           </div>
                         </div>
                       ))}
-                    </div>
+                    </div><div className="border-t border-slate-100 pt-4"><button className="btn-primary w-full rounded-full py-3 text-sm">✓ Enregistrer les rubriques visibles</button></div></form>
                   </section>
-                </div>
-                <div className="sticky bottom-0 -mx-1 border-t border-slate-100 bg-white/95 px-1 py-3 backdrop-blur"><button className="btn-primary w-full rounded-full py-3 text-sm">✓ Enregistrer ma carte</button><p className="mt-2 text-center text-[10px] text-slate-400">Vos modifications seront visibles après enregistrement.</p></div>
-              </form>
-              </PopupDialog>
-              </div>
 
               <div className="space-y-5">
                 <div><h3 className="font-bold text-slate-900">Réseaux sociaux & liens</h3><p className="mt-1 text-xs text-slate-500">Ajoutez Instagram, TikTok, YouTube, LinkedIn, vos projets, une boutique ou un lien de réservation.</p>
