@@ -216,7 +216,7 @@ export function ProspectIntake() {
       </header>
       <section className="relative mx-auto mt-1 w-full max-w-3xl rounded-[1.75rem] border border-blue-300/35 bg-[linear-gradient(125deg,rgba(9,27,52,.88),rgba(18,32,62,.76)_52%,rgba(47,55,113,.76))] p-5 text-white shadow-[0_25px_80px_rgba(0,0,0,.45)] backdrop-blur-2xl sm:p-7 lg:p-8">
         <div className="text-center"><h1 className="text-3xl font-black tracking-tight sm:text-4xl lg:text-5xl">Devenez <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-violet-500 bg-clip-text text-transparent">client</span></h1><p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-white/85 sm:text-base">Rejoignez TouchCard Business et créez votre carte digitale en quelques étapes simples.</p></div>
-        <div className="mt-7 grid grid-cols-5 gap-x-2 gap-y-3 sm:grid-cols-9 sm:gap-2">{visibleSteps.map((item,index)=><div key={item} className="flex min-w-0 flex-col items-center text-center"><span className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-bold ${step===item?"border-cyan-300 bg-gradient-to-br from-cyan-400 to-blue-600 text-white shadow-[0_0_22px_rgba(0,174,255,.4)]":step>item?"border-violet-300/70 bg-violet-500/20 text-white":"border-slate-400/60 bg-slate-900/40 text-slate-300"}`}>{index+1}</span><span className="mt-1 hidden max-w-full truncate text-[9px] leading-tight text-white/75 sm:block">{["Identité","Ville","Activité","Contact","Carte","Services","Liens","Options","Envoi"][index]}</span></div>)}</div>
+        <div className="mt-7 grid grid-cols-5 gap-x-2 gap-y-3 sm:grid-cols-9 sm:gap-2">{visibleSteps.map((item,index)=><div key={item} className="flex min-w-0 flex-col items-center text-center"><span className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-bold ${step===item?"border-cyan-300 bg-gradient-to-br from-cyan-400 to-blue-600 text-white shadow-[0_0_22px_rgba(0,174,255,.4)]":step>item?"border-violet-300/70 bg-violet-500/20 text-white":"border-slate-400/60 bg-slate-900/40 text-slate-300"}`}>{index+1}</span><span className="mt-1 hidden max-w-full truncate text-[9px] leading-tight text-white/75 sm:block">{["Identité","Ville","Activité","Contact","Carte",serviceChoiceRequired ? "Services" : "Adresse","Liens","Options","Envoi"][index]}</span></div>)}</div>
         <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/15"><div className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500 transition-all duration-500" style={{ width: `${progress}%` }}/></div>
         <p className="mt-7 text-xs font-black uppercase tracking-[.22em] text-cyan-200">{titles[step]}</p>
         <h2 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">{subtitles[step]}</h2>
@@ -254,7 +254,7 @@ export function ProspectIntake() {
   </div>}
 </div>}{step === 8 && <div className="space-y-3 rounded-2xl border border-violet-100 bg-violet-50/50 p-5 text-sm"><Review label="Nom" value={form.fullName}/><Review label="Ville" value={form.city}/><Review label="Secteur" value={form.sector === "Autre" ? form.sectorOther : form.sector}/><Review label="E-mail" value={form.email}/><Review label="Téléphone" value={form.phone}/><Review label="Pages & réseaux" value={form.socialLinks.filter((item) => item.url.trim()).map((item) => item.platform + ": " + item.url).join(" · ") || "Non renseignés"}/><Review label="Nom de l’activité" value={form.brandName || (form.cardType === "contact" ? form.fullName : "")}/><Review label="Carte souhaitée" value={cards.find((card) => card.id === form.cardType)?.title || ""}/>{!serviceChoiceRequired && <Review label="Adresse de l’établissement" value={form.businessAddress}/>}<Review label="Prix indicatif" value={({ contact: "149 DH", "google-review": "199 DH", "e-business": "399 DH", service: "499 DH" } as Record<string, string>)[form.cardType] || "À confirmer"}/><Review label="Formule choisie" value={form.projectNeeds[0] || (form.cardType === "contact" ? "Non applicable — E-Contact" : form.cardType === "google-review" ? "Non applicable — Avis Google" : "Non sélectionnée")}/><Review label="Personnalisation" value={form.customRequested ? "Oui" : "Non"}/>{form.customRequested && <><Review label="Marque" value={form.brandName}/><Review label="Logo" value={logoName || "Non fourni"}/><Review label="Adresse" value={form.businessAddress}/><Review label="Téléphone professionnel" value={form.businessPhone}/></>}</div>}
           {error && <p role="alert" className="mt-5 rounded-xl border border-rose-400/20 bg-rose-400/10 p-3 text-sm text-rose-700">{error}</p>}
-          <div className="mt-9 flex flex-col-reverse justify-between gap-3 sm:flex-row"><button type="button" disabled={step === 0 || busy} onClick={() => { setError(""); setStep((value) => value === 8 ? 7 : value === 6 && !serviceChoiceRequired ? 4 : value - 1); }} className="rounded-full border border-white/25 bg-white/5 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-white/10 disabled:opacity-30">Précédent</button><button type="submit" disabled={busy} className="rounded-full bg-gradient-to-r from-cyan-500 via-blue-600 to-violet-600 px-8 py-3.5 text-sm font-extrabold text-white shadow-[0_10px_30px_rgba(0,120,255,.28)] transition hover:-translate-y-0.5 hover:brightness-110 disabled:opacity-60">{busy ? "Enregistrement..." : step === 8 ? "Envoyer ma demande →" : "Continuer →"}</button></div>
+          <div className="mt-9 flex flex-col-reverse justify-between gap-3 sm:flex-row"><button type="button" disabled={step === 0 || busy} onClick={() => { setError(""); setStep((value) => value === 8 ? 7 : value === 6 && !serviceChoiceRequired ? 5 : value - 1); }} className="rounded-full border border-white/25 bg-white/5 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-white/10 disabled:opacity-30">Précédent</button><button type="submit" disabled={busy} className="rounded-full bg-gradient-to-r from-cyan-500 via-blue-600 to-violet-600 px-8 py-3.5 text-sm font-extrabold text-white shadow-[0_10px_30px_rgba(0,120,255,.28)] transition hover:-translate-y-0.5 hover:brightness-110 disabled:opacity-60">{busy ? "Enregistrement..." : step === 8 ? "Envoyer ma demande →" : "Continuer →"}</button></div>
         </form>
         <div className="mt-6 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-5 text-center sm:flex-row sm:text-left"><p className="text-xs text-white/60">Vous souhaitez terminer plus tard ? Votre progression est sauvegardée automatiquement.</p><Link href="/" className="shrink-0 rounded-full border border-white/20 bg-white/5 px-5 py-2.5 text-xs font-bold text-white/85 transition hover:border-cyan-300/50 hover:bg-cyan-400/10 hover:text-white">Quitter et revenir plus tard</Link></div>
         <p className="mt-7 text-center text-[11px] leading-5 text-white/55">En confirmant, vous acceptez que TouchCard utilise ces informations pour traiter votre demande et vous contacter à ce sujet.</p>
@@ -262,19 +262,43 @@ export function ProspectIntake() {
       </div>
 
       <style jsx global>{`
-        .touchcard-intake .text-slate-900, .touchcard-intake .text-slate-800, .touchcard-intake .text-slate-700 { color: rgba(244,248,255,.94) !important; }
-        .touchcard-intake .text-slate-600, .touchcard-intake .text-slate-500 { color: rgba(219,231,249,.72) !important; }
-        .touchcard-intake .border-slate-200, .touchcard-intake .border-slate-300 { border-color: rgba(167,195,235,.24) !important; }
-        .touchcard-intake .bg-white, .touchcard-intake .bg-violet-50, .touchcard-intake .bg-violet-50\/60, .touchcard-intake .bg-violet-50\/50 { background-color: rgba(5,17,36,.66) !important; }
-        .touchcard-intake input:not([type=radio]):not([type=file]), .touchcard-intake textarea, .touchcard-intake select { color: #f8fbff !important; background-color: rgba(3,13,29,.72) !important; border-color: rgba(155,190,235,.3) !important; }
-        .touchcard-intake input::placeholder, .touchcard-intake textarea::placeholder { color: rgba(207,220,241,.5) !important; }
+        .touchcard-intake { color-scheme: dark; }
+        .touchcard-intake .text-slate-900,
+        .touchcard-intake .text-slate-800,
+        .touchcard-intake .text-slate-700 { color: #f1f5fb !important; }
+        .touchcard-intake .text-slate-600,
+        .touchcard-intake .text-slate-500 { color: #b8c8dc !important; }
+        .touchcard-intake .border-slate-200,
+        .touchcard-intake .border-slate-300 { border-color: rgba(148, 181, 220, .28) !important; }
+        .touchcard-intake [class~="bg-white"],
+        .touchcard-intake [class~="bg-violet-50"],
+        .touchcard-intake [class~="bg-violet-50/60"],
+        .touchcard-intake [class~="bg-violet-50/50"] {
+          background-color: rgba(7, 22, 43, .88) !important;
+        }
+        .touchcard-intake input:not([type="radio"]):not([type="file"]),
+        .touchcard-intake textarea,
+        .touchcard-intake select {
+          color: #f8fbff !important;
+          background: rgba(3, 13, 29, .88) !important;
+          border-color: rgba(130, 177, 230, .38) !important;
+        }
+        .touchcard-intake input::placeholder,
+        .touchcard-intake textarea::placeholder { color: #91a6c0 !important; opacity: 1; }
         .touchcard-intake select option { color: #f8fbff; background: #0b1930; }
-        .touchcard-intake label { color: rgba(238,245,255,.92); }
-        .touchcard-intake .hover\\:bg-violet-50:hover, .touchcard-intake .hover\\:bg-slate-50:hover { background-color: rgba(24,62,104,.6) !important; }
-        .touchcard-intake .bg-violet-700 { background-color: #4f46e5 !important; }
-        .touchcard-intake .text-violet-900, .touchcard-intake .text-violet-700 { color: #dceaff !important; }
-        .touchcard-intake .ring-violet-200 { --tw-ring-color: rgba(103,232,249,.35) !important; }
-        @media (max-width: 639px) { .touchcard-intake section { border-radius: 1.35rem; } }
+        .touchcard-intake input[type="radio"] { accent-color: #22d3ee; }
+        .touchcard-intake label { color: #e7f0fc; }
+        .touchcard-intake [class~="border-violet-500"] { border-color: rgba(103, 232, 249, .82) !important; }
+        .touchcard-intake [class~="ring-violet-200"] { --tw-ring-color: rgba(103, 232, 249, .28) !important; }
+        .touchcard-intake [class~="text-violet-900"],
+        .touchcard-intake [class~="text-violet-700"] { color: #d9f4ff !important; }
+        .touchcard-intake [class~="bg-violet-700"] { background-color: #3158c9 !important; }
+        .touchcard-intake .hover\\:bg-violet-50:hover,
+        .touchcard-intake .hover\\:bg-slate-50:hover { background-color: rgba(24, 62, 104, .72) !important; }
+        @media (max-width: 639px) {
+          .touchcard-intake section { border-radius: 1.35rem; }
+          .touchcard-intake aside { min-height: 300px; }
+        }
       `}</style>
     </main>
   );
