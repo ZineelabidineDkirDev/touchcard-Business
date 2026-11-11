@@ -71,6 +71,22 @@ export const CARD_MODULES: CardModuleDefinition[] = [
     { key: "thank_you_message", label: "Message de remerciement", type: "textarea", defaultValue: "Merci de prendre le temps de partager votre expérience." },
   ] },
   { id: "crm_contacts", label: "Contacts & CRM", description: "Centralisation des prospects et clients", group: "Relation client", templates: businessTemplates, configurationFields: [] },
+  { id: "doctor_appointments", label: "Rendez-vous médicaux", description: "Demandes de consultation et suivi des rendez-vous patients", group: "Santé", templates: businessTemplates, configurationFields: [
+    { key: "section_title", label: "Titre public", type: "text", defaultValue: "Prendre rendez-vous" },
+    { key: "appointment_duration", label: "Durée indicative (minutes)", type: "select", defaultValue: "30", options: [{ label: "15 minutes", value: "15" }, { label: "30 minutes", value: "30" }, { label: "45 minutes", value: "45" }, { label: "60 minutes", value: "60" }] },
+    { key: "ask_reason", label: "Demander le motif de consultation", type: "checkbox", defaultValue: true },
+  ] },
+  { id: "gym_registration", label: "Inscriptions salle de sport", description: "Formules d'abonnement et demandes d'inscription", group: "Sport & bien-être", templates: businessTemplates, configurationFields: [
+    { key: "section_title", label: "Titre public", type: "text", defaultValue: "Nos abonnements" },
+    { key: "show_trial", label: "Proposer une séance d'essai", type: "checkbox", defaultValue: true },
+    { key: "ask_fitness_goals", label: "Demander les objectifs sportifs", type: "checkbox", defaultValue: true },
+  ] },
+  { id: "school_registration", label: "Inscriptions école & formation", description: "Programmes, préinscriptions et dossiers élèves", group: "Éducation", templates: businessTemplates, configurationFields: [
+    { key: "section_title", label: "Titre public", type: "text", defaultValue: "Nos formations" },
+    { key: "ask_guardian", label: "Demander les coordonnées du responsable légal", type: "checkbox", defaultValue: true },
+    { key: "show_program_dates", label: "Afficher les dates des programmes", type: "checkbox", defaultValue: true },
+  ] },
+
   { id: "team", label: "Équipe & collaborateurs", description: "Gestion des membres de l'organisation", group: "Gestion", templates: businessTemplates, configurationFields: [] },
   { id: "gallery", label: "Portfolio & galerie de projets", description: "Réalisations, images de projets et présentation du CV professionnel", group: "Vitrine", templates: allTemplates, configurationFields: [
     { key: "section_title", label: "Titre public", type: "text", defaultValue: "Portfolio & réalisations" },
