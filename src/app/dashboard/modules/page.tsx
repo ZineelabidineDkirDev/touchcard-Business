@@ -8,7 +8,7 @@ import {
 
 const statusLabels: Record<string, string> = {
   pending: "En attente", confirmed: "Confirmée", in_progress: "En cours",
-  completed: "Terminée", rejected: "Refusée", cancelled: "Annulée",
+  completed: "Terminée", rejected: "Refusée", cancelled: "Annulée", contacted: "Contactée", approved: "Approuvée", under_review: "En étude", accepted: "Acceptée", enrolled: "Inscrite",
 };
 
 export default async function BusinessModulesPage() {
@@ -76,7 +76,7 @@ export default async function BusinessModulesPage() {
     {canAppointments && <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
       <SectionTitle title="Rendez-vous & réservations" description="Consultez les demandes privées reçues depuis votre carte NFC et mettez leur statut à jour."/>
       <div className="grid gap-3 sm:grid-cols-3"><Metric label="Total" value={appointments.data?.length ?? 0}/><Metric label="En attente" value={(appointments.data ?? []).filter((x: any) => x.status === "pending").length}/><Metric label="Confirmés" value={(appointments.data ?? []).filter((x: any) => x.status === "confirmed").length}/></div>
-      <div className="space-y-3">{(appointments.data ?? []).map((item: any) => <RequestCard key={item.id} item={item} action={updateAppointmentStatus} title={item.appointment_type === "consultation" ? "Consultation" : item.appointment_type === "restaurant_booking" ? "Réservation restaurant" : "Rendez-vous"} date={item.starts_at}/>) }{!(appointments.data?.length) && <Empty text="Aucune demande de rendez-vous reçue."/>}</div>
+      <div className="space-y-3">{(appointments.data ?? []).map((item: any) => <RequestCard key={item.id} item={item} action={updateAppointmentStatus} statuses={["pending","confirmed","completed","rejected","cancelled"]} title={item.appointment_type === "consultation" ? "Consultation" : item.appointment_type === "restaurant_booking" ? "Réservation restaurant" : "Rendez-vous"} date={item.starts_at}/>) }{!(appointments.data?.length) && <Empty text="Aucune demande de rendez-vous reçue."/>}</div>
     </section>}
 
     {canGym && <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
@@ -92,7 +92,7 @@ export default async function BusinessModulesPage() {
       </form>
       <div className="grid gap-3 md:grid-cols-2">{(plans.data ?? []).map((plan: any) => <article key={plan.id} className="rounded-2xl border border-slate-200 p-4"><h3 className="font-bold text-slate-900">{plan.name}</h3><p className="mt-1 text-sm text-slate-500">{plan.duration_days} jours · {(plan.benefits ?? []).join(" · ")}</p><p className="mt-2 font-black text-indigo-700">{Number(plan.price).toLocaleString("fr-MA")} {plan.currency}</p></article>)}{!(plans.data?.length) && <Empty text="Aucune formule d'abonnement créée."/>}</div>
       <h3 className="pt-3 text-lg font-black text-slate-900">Demandes d'inscription</h3>
-      <div className="space-y-3">{(gymRegistrations.data ?? []).map((item: any) => <RequestCard key={item.id} item={item} action={updateGymRegistrationStatus} title="Inscription sport" date={item.created_at} detail={item.fitness_goals}/>) }{!(gymRegistrations.data?.length) && <Empty text="Aucune inscription reçue."/>}</div>
+      <div className="space-y-3">{(gymRegistrations.data ?? []).map((item: any) => <RequestCard key={item.id} item={item} action={updateGymRegistrationStatus} statuses={["pending","contacted","approved","active","rejected","cancelled"]} title="Inscription sport" date={item.created_at} detail={item.fitness_goals}/>) }{!(gymRegistrations.data?.length) && <Empty text="Aucune inscription reçue."/>}</div>
     </section>}
 
     {canSchool && <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
@@ -109,7 +109,7 @@ export default async function BusinessModulesPage() {
       </form>
       <div className="grid gap-3 md:grid-cols-2">{(programs.data ?? []).map((program: any) => <article key={program.id} className="rounded-2xl border border-slate-200 p-4"><h3 className="font-bold text-slate-900">{program.title}</h3><p className="mt-1 text-sm text-slate-500">{program.duration_label || "Durée à préciser"} · {program.start_date || "Date à définir"}</p>{program.description && <p className="mt-2 text-sm text-slate-600">{program.description}</p>}</article>)}{!(programs.data?.length) && <Empty text="Aucun programme publié."/>}</div>
       <h3 className="pt-3 text-lg font-black text-slate-900">Préinscriptions reçues</h3>
-      <div className="space-y-3">{(enrollments.data ?? []).map((item: any) => <RequestCard key={item.id} item={item} action={updateSchoolEnrollmentStatus} title="Préinscription" date={item.created_at} detail={item.message}/>) }{!(enrollments.data?.length) && <Empty text="Aucune préinscription reçue."/>}</div>
+      <div className="space-y-3">{(enrollments.data ?? []).map((item: any) => <RequestCard key={item.id} item={item} action={updateSchoolEnrollmentStatus} statuses={["pending","under_review","accepted","enrolled","rejected","cancelled"]} title="Préinscription" date={item.created_at} detail={item.message}/>) }{!(enrollments.data?.length) && <Empty text="Aucune préinscription reçue."/>}</div>
     </section>}
   </div>;
 }
@@ -119,6 +119,6 @@ function SectionTitle({ title, description }: { title: string; description: stri
 }
 function Empty({ text }: { text: string }) { return <p className="rounded-xl border border-dashed border-slate-200 p-5 text-center text-sm text-slate-500">{text}</p>; }
 function Metric({ label, value }: { label: string; value: number }) { return <div className="rounded-xl bg-slate-50 p-4"><p className="text-xs text-slate-500">{label}</p><p className="mt-1 text-2xl font-black text-slate-900">{value}</p></div>; }
-function RequestCard({ item, action, title, date, detail }: { item: any; action: (data: FormData) => Promise<void>; title: string; date: string; detail?: string | null }) {
-  return <article className="rounded-2xl border border-slate-200 p-4"><div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-bold text-slate-900">{item.customer_name || item.full_name || item.student_name} · {title}</h3><p className="mt-1 text-xs text-slate-500">{new Date(date).toLocaleString("fr-FR")}</p><p className="mt-2 text-sm text-slate-600">{item.customer_phone || item.phone || item.guardian_phone || "Téléphone non renseigné"}{item.customer_email || item.email || item.student_email ? " · " + (item.customer_email || item.email || item.student_email) : ""}</p>{detail && <p className="mt-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">{detail}</p>}</div><span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800">{statusLabels[item.status] || item.status}</span></div><form action={action} className="mt-4 flex gap-2 border-t border-slate-100 pt-3"><input type="hidden" name="id" value={item.id}/><select name="status" defaultValue={item.status} className="rounded-lg border border-slate-200 px-3 py-2 text-sm">{Object.entries(statusLabels).map(([key,label]) => <option key={key} value={key}>{label}</option>)}</select><button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white">Enregistrer</button></form></article>;
+function RequestCard({ item, action, title, date, detail }: { item: any; action: (data: FormData) => Promise<void>; title: string; date: string; detail?: string | null; statuses: string[] }) {
+  return <article className="rounded-2xl border border-slate-200 p-4"><div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-bold text-slate-900">{item.customer_name || item.full_name || item.student_name} · {title}</h3><p className="mt-1 text-xs text-slate-500">{new Date(date).toLocaleString("fr-FR")}</p><p className="mt-2 text-sm text-slate-600">{item.customer_phone || item.phone || item.guardian_phone || "Téléphone non renseigné"}{item.customer_email || item.email || item.student_email ? " · " + (item.customer_email || item.email || item.student_email) : ""}</p>{detail && <p className="mt-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-600">{detail}</p>}</div><span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800">{statusLabels[item.status] || item.status}</span></div><form action={action} className="mt-4 flex gap-2 border-t border-slate-100 pt-3"><input type="hidden" name="id" value={item.id}/><select name="status" defaultValue={item.status} className="rounded-lg border border-slate-200 px-3 py-2 text-sm">{statuses.map((key) => <option key={key} value={key}>{statusLabels[key] || key}</option>)}</select><button className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white">Enregistrer</button></form></article>;
 }
