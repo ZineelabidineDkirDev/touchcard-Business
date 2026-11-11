@@ -30,8 +30,12 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
   const fullName = input.fullName.trim();
   const email = input.email.trim().toLowerCase();
   const phone = input.phone.trim();
+  const isPersonalContact = input.cardType === "contact";
+  const activitySector = isPersonalContact ? input.sector.trim() || "Personnel" : input.sector === "Autre" ? input.sectorOther.trim() || "Autre" : input.sector.trim();
+  const brandName = input.brandName.trim() || (isPersonalContact ? fullName : "");
+  const selectedProjectNeeds = ["e-business", "service"].includes(input.cardType) ? (input.projectNeeds ?? []).slice(0, 1) : [];
 
-  if (!fullName || !input.city || !input.sector || !email || !phone || !input.cardType) {
+  if (!fullName || !input.city || (!isPersonalContact && (!activitySector || !brandName)) || !email || !phone || !input.cardType) {
     return { ok: false as const, error: "Veuillez compléter tous les champs obligatoires." };
   }
   if (input.sector.includes("|")) {
@@ -52,18 +56,18 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
       prospect: {
         full_name: fullName,
         city: input.city.trim(),
-        activity_sector: input.sector === "Autre" ? input.sectorOther.trim() || "Autre" : input.sector,
+        activity_sector: activitySector,
         email,
         phone,
         card_type: input.cardType,
         reason: input.reason.trim() || null,
         customization_requested: input.customRequested,
-        brand_name: input.brandName.trim() || null,
+        brand_name: brandName || null,
         logo_url: input.customRequested ? input.logoUrl.trim() || null : null,
         business_address: input.customRequested ? input.businessAddress.trim() || null : null,
         business_phone: input.customRequested ? input.businessPhone.trim() || null : null,
         social_links: (input.socialLinks ?? []).filter((item) => item.url.trim()).map((item) => ({ platform: item.platform, url: item.url.trim() })),
-        project_needs: { selected: (input.projectNeeds ?? []).slice(0, 1), reservation_mode: input.reservationMode || null, reservation_channels: (input.reservationChannels ?? []).slice(0, 10), management_needs: (input.managementNeeds ?? []).slice(0, 20) },
+        project_needs: { selected: selectedProjectNeeds, reservation_mode: selectedProjectNeeds.length ? input.reservationMode || null : null, reservation_channels: selectedProjectNeeds.length ? (input.reservationChannels ?? []).slice(0, 10) : [], management_needs: selectedProjectNeeds.length ? (input.managementNeeds ?? []).slice(0, 20) : [] },
       },
     },
   });
@@ -146,6 +150,11 @@ export async function createProspectCustomer(formData: FormData) {
   if (!allowedTemplates.includes(workspaceConfig.template) || !Array.isArray(workspaceConfig.modules)
     || workspaceConfig.modules.some((module) => !allowedModules.includes(module))) {
     redirect(`/dashboard/prospects/${id}/configure?error=${encodeURIComponent("Les options sélectionnées ne sont pas valides.")}`);
+  }
+
+  if (workspaceConfig.template === "contact") {
+    const contactModules = new Set(["dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc", "gallery", "analytics"]);
+    workspaceConfig.modules = [...new Set([...workspaceConfig.modules.filter((module) => contactModules.has(module)), "dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc", "gallery", "analytics"])];
   }
 
   const supabase = await createClient();
@@ -349,14 +358,15 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
       return { ok: false as const, error: "La proposition IA ne respecte pas le modèle demandé. Réessaie." };
     }
 
-    const safeModules = [...new Set(parsed.modules.filter((module) => allowedModules.includes(module)))];
+    const contactModules = new Set(["dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc", "gallery", "analytics"]);
+    const safeModules = [...new Set(parsed.modules.filter((module) => allowedModules.includes(module) && (template !== "contact" || contactModules.has(module))))];
     const formula = String(needs.selected?.[0] ?? "").toLocaleLowerCase("fr");
     const normalizedSector = String(prospect.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     const normalizedNeed = [...(needs.selected ?? []), ...(needs.management_needs ?? [])].join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
     const isBeautyBusiness = /beaute|cosmetique?s?|cosmetics?|esthetique|spa|hammam|coiffure|onglerie|maquillage|institut de beaute|massage/.test(normalizedSector + " " + normalizedNeed);
     const isRestaurantBusiness = /restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(normalizedSector + " " + normalizedNeed);
     const requiredModules = ["dashboard", "digital_card", "analytics"];
-    if (template === "contact") requiredModules.push("contact_profile", "social_links", "qr_nfc");
+    if (template === "contact") requiredModules.push("contact_profile", "social_links", "qr_nfc", "gallery");
     if (template === "google-review") requiredModules.push("company_profile", "google_reviews", "qr_nfc");
     if (formula.includes("contact") || template === "contact") requiredModules.push("contact_profile");
     if (formula.includes("entreprise")) requiredModules.push("company_profile");
@@ -367,12 +377,13 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
     if (formula.includes("réservation") || formula.includes("reservation")) requiredModules.push("bookings", "availability_calendar");
     if (formula.includes("équipe") || formula.includes("collaborateur") || needs.reservation_mode === "team") requiredModules.push("team");
     for (const module of requiredModules) if (!safeModules.includes(module)) safeModules.push(module);
+    const finalModules = template === "contact" ? safeModules.filter((module) => contactModules.has(module)) : safeModules;
 
     return {
       ok: true as const,
       suggestions: {
         template,
-        modules: safeModules,
+        modules: finalModules,
         profile_draft: {
           tagline: String(parsed.profile_draft.tagline ?? "").slice(0, 180),
           description: String(parsed.profile_draft.description ?? "").slice(0, 1200),

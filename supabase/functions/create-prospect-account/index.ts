@@ -139,8 +139,8 @@ Deno.serve(async (req: Request) => {
       : [];
     const projectNeeds = prospect.project_needs && typeof prospect.project_needs === "object"
       ? {
-          selected: Array.isArray(prospect.project_needs.selected) ? prospect.project_needs.selected.slice(0, 1).map((v: unknown) => String(v).slice(0, 120)) : [],
-          reservation_mode: String(prospect.project_needs.reservation_mode ?? "").slice(0, 80) || null,
+          selected: ["e-business", "service"].includes(cardType) && Array.isArray(prospect.project_needs.selected) ? prospect.project_needs.selected.slice(0, 1).map((v: unknown) => String(v).slice(0, 120)) : [],
+          reservation_mode: ["e-business", "service"].includes(cardType) ? String(prospect.project_needs.reservation_mode ?? "").slice(0, 80) || null : null,
           reservation_channels: [],
           management_needs: [],
         }
