@@ -45,9 +45,10 @@ async function PublicCardContent({
     version?: number;
     modules?: string[];
     ai_suggestions?: { profile_draft?: { categories?: string[]; suggested_buttons?: { kind: string; label: string; enabled: boolean }[] } | null } | null;
+    module_settings?: Record<string, Record<string, string | boolean>>;
     original_client_choices?: { project_needs?: { selected?: string[]; management_needs?: string[]; reservation_mode?: string | null; reservation_channels?: string[] } | null; activity_sector?: string; city?: string };
   };
-  const modules = Array.isArray(workspaceConfig.modules) ? workspaceConfig.modules : [];\n  const moduleSettings = (workspaceConfig as typeof workspaceConfig & { module_settings?: Record<string, Record<string, string | boolean>> }).module_settings ?? {};\n  const moduleEnabled = (id: string) => workspaceConfig.version ? modules.includes(id) : !workspaceConfig.version || modules.includes(id);
+  const modules = Array.isArray(workspaceConfig.modules) ? workspaceConfig.modules : [];\n  const moduleSettings = workspaceConfig.module_settings ?? {};\n  const moduleEnabled = (id: string) => modules.includes(id);
   const activitySector = String(workspaceConfig.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const selectedNeed = (workspaceConfig.original_client_choices?.project_needs?.selected ?? []).join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const isEcommerce = template === "e-business" && (
@@ -71,10 +72,10 @@ async function PublicCardContent({
   const profileCategories = Array.isArray(profileDraft?.categories)
     ? profileDraft.categories.map((value) => String(value).trim()).filter(Boolean).slice(0, 8)
     : [];
-  const showCatalog = supportsBusinessCatalog && (moduleEnabled("service_catalog") || moduleEnabled("room_catalog") || (moduleEnabled("product_catalog") && isEcommerce));\n  const visibilitySettings = (card.public_settings ?? {}) as Record<string, boolean>;
-  const galleryEnabled = moduleEnabled("gallery");
+  const showCatalog = supportsBusinessCatalog && (!workspaceConfig.version ? (["service", "e-business"].includes(template) || isBeauty || isRestaurant || isRealEstate) : (moduleEnabled("service_catalog") || moduleEnabled("room_catalog") || (moduleEnabled("product_catalog") && isEcommerce)));\n  const visibilitySettings = (card.public_settings ?? {}) as Record<string, boolean>;
+  const galleryEnabled = !workspaceConfig.version || moduleEnabled("gallery");
   const allowOrders = template === "e-business" && isEcommerce && moduleEnabled("orders") && visibilitySettings.show_orders !== false;
-  const allowBookings = template !== "contact" && moduleEnabled("bookings") && visibilitySettings.show_bookings !== false;
+  const allowBookings = template !== "contact" && (moduleEnabled("bookings") || (!workspaceConfig.version && isBeauty)) && visibilitySettings.show_bookings !== false;
   const allowQuotes = template !== "contact" && moduleEnabled("quote_requests") && visibilitySettings.show_quotes !== false;
   const { data: catalogItems } = showCatalog
     ? await supabase.from("products").select("id,name,description,price,currency,image_url")
@@ -151,7 +152,7 @@ async function PublicCardContent({
               {whatsapp && <TrackedPublicLink cardId={card.id} href={"https://wa.me/" + whatsapp} className="flex min-h-[68px] items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left transition hover:border-slate-300 hover:bg-slate-50"><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#25D366] text-white" aria-hidden="true"><svg viewBox="0 0 32 32" className="h-7 w-7" fill="currentColor"><path d="M16.02 3.2A12.7 12.7 0 0 0 5.1 22.37L3.4 28.6l6.38-1.67A12.7 12.7 0 1 0 16.02 3.2Zm0 23.1c-1.94 0-3.84-.52-5.5-1.5l-.4-.24-3.78.99 1.01-3.68-.26-.42a10.45 10.45 0 1 1 8.93 4.85Zm5.74-7.83c-.31-.16-1.83-.9-2.11-1-.28-.1-.49-.16-.7.16-.21.31-.8 1-.98 1.2-.18.2-.36.23-.67.08-.31-.16-1.3-.48-2.47-1.53-.91-.81-1.53-1.82-1.71-2.13-.18-.31-.02-.48.14-.64.14-.14.31-.36.47-.54.16-.18.21-.31.31-.52.1-.21.05-.39-.03-.55-.08-.16-.7-1.69-.96-2.31-.25-.6-.51-.52-.7-.53h-.6c-.21 0-.55.08-.83.39-.28.31-1.09 1.07-1.09 2.6s1.12 3.02 1.27 3.23c.16.21 2.2 3.36 5.33 4.71.75.32 1.33.52 1.78.66.75.24 1.43.2 1.97.12.6-.09 1.83-.75 2.09-1.48.26-.73.26-1.35.18-1.48-.08-.13-.28-.21-.6-.37Z"/></svg></span><span className="min-w-0 flex-1"><span className="block text-xs font-semibold text-slate-500">WhatsApp Business</span><span className="block break-all text-sm font-bold text-slate-950">{fields.whatsapp}</span></span><span className="text-xs font-bold" style={{ color: accent }}>Écrire ↗</span></TrackedPublicLink>}
             </div>
           </section>}
-          {settings.show_company_info !== false && moduleEnabled("company_profile") && (fields.company_phone || fields.company_email || fields.company_address || fields.industry) && <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+          {settings.show_company_info !== false && (moduleEnabled("contact_profile") || moduleEnabled("company_profile")) && (fields.company_phone || fields.company_email || fields.company_address || fields.industry) && <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <h2 className="text-base font-extrabold text-slate-950">Company Info</h2>
             <div className="mt-3 space-y-2">
               {fields.company_phone && <TrackedPublicLink cardId={card.id} href={"tel:" + fields.company_phone} className="flex items-center gap-3 rounded-xl border border-slate-100 p-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-lg" aria-hidden="true">☎</span><span className="min-w-0"><span className="block text-[10px] font-bold uppercase tracking-wide text-slate-400">Téléphone de l’entreprise</span><span className="break-all text-sm font-bold text-slate-900">{fields.company_phone}</span></span></TrackedPublicLink>}
@@ -177,7 +178,7 @@ async function PublicCardContent({
             {showCatalog && (catalogItems?.length ?? 0) > 0 ? <div className="grid grid-cols-2 gap-3">
               {(catalogItems ?? []).map((item) => <article key={item.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                 {item.image_url ? <img src={item.image_url} alt={item.name} loading="lazy" className="h-32 w-full object-cover"/> : <div className="flex h-24 items-center justify-center bg-slate-50 text-3xl text-slate-300">✦</div>}
-                <div className="p-4"><h3 className="font-bold text-slate-900">{item.name}</h3>{item.description && <p className="mt-1 text-sm leading-6 text-slate-600">{item.description}</p>}<p className="mt-3 text-sm font-black text-slate-700">{Number(item.price).toLocaleString("fr-MA")} {item.currency}</p></div>
+                <div className="p-4"><h3 className="font-bold text-slate-900">{item.name}</h3>{item.description && <p className="mt-1 text-sm leading-6 text-slate-600">{item.description}</p>}<p className="mt-3 text-sm font-black text-slate-700">{moduleSettings.service_catalog?.price_display === "hidden" || moduleSettings.service_catalog?.price_display === "on_request" ? "Prix sur demande" : Number(item.price).toLocaleString("fr-MA") + " " + item.currency}</p></div>
               </article>)}
             </div> : <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-xs leading-5 text-slate-500">Aucun élément publié pour le moment.</p>}
           </section>}
