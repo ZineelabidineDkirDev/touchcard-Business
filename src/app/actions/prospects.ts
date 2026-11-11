@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { generateTemplateBlueprint } from "@/lib/cards/template-engine";
 
 export type ProspectInput = {
   fullName: string;
@@ -26,7 +27,7 @@ export type ProspectInput = {
   managementNeeds: string[];
 };
 
-export async function submitProspectRequest(input: ProspectInput, requestId: string, provisionalPassword: string) {
+export async function submitProspectRequest(input: ProspectInput, requestId: string) {
   const fullName = input.fullName.trim();
   const email = input.email.trim().toLowerCase();
   const phone = input.phone.trim();
@@ -44,16 +45,11 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { ok: false as const, error: "Veuillez saisir une adresse e-mail valide." };
   }
-  if (provisionalPassword.length < 10 || !/[A-Za-z]/.test(provisionalPassword) || !/[0-9]/.test(provisionalPassword)) {
-    return { ok: false as const, error: "Le mot de passe doit contenir au moins 10 caractères, avec des lettres et des chiffres." };
-  }
-
-  const supabase = await createClient();
+remove password validation  const supabase = await createClient();
   const { data, error } = await supabase.functions.invoke("create-prospect-account", {
     body: {
       request_id: requestId,
-      password: provisionalPassword,
-      prospect: {
+remove password payload      prospect: {
         full_name: fullName,
         city: input.city.trim(),
         activity_sector: activitySector,
@@ -80,7 +76,7 @@ export async function submitProspectRequest(input: ProspectInput, requestId: str
     return { ok: false as const, error: data?.error || "La création du compte et l'enregistrement de la demande ont échoué. Veuillez réessayer." };
   }
 
-  return { ok: true as const, requestId, email };
+  return { ok: true as const, requestId, email, temporaryPassword: String(data.temporary_password ?? "") };
 }
 
 export async function updateProspectStatus(formData: FormData) {
@@ -96,8 +92,59 @@ export async function updateProspectStatus(formData: FormData) {
 
   if (!isPlatformSuperAdmin(user.email)) return;
 
-  const { error } = await supabase.from("prospect_requests").update({ status, ...(adminNotes ? { admin_notes: adminNotes } : {}), ...(status === "rejected" || status === "cancelled" ? { client_access_enabled: false } : {}), updated_at: new Date().toISOString() }).eq("id", id);
-  if (!error) revalidatePath("/dashboard/prospects");
+  const { data: prospect, error: lookupError } = await supabase.from("prospect_requests")
+    .select("id,user_id,full_name,city,activity_sector,reason,email,phone,brand_name,logo_url,business_address,business_phone,social_links,card_type,project_needs,status")
+    .eq("id", id).maybeSingle();
+  if (lookupError || !prospect) return;
+
+  const { error } = await supabase.from("prospect_requests")
+    .update({ status, ...(adminNotes ? { admin_notes: adminNotes } : {}), ...(status === "rejected" || status === "cancelled" ? { client_access_enabled: false } : {}), updated_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) return;
+
+  // Dès l'approbation, générer et créer automatiquement l'espace avec le moteur local.
+  // Le client peut encore définir son mot de passe après coup ; l'accès reste verrouillé jusque-là.
+  if (status === "approved" && prospect.user_id) {
+    const { data: existingWorkspace, error: workspaceLookupError } = await supabase
+      .from("organizations").select("id").eq("owner_id", prospect.user_id).maybeSingle();
+    if (workspaceLookupError) {
+      console.error("Approved prospect workspace lookup failed", { id, workspaceLookupError });
+      redirect("/dashboard/prospects?provision_error=1");
+    }
+    if (!existingWorkspace) {
+      const blueprint = generateTemplateBlueprint({
+        template: prospect.card_type,
+        needs: (prospect.project_needs ?? {}) as { selected?: string[]; reservation_mode?: string | null; reservation_channels?: string[]; management_needs?: string[] },
+        sector: prospect.activity_sector,
+        reason: prospect.reason ?? "",
+      });
+      const { data: provisioned, error: provisionError } = await supabase.functions.invoke("create-prospect-customer", {
+        body: {
+          request_id: id,
+          workspace_config: {
+            template: blueprint.template,
+            modules: blueprint.modules,
+            plan_code: "to_define",
+            ai_suggestions: {
+              profile_draft: blueprint.profile_draft,
+              rationale: blueprint.rationale,
+              generated_by: blueprint.generated_by,
+            },
+          },
+        },
+      });
+      if (provisionError || !provisioned?.ok || !provisioned?.verified) {
+        console.error("Automatic prospect workspace provisioning failed", { id, message: provisionError?.message, details: provisioned?.error });
+        await supabase.from("prospect_requests").update({
+          admin_notes: [adminNotes, "Création automatique de l'espace client à relancer : " + String(provisioned?.error ?? provisionError?.message ?? "erreur technique").slice(0, 300)].filter(Boolean).join("\n"),
+          updated_at: new Date().toISOString(),
+        }).eq("id", id);
+        redirect("/dashboard/prospects?provision_error=1");
+      }
+    }
+  }
+  revalidatePath("/dashboard/prospects");
+  revalidatePath("/dashboard");
 }
 
 export async function activateProspectClientAccess(formData: FormData) {
