@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
+import { CARD_MODULES } from "@/lib/cards/module-registry";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { generateTemplateBlueprint } from "@/lib/cards/template-engine";
@@ -190,12 +191,7 @@ export async function createProspectCustomer(formData: FormData) {
   }
 
   workspaceConfig.version = 2;\n  const allowedTemplates = ["e-business", "contact", "service", "google-review"];
-  const allowedModules = [
-    "dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc",
-    "company_profile", "service_catalog", "product_catalog", "orders", "google_reviews",
-    "quote_requests", "bookings", "availability_calendar", "team",
-    "gallery", "room_catalog", "crm_contacts", "analytics", "whatsapp",
-  ];
+  const allowedModules = CARD_MODULES.map((module) => module.id);
   if (!allowedTemplates.includes(workspaceConfig.template) || !Array.isArray(workspaceConfig.modules)
     || workspaceConfig.modules.some((module) => !allowedModules.includes(module))) {
     redirect(`/dashboard/prospects/${id}/configure?error=${encodeURIComponent("Les options sélectionnées ne sont pas valides.")}`);
