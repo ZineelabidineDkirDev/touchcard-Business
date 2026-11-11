@@ -1,6 +1,9 @@
 export type ServiceChoice = { id: string; label: string; description: string; modules: string[]; sectors?: RegExp };
 
 const choices: ServiceChoice[] = [
+  { id: "commerce", label: "Commerce & vente de produits", description: "Catalogue de produits, demandes clients et commandes selon votre activité.", modules: ["company_profile", "product_catalog", "orders", "crm_contacts", "whatsapp"], sectors: /commerce|boutique|vente|ecommerce|e-commerce/ },
+  { id: "beauty", label: "Beauté, bien-être & prestations sur rendez-vous", description: "Prestations, tarifs, calendrier et demandes de rendez-vous.", modules: ["company_profile", "service_catalog", "bookings", "availability_calendar", "gallery", "crm_contacts", "whatsapp"], sectors: /beaute|cosmetique|esthetique|spa|hammam|coiffure|onglerie|massage|barber|barbier/ },
+  { id: "training", label: "Éducation, cours & formation", description: "Programmes, sessions, galerie et préinscriptions.", modules: ["company_profile", "school_registration", "gallery", "crm_contacts", "whatsapp"], sectors: /education|ecole|formation|enseignement|coaching|cours/ },
   { id: "professional_profile", label: "Profil professionnel & portfolio", description: "Profil, réalisations, galerie, CV et liens professionnels.", modules: ["gallery", "whatsapp"] },
   { id: "service_catalog", label: "Prestations & demandes de devis", description: "Catalogue de services, tarifs, demandes de devis et contacts clients.", modules: ["company_profile", "service_catalog", "quote_requests", "crm_contacts", "whatsapp"] },
   { id: "online_store", label: "Boutique en ligne & commandes", description: "Catalogue produits, panier et réception des commandes.", modules: ["company_profile", "product_catalog", "orders", "crm_contacts", "whatsapp"] },
