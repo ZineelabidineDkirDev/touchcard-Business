@@ -19,7 +19,8 @@ export type CardModuleDefinition = {
 
 const allTemplates: CardModuleDefinition["templates"] = ["contact", "service", "e-business", "google-review"];
 const businessTemplates: CardModuleDefinition["templates"] = ["service", "e-business"];
-const commerceTemplates: CardModuleDefinition["templates"] = ["e-business"];
+const commerceTemplates: CardModuleDefinition["templates"] = ["service", "e-business"];
+const accommodationTemplates: CardModuleDefinition["templates"] = ["e-business"];
 
 export const CARD_MODULES: CardModuleDefinition[] = [
   { id: "dashboard", label: "Tableau de bord", description: "Vue d'ensemble de l'activité", group: "Essentiel", templates: allTemplates, configurationFields: [] },
@@ -48,7 +49,7 @@ export const CARD_MODULES: CardModuleDefinition[] = [
     { key: "collect_delivery_address", label: "Demander l'adresse de livraison", type: "checkbox", defaultValue: true },
     { key: "allow_whatsapp_confirmation", label: "Autoriser la confirmation WhatsApp", type: "checkbox", defaultValue: true },
   ] },
-  { id: "room_catalog", label: "Catalogue des chambres", description: "Chambres, photos, capacité et tarifs", group: "Hébergement", templates: commerceTemplates, configurationFields: [
+  { id: "room_catalog", label: "Catalogue des chambres", description: "Chambres, photos, capacité et tarifs", group: "Hébergement", templates: accommodationTemplates, configurationFields: [
     { key: "section_title", label: "Titre public", type: "text", defaultValue: "Nos chambres" },
     { key: "currency", label: "Devise", type: "select", defaultValue: "MAD", options: [{ label: "MAD — Dirham", value: "MAD" }, { label: "EUR — Euro", value: "EUR" }] },
   ] },
