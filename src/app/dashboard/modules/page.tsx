@@ -49,7 +49,7 @@ export default async function BusinessModulesPage() {
     {canCatalog && <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
       <SectionTitle title="Prestations, menus & chambres" description="Ajoutez les éléments qui seront présentés sur votre carte publique."/>
       <form action={createBusinessCatalogItem} className="grid gap-3 rounded-2xl bg-slate-50 p-4 sm:grid-cols-2 lg:grid-cols-6">
-        <select name="item_type" className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"><option value="service">Prestation / menu</option><option value="room">Chambre</option></select>
+        <select name="item_type" className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"><option value="service">Prestation</option><option value="menu">Plat / élément du menu</option><option value="room">Chambre</option></select>
         <input name="name" required maxLength={140} placeholder="Nom" className="rounded-xl border border-slate-200 px-3 py-3 text-sm"/>
         <input name="price" type="number" min="0" step="0.01" placeholder="Prix (MAD)" className="rounded-xl border border-slate-200 px-3 py-3 text-sm"/>
         <input name="duration_minutes" type="number" min="0" placeholder="Durée (min)" className="rounded-xl border border-slate-200 px-3 py-3 text-sm"/>
