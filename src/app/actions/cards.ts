@@ -189,7 +189,7 @@ export async function saveClientCardProfile(formData: FormData) {
     intake_profile_synced: true,
   };
 
-  const { data: existingCard } = await supabase.from("cards").select("theme").eq("id", cardId).eq("organization_id", organizationId).maybeSingle();
+  const { data: existingCard } = await supabase.from("cards").select("theme,public_settings").eq("id", cardId).eq("organization_id", organizationId).maybeSingle();
   const existingTheme = (existingCard?.theme ?? {}) as Record<string, unknown>;
   const requestedAccent = String(formData.get("accent_color") ?? "").trim().toUpperCase();
   const requestedTextColor = String(formData.get("text_color") ?? "").trim().toUpperCase();
@@ -199,9 +199,16 @@ export async function saveClientCardProfile(formData: FormData) {
     ...(validHexColor(requestedAccent) ? { accent: requestedAccent } : {}),
     ...(validHexColor(requestedTextColor) ? { text_color: requestedTextColor } : {}),
   };
+  const visibilityKeys = ["show_phone", "show_email", "show_website", "show_about", "show_contact", "show_company_info", "show_categories", "show_info_fields", "show_google_reviews", "show_catalog_pdf", "show_catalog", "show_request_forms", "show_orders", "show_bookings", "show_quotes", "show_social_links", "show_featured_links", "show_faq", "show_videos", "show_location"];
+  const nextPublicSettings: Record<string, boolean> = {
+    ...((existingCard?.public_settings ?? {}) as Record<string, boolean>),
+    show_save_contact: true,
+  };
+  for (const key of visibilityKeys) nextPublicSettings[key] = formData.get(key) === "on";
 
   const { data: updatedCard, error } = await supabase.from("cards").update({
     theme: nextTheme,
+    public_settings: nextPublicSettings,
     full_name: String(formData.get("full_name") ?? "").trim().slice(0, 120),
     job_title: String(formData.get("job_title") ?? "").trim().slice(0, 120) || null,
     company_name: String(formData.get("company_name") ?? "").trim().slice(0, 120) || null,
