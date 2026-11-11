@@ -13,7 +13,7 @@ const statuses = [
   ["completed", "Terminé"], ["rejected", "Refusé"], ["cancelled", "Annulé"],
 ];
 
-export default async function ProspectsPage({ searchParams }: { searchParams: Promise<{ created?: string; verified?: string; already_created?: string; approval_required?: string }> }) {
+export default async function ProspectsPage({ searchParams }: { searchParams: Promise<{ created?: string; verified?: string; already_created?: string; approval_required?: string; provision_error?: string }> }) {
   await connection();
   const query = await searchParams;
   const supabase = await createClient();
@@ -42,6 +42,7 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
       {query.created === "1" && <div role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">{query.verified === "1" ? "Création vérifiée : compte client, accès activé, organisation, adhésion, carte NFC et modules requis confirmés." : "L’espace client a été créé."}</div>}
       {query.already_created === "1" && <div className="mt-6 rounded-2xl bg-slate-100 p-4 text-sm text-slate-700">Cette demande est déjà liée à un compte client.</div>}
       {query.approval_required === "1" && <div className="mt-6 rounded-2xl bg-amber-50 p-4 text-sm text-amber-800">Validez d'abord la demande avant de configurer son espace client.</div>}
+      {query.provision_error === "1" && <div role="alert" className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">La demande est validée, mais la création automatique de l’espace client a rencontré un problème. Consultez la note de la demande et relancez la configuration. Le délai d’une heure doit être surveillé.</div>}
       <section className="mt-10 space-y-4">
         <div><p className="text-xs font-black uppercase tracking-[.18em] text-violet-700">Validation des designs</p><h2 className="mt-2 text-2xl font-black text-slate-950">Demandes de modèles de cartes</h2><p className="mt-1 text-sm text-slate-500">Les clients choisissent un design compatible. Aucune carte n'est publiée automatiquement.</p></div>
         {(designRequests ?? []).map((request:any) => <article key={request.id} className="rounded-2xl border border-violet-100 bg-white p-5 shadow-sm">
