@@ -56,7 +56,7 @@ const INTRO: Record<Locale, { title: string; accent: string; sub: string; steps:
   },
 };
 /* Les 9 étapes internes sont regroupées en 6 étapes visibles, comme sur la maquette */
-const GROUP_OF_STEP = [0, 0, 1, 1, 2, 3, 4, 5, 5];
+const GROUP_OF_STEP = [0, 0, 1, 2, 2, 3, 4, 5, 5];
 
 function StepIcon({ index }: { index: number }) {
   const c = { viewBox: "0 0 24 24", "aria-hidden": true as const, className: "h-6 w-6", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
@@ -102,7 +102,8 @@ export function ProspectIntake() {
           const restoredForm = { ...draft.form, logoUrl: savedLogoUrl.startsWith("https://") || savedLogoUrl.startsWith("http://") ? savedLogoUrl : "" };
           const restoredStep = Number.isInteger(draft.step) ? Number(draft.step) : 0;
           const safeStep = Math.min(8, Math.max(0, restoredStep));
-          const migratedStep = safeStep === 5 && restoredForm.cardType !== "e-business" && restoredForm.cardType !== "service" ? 6 : safeStep;
+          const reorderedStep = safeStep === 3 ? 2 : safeStep === 4 ? 3 : safeStep;
+          const migratedStep = reorderedStep === 5 && restoredForm.cardType !== "e-business" && restoredForm.cardType !== "service" ? 6 : reorderedStep;
           setForm((current) => ({ ...current, ...restoredForm }));
           setStep(migratedStep);
         }
@@ -177,8 +178,8 @@ export function ProspectIntake() {
     if (step === 1 && !form.city.trim()) return "Indiquez votre ville.";
     if (step === 4 && serviceChoiceRequired && (!form.sector || form.sector.includes("|") || (form.sector === "Autre" && !form.sectorOther.trim()))) return "Choisissez un seul domaine professionnel.";
     if (step === 4 && serviceChoiceRequired && !form.brandName.trim()) return "Indiquez le nom de votre activité ou de votre marque."
-    if (step === 3 && (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) || !form.phone.trim())) return "Indiquez un e-mail valide et votre téléphone.";
-    if (step === 4 && !form.cardType) return "Choisissez le type de carte qui vous intéresse.";
+    if (step === 2 && (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) || !form.phone.trim())) return "Indiquez un e-mail valide et votre téléphone.";
+    if (step === 3 && !form.cardType) return "Choisissez le type de carte qui vous intéresse.";
     if (step === 5 && serviceChoiceRequired && !form.projectNeeds[0]) return "Choisissez une formule de service pour continuer.";
     if (step === 5 && !serviceChoiceRequired && !form.businessAddress.trim()) return "Indiquez l’adresse de votre établissement (rue, quartier et ville).";
     return "";
@@ -190,7 +191,7 @@ export function ProspectIntake() {
     const validation = validateStep();
     if (validation) { setError(validation); return; }
     if (step < 8) {
-      const nextStep = step === 4 && !serviceChoiceRequired ? 6 : step + 1;
+      const nextStep = step === 3 && !serviceChoiceRequired ? 6 : step + 1;
       persistDraft(nextStep, form);
       setStep(nextStep);
       return;
@@ -257,7 +258,7 @@ export function ProspectIntake() {
   const activeGroup = serviceChoiceRequired
     ? (GROUP_OF_STEP[step] ?? 0)
     : (step <= 4 ? (GROUP_OF_STEP[step] ?? 0) : Math.max(0, (GROUP_OF_STEP[step] ?? 0) - 1));
-  const question = step === 5 ? l.q5a : l.q[step];
+  const question = step === 5 ? l.q5a : step === 2 ? l.q[3] : step === 3 ? l.q[4] : step === 4 ? l.q[2] : l.q[step];
   const languages = [["fr", "🇫🇷", "FR"], ["en", "🇬🇧", "EN"], ["ar", "🇲🇦", "AR"]] as const;
 
   return (
@@ -309,9 +310,9 @@ export function ProspectIntake() {
           <form onSubmit={submit} className="mt-6">
           {step === 0 && <Field label={locale === "ar" ? "الاسم الكامل" : locale === "en" ? "Full name" : "Nom et prénom"} value={form.fullName} onChange={(v) => update("fullName", v)} placeholder={locale === "ar" ? "مثال: أحمد بنعلي" : locale === "en" ? "e.g. Ahmed Benali" : "Ex: Ahmed Benali"} autoComplete="name" withUserIcon/>}
           {step === 1 && <Field label="Ville" value={form.city} onChange={(v) => update("city", v)} placeholder="Ex. : Casablanca" />}
-          {step === 2 && <div className="space-y-4"><Field label="Nom de votre activité / marque (facultatif pour E-Contact et Avis Google)" value={form.brandName} onChange={(v) => update("brandName", v)} placeholder="Ex. : MMC Event" autoComplete="organization"/><p className="text-sm text-slate-600">Sélectionnez un seul domaine correspondant à votre activité principale. Facultatif pour E-Contact et Avis Google.</p><div className="grid gap-3 sm:grid-cols-2">{sectors.map((sector) => <label key={sector} className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 text-left transition ${form.sector === sector ? "border-violet-500 bg-violet-50 ring-2 ring-violet-200" : "border-slate-200 bg-white hover:border-violet-300 hover:bg-violet-50"}`}><input type="radio" name="professional_sector" value={sector} checked={form.sector === sector} onChange={() => update("sector", sector)} className="h-4 w-4 accent-violet-700"/><span className="font-semibold text-slate-800">{sector}</span>{form.sector === sector && <span className="ml-auto text-xs font-bold text-violet-700">Choisi ✓</span>}</label>)}</div>{form.sector === "Autre" && <Field label="Précisez votre activité" value={form.sectorOther} onChange={(v) => update("sectorOther", v)} placeholder="Votre secteur d'activité"/>}</div>}
-          {step === 3 && <div className="grid gap-5"><Field label="Adresse e-mail" type="email" value={form.email} onChange={(v) => update("email", v)} placeholder="vous@exemple.com" autoComplete="email"/><Field label="Téléphone" type="tel" value={form.phone} onChange={(v) => update("phone", v)} placeholder="+212 6 XX XX XX XX" autoComplete="tel"/></div>}
-          {step === 4 && <div className="space-y-5"><div className="grid gap-5 sm:grid-cols-2">{cards.map((card) => <div key={card.id} role="checkbox" aria-checked={form.cardType === card.id} tabIndex={0} onClick={() => selectCard(card.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); selectCard(card.id); } }} className={`group cursor-pointer rounded-2xl border p-3 text-left transition focus:outline-none focus:ring-2 focus:ring-violet-400 ${form.cardType === card.id ? "border-violet-500 bg-violet-50 ring-2 ring-violet-200" : "border-slate-200 bg-white hover:border-violet-300 hover:bg-violet-50"}`}><div className="relative aspect-[1.586/1] w-full"><PhysicalNfcCard title={card.title} cardType={card.id} clientName={form.fullName || "M./Mme Client"}/>{form.cardType === card.id && <span className="absolute -right-2 -top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-violet-700 text-lg font-black text-white shadow-lg" aria-label="Sélectionné">✓</span>}</div><div className="mt-4 flex items-center justify-between gap-2"><h3 className="font-extrabold text-slate-900">{card.title}</h3>{form.cardType === card.id && <span className="text-xs font-bold text-violet-700">Choisie ✓</span>}</div><p className="mt-1 text-xs leading-5 text-slate-600">{card.desc}</p></div>)}</div><div><label className="mb-2 block text-sm font-semibold text-slate-800">Pourquoi avez-vous choisi cette carte ?</label><textarea value={form.reason} onChange={(event) => update("reason", event.target.value)} rows={3} placeholder="Expliquez-nous votre besoin..." className="w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-400/20"/></div></div>}{serviceChoiceRequired && step === 5 && <div className="space-y-5">
+          {serviceChoiceRequired && step === 4 && <div className="space-y-4"><Field label="Nom de votre activité / marque (facultatif pour E-Contact et Avis Google)" value={form.brandName} onChange={(v) => update("brandName", v)} placeholder="Ex. : MMC Event" autoComplete="organization"/><p className="text-sm text-slate-600">Sélectionnez un seul domaine correspondant à votre activité principale. Facultatif pour E-Contact et Avis Google.</p><div className="grid gap-3 sm:grid-cols-2">{sectors.map((sector) => <label key={sector} className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 text-left transition ${form.sector === sector ? "border-violet-500 bg-violet-50 ring-2 ring-violet-200" : "border-slate-200 bg-white hover:border-violet-300 hover:bg-violet-50"}`}><input type="radio" name="professional_sector" value={sector} checked={form.sector === sector} onChange={() => update("sector", sector)} className="h-4 w-4 accent-violet-700"/><span className="font-semibold text-slate-800">{sector}</span>{form.sector === sector && <span className="ml-auto text-xs font-bold text-violet-700">Choisi ✓</span>}</label>)}</div>{form.sector === "Autre" && <Field label="Précisez votre activité" value={form.sectorOther} onChange={(v) => update("sectorOther", v)} placeholder="Votre secteur d'activité"/>}</div>}
+          {step === 2 && <div className="grid gap-5"><Field label="Adresse e-mail" type="email" value={form.email} onChange={(v) => update("email", v)} placeholder="vous@exemple.com" autoComplete="email"/><Field label="Téléphone" type="tel" value={form.phone} onChange={(v) => update("phone", v)} placeholder="+212 6 XX XX XX XX" autoComplete="tel"/></div>}
+          {step === 3 && <div className="space-y-5"><div className="grid gap-5 sm:grid-cols-2">{cards.map((card) => <div key={card.id} role="checkbox" aria-checked={form.cardType === card.id} tabIndex={0} onClick={() => selectCard(card.id)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); selectCard(card.id); } }} className={`group cursor-pointer rounded-2xl border p-3 text-left transition focus:outline-none focus:ring-2 focus:ring-violet-400 ${form.cardType === card.id ? "border-violet-500 bg-violet-50 ring-2 ring-violet-200" : "border-slate-200 bg-white hover:border-violet-300 hover:bg-violet-50"}`}><div className="relative aspect-[1.586/1] w-full"><PhysicalNfcCard title={card.title} cardType={card.id} clientName={form.fullName || "M./Mme Client"}/>{form.cardType === card.id && <span className="absolute -right-2 -top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-violet-700 text-lg font-black text-white shadow-lg" aria-label="Sélectionné">✓</span>}</div><div className="mt-4 flex items-center justify-between gap-2"><h3 className="font-extrabold text-slate-900">{card.title}</h3>{form.cardType === card.id && <span className="text-xs font-bold text-violet-700">Choisie ✓</span>}</div><p className="mt-1 text-xs leading-5 text-slate-600">{card.desc}</p></div>)}</div><div><label className="mb-2 block text-sm font-semibold text-slate-800">Pourquoi avez-vous choisi cette carte ?</label><textarea value={form.reason} onChange={(event) => update("reason", event.target.value)} rows={3} placeholder="Expliquez-nous votre besoin..." className="w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-400/20"/></div></div>}{serviceChoiceRequired && step === 5 && <div className="space-y-5">
   <div className="rounded-2xl border border-violet-100 bg-violet-50/60 p-5">
     <p className="text-sm font-bold text-slate-900">Choisissez une seule formule de service</p>
     <p className="mt-1 text-sm leading-6 text-slate-600">Cette étape apparaît uniquement après le choix E-Business ou Personnalisée. Les fonctionnalités seront préparées selon votre activité.</p>
@@ -339,7 +340,7 @@ export function ProspectIntake() {
           {error && <p role="alert" className="mt-5 rounded-xl border border-rose-400/20 bg-rose-400/10 p-3 text-sm text-rose-700">{error}</p>}
           <div className="mt-8 flex flex-col items-center gap-5">
             <div className="flex flex-wrap items-center justify-center gap-3">
-              {step > 0 && <button type="button" disabled={busy} onClick={() => { setError(""); setStep((value) => value === 8 ? 7 : value === 6 && !serviceChoiceRequired ? 4 : value - 1); }} className="rounded-full border border-white/25 bg-white/5 px-7 py-4 text-base font-bold text-white transition hover:bg-white/10 disabled:opacity-30">{l.prev}</button>}
+              {step > 0 && <button type="button" disabled={busy} onClick={() => { setError(""); setStep((value) => value === 8 ? 7 : value === 6 && !serviceChoiceRequired ? 3 : value - 1); }} className="rounded-full border border-white/25 bg-white/5 px-7 py-4 text-base font-bold text-white transition hover:bg-white/10 disabled:opacity-30">{l.prev}</button>}
               <button type="submit" disabled={busy} className="inline-flex min-w-[250px] items-center justify-center gap-2 rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-600 px-10 py-4 text-xl font-bold text-white shadow-[0_10px_34px_rgba(0,140,255,.45)] transition hover:-translate-y-0.5 hover:brightness-110 disabled:opacity-60">{busy ? l.saving : step === 8 ? l.send : l.next}<span aria-hidden="true">{locale === "ar" ? "←" : "→"}</span></button>
             </div>
             <Link href="/" className="inline-flex items-center gap-2 text-base text-white/85 transition hover:text-white"><ExitIcon />{l.later}</Link>
