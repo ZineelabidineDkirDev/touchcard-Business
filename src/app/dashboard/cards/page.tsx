@@ -326,7 +326,6 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                         </div>
                       ))}
                     </div>
-                    <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2.5 text-[11px] leading-5 text-amber-800">Les fonctionnalités non incluses dans votre formule ou non activées par l’administrateur restent indisponibles, même si vous cochez leur affichage.</p>
                   </section>
                 </div>
                 <div className="sticky bottom-0 -mx-1 border-t border-slate-100 bg-white/95 px-1 py-3 backdrop-blur"><button className="btn-primary w-full rounded-full py-3 text-sm">✓ Enregistrer ma carte</button><p className="mt-2 text-center text-[10px] text-slate-400">Vos modifications seront visibles après enregistrement.</p></div>
