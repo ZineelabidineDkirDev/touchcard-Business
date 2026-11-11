@@ -94,7 +94,7 @@ async function PublicCardContent({
   const whatsapp = String(fields.whatsapp ?? "").replace(/[^+\d]/g, "").replace(/^\+/, "");
   const vcardUrl = "/api/cards/" + encodeURIComponent(slug) + "/vcard";
   // The map must point to the exact address entered for this card. Never fall back to a city or company name.
-  const exactAddress = (template === "e-business" ? fields.company_address : fields.location)?.trim() ?? "";
+  const exactAddress = (fields.company_address || fields.location || "").trim();
   const mapEmbedUrl = exactAddress ? "https://www.google.com/maps?q=" + encodeURIComponent(exactAddress) + "&output=embed" : null;
   const mapDirectionsUrl = exactAddress ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(exactAddress) : null;
   const socialLinks = (links ?? []).filter((link) => ["instagram", "facebook", "linkedin", "tiktok", "youtube", "x", "pinterest", "whatsapp", "telegram"].includes(link.kind));
@@ -123,7 +123,7 @@ async function PublicCardContent({
               <div className="flex min-w-0 flex-col justify-between py-1">
                 <div><h1 className="break-words text-[25px] font-black leading-[1.02] tracking-tight" style={{ color: textColor }}>{card.full_name}</h1>
                   {card.job_title && <p className="mt-3 text-xs font-medium leading-4" style={{ color: textColor }}>{card.job_title}</p>}
-                  {template !== "contact" && card.company_name && <p className="mt-1 text-xs font-bold" style={{ color: textColor }}>{card.company_name}</p>}</div>
+                  {card.company_name && <p className="mt-1 text-xs font-bold" style={{ color: textColor }}>{card.company_name}</p>}</div>
                 {fields.tagline && <p className="mt-3 text-[11px] font-bold leading-4" style={{ color: textColor }}>{fields.tagline}</p>}
               </div>
               <div className="h-[118px] w-[118px] overflow-hidden rounded-xl bg-slate-100">
@@ -146,7 +146,7 @@ async function PublicCardContent({
           {cvField && <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-slate-900">CV professionnel</h2><a href={cvField.value} target="_blank" rel="noopener noreferrer" className="mt-3 flex items-center justify-center rounded-xl px-4 py-3 text-sm font-bold text-white" style={{ backgroundColor: accent }}>Consulter / télécharger mon CV ↗</a></section>}
           {settings.show_contact !== false && (card.phone || card.email || card.website || whatsapp) && <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <h2 className="text-base font-extrabold text-slate-950">Restons en contact</h2>
-            <p className="mt-1 text-xs text-slate-500">Retrouvez facilement les coordonnées de {template === "contact" ? card.full_name : card.company_name || card.full_name}.</p>
+            <p className="mt-1 text-xs text-slate-500">Retrouvez facilement les coordonnées de {card.company_name || card.full_name}.</p>
             <div className="mt-4 grid grid-cols-1 gap-2">
               {settings.show_phone !== false && card.phone && <TrackedPublicLink cardId={card.id} href={"tel:" + card.phone} className="flex min-h-[68px] items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left transition hover:border-slate-300 hover:bg-slate-50"><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg font-bold text-white" style={{ backgroundColor: accent }} aria-hidden="true">☎</span><span className="min-w-0 flex-1"><span className="block text-xs font-semibold text-slate-500">Téléphone</span><span className="block break-all text-sm font-bold text-slate-950">{card.phone}</span></span><span className="text-xs font-bold" style={{ color: accent }}>Appeler ↗</span></TrackedPublicLink>}
               {settings.show_email !== false && card.email && <TrackedPublicLink cardId={card.id} href={"mailto:" + card.email} className="flex min-h-[68px] items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left transition hover:border-slate-300 hover:bg-slate-50"><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-lg font-bold text-white" style={{ backgroundColor: accent }} aria-hidden="true">✉</span><span className="min-w-0 flex-1"><span className="block text-xs font-semibold text-slate-500">E-mail</span><span className="block break-all text-sm font-bold text-slate-950">{card.email}</span></span><span className="text-xs font-bold" style={{ color: accent }}>Écrire ↗</span></TrackedPublicLink>}
