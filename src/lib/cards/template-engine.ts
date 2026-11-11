@@ -1,4 +1,5 @@
 import { BASE_MODULES_BY_TEMPLATE } from "@/lib/cards/module-registry";
+import { getServiceModules } from "@/lib/cards/service-choice-registry";
 
 export type CardTemplate = "contact" | "service" | "e-business" | "google-review";
 
@@ -41,6 +42,8 @@ export function generateTemplateBlueprint(input: {
   const template: CardTemplate = input.template in baseModules ? input.template as CardTemplate : "contact";
   const text = normalizedText(input.needs ?? null, input.sector ?? "", input.reason ?? "");
   const modules = new Set(baseModules[template]);
+  const selectedServiceId = input.needs?.selected?.[0] ?? "";
+  for (const moduleId of getServiceModules(selectedServiceId)) modules.add(moduleId);
   const sectorText = (input.sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const isCommerce = /e.?commerce|commerce en ligne|boutique en ligne|vente en ligne/.test(sectorText)
     || /boutique en ligne|vente en ligne|e.?commerce|commerce en ligne|catalogue de produits|commande de produits/.test(text);
@@ -75,6 +78,13 @@ export function generateTemplateBlueprint(input: {
   }
 
   if (portfolioProfessional) modules.add("gallery");
+
+  // E-Contact is intentionally limited to its standard personal-profile sections.
+  // Sector keywords and old saved service choices must never activate business modules on it.
+  if (template === "contact") {
+    modules.clear();
+    for (const moduleId of baseModules.contact) modules.add(moduleId);
+  }
 
   const sector = (input.sector ?? "").trim();
   const profileFields: TemplateProfileDraft["card_fields"] = template === "contact"
