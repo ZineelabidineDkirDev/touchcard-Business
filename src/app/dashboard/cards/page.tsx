@@ -128,10 +128,10 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
     : { data: [] as { card_id: string; event_type: string }[] };
   const config = (organization?.workspace_config ?? {}) as { version?: number; template?: string; modules?: string[]; ai_suggestions?: { profile_draft?: { tagline?: string; description?: string; card_fields?: { key: string; label: string; type: string; visible: boolean }[]; suggested_buttons?: { kind: string; label: string; enabled: boolean }[] } } };
   const modules = Array.isArray(config.modules) ? config.modules : [];
+  const activitySector = String((organization?.workspace_config as any)?.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const isCreativeProfile = /designer|design graphique|graphiste|photographe|photography/.test(activitySector);
   const galleryEnabled = isCreativeProfile || !config.version || modules.includes("gallery");
   if (config.version && !modules.includes("digital_card")) notFound();
-  const activitySector = String((organization?.workspace_config as any)?.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const selectedNeed = String(((organization?.workspace_config as any)?.original_client_choices?.project_needs?.selected ?? []).join(" ")).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const isEcommerce = config.template === "e-business" && (/e.?commerce|commerce en ligne|boutique en ligne|vente en ligne/.test(activitySector) || /boutique en ligne|vente en ligne|e.?commerce|commerce en ligne|catalogue de produits|commande de produits/.test(selectedNeed));
   const supportsBusinessCatalog = !config.template || ["service", "e-business"].includes(config.template);
@@ -316,7 +316,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                       <h4 className="mt-1 text-base font-black text-slate-900">Modules visibles de ma carte</h4>
                       <p className="mt-1 text-xs leading-5 text-slate-500">Choisissez ici les rubriques que vos visiteurs verront après un scan. Ces réglages sont enregistrés avec le reste de votre personnalisation.</p>
                     </div>
-                    <form action={saveClientCardVisibility} className="space-y-4"><input type="hidden" name="card_id" value={card.id}/>
+                    <form action={saveClientCardVisibility} className="space-y-4"><input type="hidden" name="card_id" value={card.id}/><div className="space-y-4">
                       {[
                         { title: "Présentation & identité", items: [["show_about", "Présentation / À propos"], ["show_company_info", "Informations entreprise"], ["show_categories", "Domaines et spécialités"], ["show_info_fields", "Informations complémentaires"]] },
                         { title: "Coordonnées", items: [["show_contact", "Bloc de contact"], ["show_phone", "Téléphone"], ["show_email", "E-mail"], ["show_website", "Site web"]] },
