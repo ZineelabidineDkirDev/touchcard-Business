@@ -31,8 +31,6 @@ async function AccountPendingContent() {
   if (!accessBlocked && !request.password_initialized) redirect("/setup-password");
   if (!accessBlocked && request.client_access_enabled) redirect("/dashboard");
 
-  const deadlineBase = correctionRequested ? request.updated_at : request.created_at;
-  const deadline = new Date(new Date(deadlineBase).getTime() + 12 * 60 * 60 * 1000);
   const displayName = String(request.full_name || user.user_metadata.full_name || "cher client").trim();
 
   return (
@@ -56,10 +54,9 @@ async function AccountPendingContent() {
             <p className="mx-auto mt-8 max-w-3xl text-xl font-medium leading-relaxed text-slate-700 sm:text-2xl">{correctionRequested ? "Notre équipe a besoin d’une précision pour poursuivre l’étude de votre demande. Consultez la note ci-dessous." : "Votre compte a bien été créé. Votre espace client sera accessible après validation de votre demande par l’équipe TouchCard."}</p>
             {correctionRequested && request.admin_notes && <div className="mx-auto mt-6 max-w-2xl rounded-2xl border border-amber-200 bg-amber-50 p-5 text-left text-base leading-7 text-amber-950"><p className="text-xs font-black uppercase tracking-wider text-amber-700">Message de l’équipe TouchCard</p><p className="mt-2 whitespace-pre-wrap">{request.admin_notes}</p></div>}
             <div className="mx-auto mt-9 max-w-2xl rounded-3xl border border-indigo-100 bg-indigo-50/70 px-6 py-7">
-              <p className="text-sm font-bold uppercase tracking-wider text-indigo-700">{correctionRequested ? "Délai de traitement après réception de votre précision" : "Délai maximal de validation"}</p>
-              <p className="mt-2 text-4xl font-black text-indigo-950 sm:text-5xl">12 heures</p>
-              <p className="mt-3 text-base leading-7 text-slate-600">à compter de la réception de votre demande.</p>
-              <p className="mt-5 text-xs font-semibold text-slate-500">Échéance indicative : {deadline.toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short", timeZone: "Africa/Casablanca" })}</p>
+              <p className="text-sm font-bold uppercase tracking-wider text-indigo-700">{correctionRequested ? "Délai après réception de votre précision" : "Création de votre espace après validation"}</p>
+              <p className="mt-2 text-4xl font-black text-indigo-950 sm:text-5xl">1 heure maximum</p>
+              <p className="mt-3 text-base leading-7 text-slate-600">{correctionRequested ? "Le traitement reprend dès réception de votre réponse." : "Votre espace client est généré automatiquement dans l’heure qui suit la validation de votre demande par TouchCard."}</p>
             </div>
             <p className="mt-7 text-sm text-slate-500">Numéro de demande : <span className="font-mono font-bold text-slate-800">{request.id}</span></p>
             <p className="mt-8 text-xl font-bold text-slate-900 sm:text-2xl">Merci pour votre confiance !</p>
