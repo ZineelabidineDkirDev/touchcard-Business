@@ -189,37 +189,14 @@ function LandingHeroNfcCard() {
   return (
     <div className="mx-auto flex w-full max-w-[560px] items-center justify-center px-4 py-8">
       <motion.div
-        className="relative aspect-[1.586/1] w-full max-w-[460px] [perspective:1400px]"
+        className="relative aspect-[1.586/1] w-full max-w-[460px]"
         initial={false}
         whileHover={reduceMotion ? undefined : { y: -7, rotateX: 3, rotateY: -5, scale: 1.015 }}
         animate={reduceMotion ? undefined : { y: [0, -8, 0], rotate: [-7, -5.5, -7] }}
         transition={{ y: { duration: 6, repeat: Infinity, ease: "easeInOut" }, rotate: { duration: 6, repeat: Infinity, ease: "easeInOut" }, default: { type: "spring", stiffness: 150, damping: 18 } }}
-        style={{ transformStyle: "preserve-3d" }}
       >
-        <div className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-cyan-400/35 via-blue-600/20 to-fuchsia-500/35 blur-2xl" />
-        <div className="absolute inset-0 overflow-hidden rounded-[1.35rem] border border-cyan-300/55 bg-[linear-gradient(135deg,#17202c_0%,#080d17_34%,#03060c_68%,#171323_100%)] shadow-[0_30px_70px_-18px_rgba(0,0,0,.9),0_0_32px_rgba(0,174,255,.28),inset_0_1px_1px_rgba(255,255,255,.22)]">
-          <div aria-hidden="true" className="absolute inset-[2px] rounded-[1.25rem] border border-white/10" />
-          <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(ellipse_at_18%_10%,rgba(255,255,255,.2),transparent_34%),linear-gradient(115deg,transparent_25%,rgba(255,255,255,.055)_48%,transparent_66%)]" />
-          <svg aria-hidden="true" viewBox="0 0 520 330" preserveAspectRatio="none" className="absolute inset-0 h-full w-full opacity-90">
-            {Array.from({ length: 17 }, (_, index) => (
-              <path key={index} d={`M -30 ${190 + index * 9} C 95 ${85 + index * 5}, 130 ${330 - index * 3}, 270 ${235 + index * 3} S 425 ${115 + index * 5}, 560 ${205 + index * 4}`} fill="none" stroke={index % 2 ? "#08bfff" : "#713cff"} strokeWidth="1.15" opacity={0.24 + (index % 4) * 0.08} />
-            ))}
-          </svg>
-          <div aria-hidden="true" className="absolute -bottom-16 -right-12 h-48 w-64 rounded-full bg-violet-600/25 blur-3xl" />
-          <div aria-hidden="true" className="absolute -left-16 bottom-0 h-36 w-64 rounded-full bg-cyan-400/20 blur-3xl" />
-          <div className="absolute right-[7%] top-[8%] flex flex-col items-center text-white/95 drop-shadow-[0_0_10px_rgba(255,255,255,.35)]">
-            <svg aria-hidden="true" viewBox="0 0 36 36" className="h-9 w-9" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round">
-              <path d="M8 11a10 10 0 0 0 0 14M14 15a4 4 0 0 0 0 6M22 15a4 4 0 0 1 0 6M28 11a10 10 0 0 1 0 14" />
-            </svg>
-            <span className="mt-0.5 text-[10px] font-extrabold tracking-[.16em]">NFC</span>
-          </div>
-          <div className="absolute inset-0 flex flex-col items-center justify-center pt-3">
-            <img src="/brand/touchcard-mark.svg" alt="Symbole TouchCard" className="h-[34%] w-[34%] object-contain drop-shadow-[0_0_18px_rgba(0,174,255,.35)]" />
-            <span className="mt-3 text-[clamp(17px,2.8vw,25px)] font-bold tracking-[-.045em] text-white drop-shadow-lg">TouchCard</span>
-            <span className="mt-0.5 text-[clamp(10px,1.5vw,14px)] font-medium tracking-[.18em] text-slate-300">BUSINESS</span>
-          </div>
-          <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-cyan-300/90 to-fuchsia-400/80 shadow-[0_0_18px_rgba(0,200,255,.9)]" />
-        </div>
+        <div aria-hidden="true" className="absolute -inset-3 rounded-[2rem] bg-gradient-to-br from-cyan-400/35 via-blue-600/20 to-fuchsia-500/35 blur-2xl" />
+        <PhysicalNfcCard title="E-Business" cardType="e-business" clientName="Votre nom" className="h-full w-full" animateBrandColors />
       </motion.div>
     </div>
   );
