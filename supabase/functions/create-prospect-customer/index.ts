@@ -90,6 +90,10 @@ Deno.serve(async (req: Request) => {
     if (selectedModules.some((module) => !allowedModules.has(module))) return json({ error: "Unknown workspace module" }, 400);
     if (!selectedModules.includes("dashboard")) selectedModules.unshift("dashboard");
     if (!selectedModules.includes("digital_card")) return json({ error: "The public digital card module is required" }, 400);
+    if (cardType === "contact") {
+      const contactModules = new Set(["dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc", "gallery", "analytics"]);
+      selectedModules = [...new Set([...selectedModules.filter((module) => contactModules.has(module)), "dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc", "gallery", "analytics"])];
+    }
 
     const { data: prospect, error: prospectError } = await admin.from("prospect_requests")
       .select("id,user_id,full_name,email,phone,city,status,brand_name,logo_url,business_address,business_phone,social_links,card_type,activity_sector,project_needs,client_access_enabled,password_initialized")
@@ -99,8 +103,8 @@ Deno.serve(async (req: Request) => {
     if (!prospect.user_id) return json({ error: "The customer account must be created when the prospect submits the request" }, 409);
     if (prospect.card_type !== cardType) return json({ error: "The selected template must match the prospect's original card choice" }, 400);
 
-    // Beauté/Cosmétique business rules are intentionally limited to Contact and E-Service.
-    const beautyWorkspace = ["contact", "service"].includes(cardType) && isBeautySector(prospect.activity_sector, prospect.project_needs);
+    // Les règles Beauté/Cosmétique s’appliquent à E-Service et E-Business, jamais à E-Contact.
+    const beautyWorkspace = ["service", "e-business"].includes(cardType) && isBeautySector(prospect.activity_sector, prospect.project_needs);
     const requiredBeautyModules = beautyWorkspace ? ["service_catalog", "bookings", "availability_calendar", "whatsapp"] : [];
     selectedModules = [...new Set([...selectedModules, ...requiredBeautyModules])];
 
@@ -175,7 +179,7 @@ Deno.serve(async (req: Request) => {
       const kindByPlatform: Record<string, string> = {
         instagram: "instagram", facebook: "facebook", tiktok: "tiktok",
         linkedin: "linkedin", youtube: "youtube", whatsapp: "whatsapp",
-        "site web": "website", website: "website", autre: "other",
+        "site web": "website", website: "website", "cv / portfolio": "other", "portfolio / cv": "other", cv: "other", portfolio: "other", autre: "other",
       };
       return [{ label: platform.slice(0, 60), url, kind: kindByPlatform[normalizedPlatform] ?? "other", position: index }];
     });
