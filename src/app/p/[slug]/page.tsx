@@ -74,10 +74,10 @@ async function PublicCardContent({
   const profileCategories = Array.isArray(profileDraft?.categories)
     ? profileDraft.categories.map((value) => String(value).trim()).filter(Boolean).slice(0, 8)
     : [];
-  const showCatalog = supportsBusinessCatalog && (!workspaceConfig.version ? (["service", "e-business"].includes(template) || isBeauty || isRestaurant || isRealEstate) : (moduleEnabled("service_catalog") || moduleEnabled("room_catalog") || (moduleEnabled("product_catalog") && isEcommerce)));
+  const showCatalog = supportsBusinessCatalog && (!workspaceConfig.version ? (["service", "e-business"].includes(template) || isBeauty || isRestaurant || isRealEstate) : (moduleEnabled("service_catalog") || moduleEnabled("room_catalog") || moduleEnabled("product_catalog")));
   const visibilitySettings = (card.public_settings ?? {}) as Record<string, boolean>;
   const galleryEnabled = !workspaceConfig.version || moduleEnabled("gallery");
-  const allowOrders = template === "e-business" && isEcommerce && moduleEnabled("orders") && visibilitySettings.show_orders !== false;
+  const allowOrders = template !== "contact" && (workspaceConfig.version ? moduleEnabled("orders") : template === "e-business" && isEcommerce && moduleEnabled("orders")) && visibilitySettings.show_orders !== false;
   const allowBookings = template !== "contact" && (moduleEnabled("bookings") || (!workspaceConfig.version && isBeauty)) && visibilitySettings.show_bookings !== false;
   const allowQuotes = template !== "contact" && moduleEnabled("quote_requests") && visibilitySettings.show_quotes !== false;
   const { data: catalogItems } = showCatalog
