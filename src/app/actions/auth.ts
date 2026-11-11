@@ -3,6 +3,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
 
 export type AuthState = { error?: string; success?: string };
 
@@ -42,6 +43,14 @@ export async function signIn(_state: AuthState, formData: FormData): Promise<Aut
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       return { error: "Connexion impossible. Vérifiez vos identifiants et confirmez votre adresse e-mail si nécessaire." };
+    }
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user && !isPlatformSuperAdmin(user.email)) {
+      const { data: clientRequest } = await supabase.from("prospect_requests")
+        .select("status,password_initialized,client_access_enabled").eq("user_id", user.id).maybeSingle();
+      if (clientRequest && ["rejected", "cancelled"].includes(clientRequest.status)) redirect("/account-pending?blocked=1");
+      if (clientRequest && !clientRequest.password_initialized) redirect("/setup-password");
+      if (clientRequest && !clientRequest.client_access_enabled) redirect("/account-pending");
     }
   } catch (error) {
     return { error: getSafeAuthError(error) };
