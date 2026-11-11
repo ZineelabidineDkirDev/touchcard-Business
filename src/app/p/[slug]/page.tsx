@@ -48,7 +48,9 @@ async function PublicCardContent({
     module_settings?: Record<string, Record<string, string | boolean>>;
     original_client_choices?: { project_needs?: { selected?: string[]; management_needs?: string[]; reservation_mode?: string | null; reservation_channels?: string[] } | null; activity_sector?: string; city?: string };
   };
-  const modules = Array.isArray(workspaceConfig.modules) ? workspaceConfig.modules : [];\n  const moduleSettings = workspaceConfig.module_settings ?? {};\n  const moduleEnabled = (id: string) => modules.includes(id);
+  const modules = Array.isArray(workspaceConfig.modules) ? workspaceConfig.modules : [];
+  const moduleSettings = workspaceConfig.module_settings ?? {};
+  const moduleEnabled = (id: string) => modules.includes(id);
   const activitySector = String(workspaceConfig.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const selectedNeed = (workspaceConfig.original_client_choices?.project_needs?.selected ?? []).join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const isEcommerce = template === "e-business" && (
@@ -72,7 +74,8 @@ async function PublicCardContent({
   const profileCategories = Array.isArray(profileDraft?.categories)
     ? profileDraft.categories.map((value) => String(value).trim()).filter(Boolean).slice(0, 8)
     : [];
-  const showCatalog = supportsBusinessCatalog && (!workspaceConfig.version ? (["service", "e-business"].includes(template) || isBeauty || isRestaurant || isRealEstate) : (moduleEnabled("service_catalog") || moduleEnabled("room_catalog") || (moduleEnabled("product_catalog") && isEcommerce)));\n  const visibilitySettings = (card.public_settings ?? {}) as Record<string, boolean>;
+  const showCatalog = supportsBusinessCatalog && (!workspaceConfig.version ? (["service", "e-business"].includes(template) || isBeauty || isRestaurant || isRealEstate) : (moduleEnabled("service_catalog") || moduleEnabled("room_catalog") || (moduleEnabled("product_catalog") && isEcommerce)));
+  const visibilitySettings = (card.public_settings ?? {}) as Record<string, boolean>;
   const galleryEnabled = !workspaceConfig.version || moduleEnabled("gallery");
   const allowOrders = template === "e-business" && isEcommerce && moduleEnabled("orders") && visibilitySettings.show_orders !== false;
   const allowBookings = template !== "contact" && (moduleEnabled("bookings") || (!workspaceConfig.version && isBeauty)) && visibilitySettings.show_bookings !== false;
