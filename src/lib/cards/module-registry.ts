@@ -39,6 +39,7 @@ export const CARD_MODULES: CardModuleDefinition[] = [
   ] },
   { id: "product_catalog", label: "Catalogue produits", description: "Produits, descriptions, photos et prix", group: "Commerce", templates: commerceTemplates, configurationFields: [
     { key: "section_title", label: "Titre public", type: "text", defaultValue: "Nos produits" },
+    { key: "price_display", label: "Affichage des prix", type: "select", defaultValue: "visible", options: [{ label: "Afficher les prix", value: "visible" }, { label: "Sur demande", value: "on_request" }, { label: "Masquer les prix", value: "hidden" }] },
     { key: "currency", label: "Devise", type: "select", defaultValue: "MAD", options: [{ label: "MAD — Dirham", value: "MAD" }, { label: "EUR — Euro", value: "EUR" }, { label: "USD — Dollar", value: "USD" }] },
     { key: "show_stock", label: "Afficher la disponibilité", type: "checkbox", defaultValue: true },
   ] },
