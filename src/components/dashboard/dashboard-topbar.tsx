@@ -102,7 +102,7 @@ export function DashboardTopbar({ name, email, avatarUrl = "", notificationsEnab
         <p className="text-[10px] font-bold uppercase tracking-[.18em] text-indigo-600">TouchCard Business</p>
         <p className="mt-1 truncate text-base font-extrabold text-slate-900 sm:text-lg">{name || "Espace client"}</p>
       </div>}
-      {!isSuperAdmin && <div className="hidden min-w-0 shrink-0 xl:block"><p className="text-xs font-semibold text-slate-500">Espace professionnel</p></div>}
+      {!isSuperAdmin && <Link href="/dashboard" className="hidden min-w-0 shrink-0 items-center gap-2 xl:flex" aria-label="TouchCard Business - tableau de bord"><img src="/brand/touchcard-mark.svg" alt="" className="h-9 w-9 object-contain"/><span className="flex flex-col leading-none"><strong className="text-sm font-black tracking-tight text-slate-900">TouchCard</strong><span className="mt-1 text-[9px] font-bold tracking-[.16em] text-slate-500">BUSINESS</span></span></Link>}
       {!isSuperAdmin && navigation && <div className="order-3 w-full min-w-0 xl:order-2 xl:w-auto xl:flex-1">{navigation}</div>}
       <div className={"flex shrink-0 items-center gap-2 sm:gap-3 " + (!isSuperAdmin ? "order-2 ml-auto xl:order-3 xl:ml-0" : "")}>
         <button type="button" onClick={toggleTheme} aria-label={dark ? "Passer au thème clair" : "Passer au thème sombre"} title={dark ? "Mode clair" : "Mode sombre"} className="dashboard-icon-button flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100">
