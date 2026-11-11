@@ -39,7 +39,7 @@ export function ProspectIntake() {
   const [logoName, setLogoName] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const serviceChoiceRequired = form.cardType === "e-business" || form.cardType === "service";
-  const visibleSteps = useMemo(() => serviceChoiceRequired ? [0, 1, 2, 3, 4, 5, 6, 7, 8] : [0, 1, 2, 3, 4, 6, 7, 8], [serviceChoiceRequired]);
+  const visibleSteps = useMemo(() => [0, 1, 2, 3, 4, 5, 6, 7, 8], []);
   const progress = ((Math.max(0, visibleSteps.indexOf(step)) + 1) / visibleSteps.length) * 100;
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export function ProspectIntake() {
           const restoredForm = { ...draft.form, logoUrl: savedLogoUrl.startsWith("https://") || savedLogoUrl.startsWith("http://") ? savedLogoUrl : "" };
           const restoredCardType = String(restoredForm.cardType || "");
           const restoredStep = Number.isInteger(draft.step) ? Number(draft.step) : 0;
-          const safeStep = restoredStep === 5 && restoredCardType !== "e-business" && restoredCardType !== "service" ? 6 : Math.min(8, Math.max(0, restoredStep));
+          const safeStep = Math.min(8, Math.max(0, restoredStep));
           setForm((current) => ({ ...current, ...restoredForm }));
           setStep(safeStep);
         }
@@ -73,7 +73,7 @@ export function ProspectIntake() {
     if (!draftLoaded) return;
     const saveDraft = () => {
       try {
-        window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ savedAt: Date.now(), step, form }));
+        window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ version: 4, savedAt: Date.now(), step, form }));
         window.localStorage.removeItem(LEGACY_DRAFT_KEY);
       } catch { /* Storage may be disabled; the form remains usable. */ }
     };
@@ -87,13 +87,9 @@ export function ProspectIntake() {
     };
   }, [step, form, draftLoaded]);
 
-  useEffect(() => {
-    if (step === 5 && !serviceChoiceRequired) setStep(6);
-  }, [step, serviceChoiceRequired]);
-
   function persistDraft(nextStep: number, nextForm: ProspectInput) {
     try {
-      window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ savedAt: Date.now(), step: nextStep, form: nextForm }));
+      window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ version: 4, savedAt: Date.now(), step: nextStep, form: nextForm }));
     } catch { /* Keep the form usable if browser storage is unavailable. */ }
   }
 
@@ -128,6 +124,7 @@ export function ProspectIntake() {
     if (step === 3 && (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) || !form.phone.trim())) return "Indiquez un e-mail valide et votre téléphone.";
     if (step === 4 && !form.cardType) return "Choisissez le type de carte qui vous intéresse.";
     if (step === 5 && serviceChoiceRequired && !form.projectNeeds[0]) return "Choisissez une formule de service pour continuer.";
+    if (step === 5 && !serviceChoiceRequired && !form.businessAddress.trim()) return "Indiquez l’adresse de votre établissement (rue, quartier et ville).";
     return "";
   }
 
@@ -137,7 +134,7 @@ export function ProspectIntake() {
     const validation = validateStep();
     if (validation) { setError(validation); return; }
     if (step < 8) {
-      const nextStep = step === 4 && !serviceChoiceRequired ? 6 : step + 1;
+      const nextStep = step + 1;
       persistDraft(nextStep, form);
       setStep(nextStep);
       return;
@@ -199,8 +196,8 @@ export function ProspectIntake() {
     );
   }
 
-  const titles = ["Faisons connaissance", "Votre localisation", "Votre activité", "Vos coordonnées", "Votre choix", "Votre formule de service", "Vos réseaux & pages", "Votre personnalisation", "Récapitulatif"];
-  const subtitles = ["Comment pouvons-nous vous appeler ?", "Dans quelle ville exercez-vous ?", "Quel est votre domaine professionnel ?", "Comment pouvons-nous vous joindre ?", "Quelle solution correspond à votre besoin ?", "Choisissez une formule adaptée à votre activité. Cette étape concerne E-Business et Personnalisée uniquement.", "Ajoutez votre site web, votre CV / portfolio et vos réseaux sociaux.", "Souhaitez-vous une carte personnalisée ?", "Relisez votre demande avant de l’envoyer."];
+  const titles = ["Faisons connaissance", "Votre localisation", "Votre activité", "Vos coordonnées", "Votre choix", serviceChoiceRequired ? "Votre formule de service" : "Adresse de l’établissement", "Vos réseaux & pages", "Votre personnalisation", "Récapitulatif"];
+  const subtitles = ["Comment pouvons-nous vous appeler ?", "Dans quelle ville exercez-vous ?", "Quel est votre domaine professionnel ?", "Comment pouvons-nous vous joindre ?", "Quelle solution correspond à votre besoin ?", serviceChoiceRequired ? "Choisissez une seule formule adaptée à votre activité." : "Indiquez l’adresse où votre carte ou votre espace sera rattaché.", "Ajoutez votre site web, votre CV / portfolio et vos réseaux sociaux.", "Souhaitez-vous une carte personnalisée ?", "Relisez votre demande avant de l’envoyer."];
 
   return (
     <main className="relative grid min-h-screen overflow-hidden bg-[#071326] px-4 py-6 text-slate-900 sm:px-6 sm:py-8 lg:grid-cols-[.92fr_1.08fr] lg:grid-rows-[auto_1fr] lg:gap-x-8 lg:px-10 lg:py-8">
@@ -233,7 +230,7 @@ export function ProspectIntake() {
         <form onSubmit={submit} className="mt-8">
           {step === 0 && <Field label="Nom et prénom" value={form.fullName} onChange={(v) => update("fullName", v)} placeholder="Ex. : Zine El Abidine Dkir" autoComplete="name"/>}
           {step === 1 && <Field label="Ville" value={form.city} onChange={(v) => update("city", v)} placeholder="Ex. : Casablanca" />}
-          {step === 2 && <div className="space-y-4"><Field label="Nom de votre activité / marque (facultatif pour E-Contact)" value={form.brandName} onChange={(v) => update("brandName", v)} placeholder="Ex. : MMC Event" autoComplete="organization"/><p className="text-sm text-slate-600">Sélectionnez un seul domaine correspondant à votre activité principale. Facultatif pour E-Contact.</p><div className="grid gap-3 sm:grid-cols-2">{sectors.map((sector) => <label key={sector} className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 text-left transition ${form.sector === sector ? "border-violet-500 bg-violet-50 ring-2 ring-violet-200" : "border-slate-200 bg-white hover:border-violet-300 hover:bg-violet-50"}`}><input type="radio" name="professional_sector" value={sector} checked={form.sector === sector} onChange={() => update("sector", sector)} className="h-4 w-4 accent-violet-700"/><span className="font-semibold text-slate-800">{sector}</span>{form.sector === sector && <span className="ml-auto text-xs font-bold text-violet-700">Choisi ✓</span>}</label>)}</div>{form.sector === "Autre" && <Field label="Précisez votre activité" value={form.sectorOther} onChange={(v) => update("sectorOther", v)} placeholder="Votre secteur d'activité"/>}</div>}
+          {step === 2 && <div className="space-y-4"><Field label="Nom de votre activité / marque (facultatif pour E-Contact et Avis Google)" value={form.brandName} onChange={(v) => update("brandName", v)} placeholder="Ex. : MMC Event" autoComplete="organization"/><p className="text-sm text-slate-600">Sélectionnez un seul domaine correspondant à votre activité principale. Facultatif pour E-Contact et Avis Google.</p><div className="grid gap-3 sm:grid-cols-2">{sectors.map((sector) => <label key={sector} className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 text-left transition ${form.sector === sector ? "border-violet-500 bg-violet-50 ring-2 ring-violet-200" : "border-slate-200 bg-white hover:border-violet-300 hover:bg-violet-50"}`}><input type="radio" name="professional_sector" value={sector} checked={form.sector === sector} onChange={() => update("sector", sector)} className="h-4 w-4 accent-violet-700"/><span className="font-semibold text-slate-800">{sector}</span>{form.sector === sector && <span className="ml-auto text-xs font-bold text-violet-700">Choisi ✓</span>}</label>)}</div>{form.sector === "Autre" && <Field label="Précisez votre activité" value={form.sectorOther} onChange={(v) => update("sectorOther", v)} placeholder="Votre secteur d'activité"/>}</div>}
           {step === 3 && <div className="grid gap-5"><Field label="Adresse e-mail" type="email" value={form.email} onChange={(v) => update("email", v)} placeholder="vous@exemple.com" autoComplete="email"/><Field label="Téléphone" type="tel" value={form.phone} onChange={(v) => update("phone", v)} placeholder="+212 6 XX XX XX XX" autoComplete="tel"/></div>}
           {step === 4 && <div className="space-y-5"><div className="grid gap-5 sm:grid-cols-3">{cards.map((card) => <div key={card.id} role="checkbox" aria-checked={form.cardType === card.id} tabIndex={0} onClick={() => setForm((current) => ({ ...current, cardType: card.id, projectNeeds: [], reservationMode: "", reservationChannels: [], managementNeeds: [] }))} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setForm((current) => ({ ...current, cardType: card.id, projectNeeds: [], reservationMode: "", reservationChannels: [], managementNeeds: [] })); } }} className={`group cursor-pointer rounded-2xl border p-3 text-left transition focus:outline-none focus:ring-2 focus:ring-violet-400 ${form.cardType === card.id ? "border-violet-500 bg-violet-50 ring-2 ring-violet-200" : "border-slate-200 bg-white hover:border-violet-300 hover:bg-violet-50"}`}><div className="relative aspect-[1.586/1] w-full"><PhysicalNfcCard title={card.title} cardType={card.id} clientName={form.fullName || "M./Mme Client"}/>{form.cardType === card.id && <span className="absolute -right-2 -top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-violet-700 text-lg font-black text-white shadow-lg" aria-label="Sélectionné">✓</span>}</div><div className="mt-4 flex items-center justify-between gap-2"><h3 className="font-extrabold text-slate-900">{card.title}</h3>{form.cardType === card.id && <span className="text-xs font-bold text-violet-700">Choisie ✓</span>}</div><p className="mt-1 text-xs leading-5 text-slate-600">{card.desc}</p></div>)}</div><div><label className="mb-2 block text-sm font-semibold text-slate-800">Pourquoi avez-vous choisi cette carte ?</label><textarea value={form.reason} onChange={(event) => update("reason", event.target.value)} rows={3} placeholder="Expliquez-nous votre besoin..." className="w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-400/20"/></div></div>}{serviceChoiceRequired && step === 5 && <div className="space-y-5">
   <div className="rounded-2xl border border-violet-100 bg-violet-50/60 p-5">
@@ -252,6 +249,9 @@ export function ProspectIntake() {
       </label>
     ))}
   </div>
+</div>}{!serviceChoiceRequired && step === 5 && <div className="space-y-4 rounded-2xl border border-violet-100 bg-violet-50/60 p-5">
+  <p className="text-sm leading-6 text-slate-600">Cette adresse sera utilisée pour préparer votre espace et rattacher votre carte à votre établissement. Elle ne remplace pas vos liens sociaux.</p>
+  <Field label="Adresse de l’établissement (rue, quartier et ville)" value={form.businessAddress} onChange={(v) => update("businessAddress", v)} placeholder="Ex. : 12 rue..., quartier..., Casablanca"/>
 </div>}{step === 6 && <div className="space-y-5"><p className="text-sm leading-6 text-slate-600">{form.cardType === "contact" ? "Ajoutez votre site web personnel, votre CV / portfolio et vos réseaux sociaux." : "Ajoutez les liens de vos pages professionnelles et réseaux sociaux. Vous pouvez en ajouter plusieurs ou supprimer ceux qui ne sont pas utiles."}</p><div className="space-y-3">{form.socialLinks.map((item, index) => <div key={index} className="grid gap-2 rounded-2xl border border-violet-100 bg-violet-50/60 p-3 sm:grid-cols-[.8fr_1.4fr_auto] sm:items-end"><div><label className="mb-2 block text-xs font-bold text-slate-700">Plateforme</label><select value={item.platform} onChange={(event) => update("socialLinks", form.socialLinks.map((link, i) => i === index ? { ...link, platform: event.target.value } : link))} className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm text-slate-900 outline-none focus:border-violet-400"><option>Instagram</option><option>Facebook</option><option>TikTok</option><option>LinkedIn</option><option>YouTube</option><option>WhatsApp</option><option>Site web</option><option>CV / Portfolio</option><option>Autre</option></select></div><div><label className="mb-2 block text-xs font-bold text-slate-700">Lien de votre page</label><input type="url" value={item.url} onChange={(event) => update("socialLinks", form.socialLinks.map((link, i) => i === index ? { ...link, url: event.target.value } : link))} placeholder="https://..." className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-violet-400"/></div><div className="flex gap-2"><button type="button" aria-label="Ajouter un lien" onClick={() => update("socialLinks", [...form.socialLinks, { platform: "Instagram", url: "" }])} className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-700 text-2xl text-white shadow-md hover:bg-violet-800">+</button><button type="button" aria-label="Supprimer ce lien" disabled={form.socialLinks.length === 1} onClick={() => update("socialLinks", form.socialLinks.filter((_, i) => i !== index))} className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-300 bg-white text-2xl text-slate-600 hover:bg-rose-50 disabled:opacity-30">−</button></div></div>)}</div></div>}{step === 7 && <div className="space-y-5">
   <p className="text-sm text-slate-600">{form.cardType === "contact" ? "Personnalisez votre carte personnelle avec une photo ou un logo. Vos coordonnées et votre portfolio restent au centre de la carte." : "Nous pouvons adapter le design et les informations de votre carte à votre marque."}</p>
   <div className="grid grid-cols-2 gap-3"><Choice selected={form.customRequested} onClick={() => update("customRequested", true)}>Oui, personnaliser</Choice><Choice selected={!form.customRequested} onClick={() => update("customRequested", false)}>Non, passer</Choice></div>
@@ -259,7 +259,7 @@ export function ProspectIntake() {
     {form.cardType !== "contact" && <><Field label="Nom de marque" value={form.brandName} onChange={(v) => update("brandName", v)} placeholder="Votre brand name"/><Field label="Adresse professionnelle" value={form.businessAddress} onChange={(v) => update("businessAddress", v)} placeholder="Adresse"/><Field label="Téléphone professionnel" value={form.businessPhone} onChange={(v) => update("businessPhone", v)} placeholder="+212..."/></>}
     <div><label className="mb-2 block text-sm font-semibold text-slate-700">Logo (image, 2 Mo max.)</label><input type="file" accept="image/*" onChange={onLogoChange} className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-500 file:px-3 file:py-2 file:font-bold file:text-white"/>{logoName && <p className="mt-2 text-xs text-emerald-700">{logoName}</p>}</div>
   </div>}
-</div>}{step === 8 && <div className="space-y-3 rounded-2xl border border-violet-100 bg-violet-50/50 p-5 text-sm"><Review label="Nom" value={form.fullName}/><Review label="Ville" value={form.city}/><Review label="Secteur" value={form.sector === "Autre" ? form.sectorOther : form.sector}/><Review label="E-mail" value={form.email}/><Review label="Téléphone" value={form.phone}/><Review label="Pages & réseaux" value={form.socialLinks.filter((item) => item.url.trim()).map((item) => item.platform + ": " + item.url).join(" · ") || "Non renseignés"}/><Review label="Nom de l’activité" value={form.brandName || (form.cardType === "contact" ? form.fullName : "")}/><Review label="Carte souhaitée" value={cards.find((card) => card.id === form.cardType)?.title || ""}/><Review label="Prix indicatif" value={({ contact: "149 DH", "google-review": "199 DH", "e-business": "399 DH", service: "499 DH" } as Record<string, string>)[form.cardType] || "À confirmer"}/><Review label="Formule choisie" value={form.projectNeeds[0] || (form.cardType === "contact" ? "Non applicable — E-Contact" : form.cardType === "google-review" ? "Non applicable — Avis Google" : "Non sélectionnée")}/><Review label="Personnalisation" value={form.customRequested ? "Oui" : "Non"}/>{form.customRequested && <><Review label="Marque" value={form.brandName}/><Review label="Logo" value={logoName || "Non fourni"}/><Review label="Adresse" value={form.businessAddress}/><Review label="Téléphone professionnel" value={form.businessPhone}/></>}</div>}
+</div>}{step === 8 && <div className="space-y-3 rounded-2xl border border-violet-100 bg-violet-50/50 p-5 text-sm"><Review label="Nom" value={form.fullName}/><Review label="Ville" value={form.city}/><Review label="Secteur" value={form.sector === "Autre" ? form.sectorOther : form.sector}/><Review label="E-mail" value={form.email}/><Review label="Téléphone" value={form.phone}/><Review label="Pages & réseaux" value={form.socialLinks.filter((item) => item.url.trim()).map((item) => item.platform + ": " + item.url).join(" · ") || "Non renseignés"}/><Review label="Nom de l’activité" value={form.brandName || (form.cardType === "contact" ? form.fullName : "")}/><Review label="Carte souhaitée" value={cards.find((card) => card.id === form.cardType)?.title || ""}/>{!serviceChoiceRequired && <Review label="Adresse de l’établissement" value={form.businessAddress}/>}<Review label="Prix indicatif" value={({ contact: "149 DH", "google-review": "199 DH", "e-business": "399 DH", service: "499 DH" } as Record<string, string>)[form.cardType] || "À confirmer"}/><Review label="Formule choisie" value={form.projectNeeds[0] || (form.cardType === "contact" ? "Non applicable — E-Contact" : form.cardType === "google-review" ? "Non applicable — Avis Google" : "Non sélectionnée")}/><Review label="Personnalisation" value={form.customRequested ? "Oui" : "Non"}/>{form.customRequested && <><Review label="Marque" value={form.brandName}/><Review label="Logo" value={logoName || "Non fourni"}/><Review label="Adresse" value={form.businessAddress}/><Review label="Téléphone professionnel" value={form.businessPhone}/></>}</div>}
           {error && <p role="alert" className="mt-5 rounded-xl border border-rose-400/20 bg-rose-400/10 p-3 text-sm text-rose-700">{error}</p>}
           <div className="mt-9 flex flex-col-reverse justify-between gap-3 sm:flex-row"><button type="button" disabled={step === 0 || busy} onClick={() => { setError(""); setStep((value) => value === 8 ? 7 : value === 6 && !serviceChoiceRequired ? 4 : value - 1); }} className="rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 transition hover:border-violet-300 hover:bg-violet-50 disabled:opacity-30">Précédent</button><button type="submit" disabled={busy} className="rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-7 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-indigo-950/30 transition hover:-translate-y-0.5 hover:brightness-110 disabled:opacity-60">{busy ? "Enregistrement..." : step === 8 ? "Envoyer ma demande" : "Suivant →"}</button></div>
         </form>
