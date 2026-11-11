@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { I18nText } from "@/i18n/provider";
 import { PublicCardTracker, TrackedPublicLink } from "@/components/cards/public-card-tracker";
 import { PublicWorkspaceRequestForms } from "@/components/cards/public-workspace-request-forms";
+import { PublicBusinessModules } from "@/components/cards/public-business-modules";
 
 type PublicFields = { nfc_display_code?: string; tagline?: string; location?: string; hours?: string; whatsapp?: string; company_phone?: string; company_email?: string; company_address?: string; industry?: string; custom_fields?: { key: string; label: string; value: string; visible: boolean }[] };
 type PublicLink = { id: string; label: string; url: string; kind: string };
@@ -88,6 +89,18 @@ async function PublicCardContent({
     ? await supabase.from("organization_catalog_documents").select("file_url,file_name")
       .eq("organization_id", card.organization_id).maybeSingle()
     : { data: null as { file_url: string; file_name: string } | null };
+  const { data: businessModuleCatalog } = (moduleEnabled("service_catalog") || moduleEnabled("room_catalog"))
+    ? await supabase.from("business_catalog_items").select("id,item_type,name,description,price,currency,duration_minutes,capacity")
+      .eq("organization_id", card.organization_id).eq("is_active", true).order("display_order").limit(40)
+    : { data: [] as { id: string; item_type: string; name: string; description: string | null; price: number; currency: string; duration_minutes: number | null; capacity: number | null }[] };
+  const { data: gymPlans } = moduleEnabled("gym_registration")
+    ? await supabase.from("gym_membership_plans").select("id,name,description,price,currency,duration_days,benefits")
+      .eq("organization_id", card.organization_id).eq("is_active", true).order("display_order").limit(20)
+    : { data: [] as { id: string; name: string; description: string | null; price: number; currency: string; duration_days: number; benefits: string[] }[] };
+  const { data: schoolPrograms } = moduleEnabled("school_registration")
+    ? await supabase.from("school_programs").select("id,title,description,duration_label,price,currency,start_date,end_date")
+      .eq("organization_id", card.organization_id).eq("is_active", true).order("display_order").limit(20)
+    : { data: [] as { id: string; title: string; description: string | null; duration_label: string | null; price: number | null; currency: string; start_date: string | null; end_date: string | null }[] };
   const fields = (card.public_fields ?? {}) as PublicFields & { google_review_url?: string };
   const settings = (card.public_settings ?? {}) as Record<string, boolean>;
   const source = query.source === "nfc" ? "nfc_scan" : query.source === "qr" ? "qr_scan" : "view";
@@ -199,6 +212,15 @@ async function PublicCardContent({
             bookingDateMode={isHospitality ? "stay" : "datetime"}
             serviceMode={isBeauty}
             whatsappPhone={fields.whatsapp || card.phone || ""}
+          />}
+
+          {settings.show_request_forms !== false && <PublicBusinessModules
+            slug={card.slug}
+            modules={modules}
+            catalog={(businessModuleCatalog ?? []) as any[]}
+            plans={(gymPlans ?? []) as any[]}
+            programs={(schoolPrograms ?? []) as any[]}
+            accent={accent}
           />}
 
           {settings.show_social_links !== false && <section className="rounded-2xl bg-white p-4"><div className="flex flex-wrap items-end justify-between gap-2"><div><h2 className="text-base font-bold text-black">Réseaux sociaux</h2></div></div>{socialLinks.length > 0 ? <div className="mt-4 grid grid-cols-5 gap-2">{socialLinks.map((link: PublicLink) => <TrackedPublicLink key={link.id} cardId={card.id} linkId={link.id} href={link.url} className="flex aspect-square min-w-0 items-center justify-center rounded-xl text-lg font-black text-white shadow-sm transition hover:-translate-y-0.5" style={{ backgroundColor: ({instagram:"#E4405F",facebook:"#1877F2",linkedin:"#0A66C2",tiktok:"#111111",youtube:"#FF0000",x:"#000000",pinterest:"#BD081C",whatsapp:"#25D366",telegram:"#229ED9"} as Record<string,string>)[link.kind] ?? "#64748b" }}><span>{({instagram:"◎",facebook:"f",linkedin:"in",tiktok:"♪",youtube:"▶",x:"𝕏",pinterest:"P",whatsapp:"◉",telegram:"➤"} as Record<string,string>)[link.kind] ?? "↗"}</span></TrackedPublicLink>)}</div> : <p className="mt-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-center text-xs leading-5 text-slate-500">Les réseaux sociaux ajoutés par le client apparaîtront ici.</p>}</section>}
