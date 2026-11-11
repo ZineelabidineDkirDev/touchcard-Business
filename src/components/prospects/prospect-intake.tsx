@@ -264,6 +264,9 @@ export function ProspectIntake() {
           {languages.map(([code, flag, label]) => (
             <button key={code} type="button" aria-pressed={locale === code} onClick={() => setLocale(code)} className={`inline-flex items-center gap-1 rounded-full border bg-[#0a1a45]/70 px-2.5 py-1.5 text-xs font-bold text-white backdrop-blur-md transition sm:gap-2 sm:px-3 sm:py-2 sm:text-sm lg:px-4 ${locale === code ? "border-cyan-300 shadow-[0_0_0_2px_rgba(0,200,255,.25)]" : "border-white/20 hover:border-white/40"}`}><span aria-hidden="true">{flag}</span>{label}</button>
           ))}
+          <Link href="/" aria-label="Fermer et revenir à l’accueil" title="Fermer" className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/25 bg-[#0a1a45]/80 text-lg font-semibold text-white shadow-lg backdrop-blur-md transition hover:border-rose-300/70 hover:bg-rose-500/20 hover:text-rose-100 sm:h-10 sm:w-10" >
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="m18 6-12 12M6 6l12 12" /></svg>
+          </Link>
         </div>
       </header>
 
