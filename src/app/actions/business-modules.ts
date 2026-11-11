@@ -101,7 +101,8 @@ export async function createSchoolProgram(data: FormData) {
 
 async function updateStatus(table: string, id: string, status: string, modules: string[]) {
   const ctx = await getModuleContext(modules, "any");
-  if (!ctx || !id || !["pending", "confirmed", "in_progress", "completed", "rejected", "cancelled", "active"].includes(status)) return;
+  const allowed = table === "business_appointments" ? ["pending", "confirmed", "completed", "rejected", "cancelled"] : table === "gym_registrations" ? ["pending", "contacted", "approved", "active", "rejected", "cancelled"] : ["pending", "under_review", "accepted", "enrolled", "rejected", "cancelled"];
+  if (!ctx || !id || !allowed.includes(status)) return;
   const { error } = await (ctx.supabase.from(table as never) as any).update({ status, updated_at: new Date().toISOString() })
     .eq("id", id).eq("organization_id", ctx.organizationId);
   if (error) console.error("Business module status update failed", error);
