@@ -46,7 +46,7 @@ const moduleCatalog = [
   { id: "availability_calendar", label: "Calendrier de disponibilités", description: "Créneaux et disponibilités", group: "Relation client" },
   { id: "crm_contacts", label: "Contacts & CRM", description: "Centralisation des prospects et clients", group: "Relation client" },
   { id: "team", label: "Équipe & collaborateurs", description: "Gestion des membres de l'organisation", group: "Gestion" },
-  { id: "gallery", label: "Galerie photos", description: "Images, réalisations et contenus", group: "Vitrine" },
+  { id: "gallery", label: "Portfolio & galerie de projets", description: "Réalisations, images de projets et présentation du CV professionnel", group: "Vitrine" },
   { id: "whatsapp", label: "Contact WhatsApp", description: "Accès direct à WhatsApp", group: "Relation client" },
   { id: "analytics", label: "Statistiques", description: "Vues, scans, clics et performances", group: "Pilotage" },
 ];
