@@ -121,6 +121,34 @@ export async function createClientCard(formData: FormData) {
   redirect("/dashboard/cards?card_created=1");
 }
 
+export async function saveClientCardVisibility(formData: FormData) {
+  const { supabase, user, organizationId } = await getWorkspace();
+  if (!user) redirect("/login?next=/dashboard/cards");
+  if (!organizationId) redirect("/dashboard/cards?card_error=workspace");
+  if (!(await hasWorkspaceModule(supabase, organizationId, "digital_card"))) redirect("/dashboard/cards?card_error=module");
+
+  const cardId = String(formData.get("card_id") ?? "").trim();
+  if (!cardId) redirect("/dashboard/cards?card_error=missing");
+  const { data: card, error: readError } = await supabase.from("cards")
+    .select("slug,public_settings").eq("id", cardId).eq("organization_id", organizationId).maybeSingle();
+  if (readError || !card) redirect("/dashboard/cards?card_error=not_found");
+
+  const keys = ["show_phone", "show_email", "show_website", "show_about", "show_contact", "show_company_info", "show_categories", "show_info_fields", "show_google_reviews", "show_catalog_pdf", "show_catalog", "show_request_forms", "show_social_links", "show_featured_links", "show_faq", "show_videos", "show_location"];
+  const current = (card.public_settings ?? {}) as Record<string, boolean>;
+  const nextSettings: Record<string, boolean> = { ...current, show_save_contact: true };
+  for (const key of keys) nextSettings[key] = formData.get(key) === "on";
+
+  const { error } = await supabase.from("cards").update({ public_settings: nextSettings, updated_at: new Date().toISOString() })
+    .eq("id", cardId).eq("organization_id", organizationId);
+  if (error) {
+    console.error("Client card visibility update failed", { cardId, code: error.code, message: error.message });
+    redirect("/dashboard/cards?card_error=database");
+  }
+  revalidatePath("/dashboard/cards");
+  revalidatePath("/p/" + card.slug);
+  redirect("/dashboard/cards?visibility_saved=1");
+}
+
 export async function saveClientCardProfile(formData: FormData) {
   const { supabase, user, organizationId } = await getWorkspace();
   if (!user) redirect("/login?next=/dashboard/cards");
