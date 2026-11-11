@@ -39,7 +39,7 @@ Deno.serve(async (req: Request) => {
   });
   const { data: prospect, error: lookupError } = await admin
     .from("prospect_requests")
-    .select("id")
+    .select("id,status")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -47,7 +47,7 @@ Deno.serve(async (req: Request) => {
 
   const { error: updateError } = await admin
     .from("prospect_requests")
-    .update({ password_initialized: true, updated_at: new Date().toISOString() })
+    .update({ password_initialized: true, client_access_enabled: ["in_production", "completed"].includes(prospect.status), updated_at: new Date().toISOString() })
     .eq("id", prospect.id)
     .eq("user_id", user.id);
 
