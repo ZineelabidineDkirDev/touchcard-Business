@@ -26,6 +26,8 @@ const contactOptions = [
 ] as const;
 
 type Props = {
+  cardId: string;
+  action: (formData: FormData) => void | Promise<void>;
   initialSettings: Record<string, boolean> | null;
   cardName: string;
   companyName: string;
@@ -76,9 +78,11 @@ export function CardVisibilityPreview(props: Props) {
   return (
     <section className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
       <div>
-        <h3 className="text-sm font-black text-slate-900">Sections visibles sur ma carte NFC</h3>
-        <p className="mt-1 text-xs leading-5 text-slate-500">Activez ou désactivez une section : l’aperçu se met à jour immédiatement, sans enregistrer.</p>
+        <h3 className="text-sm font-black text-slate-900">Modules visibles dans ma carte</h3>
+        <p className="mt-1 text-xs leading-5 text-slate-500">Activez ou désactivez les rubriques de votre carte. L’aperçu se met à jour immédiatement ; cliquez sur « Enregistrer » pour appliquer le choix à la carte publique.</p>
       </div>
+      <form action={props.action}>
+      <input type="hidden" name="card_id" value={props.cardId}/>
       <div className="mt-4 grid gap-4 xl:grid-cols-[1fr_.82fr]">
         <div>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -131,9 +135,11 @@ export function CardVisibilityPreview(props: Props) {
             </div>
             <div className="h-2.5 bg-slate-900"/>
           </div>
-          <p className="mt-2 text-center text-[10px] leading-4 text-slate-500">Maquette indicative. Les modifications seront appliquées à la carte publique après enregistrement.</p>
+          <p className="mt-2 text-center text-[10px] leading-4 text-slate-500">Aperçu indicatif : les modifications seront appliquées après enregistrement.</p>
         </aside>
       </div>
+      <div className="mt-4 flex flex-col gap-2 border-t border-slate-200 pt-4 sm:flex-row sm:items-center sm:justify-between"><p className="text-xs text-slate-500">Un module non inclus dans votre formule reste indisponible, même si vous l’affichez ici.</p><button type="submit" className="rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700">Enregistrer les modules visibles</button></div>
+      </form>
     </section>
   );
 }
