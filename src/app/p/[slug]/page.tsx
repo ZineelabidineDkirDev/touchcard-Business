@@ -78,7 +78,7 @@ async function PublicCardContent({
     : [];
   const showCatalog = !isCreativeProfile && supportsBusinessCatalog && (!workspaceConfig.version ? (["service", "e-business"].includes(template) || isBeauty || isRestaurant || isRealEstate) : (moduleEnabled("service_catalog") || moduleEnabled("room_catalog") || moduleEnabled("product_catalog")));
   const visibilitySettings = (card.public_settings ?? {}) as Record<string, boolean>;
-  const galleryEnabled = !workspaceConfig.version || moduleEnabled("gallery");
+  const galleryEnabled = isCreativeProfile || !workspaceConfig.version || moduleEnabled("gallery");
   const allowOrders = !isCreativeProfile && template !== "contact" && (workspaceConfig.version ? moduleEnabled("orders") : template === "e-business" && isEcommerce && moduleEnabled("orders")) && visibilitySettings.show_orders !== false;
   const allowBookings = !isCreativeProfile && template !== "contact" && (moduleEnabled("bookings") || (!workspaceConfig.version && isBeauty)) && visibilitySettings.show_bookings !== false;
   const allowQuotes = !isCreativeProfile && template !== "contact" && moduleEnabled("quote_requests") && visibilitySettings.show_quotes !== false;
