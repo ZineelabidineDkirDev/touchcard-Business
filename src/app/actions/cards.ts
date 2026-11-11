@@ -155,8 +155,10 @@ export async function saveClientCardProfile(formData: FormData) {
     company_email: String(formData.get("company_email") ?? "").trim().slice(0, 180),
     company_address: String(formData.get("company_address") ?? "").trim().slice(0, 240),
     industry: String(formData.get("industry") ?? "").trim().slice(0, 120),
+    contact_person_name: String(formData.get("contact_person_name") ?? "").trim().slice(0, 120),
     google_review_url: safeHttpUrl(String(formData.get("google_review_url") ?? ""), 1000) ?? "",
     custom_fields: customFields,
+    intake_profile_synced: true,
   };
 
   const { data: existingCard } = await supabase.from("cards").select("theme").eq("id", cardId).eq("organization_id", organizationId).maybeSingle();
