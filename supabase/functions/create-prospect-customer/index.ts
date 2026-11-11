@@ -295,7 +295,7 @@ Deno.serve(async (req: Request) => {
       verified: true,
       verification: {
         account_exists: Boolean(prospect.user_id),
-        client_access_enabled: Boolean(prospect.client_access_enabled),
+        client_access_enabled: Boolean(prospect.password_initialized),
         password_initialized: Boolean(prospect.password_initialized),
         organization_linked: true,
         membership_linked: true,
