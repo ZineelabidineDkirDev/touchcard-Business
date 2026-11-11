@@ -266,7 +266,7 @@ export async function saveClientCardCv(cardId: string, cvUrl: string) {
   const { data: organization } = await supabase.from("organizations")
     .select("workspace_config").eq("id", organizationId).maybeSingle();
   const config = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[]; original_client_choices?: { activity_sector?: string } };
-  const sector = String(config.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
+  const sector = String(config.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const isCreativeProfile = /designer|design graphique|graphiste|photographe|photography/.test(sector);
   const galleryEnabled = isCreativeProfile || !config.version || (Array.isArray(config.modules) && config.modules.includes("gallery"));
   if (!galleryEnabled) return { ok: false as const, error: "Le module CV n'est pas activé." };
@@ -280,8 +280,8 @@ export async function saveClientCardCv(cardId: string, cvUrl: string) {
   const nextCustomFields = customFields.filter((field: any) => !/cv professionnel|^cv$/i.test(String(field.label ?? "").trim()));
   if (cvUrl) {
     const expectedPath = `/storage/v1/object/public/client-media/${organizationId}/cv/`;
-    const baseUrl = String(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").replace(/\\/$/, "");
-    if (!baseUrl || !cvUrl.startsWith(baseUrl + expectedPath) || !/^https:\\/\\//i.test(cvUrl)) {
+    const baseUrl = String(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").replace(/\/$/, "");
+    if (!baseUrl || !cvUrl.startsWith(baseUrl + expectedPath) || !(cvUrl.startsWith("https://") || cvUrl.startsWith("http://"))) {
       return { ok: false as const, error: "Adresse du CV invalide." };
     }
     nextCustomFields.push({ key: "cv_professionnel", label: "CV professionnel", value: cvUrl, visible: true });
