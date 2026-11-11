@@ -54,6 +54,7 @@ async function PublicCardContent({
   const moduleEnabled = (id: string) => modules.includes(id);
   const activitySector = String(workspaceConfig.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const selectedNeed = (workspaceConfig.original_client_choices?.project_needs?.selected ?? []).join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const isCreativeProfile = /designer|design graphique|graphiste|photographe|photography/.test(activitySector);
   const isEcommerce = template === "e-business" && (
     /e.?commerce|commerce en ligne|boutique en ligne|vente en ligne/.test(activitySector)
     || /boutique en ligne|vente en ligne|e.?commerce|commerce en ligne|catalogue de produits|commande de produits/.test(selectedNeed)
@@ -75,12 +76,12 @@ async function PublicCardContent({
   const profileCategories = Array.isArray(profileDraft?.categories)
     ? profileDraft.categories.map((value) => String(value).trim()).filter(Boolean).slice(0, 8)
     : [];
-  const showCatalog = supportsBusinessCatalog && (!workspaceConfig.version ? (["service", "e-business"].includes(template) || isBeauty || isRestaurant || isRealEstate) : (moduleEnabled("service_catalog") || moduleEnabled("room_catalog") || moduleEnabled("product_catalog")));
+  const showCatalog = !isCreativeProfile && supportsBusinessCatalog && (!workspaceConfig.version ? (["service", "e-business"].includes(template) || isBeauty || isRestaurant || isRealEstate) : (moduleEnabled("service_catalog") || moduleEnabled("room_catalog") || moduleEnabled("product_catalog")));
   const visibilitySettings = (card.public_settings ?? {}) as Record<string, boolean>;
   const galleryEnabled = !workspaceConfig.version || moduleEnabled("gallery");
-  const allowOrders = template !== "contact" && (workspaceConfig.version ? moduleEnabled("orders") : template === "e-business" && isEcommerce && moduleEnabled("orders")) && visibilitySettings.show_orders !== false;
-  const allowBookings = template !== "contact" && (moduleEnabled("bookings") || (!workspaceConfig.version && isBeauty)) && visibilitySettings.show_bookings !== false;
-  const allowQuotes = template !== "contact" && moduleEnabled("quote_requests") && visibilitySettings.show_quotes !== false;
+  const allowOrders = !isCreativeProfile && template !== "contact" && (workspaceConfig.version ? moduleEnabled("orders") : template === "e-business" && isEcommerce && moduleEnabled("orders")) && visibilitySettings.show_orders !== false;
+  const allowBookings = !isCreativeProfile && template !== "contact" && (moduleEnabled("bookings") || (!workspaceConfig.version && isBeauty)) && visibilitySettings.show_bookings !== false;
+  const allowQuotes = !isCreativeProfile && template !== "contact" && moduleEnabled("quote_requests") && visibilitySettings.show_quotes !== false;
   const { data: catalogItems } = showCatalog
     ? await supabase.from("products").select("id,name,description,price,currency,image_url")
       .eq("organization_id", card.organization_id).eq("is_active", true).order("created_at", { ascending: false }).limit(24)
@@ -186,9 +187,9 @@ async function PublicCardContent({
           {settings.show_info_fields !== false && infoFields.length > 0 && <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-black">Informations</h2><div className="mt-3 space-y-3">{infoFields.map((field) => <div key={field.key} className="border-b border-slate-100 pb-3 last:border-0"><p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">{field.label}</p><p className="mt-1 whitespace-pre-line text-sm font-medium text-slate-800">{field.value}</p></div>)}</div></section>}
 
 
-          {settings.show_google_reviews !== false && template === "google-review" && <section className="rounded-2xl bg-white p-4 text-center"><p className="text-sm font-bold text-slate-900">Votre avis compte pour nous</p><p className="mt-1 text-2xl tracking-[.2em] text-amber-500" aria-label="5 étoiles">★★★★★</p>{fields.google_review_url ? <TrackedPublicLink cardId={card.id} href={fields.google_review_url} className="mt-3 flex items-center justify-center rounded-xl px-4 py-3 text-sm font-bold text-white" style={{ backgroundColor: accent }}>Laisser un avis Google</TrackedPublicLink> : <p className="mt-2 text-xs text-slate-600">Le lien Google sera ajouté prochainement.</p>}</section>}
+          {settings.show_google_reviews !== false && (template === "google-review" || template === "e-business") && <section className="rounded-2xl bg-white p-4 text-center"><p className="text-sm font-bold text-slate-900">Votre avis compte pour nous</p><p className="mt-1 text-2xl tracking-[.2em] text-amber-500" aria-label="5 étoiles">★★★★★</p>{fields.google_review_url ? <TrackedPublicLink cardId={card.id} href={fields.google_review_url} className="mt-3 flex items-center justify-center rounded-xl px-4 py-3 text-sm font-bold text-white" style={{ backgroundColor: accent }}>Laisser un avis Google</TrackedPublicLink> : <p className="mt-2 text-xs text-slate-600">Le lien Google sera ajouté prochainement.</p>}</section>}
 
-          {settings.show_catalog_pdf !== false && showCatalog && catalogDocument?.file_url && <section className="rounded-2xl bg-white p-4"><a href={catalogDocument.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-xl border border-indigo-100 bg-indigo-50 p-4 text-indigo-950 shadow-sm transition hover:bg-indigo-100"><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white"><svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v6h5M9 15h6M9 18h6"/></svg></span><span className="min-w-0 flex-1"><strong className="block text-sm font-black">Consulter notre catalogue PDF</strong><span className="mt-1 block truncate text-xs text-indigo-700">{catalogDocument.file_name || "Voir les prestations et tarifs"}</span></span><span className="text-lg font-black">↗</span></a></section>}
+          {!isCreativeProfile && settings.show_catalog_pdf !== false && showCatalog && catalogDocument?.file_url && <section className="rounded-2xl bg-white p-4"><a href={catalogDocument.file_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 rounded-xl border border-indigo-100 bg-indigo-50 p-4 text-indigo-950 shadow-sm transition hover:bg-indigo-100"><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white"><svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v6h5M9 15h6M9 18h6"/></svg></span><span className="min-w-0 flex-1"><strong className="block text-sm font-black">Consulter notre catalogue PDF</strong><span className="mt-1 block truncate text-xs text-indigo-700">{catalogDocument.file_name || "Voir les prestations et tarifs"}</span></span><span className="text-lg font-black">↗</span></a></section>}
           {settings.show_catalog !== false && showCatalog && (!isEcommerce || template !== "e-business") && <section className="rounded-2xl bg-white p-4">
             <h2 className="mb-3 text-base font-bold text-black">{String(moduleSettings.room_catalog?.section_title || moduleSettings.service_catalog?.section_title || moduleSettings.product_catalog?.section_title || (hasRoomCatalog ? "Nos chambres" : isBarber ? "Nos prestations barber" : isBeauty ? "Nos prestations beauté" : isRestaurant ? "Notre menu" : template === "service" ? "Prestations" : isRealEstate ? "Nos projets" : "Nos réalisations"))}</h2>
             {showCatalog && (catalogItems?.length ?? 0) > 0 ? <div className="grid grid-cols-2 gap-3">
@@ -199,7 +200,7 @@ async function PublicCardContent({
             </div> : <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-xs leading-5 text-slate-500">Aucun élément publié pour le moment.</p>}
           </section>}
 
-          {settings.show_request_forms !== false && (allowOrders || allowBookings || allowQuotes || (isEcommerce && showCatalog) || (hasRoomCatalog && allowBookings)) && <PublicWorkspaceRequestForms
+          {!isCreativeProfile && settings.show_request_forms !== false && (allowOrders || allowBookings || allowQuotes || (isEcommerce && showCatalog) || (hasRoomCatalog && allowBookings)) && <PublicWorkspaceRequestForms
             cardSlug={card.slug}
             accent={accent}
             products={(catalogItems ?? []).map((item) => ({ id: item.id, name: item.name, description: item.description, image_url: item.image_url, price: Number(item.price), currency: item.currency }))}
@@ -214,7 +215,7 @@ async function PublicCardContent({
             whatsappPhone={fields.whatsapp || card.phone || ""}
           />}
 
-          {settings.show_request_forms !== false && <PublicBusinessModules
+          {!isCreativeProfile && settings.show_request_forms !== false && <PublicBusinessModules
             slug={card.slug}
             modules={modules}
             catalog={(businessModuleCatalog ?? []) as any[]}
