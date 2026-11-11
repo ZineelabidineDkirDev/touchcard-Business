@@ -29,14 +29,14 @@ export function ProspectIntake() {
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
   const [submittedRequestId, setSubmittedRequestId] = useState("");
+  const [temporaryPassword, setTemporaryPassword] = useState("");
+  const [copiedPassword, setCopiedPassword] = useState(false);
   const [draftLoaded, setDraftLoaded] = useState(false);
   const reduceMotion = useReducedMotion();
   const [logoName, setLogoName] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [provisionalPassword, setProvisionalPassword] = useState("");
-  const [passwordConfirmation, setPasswordConfirmation] = useState("");
-  const serviceChoiceRequired = form.cardType === "e-business" || form.cardType === "service";
-  const visibleSteps = useMemo(() => serviceChoiceRequired ? [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] : [0, 1, 2, 3, 4, 6, 7, 8, 9], [serviceChoiceRequired]);
+remove password form state  const serviceChoiceRequired = form.cardType === "e-business" || form.cardType === "service";
+  const visibleSteps = useMemo(() => serviceChoiceRequired ? [0, 1, 2, 3, 4, 5, 6, 7, 8] : [0, 1, 2, 3, 4, 6, 7, 8], [serviceChoiceRequired]);
   const progress = ((Math.max(0, visibleSteps.indexOf(step)) + 1) / visibleSteps.length) * 100;
 
   useEffect(() => {
@@ -95,9 +95,7 @@ export function ProspectIntake() {
     if (step === 3 && (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) || !form.phone.trim())) return "Indiquez un e-mail valide et votre téléphone.";
     if (step === 4 && !form.cardType) return "Choisissez le type de carte qui vous intéresse.";
     if (step === 5 && serviceChoiceRequired && !form.projectNeeds[0]) return "Choisissez une formule de service pour continuer.";
-    if (step === 8 && (provisionalPassword.length < 10 || !/[A-Za-z]/.test(provisionalPassword) || !/[0-9]/.test(provisionalPassword))) return "Le mot de passe doit contenir au moins 10 caractères, avec des lettres et des chiffres.";
-    if (step === 8 && provisionalPassword !== passwordConfirmation) return "Les deux mots de passe ne correspondent pas.";
-    return "";
+remove password validation    return "";
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -105,7 +103,7 @@ export function ProspectIntake() {
     setError("");
     const validation = validateStep();
     if (validation) { setError(validation); return; }
-    if (step < 9) { setStep((value) => value === 4 && !serviceChoiceRequired ? 6 : value + 1); return; }
+    if (step < 8) { setStep((value) => value === 4 && !serviceChoiceRequired ? 6 : value === 7 ? 8 : value + 1); return; }
 
     setBusy(true);
     const requestId = crypto.randomUUID();
@@ -124,9 +122,16 @@ export function ProspectIntake() {
       const { data: publicUrl } = supabase.storage.from("prospect-logos").getPublicUrl(uploaded.path);
       requestData = { ...form, logoUrl: publicUrl.publicUrl };
     }
-    const result = await submitProspectRequest(requestData, requestId, provisionalPassword);
+    const result = await submitProspectRequest(requestData, requestId);
     if (!result.ok) { setError(result.error); setBusy(false); return; }
 
+    if (!result.temporaryPassword) {
+      setError("La demande a été enregistrée, mais les identifiants temporaires n’ont pas pu être récupérés. Contactez le support avant toute connexion.");
+      setBusy(false);
+      return;
+    }
+    setSubmittedRequestId(requestId);
+    setTemporaryPassword(result.temporaryPassword);
     // Remove locally cached contact details after a successful submission.
     try { window.localStorage.removeItem("touchcard-prospect-draft-v1"); } catch { /* Storage may be disabled. */ }
     // Le compte est créé sans e-mail de confirmation, mais reste verrouillé jusqu’à validation du Super Admin.
@@ -142,10 +147,12 @@ export function ProspectIntake() {
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-3xl text-emerald-700">✓</div>
           <p className="mt-8 text-xs font-black uppercase tracking-[.24em] text-violet-700">TouchCard Business</p>
           <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-5xl">Merci pour votre confiance !</h1>
-          <p className="mx-auto mt-5 max-w-lg leading-8 text-slate-600">Votre demande a bien été transmise à notre équipe. Le délai maximal de validation est de 12 heures à compter de sa réception. Vous serez informé de la suite donnée à votre demande.</p>
+          <p className="mx-auto mt-5 max-w-lg leading-8 text-slate-600">Votre demande a bien été transmise à notre équipe. Après sa validation, votre espace client sera créé automatiquement dans un délai maximal d’une heure.</p>
           <div className="mt-8 rounded-2xl border border-violet-100 bg-violet-50/70 p-5 text-left">\n            <p className="font-bold">Numéro de demande : <span className="font-mono">{submittedRequestId}</span></p>
-            <p className="font-bold">Votre demande est enregistrée.</p>
-            <p className="mt-2 text-sm text-slate-600">Votre compte est créé. Connectez-vous avec votre adresse e-mail et votre mot de passe provisoire. À la première connexion, vous devrez choisir un nouveau mot de passe. Votre espace restera verrouillé jusqu’à la validation du Super Admin.</p>
+            <p className="font-bold">Votre demande est enregistrée et votre mot de passe a été généré automatiquement.</p>
+            <p className="mt-2 text-sm text-slate-600">Identifiant : <strong>{form.email}</strong></p>
+            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-violet-200 bg-white p-3"><code className="min-w-0 flex-1 break-all text-sm font-bold text-slate-900">{temporaryPassword}</code><button type="button" onClick={async () => { try { await navigator.clipboard.writeText(temporaryPassword); setCopiedPassword(true); } catch { setCopiedPassword(false); } }} className="rounded-lg bg-violet-700 px-3 py-2 text-xs font-bold text-white">{copiedPassword ? "Copié ✓" : "Copier"}</button></div>
+            <p className="mt-3 text-sm text-slate-600">Conservez ce mot de passe provisoire. Lors de votre première connexion, vous choisirez votre mot de passe personnel sans avoir à ressaisir l’ancien. L’espace restera verrouillé jusqu’à validation de votre demande.</p>
           </div>
           <Link href="/" className="mt-8 inline-flex rounded-xl bg-violet-700 px-7 py-4 font-bold text-white transition hover:bg-violet-800">Retour à l'accueil</Link>
         </div>
@@ -153,8 +160,8 @@ export function ProspectIntake() {
     );
   }
 
-  const titles = ["Faisons connaissance", "Votre localisation", "Votre activité", "Vos coordonnées", "Votre choix", "Votre formule de service", "Vos réseaux & pages", "Votre personnalisation", "Sécurité du compte", "Récapitulatif"];
-  const subtitles = ["Comment pouvons-nous vous appeler ?", "Dans quelle ville exercez-vous ?", "Quel est votre domaine professionnel ?", "Comment pouvons-nous vous joindre ?", "Quelle solution correspond à votre besoin ?", "Choisissez une formule adaptée à votre activité. Cette étape concerne E-Business et Personnalisée uniquement.", "Ajoutez votre site web, votre CV / portfolio et vos réseaux sociaux.", "Souhaitez-vous une carte personnalisée ?", "Créez un mot de passe provisoire pour votre première connexion.", "Relisez votre demande avant de l’envoyer."];
+  const titles = ["Faisons connaissance", "Votre localisation", "Votre activité", "Vos coordonnées", "Votre choix", "Votre formule de service", "Vos réseaux & pages", "Votre personnalisation", "Récapitulatif"];
+  const subtitles = ["Comment pouvons-nous vous appeler ?", "Dans quelle ville exercez-vous ?", "Quel est votre domaine professionnel ?", "Comment pouvons-nous vous joindre ?", "Quelle solution correspond à votre besoin ?", "Choisissez une formule adaptée à votre activité. Cette étape concerne E-Business et Personnalisée uniquement.", "Ajoutez votre site web, votre CV / portfolio et vos réseaux sociaux.", "Souhaitez-vous une carte personnalisée ?", "Relisez votre demande avant de l’envoyer."];
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[#080a19] px-4 py-10 text-slate-900 sm:px-6 sm:py-14">
@@ -200,10 +207,9 @@ export function ProspectIntake() {
     {form.cardType !== "contact" && <><Field label="Nom de marque" value={form.brandName} onChange={(v) => update("brandName", v)} placeholder="Votre brand name"/><Field label="Adresse professionnelle" value={form.businessAddress} onChange={(v) => update("businessAddress", v)} placeholder="Adresse"/><Field label="Téléphone professionnel" value={form.businessPhone} onChange={(v) => update("businessPhone", v)} placeholder="+212..."/></>}
     <div><label className="mb-2 block text-sm font-semibold text-slate-700">Logo (image, 2 Mo max.)</label><input type="file" accept="image/*" onChange={onLogoChange} className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-indigo-500 file:px-3 file:py-2 file:font-bold file:text-white"/>{logoName && <p className="mt-2 text-xs text-emerald-700">{logoName}</p>}</div>
   </div>}
-</div>}{step === 8 && <div className="space-y-5"><div className="rounded-2xl border border-violet-100 bg-violet-50/60 p-5"><p className="font-bold text-slate-900">Ce mot de passe est provisoire.</p><p className="mt-2 text-sm leading-6 text-slate-600">Il vous permettra de vous connecter après l’envoi de votre demande. Lors de votre première connexion, TouchCard vous demandera de le remplacer par un mot de passe personnel. Ne le partagez avec personne.</p></div><Field label="Mot de passe provisoire (10 caractères minimum, lettres et chiffres)" type="password" value={provisionalPassword} onChange={setProvisionalPassword} placeholder="Créer votre mot de passe" autoComplete="new-password"/><Field label="Confirmer le mot de passe" type="password" value={passwordConfirmation} onChange={setPasswordConfirmation} placeholder="Répéter le mot de passe" autoComplete="new-password"/></div>}
-          {step === 9 && <div className="space-y-3 rounded-2xl border border-violet-100 bg-violet-50/50 p-5 text-sm"><Review label="Nom" value={form.fullName}/><Review label="Ville" value={form.city}/><Review label="Secteur" value={form.sector === "Autre" ? form.sectorOther : form.sector}/><Review label="E-mail" value={form.email}/><Review label="Téléphone" value={form.phone}/><Review label="Pages & réseaux" value={form.socialLinks.filter((item) => item.url.trim()).map((item) => item.platform + ": " + item.url).join(" · ") || "Non renseignés"}/><Review label="Nom de l’activité" value={form.brandName || (form.cardType === "contact" ? form.fullName : "")}/><Review label="Carte souhaitée" value={cards.find((card) => card.id === form.cardType)?.title || ""}/><Review label="Prix indicatif" value={({ contact: "149 DH", "google-review": "199 DH", "e-business": "399 DH", service: "499 DH" } as Record<string, string>)[form.cardType] || "À confirmer"}/><Review label="Formule choisie" value={form.projectNeeds[0] || (form.cardType === "contact" ? "Non applicable — E-Contact" : form.cardType === "google-review" ? "Non applicable — Avis Google" : "Non sélectionnée")}/><Review label="Personnalisation" value={form.customRequested ? "Oui" : "Non"}/>{form.customRequested && <><Review label="Marque" value={form.brandName}/><Review label="Logo" value={logoName || "Non fourni"}/><Review label="Adresse" value={form.businessAddress}/><Review label="Téléphone professionnel" value={form.businessPhone}/></>}</div>}
+</div>}{step === 8 && <div className="space-y-3 rounded-2xl border border-violet-100 bg-violet-50/50 p-5 text-sm"><Review label="Nom" value={form.fullName}/><Review label="Ville" value={form.city}/><Review label="Secteur" value={form.sector === "Autre" ? form.sectorOther : form.sector}/><Review label="E-mail" value={form.email}/><Review label="Téléphone" value={form.phone}/><Review label="Pages & réseaux" value={form.socialLinks.filter((item) => item.url.trim()).map((item) => item.platform + ": " + item.url).join(" · ") || "Non renseignés"}/><Review label="Nom de l’activité" value={form.brandName || (form.cardType === "contact" ? form.fullName : "")}/><Review label="Carte souhaitée" value={cards.find((card) => card.id === form.cardType)?.title || ""}/><Review label="Prix indicatif" value={({ contact: "149 DH", "google-review": "199 DH", "e-business": "399 DH", service: "499 DH" } as Record<string, string>)[form.cardType] || "À confirmer"}/><Review label="Formule choisie" value={form.projectNeeds[0] || (form.cardType === "contact" ? "Non applicable — E-Contact" : form.cardType === "google-review" ? "Non applicable — Avis Google" : "Non sélectionnée")}/><Review label="Personnalisation" value={form.customRequested ? "Oui" : "Non"}/>{form.customRequested && <><Review label="Marque" value={form.brandName}/><Review label="Logo" value={logoName || "Non fourni"}/><Review label="Adresse" value={form.businessAddress}/><Review label="Téléphone professionnel" value={form.businessPhone}/></>}</div>}
           {error && <p role="alert" className="mt-5 rounded-xl border border-rose-400/20 bg-rose-400/10 p-3 text-sm text-rose-700">{error}</p>}
-          <div className="mt-9 flex flex-col-reverse justify-between gap-3 sm:flex-row"><button type="button" disabled={step === 0 || busy} onClick={() => { setError(""); setStep((value) => value === 6 && !serviceChoiceRequired ? 4 : value - 1); }} className="rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 transition hover:border-violet-300 hover:bg-violet-50 disabled:opacity-30">Précédent</button><button type="submit" disabled={busy} className="rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-7 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-indigo-950/30 transition hover:-translate-y-0.5 hover:brightness-110 disabled:opacity-60">{busy ? "Enregistrement..." : step === 9 ? "Créer mon compte et envoyer la demande" : "Suivant →"}</button></div>
+          <div className="mt-9 flex flex-col-reverse justify-between gap-3 sm:flex-row"><button type="button" disabled={step === 0 || busy} onClick={() => { setError(""); setStep((value) => value === 8 ? 7 : value === 6 && !serviceChoiceRequired ? 4 : value - 1); }} className="rounded-xl border border-slate-300 bg-white px-6 py-3.5 text-sm font-bold text-slate-700 transition hover:border-violet-300 hover:bg-violet-50 disabled:opacity-30">Précédent</button><button type="submit" disabled={busy} className="rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 px-7 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-indigo-950/30 transition hover:-translate-y-0.5 hover:brightness-110 disabled:opacity-60">{busy ? "Enregistrement..." : step === 8 ? "Envoyer ma demande" : "Suivant →"}</button></div>
         </form>
         <p className="mt-7 text-center text-[11px] leading-5 text-slate-500">En confirmant, vous acceptez que TouchCard utilise ces informations pour traiter votre demande et vous contacter à ce sujet.</p>
       </section>
