@@ -98,7 +98,7 @@ async function PublicCardContent({
   const videoLinks = (links ?? []).filter((link) => link.kind === "youtube");
   const featuredLinks = (links ?? []).filter((link) => template === "contact" ? ["website", "other"].includes(link.kind) : ["calendly", "store", "website", "other"].includes(link.kind));
   const faqFields = (fields.custom_fields ?? []).filter((field) => field.visible && /^(faq|question|q\d)/i.test(field.key + " " + field.label) && field.label && field.value);
-  const galleryFields = template === "contact" && modules.includes("gallery")
+  const galleryFields = template === "contact"
     ? (fields.custom_fields ?? []).filter((field) => field.visible && /^(photo|image|galerie|gallery|portfolio)/i.test(field.label.trim()) && /^https?:\/\//i.test(field.value.trim()))
     : [];
   const infoFields = (fields.custom_fields ?? []).filter((field) => field.visible && !faqFields.includes(field) && !galleryFields.includes(field) && field.label && field.value);
