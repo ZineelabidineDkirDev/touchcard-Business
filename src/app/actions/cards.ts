@@ -193,9 +193,30 @@ export async function saveClientCardProfile(formData: FormData) {
   const workspaceConfig = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[] };
   const galleryEnabled = !workspaceConfig.version || (Array.isArray(workspaceConfig.modules) && workspaceConfig.modules.includes("gallery"));
   const { data: existingCard } = await supabase.from("cards").select("theme,public_settings,public_fields").eq("id", cardId).eq("organization_id", organizationId).maybeSingle();
+  const existingCustomFields = (((existingCard?.public_fields as any)?.custom_fields ?? []) as typeof customFields);
+  const cvFile = formData.get("cv_pdf");
+  if (cvFile instanceof File && cvFile.size > 0) {
+    if (!galleryEnabled) redirect("/dashboard/cards?card_error=module");
+    if (cvFile.size > 10 * 1024 * 1024 || cvFile.type !== "application/pdf" || !cvFile.name.toLowerCase().endsWith(".pdf")) redirect("/dashboard/cards?card_error=cv_format");
+    const safeName = cvFile.name.replace(/[^a-zA-Z0-9._-]/g, "-").slice(-90) || "cv-professionnel.pdf";
+    const storagePath = organizationId + "/cv/" + crypto.randomUUID() + "-" + safeName;
+    const { error: uploadError } = await supabase.storage.from("client-media").upload(storagePath, cvFile, {
+      cacheControl: "3600", contentType: "application/pdf", upsert: false,
+    });
+    if (uploadError) {
+      console.error("Client CV upload failed", { organizationId, message: uploadError.message });
+      redirect("/dashboard/cards?card_error=cv_upload");
+    }
+    const { data: publicUrl } = supabase.storage.from("client-media").getPublicUrl(storagePath);
+    customFields = customFields.filter((field) => !/cv professionnel|^cv$/i.test(field.label.trim()));
+    customFields.push({ key: "cv_professionnel", label: "CV professionnel", value: publicUrl.publicUrl, visible: true });
+  } else {
+    const existingCv = existingCustomFields.find((field) => /cv professionnel|^cv$/i.test(field.label.trim()));
+    customFields = customFields.filter((field) => !/cv professionnel|^cv$/i.test(field.label.trim()));
+    if (existingCv) customFields.push(existingCv);
+  }
   if (!galleryEnabled) {
-    const existingFields = ((existingCard?.public_fields as any)?.custom_fields ?? []) as typeof customFields;
-    customFields = [...customFields, ...existingFields.filter((field) => /portfolio|cv professionnel/i.test(field.key + " " + field.label))].slice(0, 20);
+    customFields = [...customFields, ...existingCustomFields.filter((field) => /portfolio/i.test(field.key + " " + field.label))].slice(0, 20);
   }
   const existingTheme = (existingCard?.theme ?? {}) as Record<string, unknown>;
   const requestedAccent = String(formData.get("accent_color") ?? "").trim().toUpperCase();
