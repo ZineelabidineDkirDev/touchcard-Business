@@ -143,7 +143,6 @@ export async function saveClientCardVisibility(formData: FormData) {
   const template = String(workspaceConfig.template ?? (card.theme as any)?.template ?? "contact");
   const nextSettings: Record<string, boolean> = { ...current, show_save_contact: true };
   for (const key of keys) nextSettings[key] = formData.get(key) === "on";
-  if (template === "e-business" && current.show_google_reviews === undefined && formData.get("show_google_reviews") === null) nextSettings.show_google_reviews = true;
   if (isCreativeProfile) {
     for (const key of ["show_catalog", "show_catalog_pdf", "show_orders", "show_bookings", "show_quotes", "show_request_forms"]) nextSettings[key] = false;
     nextSettings.show_gallery = true;
