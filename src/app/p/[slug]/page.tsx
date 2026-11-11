@@ -57,9 +57,10 @@ async function PublicCardContent({
   const isHealth = /sante|medical|medecin|dentiste|clinique|cabinet medical|kinesitherapie|bien.?etre/.test(activitySector);
   const isHospitality = /hotel|riad|maison d.?hotes|hebergement|residence touristique|auberge/.test(activitySector);
   const isRealEstate = /immobilier|agence immobiliere|promotion immobiliere|location immobiliere/.test(activitySector);
-  const isBeauty = /beaute|cosmetique?s?|cosmetics?|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage|barber|barbier|barbershop/.test(activitySector + " " + selectedNeed);
+  const supportsBusinessCatalog = ["service", "e-business"].includes(template);
+  const isBeauty = supportsBusinessCatalog && /beaute|cosmetique?s?|cosmetics?|esthetique|spa|hammam|salon de coiffure|coiffure|onglerie|maquillage|institut de beaute|massage|barber|barbier|barbershop/.test(activitySector + " " + selectedNeed);
   const isBarber = /barber|barbier|barbershop/.test(activitySector + " " + selectedNeed);
-  const isRestaurant = /restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(activitySector + " " + selectedNeed);
+  const isRestaurant = supportsBusinessCatalog && /restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(activitySector + " " + selectedNeed);
   const hasRoomCatalog = modules.includes("room_catalog");
   const profileDraft = workspaceConfig.ai_suggestions?.profile_draft;
   const originalNeeds = workspaceConfig.original_client_choices?.project_needs;
@@ -69,11 +70,12 @@ async function PublicCardContent({
   const profileCategories = Array.isArray(profileDraft?.categories)
     ? profileDraft.categories.map((value) => String(value).trim()).filter(Boolean).slice(0, 8)
     : [];
-  const showCatalog = (["service", "e-business"].includes(template) || isBeauty || isRestaurant || isRealEstate)
+  const showCatalog = supportsBusinessCatalog
+    && (["service", "e-business"].includes(template) || isBeauty || isRestaurant || isRealEstate)
     && (!workspaceConfig.version || modules.some((module) => module === "service_catalog" || module === "room_catalog" || (module === "product_catalog" && isEcommerce)) || isBeauty || isRestaurant || isRealEstate);
-  const allowOrders = isEcommerce && modules.includes("orders");
-  const allowBookings = modules.includes("bookings") || isBeauty;
-  const allowQuotes = modules.includes("quote_requests");
+  const allowOrders = template === "e-business" && isEcommerce && modules.includes("orders");
+  const allowBookings = template !== "contact" && (modules.includes("bookings") || isBeauty);
+  const allowQuotes = template !== "contact" && modules.includes("quote_requests");
   const { data: catalogItems } = showCatalog
     ? await supabase.from("products").select("id,name,description,price,currency,image_url")
       .eq("organization_id", card.organization_id).eq("is_active", true).order("created_at", { ascending: false }).limit(24)
@@ -94,9 +96,12 @@ async function PublicCardContent({
   const mapDirectionsUrl = exactAddress ? "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(exactAddress) : null;
   const socialLinks = (links ?? []).filter((link) => ["instagram", "facebook", "linkedin", "tiktok", "youtube", "x", "pinterest", "whatsapp", "telegram"].includes(link.kind));
   const videoLinks = (links ?? []).filter((link) => link.kind === "youtube");
-  const featuredLinks = (links ?? []).filter((link) => ["calendly", "store", "website", "other"].includes(link.kind));
+  const featuredLinks = (links ?? []).filter((link) => template === "contact" ? ["website", "other"].includes(link.kind) : ["calendly", "store", "website", "other"].includes(link.kind));
   const faqFields = (fields.custom_fields ?? []).filter((field) => field.visible && /^(faq|question|q\d)/i.test(field.key + " " + field.label) && field.label && field.value);
-  const infoFields = (fields.custom_fields ?? []).filter((field) => field.visible && !faqFields.includes(field) && field.label && field.value);
+  const galleryFields = template === "contact" && modules.includes("gallery")
+    ? (fields.custom_fields ?? []).filter((field) => field.visible && /^(photo|image|galerie|gallery|portfolio)/i.test(field.label.trim()) && /^https?:\/\//i.test(field.value.trim()))
+    : [];
+  const infoFields = (fields.custom_fields ?? []).filter((field) => field.visible && !faqFields.includes(field) && !galleryFields.includes(field) && field.label && field.value);
 
   return (
     <main className="min-h-screen bg-slate-100 px-0 py-0 sm:px-5 sm:py-8">
@@ -131,6 +136,7 @@ async function PublicCardContent({
             </TrackedPublicLink>
           </div>
           {settings.show_about !== false && card.bio && (() => { const words = card.bio.trim().split(/\s+/); const shortBio = words.slice(0, 20).join(" "); const isLong = words.length > 20; return <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-slate-900">À propos</h2><p className="mt-2 whitespace-pre-line text-[13px] leading-[1.7] text-slate-700">{isLong ? shortBio + "…" : card.bio}</p>{isLong && <details className="mt-2"><summary className="w-fit cursor-pointer list-none text-xs font-bold" style={{ color: accent }}>Lire plus <span aria-hidden="true">＋</span></summary><p className="mt-2 whitespace-pre-line text-[13px] leading-[1.7] text-slate-700">{card.bio}</p></details>}{(fields.location || fields.hours) && <div className="mt-3 flex flex-wrap gap-2">{fields.location && <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700"><span aria-hidden="true">📍</span>{fields.location}</span>}{fields.hours && <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700"><span aria-hidden="true">◷</span>{fields.hours}</span>}</div>}</section>; })()}
+          {galleryFields.length > 0 && <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-slate-900">Portfolio & galerie</h2><p className="mt-1 text-xs text-slate-500">Quelques photos pour découvrir mon travail.</p><div className="mt-3 grid grid-cols-2 gap-3">{galleryFields.map((field) => <a key={field.key} href={field.value} target="_blank" rel="noopener noreferrer" className="overflow-hidden rounded-xl border border-slate-100 bg-slate-50"><img src={field.value} alt={field.label} loading="lazy" className="h-36 w-full object-cover"/><span className="block truncate px-3 py-2 text-xs font-semibold text-slate-700">{field.label}</span></a>)}</div></section>}
           {settings.show_contact !== false && (card.phone || card.email || card.website || whatsapp) && <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <h2 className="text-base font-extrabold text-slate-950">Restons en contact</h2>
             <p className="mt-1 text-xs text-slate-500">Retrouvez facilement les coordonnées de {card.company_name || card.full_name}.</p>
