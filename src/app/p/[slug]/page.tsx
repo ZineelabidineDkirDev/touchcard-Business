@@ -181,7 +181,7 @@ async function PublicCardContent({
             {showCatalog && (catalogItems?.length ?? 0) > 0 ? <div className="grid grid-cols-2 gap-3">
               {(catalogItems ?? []).map((item) => <article key={item.id} className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                 {item.image_url ? <img src={item.image_url} alt={item.name} loading="lazy" className="h-32 w-full object-cover"/> : <div className="flex h-24 items-center justify-center bg-slate-50 text-3xl text-slate-300">✦</div>}
-                <div className="p-4"><h3 className="font-bold text-slate-900">{item.name}</h3>{item.description && <p className="mt-1 text-sm leading-6 text-slate-600">{item.description}</p>}<p className="mt-3 text-sm font-black text-slate-700">{moduleSettings.service_catalog?.price_display === "hidden" || moduleSettings.service_catalog?.price_display === "on_request" ? "Prix sur demande" : Number(item.price).toLocaleString("fr-MA") + " " + item.currency}</p></div>
+                <div className="p-4"><h3 className="font-bold text-slate-900">{item.name}</h3>{item.description && <p className="mt-1 text-sm leading-6 text-slate-600">{item.description}</p>}<p className="mt-3 text-sm font-black text-slate-700">{(moduleSettings.service_catalog?.price_display ?? moduleSettings.product_catalog?.price_display) === "hidden" || (moduleSettings.service_catalog?.price_display ?? moduleSettings.product_catalog?.price_display) === "on_request" ? "Prix sur demande" : Number(item.price).toLocaleString("fr-MA") + " " + item.currency}</p></div>
               </article>)}
             </div> : <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-xs leading-5 text-slate-500">Aucun élément publié pour le moment.</p>}
           </section>}
@@ -194,8 +194,8 @@ async function PublicCardContent({
             allowBookings={allowBookings}
             allowQuotes={allowQuotes}
             shopMode={isEcommerce}
-            bookingLabel={isTraining ? "S'inscrire" : isHealth ? "Prendre rendez-vous" : isHospitality ? "Réserver une chambre" : "Réserver"}
-            bookingHint={isTraining ? "Demander une inscription à une formation" : isHealth ? "Choisir une date de consultation" : isHospitality ? "Choisir les dates de votre séjour" : "Choisir une date"}
+            bookingLabel={String(moduleSettings.bookings?.section_title || (isTraining ? "S'inscrire" : isHealth ? "Prendre rendez-vous" : isHospitality ? "Réserver une chambre" : "Réserver"))}
+            bookingHint={String(moduleSettings.bookings?.confirmation_message || (isTraining ? "Demander une inscription à une formation" : isHealth ? "Choisir une date de consultation" : isHospitality ? "Choisir les dates de votre séjour" : "Choisir une date"))}
             bookingDateMode={isHospitality ? "stay" : "datetime"}
             serviceMode={isBeauty}
             whatsappPhone={fields.whatsapp || card.phone || ""}
