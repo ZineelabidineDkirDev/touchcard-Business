@@ -210,7 +210,7 @@ export async function saveClientCardProfile(formData: FormData) {
   const cvFile = formData.get("cv_pdf");
   if (cvFile instanceof File && cvFile.size > 0) {
     if (!galleryEnabled) redirect("/dashboard/cards?card_error=module");
-    if (cvFile.size > 10 * 1024 * 1024 || cvFile.type !== "application/pdf" || !cvFile.name.toLowerCase().endsWith(".pdf")) redirect("/dashboard/cards?card_error=cv_format");
+    if (cvFile.size > 3 * 1024 * 1024 || cvFile.type !== "application/pdf" || !cvFile.name.toLowerCase().endsWith(".pdf")) redirect("/dashboard/cards?card_error=cv_format");
     const safeName = cvFile.name.replace(/[^a-zA-Z0-9._-]/g, "-").slice(-90) || "cv-professionnel.pdf";
     const storagePath = organizationId + "/cv/" + crypto.randomUUID() + "-" + safeName;
     const { error: uploadError } = await supabase.storage.from("client-media").upload(storagePath, cvFile, {
