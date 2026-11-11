@@ -190,7 +190,8 @@ export async function createProspectCustomer(formData: FormData) {
     redirect(`/dashboard/prospects/${id}/configure?error=${encodeURIComponent("Configuration invalide. Veuillez recommencer.")}`);
   }
 
-  workspaceConfig.version = 2;\n  const allowedTemplates = ["e-business", "contact", "service", "google-review"];
+  workspaceConfig.version = 2;
+  const allowedTemplates = ["e-business", "contact", "service", "google-review"];
   const allowedModules = CARD_MODULES.map((module) => module.id);
   if (!allowedTemplates.includes(workspaceConfig.template) || !Array.isArray(workspaceConfig.modules)
     || workspaceConfig.modules.some((module) => !allowedModules.includes(module))) {
