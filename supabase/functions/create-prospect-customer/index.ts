@@ -191,23 +191,26 @@ Deno.serve(async (req: Request) => {
       return [{ label: platform.slice(0, 60), url, kind: kindByPlatform[normalizedPlatform] ?? "other", position: index }];
     });
     const businessAddress = String(prospect.business_address ?? "").trim();
-    const displayAddress = businessAddress && !safeHttpUrl(businessAddress) ? businessAddress : (prospect.city || "");
+    const displayAddress = businessAddress && !safeHttpUrl(businessAddress) ? businessAddress : "";
     const businessPhone = String(prospect.business_phone ?? "").trim();
+    const generatedFields = (profileDraft?.card_fields ?? [])
+      .filter((field: any) => !["tagline", "location", "hours", "whatsapp", "google_review_url", "company_phone", "company_email", "company_address", "industry", "contact_person_name"].includes(field.key))
+      .map((field: any) => ({ key: field.key, label: field.label, value: "", visible: field.visible }));
+    if (cardType !== "contact" && !generatedFields.some((field: any) => field.key === "contact_person")) {
+      generatedFields.unshift({ key: "contact_person", label: "Nom du contact", value: prospect.full_name ?? "", visible: true });
+    }
     const publicFields = {
       tagline: profileDraft?.tagline ?? "",
-      location: displayAddress,
+      location: displayAddress || String(prospect.city ?? ""),
       hours: "",
       whatsapp: businessPhone,
       company_phone: businessPhone,
       company_email: prospect.email ?? "",
       company_address: displayAddress,
       industry: prospect.activity_sector ?? "",
+      contact_person_name: cardType === "contact" ? "" : String(prospect.full_name ?? ""),
       google_review_url: "",
-      custom_fields: (profileDraft?.card_fields ?? [])
-        .filter((field: any) => !["tagline", "location", "hours", "whatsapp", "google_review_url", "company_phone", "company_email", "company_address", "industry"].includes(field.key))
-        .map((field: any) => ({
-          key: field.key, label: field.label, value: "", visible: field.visible,
-        })),
+      custom_fields: generatedFields,
     };
     const { data: card, error: cardError } = await admin.from("cards").insert({
       organization_id: organization.id,
