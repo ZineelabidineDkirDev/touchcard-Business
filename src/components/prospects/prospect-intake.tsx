@@ -123,8 +123,8 @@ export function ProspectIntake() {
   function validateStep() {
     if (step === 0 && !form.fullName.trim()) return "Indiquez votre nom et prénom.";
     if (step === 1 && !form.city.trim()) return "Indiquez votre ville.";
-    if (step === 4 && form.cardType !== "contact" && (!form.sector || form.sector.includes("|") || (form.sector === "Autre" && !form.sectorOther.trim()))) return "Choisissez un seul domaine professionnel.";
-    if (step === 4 && form.cardType !== "contact" && !form.brandName.trim()) return "Indiquez le nom de votre activité ou de votre marque."
+    if (step === 4 && serviceChoiceRequired && (!form.sector || form.sector.includes("|") || (form.sector === "Autre" && !form.sectorOther.trim()))) return "Choisissez un seul domaine professionnel.";
+    if (step === 4 && serviceChoiceRequired && !form.brandName.trim()) return "Indiquez le nom de votre activité ou de votre marque."
     if (step === 3 && (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email) || !form.phone.trim())) return "Indiquez un e-mail valide et votre téléphone.";
     if (step === 4 && !form.cardType) return "Choisissez le type de carte qui vous intéresse.";
     if (step === 5 && serviceChoiceRequired && !form.projectNeeds[0]) return "Choisissez une formule de service pour continuer.";
