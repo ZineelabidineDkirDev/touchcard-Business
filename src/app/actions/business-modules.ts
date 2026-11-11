@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 
 type ModuleContext = { supabase: Awaited<ReturnType<typeof createClient>>; organizationId: string; modules: string[] };
 
-async function getModuleContext(required: string[]): Promise<ModuleContext | null> {
+async function getModuleContext(required: string[], match: "all" | "any" = "all"): Promise<ModuleContext | null> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
@@ -16,7 +16,7 @@ async function getModuleContext(required: string[]): Promise<ModuleContext | nul
     .select("workspace_config").eq("id", membership.organization_id).maybeSingle();
   const config = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[] };
   const modules = Array.isArray(config.modules) ? config.modules : [];
-  if (config.version && !required.every((id) => modules.includes(id))) return null;
+  if (config.version && required.length && !(match === "any" ? required.some((id) => modules.includes(id)) : required.every((id) => modules.includes(id)))) return null;
   return { supabase, organizationId: membership.organization_id, modules };
 }
 
@@ -100,9 +100,9 @@ export async function createSchoolProgram(data: FormData) {
 }
 
 async function updateStatus(table: string, id: string, status: string, modules: string[]) {
-  const ctx = await getModuleContext(modules);
+  const ctx = await getModuleContext(modules, "any");
   if (!ctx || !id || !["pending", "confirmed", "in_progress", "completed", "rejected", "cancelled", "active"].includes(status)) return;
-  const { error } = await ctx.supabase.from(table).update({ status, updated_at: new Date().toISOString() })
+  const { error } = await (ctx.supabase.from(table as never) as any).update({ status, updated_at: new Date().toISOString() })
     .eq("id", id).eq("organization_id", ctx.organizationId);
   if (error) console.error("Business module status update failed", error);
   revalidatePath("/dashboard/modules");
