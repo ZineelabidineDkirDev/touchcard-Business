@@ -69,7 +69,7 @@ Deno.serve(async (req: Request) => {
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json(req, { error: "Adresse e-mail invalide." }, 400);
     if (email === PLATFORM_SUPER_ADMIN_EMAIL) return json(req, { error: "Cette adresse est réservée au compte Super Admin." }, 403);
-remove client password check    if (fullName.length > 160 || brandName.length > 160 || email.length > 254 || phone.length > 60 || city.length > 120 || sector.length > 160) {
+    if (fullName.length > 160 || brandName.length > 160 || email.length > 254 || phone.length > 60 || city.length > 120 || sector.length > 160) {
       return json(req, { error: "Une information dépasse la longueur autorisée." }, 400);
     }
 
