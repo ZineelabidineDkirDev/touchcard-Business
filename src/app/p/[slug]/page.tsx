@@ -75,6 +75,7 @@ async function PublicCardContent({
     && (["service", "e-business"].includes(template) || isBeauty || isRestaurant || isRealEstate)
     && (!workspaceConfig.version || modules.some((module) => module === "service_catalog" || module === "room_catalog" || (module === "product_catalog" && isEcommerce)) || isBeauty || isRestaurant || isRealEstate);
   const visibilitySettings = (card.public_settings ?? {}) as Record<string, boolean>;
+  const galleryEnabled = !workspaceConfig.version || modules.includes("gallery");
   const allowOrders = template === "e-business" && isEcommerce && modules.includes("orders") && visibilitySettings.show_orders !== false;
   const allowBookings = template !== "contact" && (modules.includes("bookings") || isBeauty) && visibilitySettings.show_bookings !== false;
   const allowQuotes = template !== "contact" && modules.includes("quote_requests") && visibilitySettings.show_quotes !== false;
@@ -100,9 +101,12 @@ async function PublicCardContent({
   const videoLinks = (links ?? []).filter((link) => link.kind === "youtube");
   const featuredLinks = (links ?? []).filter((link) => template === "contact" ? ["website", "other"].includes(link.kind) : ["calendly", "store", "website", "other"].includes(link.kind));
   const faqFields = (fields.custom_fields ?? []).filter((field) => field.visible && /^(faq|question|q\d)/i.test(field.key + " " + field.label) && field.label && field.value);
-  const galleryFields = template === "contact"
+  const galleryFields = galleryEnabled && visibilitySettings.show_gallery !== false
     ? (fields.custom_fields ?? []).filter((field) => field.visible && /^(photo|image|galerie|gallery|portfolio)/i.test(field.label.trim()) && /^https?:\/\//i.test(field.value.trim()))
     : [];
+  const cvField = galleryEnabled && visibilitySettings.show_cv !== false
+    ? (fields.custom_fields ?? []).find((field) => field.visible && /cv professionnel|^cv$/i.test(field.label.trim()) && /^https?:\/\//i.test(field.value.trim()))
+    : null;
   const infoFields = (fields.custom_fields ?? []).filter((field) => field.visible && !faqFields.includes(field) && !galleryFields.includes(field) && field.label && field.value);
 
   return (
@@ -139,6 +143,7 @@ async function PublicCardContent({
           </div>
           {settings.show_about !== false && card.bio && (() => { const words = card.bio.trim().split(/\s+/); const shortBio = words.slice(0, 20).join(" "); const isLong = words.length > 20; return <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-slate-900">À propos</h2><p className="mt-2 whitespace-pre-line text-[13px] leading-[1.7]" style={{ color: textColor }}>{isLong ? shortBio + "…" : card.bio}</p>{isLong && <details className="mt-2"><summary className="w-fit cursor-pointer list-none text-xs font-bold" style={{ color: accent }}>Lire plus <span aria-hidden="true">＋</span></summary><p className="mt-2 whitespace-pre-line text-[13px] leading-[1.7]" style={{ color: textColor }}>{card.bio}</p></details>}{(fields.location || fields.hours) && <div className="mt-3 flex flex-wrap gap-2">{fields.location && <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700"><span aria-hidden="true">📍</span>{fields.location}</span>}{fields.hours && <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700"><span aria-hidden="true">◷</span>{fields.hours}</span>}</div>}</section>; })()}
           {galleryFields.length > 0 && <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-slate-900">Portfolio & galerie</h2><p className="mt-1 text-xs text-slate-500">Quelques photos pour découvrir mon travail.</p><div className="mt-3 grid grid-cols-2 gap-3">{galleryFields.map((field) => <a key={field.key} href={field.value} target="_blank" rel="noopener noreferrer" className="overflow-hidden rounded-xl border border-slate-100 bg-slate-50"><img src={field.value} alt={field.label} loading="lazy" className="h-36 w-full object-cover"/><span className="block truncate px-3 py-2 text-xs font-semibold text-slate-700">{field.label}</span></a>)}</div></section>}
+          {cvField && <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-slate-900">CV professionnel</h2><a href={cvField.value} target="_blank" rel="noopener noreferrer" className="mt-3 flex items-center justify-center rounded-xl px-4 py-3 text-sm font-bold text-white" style={{ backgroundColor: accent }}>Consulter / télécharger mon CV ↗</a></section>}
           {settings.show_contact !== false && (card.phone || card.email || card.website || whatsapp) && <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <h2 className="text-base font-extrabold text-slate-950">Restons en contact</h2>
             <p className="mt-1 text-xs text-slate-500">Retrouvez facilement les coordonnées de {template === "contact" ? card.full_name : card.company_name || card.full_name}.</p>
