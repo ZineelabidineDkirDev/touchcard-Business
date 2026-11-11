@@ -278,8 +278,7 @@ Deno.serve(async (req: Request) => {
       && verifiedTag?.card_id === card.id
       && verifiedConfig.template === cardType
       && prospect.client_access_enabled === true
-      && prospect.password_initialized === true
-      && verifiedModules.includes("dashboard")
+remove password setup prerequisite      && verifiedModules.includes("dashboard")
       && verifiedModules.includes("digital_card")
       && missingBeautyModules.length === 0;
     if (!verificationOk) {
@@ -288,7 +287,7 @@ Deno.serve(async (req: Request) => {
     }
 
     const { data: linked, error: linkError } = await admin.from("prospect_requests")
-      .update({ status: "in_production", updated_at: new Date().toISOString() })
+      .update({ status: "in_production", client_access_enabled: Boolean(prospect.password_initialized), updated_at: new Date().toISOString() })
       .eq("id", prospect.id).eq("user_id", customerUserId).select("id,status").maybeSingle();
     if (linkError || !linked || linked.status !== "in_production") throw new Error("L’espace client a été créé mais le rattachement de la demande n’a pas pu être vérifié.");
 
