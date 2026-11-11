@@ -263,7 +263,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
           const currentAccent = typeof card.theme?.accent === "string" ? card.theme.accent : "#2563EB";
           const currentTextColor = typeof card.theme?.text_color === "string" ? card.theme.text_color : "#111827";
           const storedCustomFields: EditableCardField[] = Array.isArray(fields.custom_fields) ? fields.custom_fields : [];
-          const cvField = storedCustomFields.find((field) => /cv professionnel|^cv$/i.test(field.label.trim()) && /^https?:\\/\\//i.test(field.value.trim()));
+          const cvField = storedCustomFields.find((field) => /cv professionnel|^cv$/i.test(field.label.trim()) && (field.value.trim().startsWith("https://") || field.value.trim().startsWith("http://")));
           const initialCustomFields: EditableCardField[] = storedCustomFields.length
             ? storedCustomFields.filter((field) => galleryEnabled || !/portfolio|cv professionnel/i.test(field.key + " " + field.label))
             : (profileDraft?.card_fields ?? []).filter((field) => galleryEnabled || !/portfolio|cv/i.test(field.key + " " + field.label)).map((field) => ({ key: field.key, label: field.label, value: "", visible: field.visible }));
