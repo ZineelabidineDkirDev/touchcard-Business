@@ -123,6 +123,7 @@ export async function updateProspectStatus(formData: FormData) {
         body: {
           request_id: id,
           workspace_config: {
+            version: 2,
             template: blueprint.template,
             modules: blueprint.modules,
             plan_code: "to_define",
