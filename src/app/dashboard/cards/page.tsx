@@ -1,14 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { createClientCard, saveClientCardProfile, saveClientCardVisibility, addClientCardLink, deleteClientCardLink, toggleClientCardPublication, createCatalogItem, updateCatalogItem, deleteCatalogItem, importCatalogItems, uploadCatalogPdf } from "@/app/actions/cards";
+import { createClientCard, saveClientCardProfile, addClientCardLink, deleteClientCardLink, toggleClientCardPublication, createCatalogItem, updateCatalogItem, deleteCatalogItem, importCatalogItems, uploadCatalogPdf } from "@/app/actions/cards";
 import { createClient } from "@/lib/supabase/server";
 import { CustomCardFieldsEditor, type EditableCardField } from "@/components/cards/custom-card-fields-editor";
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
 import { AdminClientCards } from "@/components/dashboard/admin-client-cards";
 import { MediaImagePicker } from "@/components/dashboard/media-image-picker";
 import { PopupDialog } from "@/components/dashboard/popup-dialog";
-import { CardVisibilityPreview } from "@/components/cards/card-visibility-preview";
 import { CardColorPicker } from "@/components/cards/card-color-picker";
 
 type Card = {
@@ -300,31 +299,39 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                   </>}
                   {config.template === "google-review" && <label className="text-xs font-semibold text-slate-600">Lien Google Avis<input name="google_review_url" type="url" defaultValue={fields.google_review_url ?? ""} placeholder="https://..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>}
                   <div className="sm:col-span-2"><CustomCardFieldsEditor initialFields={initialCustomFields}/></div>
+                  <section className="sm:col-span-2 rounded-2xl border border-slate-200 bg-white p-4">
+                    <div className="mb-4">
+                      <p className="text-xs font-black uppercase tracking-wider text-indigo-600">3. Organisation de la carte publique</p>
+                      <h4 className="mt-1 text-base font-black text-slate-900">Modules visibles de ma carte</h4>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">Choisissez ici les rubriques que vos visiteurs verront après un scan. Ces réglages sont enregistrés avec le reste de votre personnalisation.</p>
+                    </div>
+                    <div className="space-y-4">
+                      {[
+                        { title: "Présentation & identité", items: [["show_about", "Présentation / À propos"], ["show_company_info", "Informations entreprise"], ["show_categories", "Domaines et spécialités"], ["show_info_fields", "Informations complémentaires"]] },
+                        { title: "Coordonnées", items: [["show_contact", "Bloc de contact"], ["show_phone", "Téléphone"], ["show_email", "E-mail"], ["show_website", "Site web"]] },
+                        { title: "Services & demandes", items: [["show_catalog", catalogLabel], ["show_catalog_pdf", "Catalogue PDF"], ["show_orders", "Commandes boutique"], ["show_bookings", "Réservations"], ["show_quotes", "Demandes de devis"], ["show_request_forms", "Formulaires de demande"]] },
+                        { title: "Communication & découverte", items: [["show_google_reviews", "Avis Google"], ["show_social_links", "Réseaux sociaux"], ["show_featured_links", "Liens mis en avant"], ["show_faq", "Questions fréquentes (FAQ)"], ["show_videos", "Vidéos"], ["show_location", "Adresse et carte"]] },
+                      ].map((group) => (
+                        <div key={group.title}>
+                          <h5 className="mb-2 text-xs font-bold text-slate-700">{group.title}</h5>
+                          <div className="grid gap-2 sm:grid-cols-2">
+                            {group.items.map(([key, label]) => (
+                              <label key={key} className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs font-semibold text-slate-700 transition hover:border-indigo-300 hover:bg-indigo-50/50">
+                                <input type="checkbox" name={key} defaultChecked={settings[key] !== false} className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"/>
+                                <span>{label}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="mt-3 rounded-xl bg-amber-50 px-3 py-2.5 text-[11px] leading-5 text-amber-800">Les fonctionnalités non incluses dans votre formule ou non activées par l’administrateur restent indisponibles, même si vous cochez leur affichage.</p>
+                  </section>
                 </div>
                 <div className="sticky bottom-0 -mx-1 border-t border-slate-100 bg-white/95 px-1 py-3 backdrop-blur"><button className="btn-primary w-full rounded-full py-3 text-sm">✓ Enregistrer ma carte</button><p className="mt-2 text-center text-[10px] text-slate-400">Vos modifications seront visibles après enregistrement.</p></div>
               </form>
               </PopupDialog>
-              <PopupDialog title="Modules visibles de ma carte" description="Choisissez les rubriques autorisées que vos visiteurs pourront voir après un scan NFC. Enregistrez pour appliquer les changements à la carte publique." triggerLabel="▦  Modules visibles de ma carte" triggerClassName="mt-3 flex w-full items-center justify-center gap-3 rounded-2xl border border-indigo-200 bg-white px-6 py-4 text-base font-extrabold text-indigo-700 shadow-sm transition hover:border-indigo-400 hover:bg-indigo-50">
-                <CardVisibilityPreview
-                  cardId={card.id}
-                  action={saveClientCardVisibility}
-                  initialSettings={settings}
-                  cardName={card.full_name}
-                  companyName={config.template === "contact" ? "" : card.company_name ?? ""}
-                  jobTitle={card.job_title ?? ""}
-                  bio={card.bio ?? ""}
-                  phone={card.phone ?? ""}
-                  email={card.email ?? ""}
-                  website={card.website ?? ""}
-                  accent={currentAccent}
-                  textColor={currentTextColor}
-                  catalogLabel={catalogLabel}
-                  catalogCount={catalogItems?.length ?? 0}
-                  hasCatalogPdf={Boolean(catalogDocument?.file_url)}
-                  socialCount={cardLinks.filter((link) => ["instagram", "facebook", "linkedin", "tiktok", "youtube", "x", "pinterest", "whatsapp", "telegram"].includes(link.kind)).length}
-                  featuredCount={cardLinks.filter((link) => !["instagram", "facebook", "linkedin", "tiktok", "youtube", "x", "pinterest", "whatsapp", "telegram"].includes(link.kind)).length}
-                />
-              </PopupDialog></div>
+              </div>
 
               <div className="space-y-5">
                 <div><h3 className="font-bold text-slate-900">Réseaux sociaux & liens</h3><p className="mt-1 text-xs text-slate-500">Ajoutez Instagram, TikTok, YouTube, LinkedIn, vos projets, une boutique ou un lien de réservation.</p>
