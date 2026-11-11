@@ -129,14 +129,26 @@ export async function saveClientCardVisibility(formData: FormData) {
 
   const cardId = String(formData.get("card_id") ?? "").trim();
   if (!cardId) redirect("/dashboard/cards?card_error=missing");
-  const { data: card, error: readError } = await supabase.from("cards")
-    .select("slug,public_settings").eq("id", cardId).eq("organization_id", organizationId).maybeSingle();
+  const [{ data: card, error: readError }, { data: organization }] = await Promise.all([
+    supabase.from("cards").select("slug,public_settings,theme").eq("id", cardId).eq("organization_id", organizationId).maybeSingle(),
+    supabase.from("organizations").select("workspace_config").eq("id", organizationId).maybeSingle(),
+  ]);
   if (readError || !card) redirect("/dashboard/cards?card_error=not_found");
 
   const keys = ["show_phone", "show_email", "show_website", "show_about", "show_contact", "show_company_info", "show_categories", "show_info_fields", "show_google_reviews", "show_catalog_pdf", "show_catalog", "show_request_forms", "show_orders", "show_bookings", "show_quotes", "show_social_links", "show_featured_links", "show_faq", "show_videos", "show_location", "show_gallery", "show_cv"];
   const current = (card.public_settings ?? {}) as Record<string, boolean>;
+  const workspaceConfig = (organization?.workspace_config ?? {}) as { template?: string; original_client_choices?: { activity_sector?: string } };
+  const sector = String(workspaceConfig.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const isCreativeProfile = /designer|design graphique|graphiste|photographe|photography/.test(sector);
+  const template = String(workspaceConfig.template ?? (card.theme as any)?.template ?? "contact");
   const nextSettings: Record<string, boolean> = { ...current, show_save_contact: true };
   for (const key of keys) nextSettings[key] = formData.get(key) === "on";
+  if (template === "e-business" && current.show_google_reviews === undefined && formData.get("show_google_reviews") === null) nextSettings.show_google_reviews = true;
+  if (isCreativeProfile) {
+    for (const key of ["show_catalog", "show_catalog_pdf", "show_orders", "show_bookings", "show_quotes", "show_request_forms"]) nextSettings[key] = false;
+    nextSettings.show_gallery = true;
+    nextSettings.show_cv = true;
+  }
 
   const { error } = await supabase.from("cards").update({ public_settings: nextSettings, updated_at: new Date().toISOString() })
     .eq("id", cardId).eq("organization_id", organizationId);
@@ -190,8 +202,10 @@ export async function saveClientCardProfile(formData: FormData) {
   };
 
   const { data: organization } = await supabase.from("organizations").select("workspace_config").eq("id", organizationId).maybeSingle();
-  const workspaceConfig = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[] };
-  const galleryEnabled = !workspaceConfig.version || (Array.isArray(workspaceConfig.modules) && workspaceConfig.modules.includes("gallery"));
+  const workspaceConfig = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[]; original_client_choices?: { activity_sector?: string } };
+  const sector = String(workspaceConfig.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const isCreativeProfile = /designer|design graphique|graphiste|photographe|photography/.test(sector);
+  const galleryEnabled = isCreativeProfile || !workspaceConfig.version || (Array.isArray(workspaceConfig.modules) && workspaceConfig.modules.includes("gallery"));
   const { data: existingCard } = await supabase.from("cards").select("theme,public_settings,public_fields").eq("id", cardId).eq("organization_id", organizationId).maybeSingle();
   const existingCustomFields = (((existingCard?.public_fields as any)?.custom_fields ?? []) as typeof customFields);
   const cvFile = formData.get("cv_pdf");
@@ -227,12 +241,10 @@ export async function saveClientCardProfile(formData: FormData) {
     ...(validHexColor(requestedAccent) ? { accent: requestedAccent } : {}),
     ...(validHexColor(requestedTextColor) ? { text_color: requestedTextColor } : {}),
   };
-  const visibilityKeys = ["show_phone", "show_email", "show_website", "show_about", "show_contact", "show_company_info", "show_categories", "show_info_fields", "show_google_reviews", "show_catalog_pdf", "show_catalog", "show_request_forms", "show_orders", "show_bookings", "show_quotes", "show_social_links", "show_featured_links", "show_faq", "show_videos", "show_location"];
   const nextPublicSettings: Record<string, boolean> = {
     ...((existingCard?.public_settings ?? {}) as Record<string, boolean>),
     show_save_contact: true,
   };
-  for (const key of visibilityKeys) nextPublicSettings[key] = formData.get(key) === "on";
 
   const { data: updatedCard, error } = await supabase.from("cards").update({
     theme: nextTheme,
