@@ -116,6 +116,9 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
     ? await supabase.from("cards").select("id,slug,full_name,job_title,company_name,bio,email,phone,website,avatar_url,cover_url,is_published,theme,public_fields,public_settings")
       .eq("organization_id", organizationId).order("created_at", { ascending: false })
     : { data: [] as Card[] };
+  const { data: intakeProfile } = await supabase.from("prospect_requests")
+    .select("full_name,city,activity_sector,email,phone,business_address,business_phone")
+    .eq("user_id", user.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
   const cardIds = (cards ?? []).map((card) => card.id);
   const { data: links } = cardIds.length
     ? await supabase.from("card_links").select("id,card_id,label,url,kind").in("card_id", cardIds).order("position")
@@ -240,7 +243,17 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
         {(cards ?? []).map((card) => {
           const cardLinks = (links ?? []).filter((link) => link.card_id === card.id);
           const cardEvents = (events ?? []).filter((event) => event.card_id === card.id);
-          const fields = (card.public_fields ?? {}) as Record<string, any>;
+          const storedFields = (card.public_fields ?? {}) as Record<string, any>;
+          const fields = storedFields.intake_profile_synced === true ? storedFields : {
+            ...storedFields,
+            location: storedFields.location || intakeProfile?.business_address || intakeProfile?.city || "",
+            company_address: storedFields.company_address || intakeProfile?.business_address || "",
+            whatsapp: storedFields.whatsapp || intakeProfile?.business_phone || "",
+            company_phone: storedFields.company_phone || intakeProfile?.business_phone || "",
+            company_email: storedFields.company_email || intakeProfile?.email || "",
+            industry: storedFields.industry || intakeProfile?.activity_sector || "",
+            contact_person_name: storedFields.contact_person_name || (config.template !== "contact" ? intakeProfile?.full_name : "") || "",
+          };
           const settings = card.public_settings ?? {};
           const currentAccent = typeof card.theme?.accent === "string" ? card.theme.accent : "#2563EB";
           const initialCustomFields: EditableCardField[] = Array.isArray(fields.custom_fields) && fields.custom_fields.length
@@ -266,6 +279,24 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                   <label className="text-xs font-semibold text-slate-600">Fonction<input name="job_title" defaultValue={card.job_title ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   {config.template !== "contact" && <label className="text-xs font-semibold text-slate-600">Entreprise<input name="company_name" defaultValue={card.company_name ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>}
                   <div className="sm:col-span-2 grid gap-4 md:grid-cols-[.8fr_1.2fr]"><MediaImagePicker organizationId={organizationId!} name="avatar_url" initialUrl={card.avatar_url} label="Photo de profil"/><MediaImagePicker organizationId={organizationId!} name="cover_url" initialUrl={card.cover_url} label="Couverture de la carte" shape="wide"/></div>
+                  <div className="sm:col-span-2 rounded-xl bg-slate-50 p-3"><h4 className="text-sm font-bold text-slate-900">2. Coordonnées et présentation</h4><p className="mt-1 text-xs text-slate-500">Les informations saisies dans votre demande sont reprises ici. Vous pouvez les corriger avant publication.</p></div>
+                  <label className="text-xs font-semibold text-slate-600">E-mail public<input name="email" type="email" defaultValue={card.email ?? intakeProfile?.email ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
+                  <label className="text-xs font-semibold text-slate-600">Téléphone public<input name="phone" defaultValue={card.phone ?? intakeProfile?.phone ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
+                  <label className="text-xs font-semibold text-slate-600">Site web<input name="website" type="url" defaultValue={card.website ?? ""} placeholder="https://" className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
+                  <label className="text-xs font-semibold text-slate-600">Accroche<input name="tagline" defaultValue={fields.tagline ?? ""} placeholder="Une phrase qui présente votre activité" className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
+                  <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Présentation<textarea name="bio" rows={3} defaultValue={card.bio ?? ""} placeholder="Présentez votre activité..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
+                  <label className="text-xs font-semibold text-slate-600">Ville / zone<input name="location" defaultValue={fields.location ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
+                  <label className="text-xs font-semibold text-slate-600">Horaires<input name="hours" defaultValue={fields.hours ?? ""} placeholder="Ex. Lun–Sam, 9h–18h" className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
+                  {config.template !== "contact" && <>
+                    <label className="text-xs font-semibold text-slate-600">Nom du contact<input name="contact_person_name" defaultValue={fields.contact_person_name ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
+                    <label className="text-xs font-semibold text-slate-600">Domaine professionnel<input name="industry" defaultValue={fields.industry ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
+                    <label className="text-xs font-semibold text-slate-600">Téléphone professionnel<input name="company_phone" defaultValue={fields.company_phone ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
+                    <label className="text-xs font-semibold text-slate-600">E-mail professionnel<input name="company_email" type="email" defaultValue={fields.company_email ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
+                    <label className="text-xs font-semibold text-slate-600 sm:col-span-2">Adresse professionnelle<input name="company_address" defaultValue={fields.company_address ?? ""} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
+                    <label className="text-xs font-semibold text-slate-600">WhatsApp<input name="whatsapp" defaultValue={fields.whatsapp ?? ""} placeholder="+212..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
+                  </>}
+                  {config.template === "google-review" && <label className="text-xs font-semibold text-slate-600">Lien Google Avis<input name="google_review_url" type="url" defaultValue={fields.google_review_url ?? ""} placeholder="https://..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>}
+                  <div className="sm:col-span-2"><CustomCardFieldsEditor initialFields={initialCustomFields}/></div>
                   <div className="sm:col-span-2">
                     <CardVisibilityPreview
                       initialSettings={settings}
