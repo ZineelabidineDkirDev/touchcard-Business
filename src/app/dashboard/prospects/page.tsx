@@ -28,7 +28,7 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
 
   const { data: prospects, error } = await supabase
     .from("prospect_requests")
-    .select("id, user_id, full_name, city, activity_sector, email, phone, card_type, reason, customization_requested, brand_name, logo_url, business_address, business_phone, social_links, project_needs, status, admin_notes, password_initialized, client_access_enabled, created_at")
+    .select("id, user_id, full_name, city, email, phone, card_type, customization_requested, brand_name, status, admin_notes, password_initialized, client_access_enabled, created_at")
     .order("created_at", { ascending: false });
 
   const { data: organizations } = await supabase.from("organizations").select("owner_id");
@@ -62,14 +62,12 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
         {(prospects ?? []).map((p) => (
           <article id={p.id} key={p.id} className="scroll-mt-28 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="flex flex-wrap items-start justify-between gap-4">
-              <div><h2 className="text-lg font-bold text-slate-950">{p.full_name}</h2><p className="mt-1 text-sm text-slate-500">{p.brand_name || p.activity_sector} · {p.city}</p><p className="mt-1 text-[11px] text-slate-400">N° {p.id}</p></div>
+              <div><h2 className="text-lg font-bold text-slate-950">{p.full_name}</h2><p className="mt-1 text-sm text-slate-500">{p.brand_name || "Demande client"} · {p.city}</p><p className="mt-1 text-[11px] text-slate-400">N° {p.id}</p></div>
               <span className="rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-700">{statuses.find(([key]) => key === p.status)?.[1] ?? p.status}</span>
             </div>
             <div className="mt-4 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
               <p><strong className="text-slate-900">E-mail :</strong> {p.email}</p><p><strong className="text-slate-900">Téléphone :</strong> {p.phone}</p>
               <p><strong className="text-slate-900">Carte :</strong> {({ contact: "Contact", service: "E-Service", "e-business": "E-Business", "google-review": "Avis Google" } as Record<string, string>)[p.card_type] ?? p.card_type}</p><p><strong className="text-slate-900">Personnalisation :</strong> {p.customization_requested ? "Oui" : "Non"}</p>
-              {p.customization_requested && <><p><strong className="text-slate-900">Logo :</strong> {p.logo_url || "Non fourni"}</p><p><strong className="text-slate-900">Adresse :</strong> {p.business_address || "—"}</p><p><strong className="text-slate-900">Téléphone professionnel :</strong> {p.business_phone || "—"}</p></>}
-              {p.reason && <p className="sm:col-span-2"><strong className="text-slate-900">Projet :</strong> {p.reason}</p>}<div className="sm:col-span-2 rounded-xl border border-violet-100 bg-violet-50/50 p-4"><p className="font-bold text-slate-900">Besoins métier déclarés</p><p className="mt-2 text-xs text-slate-600">Objectifs : {((p.project_needs as any)?.selected || []).join(" · ") || "—"}</p><p className="mt-1 text-xs text-slate-600">Réservation : {(p.project_needs as any)?.reservation_mode || "Non précisée"} · Canaux : {((p.project_needs as any)?.reservation_channels || []).join(" · ") || "—"}</p><p className="mt-1 text-xs text-slate-600">Gestion CRM : {((p.project_needs as any)?.management_needs || []).join(" · ") || "—"}</p></div>
             </div>
             <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
               <p className="text-xs text-slate-400">Reçue le {new Date(p.created_at).toLocaleString("fr-FR")}</p>
