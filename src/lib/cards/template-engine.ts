@@ -1,3 +1,5 @@
+import { BASE_MODULES_BY_TEMPLATE } from "@/lib/cards/module-registry";
+
 export type CardTemplate = "contact" | "service" | "e-business" | "google-review";
 
 export type TemplateNeeds = {
@@ -16,12 +18,7 @@ export type TemplateProfileDraft = {
   suggested_buttons: { kind: string; label: string; enabled: boolean }[];
 };
 
-const baseModules: Record<CardTemplate, string[]> = {
-  contact: ["dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc", "gallery", "analytics"],
-  service: ["dashboard", "digital_card", "company_profile", "service_catalog", "quote_requests", "bookings", "availability_calendar", "crm_contacts", "whatsapp", "analytics"],
-  "e-business": ["dashboard", "digital_card", "company_profile", "gallery", "whatsapp", "analytics"],
-  "google-review": ["dashboard", "digital_card", "company_profile", "qr_nfc", "google_reviews", "analytics"],
-};
+const baseModules: Record<CardTemplate, string[]> = BASE_MODULES_BY_TEMPLATE as Record<CardTemplate, string[]>;
 
 const themes: Record<CardTemplate, { accent: string; background: string; layout: string }> = {
   contact: { accent: "#6366f1", background: "#0f172a", layout: "classic" },
