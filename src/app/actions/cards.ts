@@ -268,9 +268,7 @@ export async function saveClientCardCv(cardId: string, cvUrl: string) {
   const config = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[]; original_client_choices?: { activity_sector?: string } };
   const sector = String(config.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const isCreativeProfile = /designer|design graphique|graphiste|photographe|photography/.test(sector);
-  const galleryEnabled = isCreativeProfile || !config.version || (Array.isArray(config.modules) && config.modules.includes("gallery"));
-  if (!galleryEnabled) return { ok: false as const, error: "Le module CV n'est pas activé." };
-
+  // Le CV est un document indépendant du module Portfolio & galerie.
   const { data: card } = await supabase.from("cards").select("id,slug,public_fields,public_settings")
     .eq("id", cardId).eq("organization_id", organizationId).maybeSingle();
   if (!card) return { ok: false as const, error: "Carte introuvable." };
