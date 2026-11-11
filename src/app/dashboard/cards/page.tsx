@@ -249,7 +249,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
           const publicUrl = "/p/" + card.slug;
           return <article key={card.id} className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 p-5">
-              <div><h2 className="text-xl font-black text-slate-950">{card.full_name}</h2><p className="mt-1 text-xs text-slate-500">{card.company_name || "Carte professionnelle"} · {card.slug}</p></div>
+              <div><h2 className="text-xl font-black text-slate-950">{card.full_name}</h2><p className="mt-1 text-xs text-slate-500">{config.template === "contact" ? "E-Contact personnel" : card.company_name || "Carte professionnelle"} · {card.slug}</p></div>
               <div className="flex flex-wrap items-center gap-2">
                 <span className={"rounded-full px-3 py-1.5 text-xs font-bold " + (card.is_published ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700")}>{card.is_published ? "Publiée" : "Brouillon"}</span>
                 <Link href={publicUrl} target="_blank" className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700">Voir la carte</Link>
