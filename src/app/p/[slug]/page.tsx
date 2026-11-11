@@ -75,9 +75,10 @@ async function PublicCardContent({
   const showCatalog = supportsBusinessCatalog
     && (["service", "e-business"].includes(template) || isBeauty || isRestaurant || isRealEstate)
     && (!workspaceConfig.version || modules.some((module) => module === "service_catalog" || module === "room_catalog" || (module === "product_catalog" && isEcommerce)) || isBeauty || isRestaurant || isRealEstate);
-  const allowOrders = template === "e-business" && isEcommerce && modules.includes("orders");
-  const allowBookings = template !== "contact" && (modules.includes("bookings") || isBeauty);
-  const allowQuotes = template !== "contact" && modules.includes("quote_requests");
+  const visibilitySettings = (card.public_settings ?? {}) as Record<string, boolean>;
+  const allowOrders = template === "e-business" && isEcommerce && modules.includes("orders") && visibilitySettings.show_orders !== false;
+  const allowBookings = template !== "contact" && (modules.includes("bookings") || isBeauty) && visibilitySettings.show_bookings !== false;
+  const allowQuotes = template !== "contact" && modules.includes("quote_requests") && visibilitySettings.show_quotes !== false;
   const { data: catalogItems } = showCatalog
     ? await supabase.from("products").select("id,name,description,price,currency,image_url")
       .eq("organization_id", card.organization_id).eq("is_active", true).order("created_at", { ascending: false }).limit(24)
