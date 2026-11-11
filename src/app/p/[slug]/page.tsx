@@ -117,7 +117,7 @@ async function PublicCardContent({
               <div className="flex min-w-0 flex-col justify-between py-1">
                 <div><h1 className="break-words text-[25px] font-black leading-[1.02] tracking-tight text-black">{card.full_name}</h1>
                   {card.job_title && <p className="mt-3 text-xs font-medium leading-4 text-slate-600">{card.job_title}</p>}
-                  {card.company_name && <p className="mt-1 text-xs font-bold text-slate-700">{card.company_name}</p>}</div>
+                  {template !== "contact" && card.company_name && <p className="mt-1 text-xs font-bold text-slate-700">{card.company_name}</p>}</div>
                 {fields.tagline && <p className="mt-3 text-[11px] font-bold leading-4 text-slate-700">{fields.tagline}</p>}
               </div>
               <div className="h-[118px] w-[118px] overflow-hidden rounded-xl bg-slate-100">
