@@ -38,6 +38,7 @@ export async function signIn(_state: AuthState, formData: FormData): Promise<Aut
   const password = String(formData.get("password") ?? "");
   if (!email || !password) return { error: "Renseignez votre e-mail et votre mot de passe." };
 
+  let destination = "/dashboard";
   try {
     const supabase = await createClient();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -48,17 +49,16 @@ export async function signIn(_state: AuthState, formData: FormData): Promise<Aut
     if (user && !isPlatformSuperAdmin(user.email)) {
       const { data: clientRequest } = await supabase.from("prospect_requests")
         .select("status,password_initialized,client_access_enabled").eq("user_id", user.id).maybeSingle();
-      if (clientRequest && ["rejected", "cancelled"].includes(clientRequest.status)) redirect("/account-pending?blocked=1");
-      if (clientRequest && !clientRequest.password_initialized) redirect("/setup-password");
-      if (clientRequest && !clientRequest.client_access_enabled) redirect("/account-pending");
+      if (clientRequest && ["rejected", "cancelled"].includes(clientRequest.status)) destination = "/account-pending?blocked=1";
+      else if (clientRequest && !clientRequest.password_initialized) destination = "/setup-password";
+      else if (clientRequest && !clientRequest.client_access_enabled) destination = "/account-pending";
     }
   } catch (error) {
     return { error: getSafeAuthError(error) };
   }
 
-  redirect("/dashboard");
+  redirect(destination);
 }
-
 export async function signUp(_state: AuthState, formData: FormData): Promise<AuthState> {
   const fullName = String(formData.get("fullName") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
