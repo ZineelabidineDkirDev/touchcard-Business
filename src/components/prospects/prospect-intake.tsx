@@ -201,20 +201,22 @@ export function ProspectIntake() {
   return (
     <main className="touchcard-intake relative min-h-screen overflow-hidden bg-[#071326] px-4 py-5 text-white sm:px-6 lg:grid lg:grid-cols-[.92fr_1.08fr] lg:gap-7 lg:px-8 lg:py-6 xl:px-12">
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_90%_80%,rgba(91,55,255,.28),transparent_42%),linear-gradient(120deg,#06101e_0%,#101d36_52%,#101638_100%)]"/>
-      <aside className="relative z-10 mx-auto mb-5 h-[42vh] min-h-[260px] w-full max-w-[720px] overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#071326] shadow-2xl lg:sticky lg:top-6 lg:mb-0 lg:h-[calc(100vh-3rem)] lg:max-h-[940px] lg:max-w-none">
+      <aside className="relative z-10 mx-auto mb-5 flex h-[48vh] min-h-[340px] w-full max-w-[720px] flex-col justify-between overflow-hidden rounded-[1.75rem] border border-white/15 bg-[#071326] p-6 shadow-2xl sm:p-8 lg:sticky lg:top-6 lg:mb-0 lg:h-[calc(100vh-3rem)] lg:max-h-[940px] lg:max-w-none">
         <div className="absolute inset-0 bg-[url('/brand/touchcard-demande-hero.webp')] bg-cover bg-[position:50%_42%] lg:bg-[position:50%_center]"/>
         <div className="absolute inset-0 bg-gradient-to-t from-[#071326]/35 via-transparent to-[#071326]/5"/>
+        <div className="relative z-10 flex items-center gap-3"><img src="/brand/touchcard-mark.svg" alt="Symbole officiel TouchCard" className="h-12 w-12 object-contain drop-shadow-lg"/><span className="flex flex-col leading-none"><strong className="text-2xl font-black tracking-tight text-white">TouchCard</strong><span className="mt-1 text-xs font-bold uppercase tracking-[.24em] text-cyan-200">Business</span></span></div>
+        <div className="relative z-10 max-w-lg pb-2"><p className="text-xs font-black uppercase tracking-[.28em] text-cyan-200">Votre identité. En un contact.</p><h2 className="mt-4 text-3xl font-black leading-tight text-white sm:text-4xl">Une seule carte.<br/><span className="bg-gradient-to-r from-cyan-300 via-blue-300 to-violet-300 bg-clip-text text-transparent">Toutes vos connexions.</span></h2><p className="mt-4 max-w-md text-sm leading-6 text-white/80">Faites découvrir votre activité, partagez vos informations et développez votre réseau avec TouchCard Business.</p><div className="mt-7 grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3"><div className="rounded-xl border border-white/15 bg-slate-950/35 p-3 backdrop-blur-md"><p className="text-sm font-bold text-white">Contact instantané</p><p className="mt-1 text-xs text-white/65">Un geste, toutes vos coordonnées.</p></div><div className="rounded-xl border border-white/15 bg-slate-950/35 p-3 backdrop-blur-md"><p className="text-sm font-bold text-white">Image professionnelle</p><p className="mt-1 text-xs text-white/65">Une présence digitale cohérente.</p></div><div className="rounded-xl border border-white/15 bg-slate-950/35 p-3 backdrop-blur-md"><p className="text-sm font-bold text-white">Simple et connecté</p><p className="mt-1 text-xs text-white/65">NFC et QR code réunis.</p></div></div></div>
       </aside>
       <div className="relative z-10 min-w-0">
       <header className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 pb-4">
-        <Link href="/" className="inline-flex items-center gap-2 lg:hidden"><img src="/brand/touchcard-mark.svg" alt="TouchCard Business" className="h-9 w-9 object-contain"/><span className="flex flex-col leading-none"><strong className="text-lg font-black tracking-tight">TouchCard</strong><span className="mt-1 text-xs text-white/75">Business</span></span></Link>
+        <Link href="/" className="inline-flex items-center gap-2"><img src="/brand/touchcard-mark.svg" alt="TouchCard Business" className="h-9 w-9 object-contain"/><span className="flex flex-col leading-none"><strong className="text-lg font-black tracking-tight">TouchCard</strong><span className="mt-1 text-xs text-white/75">Business</span></span></Link>
         <div className="ml-auto flex items-center gap-2 text-xs font-bold">
           <span className="rounded-full border border-white/30 bg-white/5 px-3 py-2">🇫🇷 FR</span><span className="rounded-full border border-white/20 bg-white/5 px-3 py-2">🇬🇧 EN</span><span className="rounded-full border border-white/20 bg-white/5 px-3 py-2">🇲🇦 AR</span>
         </div>
       </header>
       <section className="relative mx-auto mt-1 w-full max-w-3xl rounded-[1.75rem] border border-blue-300/35 bg-[linear-gradient(125deg,rgba(9,27,52,.88),rgba(18,32,62,.76)_52%,rgba(47,55,113,.76))] p-5 text-white shadow-[0_25px_80px_rgba(0,0,0,.45)] backdrop-blur-2xl sm:p-7 lg:p-8">
         <div className="text-center"><h1 className="text-3xl font-black tracking-tight sm:text-4xl lg:text-5xl">Devenez <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-violet-500 bg-clip-text text-transparent">client</span></h1><p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-white/85 sm:text-base">Rejoignez TouchCard Business et créez votre carte digitale en quelques étapes simples.</p></div>
-        <div className="mt-7 grid grid-cols-9 gap-1.5 sm:gap-2">{visibleSteps.map((item,index)=><div key={item} className="flex min-w-0 flex-col items-center text-center"><span className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-bold ${step===item?"border-cyan-300 bg-gradient-to-br from-cyan-400 to-blue-600 text-white shadow-[0_0_22px_rgba(0,174,255,.4)]":step>item?"border-violet-300/70 bg-violet-500/20 text-white":"border-slate-400/60 bg-slate-900/40 text-slate-300"}`}>{index+1}</span><span className="mt-1 hidden max-w-full truncate text-[9px] leading-tight text-white/75 sm:block">{["Identité","Ville","Activité","Contact","Carte","Services","Liens","Options","Envoi"][index]}</span></div>)}</div>
+        <div className="mt-7 grid grid-cols-5 gap-x-2 gap-y-3 sm:grid-cols-9 sm:gap-2">{visibleSteps.map((item,index)=><div key={item} className="flex min-w-0 flex-col items-center text-center"><span className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-bold ${step===item?"border-cyan-300 bg-gradient-to-br from-cyan-400 to-blue-600 text-white shadow-[0_0_22px_rgba(0,174,255,.4)]":step>item?"border-violet-300/70 bg-violet-500/20 text-white":"border-slate-400/60 bg-slate-900/40 text-slate-300"}`}>{index+1}</span><span className="mt-1 hidden max-w-full truncate text-[9px] leading-tight text-white/75 sm:block">{["Identité","Ville","Activité","Contact","Carte","Services","Liens","Options","Envoi"][index]}</span></div>)}</div>
         <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/15"><div className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500 transition-all duration-500" style={{ width: `${progress}%` }}/></div>
         <p className="mt-7 text-xs font-black uppercase tracking-[.22em] text-cyan-200">{titles[step]}</p>
         <h2 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">{subtitles[step]}</h2>
@@ -254,9 +256,26 @@ export function ProspectIntake() {
           {error && <p role="alert" className="mt-5 rounded-xl border border-rose-400/20 bg-rose-400/10 p-3 text-sm text-rose-700">{error}</p>}
           <div className="mt-9 flex flex-col-reverse justify-between gap-3 sm:flex-row"><button type="button" disabled={step === 0 || busy} onClick={() => { setError(""); setStep((value) => value === 8 ? 7 : value === 6 && !serviceChoiceRequired ? 4 : value - 1); }} className="rounded-full border border-white/25 bg-white/5 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-white/10 disabled:opacity-30">Précédent</button><button type="submit" disabled={busy} className="rounded-full bg-gradient-to-r from-cyan-500 via-blue-600 to-violet-600 px-8 py-3.5 text-sm font-extrabold text-white shadow-[0_10px_30px_rgba(0,120,255,.28)] transition hover:-translate-y-0.5 hover:brightness-110 disabled:opacity-60">{busy ? "Enregistrement..." : step === 8 ? "Envoyer ma demande →" : "Continuer →"}</button></div>
         </form>
+        <div className="mt-6 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-5 text-center sm:flex-row sm:text-left"><p className="text-xs text-white/60">Vous souhaitez terminer plus tard ? Votre progression est sauvegardée automatiquement.</p><Link href="/" className="shrink-0 rounded-full border border-white/20 bg-white/5 px-5 py-2.5 text-xs font-bold text-white/85 transition hover:border-cyan-300/50 hover:bg-cyan-400/10 hover:text-white">Quitter et revenir plus tard</Link></div>
         <p className="mt-7 text-center text-[11px] leading-5 text-white/55">En confirmant, vous acceptez que TouchCard utilise ces informations pour traiter votre demande et vous contacter à ce sujet.</p>
       </section>
       </div>
+
+      <style jsx global>{`
+        .touchcard-intake .text-slate-900, .touchcard-intake .text-slate-800, .touchcard-intake .text-slate-700 { color: rgba(244,248,255,.94) !important; }
+        .touchcard-intake .text-slate-600, .touchcard-intake .text-slate-500 { color: rgba(219,231,249,.72) !important; }
+        .touchcard-intake .border-slate-200, .touchcard-intake .border-slate-300 { border-color: rgba(167,195,235,.24) !important; }
+        .touchcard-intake .bg-white, .touchcard-intake .bg-violet-50, .touchcard-intake .bg-violet-50\/60, .touchcard-intake .bg-violet-50\/50 { background-color: rgba(5,17,36,.66) !important; }
+        .touchcard-intake input:not([type=radio]):not([type=file]), .touchcard-intake textarea, .touchcard-intake select { color: #f8fbff !important; background-color: rgba(3,13,29,.72) !important; border-color: rgba(155,190,235,.3) !important; }
+        .touchcard-intake input::placeholder, .touchcard-intake textarea::placeholder { color: rgba(207,220,241,.5) !important; }
+        .touchcard-intake select option { color: #f8fbff; background: #0b1930; }
+        .touchcard-intake label { color: rgba(238,245,255,.92); }
+        .touchcard-intake .hover\\:bg-violet-50:hover, .touchcard-intake .hover\\:bg-slate-50:hover { background-color: rgba(24,62,104,.6) !important; }
+        .touchcard-intake .bg-violet-700 { background-color: #4f46e5 !important; }
+        .touchcard-intake .text-violet-900, .touchcard-intake .text-violet-700 { color: #dceaff !important; }
+        .touchcard-intake .ring-violet-200 { --tw-ring-color: rgba(103,232,249,.35) !important; }
+        @media (max-width: 639px) { .touchcard-intake section { border-radius: 1.35rem; } }
+      `}</style>
     </main>
   );
 }
