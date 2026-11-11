@@ -94,8 +94,8 @@ export function AdminClientCards({ prospects }: Props) {
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-xs font-black uppercase tracking-[.2em] text-indigo-600">TouchCard Business · Super Admin</p>
-          <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Mes cartes NFC</h1>
-          <p className="mt-2 max-w-2xl text-sm text-slate-500">Retrouvez chaque client, son compte, ses cartes 3D et ses performances depuis une seule vue.</p>
+          <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">Portefeuille clients</h1>
+          <p className="mt-2 max-w-2xl text-sm text-slate-500">Gérez les comptes clients validés, leurs cartes NFC 3D, leurs accès et leurs performances depuis une seule vue.</p>
         </div>
         <a href="/dashboard/prospects" className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50">Gérer les demandes ↗</a>
       </header>
@@ -110,7 +110,7 @@ export function AdminClientCards({ prospects }: Props) {
       <section className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
         <div className="border-b border-slate-100 p-5 sm:p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <div><h2 className="text-lg font-black text-slate-950">Répertoire des clients</h2><p className="mt-1 text-sm text-slate-500">Cliquez sur une ligne pour ouvrir la fiche complète du client.</p></div>
+            <div><h2 className="text-lg font-black text-slate-950">Répertoire clients & cartes</h2><p className="mt-1 text-sm text-slate-500">Cliquez sur une ligne pour ouvrir la fiche complète du client.</p></div>
             <span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">{filtered.length} résultat(s)</span>
           </div>
           <div className="mt-4 flex flex-col gap-3 md:flex-row">
