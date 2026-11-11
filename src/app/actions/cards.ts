@@ -207,27 +207,10 @@ export async function saveClientCardProfile(formData: FormData) {
   const galleryEnabled = isCreativeProfile || !workspaceConfig.version || (Array.isArray(workspaceConfig.modules) && workspaceConfig.modules.includes("gallery"));
   const { data: existingCard } = await supabase.from("cards").select("theme,public_settings,public_fields").eq("id", cardId).eq("organization_id", organizationId).maybeSingle();
   const existingCustomFields = (((existingCard?.public_fields as any)?.custom_fields ?? []) as typeof customFields);
-  const cvFile = formData.get("cv_pdf");
-  if (cvFile instanceof File && cvFile.size > 0) {
-    if (!galleryEnabled) redirect("/dashboard/cards?card_error=module");
-    if (cvFile.size > 3 * 1024 * 1024 || cvFile.type !== "application/pdf" || !cvFile.name.toLowerCase().endsWith(".pdf")) redirect("/dashboard/cards?card_error=cv_format");
-    const safeName = cvFile.name.replace(/[^a-zA-Z0-9._-]/g, "-").slice(-90) || "cv-professionnel.pdf";
-    const storagePath = organizationId + "/cv/" + crypto.randomUUID() + "-" + safeName;
-    const { error: uploadError } = await supabase.storage.from("client-media").upload(storagePath, cvFile, {
-      cacheControl: "3600", contentType: "application/pdf", upsert: false,
-    });
-    if (uploadError) {
-      console.error("Client CV upload failed", { organizationId, message: uploadError.message });
-      redirect("/dashboard/cards?card_error=cv_upload");
-    }
-    const { data: publicUrl } = supabase.storage.from("client-media").getPublicUrl(storagePath);
-    customFields = customFields.filter((field) => !/cv professionnel|^cv$/i.test(field.label.trim()));
-    customFields.push({ key: "cv_professionnel", label: "CV professionnel", value: publicUrl.publicUrl, visible: true });
-  } else {
-    const existingCv = existingCustomFields.find((field) => /cv professionnel|^cv$/i.test(field.label.trim()));
-    customFields = customFields.filter((field) => !/cv professionnel|^cv$/i.test(field.label.trim()));
-    if (existingCv) customFields.push(existingCv);
-  }
+  // Le CV est géré séparément via un upload direct vers Storage (pas dans le body d'une Server Action).
+  const existingCv = existingCustomFields.find((field) => /cv professionnel|^cv$/i.test(field.label.trim()));
+  customFields = customFields.filter((field) => !/cv professionnel|^cv$/i.test(field.label.trim()));
+  if (existingCv) customFields.push(existingCv);
   if (!galleryEnabled) {
     customFields = [...customFields, ...existingCustomFields.filter((field) => /portfolio/i.test(field.key + " " + field.label))].slice(0, 20);
   }
@@ -273,6 +256,49 @@ export async function saveClientCardProfile(formData: FormData) {
   revalidatePath("/dashboard/cards");
   revalidatePath("/p/" + updatedCard.slug);
   redirect("/dashboard/cards?card_saved=1");
+}
+
+export async function saveClientCardCv(cardId: string, cvUrl: string) {
+  const { supabase, user, organizationId } = await getWorkspace();
+  if (!user || !organizationId || !(await hasWorkspaceModule(supabase, organizationId, "digital_card"))) {
+    return { ok: false as const, error: "Accès refusé." };
+  }
+  const { data: organization } = await supabase.from("organizations")
+    .select("workspace_config").eq("id", organizationId).maybeSingle();
+  const config = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[]; original_client_choices?: { activity_sector?: string } };
+  const sector = String(config.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
+  const isCreativeProfile = /designer|design graphique|graphiste|photographe|photography/.test(sector);
+  const galleryEnabled = isCreativeProfile || !config.version || (Array.isArray(config.modules) && config.modules.includes("gallery"));
+  if (!galleryEnabled) return { ok: false as const, error: "Le module CV n'est pas activé." };
+
+  const { data: card } = await supabase.from("cards").select("id,slug,public_fields,public_settings")
+    .eq("id", cardId).eq("organization_id", organizationId).maybeSingle();
+  if (!card) return { ok: false as const, error: "Carte introuvable." };
+
+  const fields = ((card.public_fields ?? {}) as Record<string, any>);
+  const customFields = Array.isArray(fields.custom_fields) ? fields.custom_fields : [];
+  const nextCustomFields = customFields.filter((field: any) => !/cv professionnel|^cv$/i.test(String(field.label ?? "").trim()));
+  if (cvUrl) {
+    const expectedPath = `/storage/v1/object/public/client-media/${organizationId}/cv/`;
+    const baseUrl = String(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "").replace(/\\/$/, "");
+    if (!baseUrl || !cvUrl.startsWith(baseUrl + expectedPath) || !/^https:\\/\\//i.test(cvUrl)) {
+      return { ok: false as const, error: "Adresse du CV invalide." };
+    }
+    nextCustomFields.push({ key: "cv_professionnel", label: "CV professionnel", value: cvUrl, visible: true });
+  }
+  const settings = { ...((card.public_settings ?? {}) as Record<string, boolean>), show_cv: true };
+  const { error } = await supabase.from("cards").update({
+    public_fields: { ...fields, custom_fields: nextCustomFields },
+    public_settings: settings,
+    updated_at: new Date().toISOString(),
+  }).eq("id", cardId).eq("organization_id", organizationId);
+  if (error) {
+    console.error("Client CV metadata update failed", { cardId, message: error.message });
+    return { ok: false as const, error: "Impossible d'enregistrer le CV." };
+  }
+  revalidatePath("/dashboard/cards");
+  revalidatePath("/p/" + card.slug);
+  return { ok: true as const };
 }
 
 export async function addClientCardLink(formData: FormData) {
