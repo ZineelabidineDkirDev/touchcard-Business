@@ -41,7 +41,7 @@ export function ProspectIntake() {
 
   useEffect(() => {
     try {
-      const saved = window.localStorage.getItem("touchcard-prospect-draft-v1");
+      const saved = window.localStorage.getItem("touchcard-prospect-draft-v2");
       if (saved) {
         const draft = JSON.parse(saved) as { savedAt?: number; step?: number; form?: ProspectInput };
         const draftAge = typeof draft.savedAt === "number" ? Date.now() - draft.savedAt : Number.POSITIVE_INFINITY;
@@ -52,15 +52,15 @@ export function ProspectIntake() {
           setForm((current) => ({ ...current, ...restoredForm }));
         }
         if (draftIsFresh && Number.isInteger(draft.step)) setStep(Math.min(9, Math.max(0, Number(draft.step))));
-        if (!draftIsFresh) window.localStorage.removeItem("touchcard-prospect-draft-v1");
+        if (!draftIsFresh) window.localStorage.removeItem("touchcard-prospect-draft-v2");
       }
-    } catch { window.localStorage.removeItem("touchcard-prospect-draft-v1"); }
+    } catch { window.localStorage.removeItem("touchcard-prospect-draft-v2"); }
     finally { setDraftLoaded(true); }
   }, []);
 
   useEffect(() => {
     if (!draftLoaded) return;
-    try { window.localStorage.setItem("touchcard-prospect-draft-v1", JSON.stringify({ savedAt: Date.now(), step, form })); }
+    try { window.localStorage.setItem("touchcard-prospect-draft-v2", JSON.stringify({ savedAt: Date.now(), step, form })); }
     catch { /* Storage may be disabled; the form remains usable. */ }
   }, [step, form, draftLoaded]);
 
@@ -133,7 +133,7 @@ export function ProspectIntake() {
     setSubmittedRequestId(requestId);
     setTemporaryPassword(result.temporaryPassword);
     // Remove locally cached contact details after a successful submission.
-    try { window.localStorage.removeItem("touchcard-prospect-draft-v1"); } catch { /* Storage may be disabled. */ }
+    try { window.localStorage.removeItem("touchcard-prospect-draft-v2"); } catch { /* Storage may be disabled. */ }
     // Le compte est créé sans e-mail de confirmation, mais reste verrouillé jusqu’à validation du Super Admin.
     setDone(true);
     setBusy(false);
@@ -155,7 +155,7 @@ export function ProspectIntake() {
             <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-violet-200 bg-white p-3"><code className="min-w-0 flex-1 break-all text-sm font-bold text-slate-900">{temporaryPassword}</code><button type="button" onClick={async () => { try { await navigator.clipboard.writeText(temporaryPassword); setCopiedPassword(true); } catch { setCopiedPassword(false); } }} className="rounded-lg bg-violet-700 px-3 py-2 text-xs font-bold text-white">{copiedPassword ? "Copié ✓" : "Copier"}</button></div>
             <p className="mt-3 text-sm text-slate-600">Conservez ce mot de passe provisoire. Lors de votre première connexion, vous choisirez votre mot de passe personnel sans avoir à ressaisir l’ancien. L’espace restera verrouillé jusqu’à validation de votre demande.</p>
           </div>
-          <Link href="/" className="mt-8 inline-flex rounded-xl bg-violet-700 px-7 py-4 font-bold text-white transition hover:bg-violet-800">Retour à l'accueil</Link>
+          <div className="mt-8 flex flex-wrap justify-center gap-3"><Link href="/login" className="inline-flex rounded-xl bg-violet-700 px-7 py-4 font-bold text-white transition hover:bg-violet-800">Se connecter</Link><Link href="/" className="inline-flex rounded-xl border border-slate-200 bg-white px-7 py-4 font-bold text-slate-700 transition hover:bg-slate-50">Retour à l'accueil</Link></div>
         </div>
       </main>
     );
