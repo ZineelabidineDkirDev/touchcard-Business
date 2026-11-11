@@ -113,7 +113,7 @@ export function generateTemplateBlueprint(input: {
     "google-review": { tagline: "Votre avis compte", description: "Retrouvez nos informations et accédez directement à notre page officielle pour partager votre expérience." },
   };
 
-  const categories = sector ? [sector] : [];
+  const categories = template === "contact" ? [] : sector ? [sector] : [];
   const profileDraft: TemplateProfileDraft = {
     ...labels[template],
     categories,
