@@ -105,7 +105,7 @@ export function PhysicalNfcCard({ title = "Contact", clientName = "Votre nom", c
             ) : (
               <div className="flex min-w-0 items-center gap-2">
                 <img src="/brand/touchcard-mark.svg" alt="Logo TouchCard" className="h-5 w-5 shrink-0 object-contain opacity-90" style={{ filter: palette.logo }}/>
-                <span className="whitespace-nowrap text-[clamp(10px,1.8vw,16px)] font-black tracking-[-.055em]" style={{ color: palette.muted }}>TouchCard</span>
+                <span className="flex min-w-0 flex-col leading-[.92]"><span className="whitespace-nowrap text-[clamp(10px,1.8vw,16px)] font-black tracking-[-.055em]" style={{ color: palette.muted }}>TouchCard</span><span className="mt-1 text-[clamp(6px,1vw,9px)] font-medium tracking-[.04em]" style={{ color: palette.muted }}>Business</span></span>
               </div>
             )}
             {isGoogle && (
@@ -143,7 +143,7 @@ export function PhysicalNfcCardBack({ colorTheme = "metallic-black" }: { colorTh
     <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-[1.15rem] border p-[7%]" style={{ background: backBackgrounds[colorTheme], borderColor: lightTheme ? "rgba(71,85,105,.25)" : "rgba(255,255,255,.2)", color: lightTheme ? ink : "#ffffff" }}>
       <div className="absolute left-[7%] top-[8%] flex items-center gap-2 opacity-100">
         <img src="/brand/touchcard-mark.svg" alt="Logo TouchCard" className="h-5 w-5" style={{ filter: lightTheme ? "grayscale(1) brightness(.45)" : "grayscale(1) brightness(2)" }}/>
-        <span className="text-xs font-black tracking-[-.04em]" style={{ color: lightTheme ? "rgba(36,23,7,.78)" : "#d0d5dc" }}>TouchCard</span>
+        <span className="flex flex-col leading-[.92]"><span className="text-xs font-black tracking-[-.04em]" style={{ color: lightTheme ? "rgba(36,23,7,.78)" : "#d0d5dc" }}>TouchCard</span><span className="mt-1 text-[8px] font-medium tracking-[.04em]" style={{ color: lightTheme ? "rgba(36,23,7,.68)" : "#aeb7c4" }}>Business</span></span>
       </div>
       <div className="w-[36%] max-w-28"><QrDemo/></div>
       <span className="mt-2 text-[clamp(7px,1.1vw,10px)] font-bold tracking-[.2em]" style={{ color: lightTheme ? "rgba(36,23,7,.78)" : "#cbd5e1" }}>TAP · SCAN · CONNECT</span>
