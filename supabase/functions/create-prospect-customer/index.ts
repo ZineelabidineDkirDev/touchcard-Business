@@ -7,6 +7,7 @@ const allowedModules = new Set([
   "company_profile", "service_catalog", "product_catalog", "orders",
   "quote_requests", "bookings", "availability_calendar", "team",
   "gallery", "room_catalog", "crm_contacts", "analytics", "whatsapp",
+  "doctor_appointments", "gym_registration", "school_registration",
   "edit_business_details", "manage_services_prices", "manage_bookings",
   "manage_content", "view_analytics", "manage_team",
 ]);
