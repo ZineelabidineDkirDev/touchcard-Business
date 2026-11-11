@@ -38,6 +38,8 @@ async function PublicCardContent({
   const theme = (card.theme ?? {}) as Record<string, unknown>;
   const template = String(theme.template ?? "contact");
   const accent = typeof theme.accent === "string" && /^#[0-9a-fA-F]{6}$/.test(theme.accent) ? theme.accent : "#4f46e5";
+  const allowedTextColors = ["#111827", "#1F2937", "#334155", "#1E3A8A", "#312E81", "#14532D", "#7F1D1D", "#7C2D12"];
+  const textColor = typeof theme.text_color === "string" && allowedTextColors.includes(theme.text_color.toUpperCase()) ? theme.text_color : "#111827";
   const { data: organization } = await supabase.from("organizations").select("workspace_config")
     .eq("id", card.organization_id).maybeSingle();
   const workspaceConfig = (organization?.workspace_config ?? {}) as {
@@ -115,10 +117,10 @@ async function PublicCardContent({
           <section className="relative z-10 -mt-12 rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
             <div className="grid grid-cols-[1fr_118px] items-stretch gap-3">
               <div className="flex min-w-0 flex-col justify-between py-1">
-                <div><h1 className="break-words text-[25px] font-black leading-[1.02] tracking-tight text-black">{card.full_name}</h1>
-                  {card.job_title && <p className="mt-3 text-xs font-medium leading-4 text-slate-600">{card.job_title}</p>}
-                  {template !== "contact" && card.company_name && <p className="mt-1 text-xs font-bold text-slate-700">{card.company_name}</p>}</div>
-                {fields.tagline && <p className="mt-3 text-[11px] font-bold leading-4 text-slate-700">{fields.tagline}</p>}
+                <div><h1 className="break-words text-[25px] font-black leading-[1.02] tracking-tight" style={{ color: textColor }}>{card.full_name}</h1>
+                  {card.job_title && <p className="mt-3 text-xs font-medium leading-4" style={{ color: textColor }}>{card.job_title}</p>}
+                  {template !== "contact" && card.company_name && <p className="mt-1 text-xs font-bold" style={{ color: textColor }}>{card.company_name}</p>}</div>
+                {fields.tagline && <p className="mt-3 text-[11px] font-bold leading-4" style={{ color: textColor }}>{fields.tagline}</p>}
               </div>
               <div className="h-[118px] w-[118px] overflow-hidden rounded-xl bg-slate-100">
                 {card.avatar_url ? <img src={card.avatar_url} alt={card.full_name} className="h-full w-full object-cover"/> : <div className="flex h-full items-center justify-center text-4xl font-black text-slate-400">{card.full_name.slice(0,1).toUpperCase()}</div>}
@@ -135,7 +137,7 @@ async function PublicCardContent({
               <span>Enregistrer contact</span>
             </TrackedPublicLink>
           </div>
-          {settings.show_about !== false && card.bio && (() => { const words = card.bio.trim().split(/\s+/); const shortBio = words.slice(0, 20).join(" "); const isLong = words.length > 20; return <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-slate-900">À propos</h2><p className="mt-2 whitespace-pre-line text-[13px] leading-[1.7] text-slate-700">{isLong ? shortBio + "…" : card.bio}</p>{isLong && <details className="mt-2"><summary className="w-fit cursor-pointer list-none text-xs font-bold" style={{ color: accent }}>Lire plus <span aria-hidden="true">＋</span></summary><p className="mt-2 whitespace-pre-line text-[13px] leading-[1.7] text-slate-700">{card.bio}</p></details>}{(fields.location || fields.hours) && <div className="mt-3 flex flex-wrap gap-2">{fields.location && <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700"><span aria-hidden="true">📍</span>{fields.location}</span>}{fields.hours && <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700"><span aria-hidden="true">◷</span>{fields.hours}</span>}</div>}</section>; })()}
+          {settings.show_about !== false && card.bio && (() => { const words = card.bio.trim().split(/\s+/); const shortBio = words.slice(0, 20).join(" "); const isLong = words.length > 20; return <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-slate-900">À propos</h2><p className="mt-2 whitespace-pre-line text-[13px] leading-[1.7]" style={{ color: textColor }}>{isLong ? shortBio + "…" : card.bio}</p>{isLong && <details className="mt-2"><summary className="w-fit cursor-pointer list-none text-xs font-bold" style={{ color: accent }}>Lire plus <span aria-hidden="true">＋</span></summary><p className="mt-2 whitespace-pre-line text-[13px] leading-[1.7]" style={{ color: textColor }}>{card.bio}</p></details>}{(fields.location || fields.hours) && <div className="mt-3 flex flex-wrap gap-2">{fields.location && <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700"><span aria-hidden="true">📍</span>{fields.location}</span>}{fields.hours && <span className="inline-flex min-h-8 items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-bold text-slate-700"><span aria-hidden="true">◷</span>{fields.hours}</span>}</div>}</section>; })()}
           {galleryFields.length > 0 && <section className="rounded-2xl bg-white p-4"><h2 className="text-base font-bold text-slate-900">Portfolio & galerie</h2><p className="mt-1 text-xs text-slate-500">Quelques photos pour découvrir mon travail.</p><div className="mt-3 grid grid-cols-2 gap-3">{galleryFields.map((field) => <a key={field.key} href={field.value} target="_blank" rel="noopener noreferrer" className="overflow-hidden rounded-xl border border-slate-100 bg-slate-50"><img src={field.value} alt={field.label} loading="lazy" className="h-36 w-full object-cover"/><span className="block truncate px-3 py-2 text-xs font-semibold text-slate-700">{field.label}</span></a>)}</div></section>}
           {settings.show_contact !== false && (card.phone || card.email || card.website || whatsapp) && <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <h2 className="text-base font-extrabold text-slate-950">Restons en contact</h2>
