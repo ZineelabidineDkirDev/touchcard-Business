@@ -57,7 +57,7 @@ export default async function BusinessModulesPage() {
         <button className="rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white">Ajouter</button>
         <textarea name="description" placeholder="Description" rows={2} className="rounded-xl border border-slate-200 px-3 py-3 text-sm sm:col-span-2 lg:col-span-6"/>
       </form>
-      <div className="grid gap-3 md:grid-cols-2">{(catalog.data ?? []).map((item: any) => <article key={item.id} className="rounded-2xl border border-slate-200 p-4"><div className="flex justify-between gap-3"><div><h3 className="font-bold text-slate-900">{item.name}</h3><p className="mt-1 text-xs text-slate-500">{item.item_type === "room" ? "Chambre" : "Prestation / menu"}</p></div><strong className="text-indigo-700">{Number(item.price).toLocaleString("fr-MA")} {item.currency}</strong></div>{item.description && <p className="mt-2 text-sm text-slate-600">{item.description}</p>}</article>)}{!(catalog.data?.length) && <Empty text="Aucun élément ajouté pour le moment."/></div>
+      <div className="grid gap-3 md:grid-cols-2">{(catalog.data ?? []).map((item: any) => <article key={item.id} className="rounded-2xl border border-slate-200 p-4"><div className="flex justify-between gap-3"><div><h3 className="font-bold text-slate-900">{item.name}</h3><p className="mt-1 text-xs text-slate-500">{item.item_type === "room" ? "Chambre" : "Prestation / menu"}</p></div><strong className="text-indigo-700">{Number(item.price).toLocaleString("fr-MA")} {item.currency}</strong></div>{item.description && <p className="mt-2 text-sm text-slate-600">{item.description}</p>}</article>)}{!(catalog.data?.length) && <Empty text="Aucun élément ajouté pour le moment."/>}</div>
     </section>}
 
     {canAvailability && <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
@@ -70,13 +70,13 @@ export default async function BusinessModulesPage() {
         <input name="slot_minutes" type="number" min="5" max="240" defaultValue="30" placeholder="Durée créneau" className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"/>
         <button className="rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white">Ajouter plage</button>
       </form>
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{(rules.data ?? []).map((rule: any) => <div key={rule.id} className="rounded-xl border border-slate-200 p-3 text-sm"><strong>{rule.specific_date || dayNames[rule.day_of_week ?? 0]}</strong><p className="mt-1 text-slate-500">{String(rule.starts_at).slice(0,5)} – {String(rule.ends_at).slice(0,5)} · créneau {rule.slot_minutes} min · capacité {rule.capacity}</p></div>)}{!(rules.data?.length) && <Empty text="Aucune disponibilité configurée."/></div>
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{(rules.data ?? []).map((rule: any) => <div key={rule.id} className="rounded-xl border border-slate-200 p-3 text-sm"><strong>{rule.specific_date || dayNames[rule.day_of_week ?? 0]}</strong><p className="mt-1 text-slate-500">{String(rule.starts_at).slice(0,5)} – {String(rule.ends_at).slice(0,5)} · créneau {rule.slot_minutes} min · capacité {rule.capacity}</p></div>)}{!(rules.data?.length) && <Empty text="Aucune disponibilité configurée."/>}</div>
     </section>}
 
     {canAppointments && <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
       <SectionTitle title="Rendez-vous & réservations" description="Consultez les demandes privées reçues depuis votre carte NFC et mettez leur statut à jour."/>
       <div className="grid gap-3 sm:grid-cols-3"><Metric label="Total" value={appointments.data?.length ?? 0}/><Metric label="En attente" value={(appointments.data ?? []).filter((x: any) => x.status === "pending").length}/><Metric label="Confirmés" value={(appointments.data ?? []).filter((x: any) => x.status === "confirmed").length}/></div>
-      <div className="space-y-3">{(appointments.data ?? []).map((item: any) => <RequestCard key={item.id} item={item} action={updateAppointmentStatus} title={item.appointment_type === "consultation" ? "Consultation" : item.appointment_type === "restaurant_booking" ? "Réservation restaurant" : "Rendez-vous"} date={item.starts_at}/>) }{!(appointments.data?.length) && <Empty text="Aucune demande de rendez-vous reçue."/></div>
+      <div className="space-y-3">{(appointments.data ?? []).map((item: any) => <RequestCard key={item.id} item={item} action={updateAppointmentStatus} title={item.appointment_type === "consultation" ? "Consultation" : item.appointment_type === "restaurant_booking" ? "Réservation restaurant" : "Rendez-vous"} date={item.starts_at}/>) }{!(appointments.data?.length) && <Empty text="Aucune demande de rendez-vous reçue."/>}</div>
     </section>}
 
     {canGym && <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
@@ -90,9 +90,9 @@ export default async function BusinessModulesPage() {
         <textarea name="description" placeholder="Description" rows={2} className="rounded-xl border border-slate-200 px-3 py-3 text-sm"/>
         <textarea name="benefits" placeholder="Avantages (un par ligne)" rows={2} className="rounded-xl border border-slate-200 px-3 py-3 text-sm"/>
       </form>
-      <div className="grid gap-3 md:grid-cols-2">{(plans.data ?? []).map((plan: any) => <article key={plan.id} className="rounded-2xl border border-slate-200 p-4"><h3 className="font-bold text-slate-900">{plan.name}</h3><p className="mt-1 text-sm text-slate-500">{plan.duration_days} jours · {(plan.benefits ?? []).join(" · ")}</p><p className="mt-2 font-black text-indigo-700">{Number(plan.price).toLocaleString("fr-MA")} {plan.currency}</p></article>)}{!(plans.data?.length) && <Empty text="Aucune formule d'abonnement créée."/></div>
+      <div className="grid gap-3 md:grid-cols-2">{(plans.data ?? []).map((plan: any) => <article key={plan.id} className="rounded-2xl border border-slate-200 p-4"><h3 className="font-bold text-slate-900">{plan.name}</h3><p className="mt-1 text-sm text-slate-500">{plan.duration_days} jours · {(plan.benefits ?? []).join(" · ")}</p><p className="mt-2 font-black text-indigo-700">{Number(plan.price).toLocaleString("fr-MA")} {plan.currency}</p></article>)}{!(plans.data?.length) && <Empty text="Aucune formule d'abonnement créée."/>}</div>
       <h3 className="pt-3 text-lg font-black text-slate-900">Demandes d'inscription</h3>
-      <div className="space-y-3">{(gymRegistrations.data ?? []).map((item: any) => <RequestCard key={item.id} item={item} action={updateGymRegistrationStatus} title="Inscription sport" date={item.created_at} detail={item.fitness_goals}/>) }{!(gymRegistrations.data?.length) && <Empty text="Aucune inscription reçue."/></div>
+      <div className="space-y-3">{(gymRegistrations.data ?? []).map((item: any) => <RequestCard key={item.id} item={item} action={updateGymRegistrationStatus} title="Inscription sport" date={item.created_at} detail={item.fitness_goals}/>) }{!(gymRegistrations.data?.length) && <Empty text="Aucune inscription reçue."/>}</div>
     </section>}
 
     {canSchool && <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
@@ -107,9 +107,9 @@ export default async function BusinessModulesPage() {
         <input name="end_date" type="date" aria-label="Date fin" className="rounded-xl border border-slate-200 px-3 py-3 text-sm"/>
         <input name="capacity" type="number" min="1" placeholder="Places disponibles" className="rounded-xl border border-slate-200 px-3 py-3 text-sm"/>
       </form>
-      <div className="grid gap-3 md:grid-cols-2">{(programs.data ?? []).map((program: any) => <article key={program.id} className="rounded-2xl border border-slate-200 p-4"><h3 className="font-bold text-slate-900">{program.title}</h3><p className="mt-1 text-sm text-slate-500">{program.duration_label || "Durée à préciser"} · {program.start_date || "Date à définir"}</p>{program.description && <p className="mt-2 text-sm text-slate-600">{program.description}</p>}</article>)}{!(programs.data?.length) && <Empty text="Aucun programme publié."/></div>
+      <div className="grid gap-3 md:grid-cols-2">{(programs.data ?? []).map((program: any) => <article key={program.id} className="rounded-2xl border border-slate-200 p-4"><h3 className="font-bold text-slate-900">{program.title}</h3><p className="mt-1 text-sm text-slate-500">{program.duration_label || "Durée à préciser"} · {program.start_date || "Date à définir"}</p>{program.description && <p className="mt-2 text-sm text-slate-600">{program.description}</p>}</article>)}{!(programs.data?.length) && <Empty text="Aucun programme publié."/>}</div>
       <h3 className="pt-3 text-lg font-black text-slate-900">Préinscriptions reçues</h3>
-      <div className="space-y-3">{(enrollments.data ?? []).map((item: any) => <RequestCard key={item.id} item={item} action={updateSchoolEnrollmentStatus} title="Préinscription" date={item.created_at} detail={item.message}/>) }{!(enrollments.data?.length) && <Empty text="Aucune préinscription reçue."/></div>
+      <div className="space-y-3">{(enrollments.data ?? []).map((item: any) => <RequestCard key={item.id} item={item} action={updateSchoolEnrollmentStatus} title="Préinscription" date={item.created_at} detail={item.message}/>) }{!(enrollments.data?.length) && <Empty text="Aucune préinscription reçue."/>}</div>
     </section>}
   </div>;
 }
