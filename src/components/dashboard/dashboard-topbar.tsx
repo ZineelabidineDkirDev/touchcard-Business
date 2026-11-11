@@ -49,7 +49,7 @@ const cardLabels: Record<string, string> = {
 export function DashboardTopbar({ name, email, avatarUrl = "", notificationsEnabled = true, isSuperAdmin = false, navigation }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [dark, setDark] = useState(false);
+  const [dark, setDark] = useState(true);
   const [notifications, setNotifications] = useState<AdminNotification[]>([]);
   const [notificationCount, setNotificationCount] = useState(0);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
@@ -72,7 +72,7 @@ export function DashboardTopbar({ name, email, avatarUrl = "", notificationsEnab
 
   useEffect(() => {
     const saved = window.localStorage.getItem("touchcard-dashboard-theme");
-    const enabled = saved === "dark";
+    const enabled = saved !== "light";
     setDark(enabled);
     document.documentElement.dataset.theme = enabled ? "dark" : "light";
     return () => { document.documentElement.dataset.theme = "light"; };

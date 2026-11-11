@@ -31,7 +31,7 @@ async function LoginContent({
   const params = await searchParams;
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-5 py-12">
+    <main className="flex min-h-screen items-center justify-center tc-dark-surface tc-auth-bg px-5 py-12">
       <section className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/50">
         <Link href="/" className="inline-flex items-center gap-3">
           <img src="/brand/touchcard-mark.svg" alt="" className="h-11 w-11 object-contain" />
@@ -62,7 +62,7 @@ async function LoginContent({
 
 function LoginLoading() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-5 py-12">
+    <main className="flex min-h-screen items-center justify-center tc-dark-surface tc-auth-bg px-5 py-12">
       <section
         aria-label="Chargement de la connexion"
         className="h-[420px] w-full max-w-md animate-pulse rounded-3xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/50"

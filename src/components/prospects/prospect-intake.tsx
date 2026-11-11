@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { PhysicalNfcCard } from "@/components/cards/physical-nfc-card";
+import { useI18n, type Locale } from "@/i18n/provider";
 import { createClient } from "@/lib/supabase/client";
 import { submitProspectRequest, type ProspectInput } from "@/app/actions/prospects";
 
@@ -25,6 +26,54 @@ const empty: ProspectInput = {
   projectNeeds: [], reservationMode: "", reservationChannels: [], managementNeeds: [],
 };
 
+const INTRO: Record<Locale, { title: string; accent: string; sub: string; steps: string[]; q: string[]; q5a: string; q5b: string; next: string; prev: string; send: string; saving: string; later: string; legal: string }> = {
+  fr: {
+    title: "Devenez", accent: "client",
+    sub: "Rejoignez TouchCard Business et créez votre carte digitale en quelques étapes simples.",
+    steps: ["Informations personnelles", "Votre entreprise", "Choix de carte", "Services", "Liens sociaux", "Confirmation"],
+    q: ["Comment pouvons-nous vous appeler ?", "Dans quelle ville exercez-vous ?", "Quel est votre domaine professionnel ?", "Comment pouvons-nous vous joindre ?", "Quelle solution correspond à votre besoin ?", "", "Ajoutez votre site web, votre CV / portfolio et vos réseaux sociaux.", "Souhaitez-vous une carte personnalisée ?", "Relisez votre demande avant de l’envoyer."],
+    q5a: "Choisissez une seule formule adaptée à votre activité.", q5b: "Indiquez l’adresse où votre carte ou votre espace sera rattaché.",
+    next: "Continuer", prev: "Précédent", send: "Envoyer ma demande", saving: "Enregistrement...", later: "Quitter et revenir plus tard",
+    legal: "En confirmant, vous acceptez que TouchCard utilise ces informations pour traiter votre demande et vous contacter à ce sujet.",
+  },
+  en: {
+    title: "Become a", accent: "client",
+    sub: "Join TouchCard Business and create your digital card in a few simple steps.",
+    steps: ["Personal information", "Your company", "Card choice", "Services", "Social links", "Confirmation"],
+    q: ["What should we call you?", "Which city do you work in?", "What is your professional field?", "How can we reach you?", "Which solution fits your needs?", "", "Add your website, CV / portfolio and social networks.", "Would you like a customized card?", "Review your request before sending it."],
+    q5a: "Choose one service plan suited to your business.", q5b: "Enter the address your card or workspace will be linked to.",
+    next: "Continue", prev: "Back", send: "Send my request", saving: "Saving...", later: "Quit and come back later",
+    legal: "By confirming, you agree that TouchCard uses this information to process your request and contact you about it.",
+  },
+  ar: {
+    title: "كن", accent: "عميلاً",
+    sub: "انضم إلى TouchCard Business وأنشئ بطاقتك الرقمية في خطوات بسيطة.",
+    steps: ["المعلومات الشخصية", "شركتك", "اختيار البطاقة", "الخدمات", "الروابط الاجتماعية", "التأكيد"],
+    q: ["كيف يمكننا أن نناديك؟", "في أي مدينة تمارس نشاطك؟", "ما هو مجالك المهني؟", "كيف يمكننا التواصل معك؟", "ما الحل الذي يناسب احتياجك؟", "", "أضف موقعك الإلكتروني وسيرتك الذاتية وشبكاتك الاجتماعية.", "هل تريد بطاقة مخصصة؟", "راجع طلبك قبل إرساله."],
+    q5a: "اختر صيغة خدمة واحدة تناسب نشاطك.", q5b: "أدخل العنوان الذي ستُربط به بطاقتك أو مساحتك.",
+    next: "متابعة", prev: "السابق", send: "إرسال طلبي", saving: "جارٍ الحفظ...", later: "الخروج والعودة لاحقاً",
+    legal: "بتأكيدك، توافق على أن تستخدم TouchCard هذه المعلومات لمعالجة طلبك والتواصل معك بشأنه.",
+  },
+};
+/* Les 9 étapes internes sont regroupées en 6 étapes visibles, comme sur la maquette */
+const GROUP_OF_STEP = [0, 0, 1, 1, 2, 3, 4, 5, 5];
+
+function StepIcon({ index }: { index: number }) {
+  const c = { viewBox: "0 0 24 24", "aria-hidden": true as const, className: "h-6 w-6", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+  switch (index) {
+    case 0: return <svg {...c}><circle cx="12" cy="8" r="4" fill="currentColor" stroke="none" /><path d="M4 21a8 8 0 0 1 16 0" fill="currentColor" stroke="none" /></svg>;
+    case 1: return <svg {...c}><path d="M4 21V4h10v5h6v12M8 8h2M8 12h2M8 16h2M16 13h2M16 17h2" /></svg>;
+    case 2: return <svg {...c}><rect x="3" y="5" width="18" height="14" rx="2.5" /><path d="M3 10h18" /></svg>;
+    case 3: return <svg {...c}><circle cx="12" cy="12" r="3" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1" /></svg>;
+    case 4: return <svg {...c}><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" /></svg>;
+    default: return <svg {...c}><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>;
+  }
+}
+
+function ExitIcon() {
+  return <svg viewBox="0 0 24 24" aria-hidden="true" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 17l5-5-5-5M15 12H3M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" /></svg>;
+}
+
 export function ProspectIntake() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<ProspectInput>(empty);
@@ -36,11 +85,10 @@ export function ProspectIntake() {
   const [copiedPassword, setCopiedPassword] = useState(false);
   const [draftLoaded, setDraftLoaded] = useState(false);
   const reduceMotion = useReducedMotion();
+  const { locale, setLocale } = useI18n();
   const [logoName, setLogoName] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const serviceChoiceRequired = form.cardType === "e-business" || form.cardType === "service";
-  const visibleSteps = useMemo(() => [0, 1, 2, 3, 4, 5, 6, 7, 8], []);
-  const progress = ((Math.max(0, visibleSteps.indexOf(step)) + 1) / visibleSteps.length) * 100;
 
   useEffect(() => {
     try {
@@ -175,7 +223,7 @@ export function ProspectIntake() {
 
   if (done) {
     return (
-      <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-white px-5 py-16 text-slate-900">
+      <main className="tc-dark-surface tc-auth-bg relative flex min-h-screen items-center justify-center overflow-hidden px-5 py-16 text-slate-900">
         <div className="pointer-events-none absolute -right-40 -top-40 h-96 w-96 rounded-full bg-indigo-600/20 blur-[100px]" />
         <div className="relative w-full max-w-2xl rounded-[2rem] border border-slate-200 bg-white p-8 text-center shadow-2xl backdrop-blur-xl sm:p-12">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-50 text-3xl text-emerald-700">✓</div>
@@ -195,37 +243,60 @@ export function ProspectIntake() {
     );
   }
 
-  const titles = ["Faisons connaissance", "Votre localisation", "Votre activité", "Vos coordonnées", "Votre choix", serviceChoiceRequired ? "Votre formule de service" : "Adresse de l’établissement", "Vos réseaux & pages", "Votre personnalisation", "Récapitulatif"];
-  const subtitles = ["Comment pouvons-nous vous appeler ?", "Dans quelle ville exercez-vous ?", "Quel est votre domaine professionnel ?", "Comment pouvons-nous vous joindre ?", "Quelle solution correspond à votre besoin ?", serviceChoiceRequired ? "Choisissez une seule formule adaptée à votre activité." : "Indiquez l’adresse où votre carte ou votre espace sera rattaché.", "Ajoutez votre site web, votre CV / portfolio et vos réseaux sociaux.", "Souhaitez-vous une carte personnalisée ?", "Relisez votre demande avant de l’envoyer."];
+  const l = INTRO[locale];
+  const activeGroup = GROUP_OF_STEP[step] ?? 0;
+  const question = step === 5 ? (serviceChoiceRequired ? l.q5a : l.q5b) : l.q[step];
+  const languages = [["fr", "🇫🇷", "FR"], ["en", "🇬🇧", "EN"], ["ar", "🇲🇦", "AR"]] as const;
 
   return (
-    <main className="touchcard-intake relative min-h-screen overflow-hidden bg-[#071326] px-4 py-5 text-white sm:px-6 lg:grid lg:grid-cols-[.92fr_1.08fr] lg:gap-7 lg:px-8 lg:py-6 xl:px-12">
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_90%_80%,rgba(91,55,255,.28),transparent_42%),linear-gradient(120deg,#06101e_0%,#101d36_52%,#101638_100%)]"/>
-      <aside className="relative z-10 mx-auto mb-5 flex h-[48vh] min-h-[340px] w-full max-w-[720px] flex-col justify-between overflow-hidden rounded-[1.75rem] border border-white/15 bg-[#071326] p-6 shadow-2xl sm:p-8 lg:sticky lg:top-6 lg:mb-0 lg:h-[calc(100vh-3rem)] lg:max-h-[940px] lg:max-w-none">
-        <div className="absolute inset-0 bg-[url('/brand/touchcard-demande-hero.webp')] bg-cover bg-[position:50%_42%] lg:bg-[position:50%_center]"/>
-        <div className="absolute inset-0 bg-gradient-to-t from-[#071326]/35 via-transparent to-[#071326]/5"/>
-        <div className="relative z-10 flex items-center gap-3"><img src="/brand/touchcard-mark.svg" alt="Symbole officiel TouchCard" className="h-12 w-12 object-contain drop-shadow-lg"/><span className="flex flex-col leading-none"><strong className="text-2xl font-black tracking-tight text-white">TouchCard</strong><span className="mt-1 text-xs font-bold uppercase tracking-[.24em] text-cyan-200">Business</span></span></div>
-        <div className="relative z-10 max-w-lg pb-2"><p className="text-xs font-black uppercase tracking-[.28em] text-cyan-200">Votre identité. En un contact.</p><h2 className="mt-4 text-3xl font-black leading-tight text-white sm:text-4xl">Une seule carte.<br/><span className="bg-gradient-to-r from-cyan-300 via-blue-300 to-violet-300 bg-clip-text text-transparent">Toutes vos connexions.</span></h2><p className="mt-4 max-w-md text-sm leading-6 text-white/80">Faites découvrir votre activité, partagez vos informations et développez votre réseau avec TouchCard Business.</p><div className="mt-7 grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3"><div className="rounded-xl border border-white/15 bg-slate-950/35 p-3 backdrop-blur-md"><p className="text-sm font-bold text-white">Contact instantané</p><p className="mt-1 text-xs text-white/65">Un geste, toutes vos coordonnées.</p></div><div className="rounded-xl border border-white/15 bg-slate-950/35 p-3 backdrop-blur-md"><p className="text-sm font-bold text-white">Image professionnelle</p><p className="mt-1 text-xs text-white/65">Une présence digitale cohérente.</p></div><div className="rounded-xl border border-white/15 bg-slate-950/35 p-3 backdrop-blur-md"><p className="text-sm font-bold text-white">Simple et connecté</p><p className="mt-1 text-xs text-white/65">NFC et QR code réunis.</p></div></div></div>
-      </aside>
-      <div className="relative z-10 min-w-0">
-      <header className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3 pb-4">
-        <Link href="/" className="inline-flex items-center gap-2"><img src="/brand/touchcard-mark.svg" alt="TouchCard Business" className="h-9 w-9 object-contain"/><span className="flex flex-col leading-none"><strong className="text-lg font-black tracking-tight">TouchCard</strong><span className="mt-1 text-xs text-white/75">Business</span></span></Link>
-        <div className="ml-auto flex items-center gap-2 text-xs font-bold">
-          <span className="rounded-full border border-white/30 bg-white/5 px-3 py-2">🇫🇷 FR</span><span className="rounded-full border border-white/20 bg-white/5 px-3 py-2">🇬🇧 EN</span><span className="rounded-full border border-white/20 bg-white/5 px-3 py-2">🇲🇦 AR</span>
+    <main className="touchcard-intake tc-dark-surface relative min-h-screen overflow-hidden text-white">
+      <div aria-hidden="true" className="tc-auth-bg absolute inset-0" />
+      {/* Visuel carte NFC (moitié gauche sur grand écran, bandeau flouté sur mobile) */}
+      <div aria-hidden="true" className="fixed inset-y-0 left-0 hidden w-[52%] bg-[url('/brand/touchcard-demande-hero.webp')] bg-[length:auto_100%] bg-left bg-no-repeat [mask-image:linear-gradient(to_right,black_72%,transparent)] lg:block" />
+      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-[320px] bg-[url('/brand/touchcard-demande-hero.webp')] bg-cover bg-top opacity-45 [mask-image:linear-gradient(to_bottom,black,transparent)] lg:hidden" />
+
+      <header dir="ltr" className="absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 px-4 pt-6 sm:gap-3 sm:px-8 lg:px-[72px] lg:pt-10">
+        <Link href="/" aria-label="TouchCard Business" className="inline-flex items-center gap-3 lg:gap-4">
+          <img src="/brand/touchcard-mark.svg" alt="" className="h-10 w-10 object-contain drop-shadow-lg sm:h-12 sm:w-12 lg:h-[72px] lg:w-[72px]" />
+          <span className="flex flex-col leading-none"><strong className="text-xl font-semibold tracking-tight text-white sm:text-2xl lg:text-[2.4rem]">TouchCard</strong><span className="mt-1 text-sm font-light tracking-wide text-white sm:text-lg lg:text-[1.7rem]">Business</span></span>
+        </Link>
+        <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3" role="group" aria-label="Language">
+          {languages.map(([code, flag, label]) => (
+            <button key={code} type="button" aria-pressed={locale === code} onClick={() => setLocale(code)} className={`inline-flex items-center gap-1 rounded-full border bg-[#0a1a45]/70 px-2.5 py-1.5 text-xs font-bold text-white backdrop-blur-md transition sm:gap-2 sm:px-3 sm:py-2 sm:text-sm lg:px-4 ${locale === code ? "border-cyan-300 shadow-[0_0_0_2px_rgba(0,200,255,.25)]" : "border-white/20 hover:border-white/40"}`}><span aria-hidden="true">{flag}</span>{label}</button>
+          ))}
         </div>
       </header>
-      <section className="relative mx-auto mt-1 w-full max-w-3xl rounded-[1.75rem] border border-blue-300/35 bg-[linear-gradient(125deg,rgba(9,27,52,.88),rgba(18,32,62,.76)_52%,rgba(47,55,113,.76))] p-5 text-white shadow-[0_25px_80px_rgba(0,0,0,.45)] backdrop-blur-2xl sm:p-7 lg:p-8">
-        <div className="text-center"><h1 className="text-3xl font-black tracking-tight sm:text-4xl lg:text-5xl">Devenez <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-violet-500 bg-clip-text text-transparent">client</span></h1><p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-white/85 sm:text-base">Rejoignez TouchCard Business et créez votre carte digitale en quelques étapes simples.</p></div>
-        <div className="mt-7 grid grid-cols-5 gap-x-2 gap-y-3 sm:grid-cols-9 sm:gap-2">{visibleSteps.map((item,index)=><div key={item} className="flex min-w-0 flex-col items-center text-center"><span className={`flex h-8 w-8 items-center justify-center rounded-full border text-xs font-bold ${step===item?"border-cyan-300 bg-gradient-to-br from-cyan-400 to-blue-600 text-white shadow-[0_0_22px_rgba(0,174,255,.4)]":step>item?"border-violet-300/70 bg-violet-500/20 text-white":"border-slate-400/60 bg-slate-900/40 text-slate-300"}`}>{index+1}</span><span className="mt-1 hidden max-w-full truncate text-[9px] leading-tight text-white/75 sm:block">{["Identité","Ville","Activité","Contact","Carte",serviceChoiceRequired ? "Services" : "Adresse","Liens","Options","Envoi"][index]}</span></div>)}</div>
-        <div className="mt-3 h-1 overflow-hidden rounded-full bg-white/15"><div className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500 transition-all duration-500" style={{ width: `${progress}%` }}/></div>
-        <p className="mt-7 text-xs font-black uppercase tracking-[.22em] text-cyan-200">{titles[step]}</p>
-        <h2 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">{subtitles[step]}</h2>
-        <form onSubmit={submit} className="mt-8">
-          {step === 0 && <Field label="Nom et prénom" value={form.fullName} onChange={(v) => update("fullName", v)} placeholder="Ex. : Zine El Abidine Dkir" autoComplete="name"/>}
+
+      <div dir="ltr" className="relative z-10 grid min-h-screen items-center px-4 pb-10 pt-28 sm:px-8 lg:grid-cols-2 lg:gap-6 lg:px-10 lg:pt-24">
+        <div aria-hidden="true" className="hidden lg:block" />
+        <section dir={locale === "ar" ? "rtl" : "ltr"} className="relative mx-auto w-full max-w-[860px] rounded-[2.25rem] border border-blue-400/50 bg-[linear-gradient(145deg,rgba(14,32,84,.74),rgba(8,16,46,.68)_55%,rgba(52,40,140,.62))] p-6 text-white shadow-[0_0_60px_rgba(40,110,255,.35),inset_0_0_0_1px_rgba(255,255,255,.05)] backdrop-blur-2xl sm:p-9 lg:ml-auto lg:px-12 lg:py-10">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-[3.4rem]">{l.title} <span className="tc-gradient-text">{l.accent}</span></h1>
+            <p className="mx-auto mt-3 max-w-xl text-base font-medium leading-snug text-white sm:text-xl">{l.sub}</p>
+          </div>
+
+          <ol className="relative mt-8 flex items-start justify-between">
+            <div aria-hidden="true" className="absolute inset-x-[8%] top-[22px] h-px bg-blue-300/30 sm:top-[26px]" />
+            <div aria-hidden="true" className="absolute start-[8%] top-[22px] h-px bg-cyan-400 transition-all duration-500 sm:top-[26px]" style={{ width: `${(activeGroup / 5) * 84}%` }} />
+            {l.steps.map((label, index) => (
+              <li key={label} aria-current={index === activeGroup ? "step" : undefined} className="relative z-10 flex w-1/6 min-w-0 flex-col items-center text-center">
+                <span className={`flex h-11 w-11 items-center justify-center rounded-full border-2 transition sm:h-[52px] sm:w-[52px] ${index === activeGroup ? "border-transparent bg-gradient-to-br from-cyan-400 to-blue-600 text-white shadow-[0_0_28px_rgba(0,200,255,.65)]" : index < activeGroup ? "border-cyan-300/80 bg-[#0a1a45] text-cyan-200" : "border-blue-300/60 bg-[#0a1a45] text-blue-100"}`}><StepIcon index={index} /></span>
+                <span className="mt-2 text-sm font-bold">{index + 1}</span>
+                <span className={`mt-0.5 px-0.5 text-[11px] leading-tight sm:text-xs ${index === activeGroup ? "block font-semibold text-white" : "hidden text-white/80 sm:block"}`}>{label}</span>
+              </li>
+            ))}
+          </ol>
+
+          <div className="mt-9 flex items-center gap-3">
+            <span aria-hidden="true" className="h-8 w-1.5 shrink-0 rounded-full bg-cyan-400" />
+            <h2 className="text-xl font-extrabold leading-snug text-white sm:text-[1.65rem]">{question}</h2>
+          </div>
+          <form onSubmit={submit} className="mt-6">
+          {step === 0 && <Field label={locale === "ar" ? "الاسم الكامل" : locale === "en" ? "Full name" : "Nom et prénom"} value={form.fullName} onChange={(v) => update("fullName", v)} placeholder={locale === "ar" ? "مثال: أحمد بنعلي" : locale === "en" ? "e.g. Ahmed Benali" : "Ex: Ahmed Benali"} autoComplete="name" withUserIcon/>}
           {step === 1 && <Field label="Ville" value={form.city} onChange={(v) => update("city", v)} placeholder="Ex. : Casablanca" />}
           {step === 2 && <div className="space-y-4"><Field label="Nom de votre activité / marque (facultatif pour E-Contact et Avis Google)" value={form.brandName} onChange={(v) => update("brandName", v)} placeholder="Ex. : MMC Event" autoComplete="organization"/><p className="text-sm text-slate-600">Sélectionnez un seul domaine correspondant à votre activité principale. Facultatif pour E-Contact et Avis Google.</p><div className="grid gap-3 sm:grid-cols-2">{sectors.map((sector) => <label key={sector} className={`flex cursor-pointer items-center gap-3 rounded-xl border p-4 text-left transition ${form.sector === sector ? "border-violet-500 bg-violet-50 ring-2 ring-violet-200" : "border-slate-200 bg-white hover:border-violet-300 hover:bg-violet-50"}`}><input type="radio" name="professional_sector" value={sector} checked={form.sector === sector} onChange={() => update("sector", sector)} className="h-4 w-4 accent-violet-700"/><span className="font-semibold text-slate-800">{sector}</span>{form.sector === sector && <span className="ml-auto text-xs font-bold text-violet-700">Choisi ✓</span>}</label>)}</div>{form.sector === "Autre" && <Field label="Précisez votre activité" value={form.sectorOther} onChange={(v) => update("sectorOther", v)} placeholder="Votre secteur d'activité"/>}</div>}
           {step === 3 && <div className="grid gap-5"><Field label="Adresse e-mail" type="email" value={form.email} onChange={(v) => update("email", v)} placeholder="vous@exemple.com" autoComplete="email"/><Field label="Téléphone" type="tel" value={form.phone} onChange={(v) => update("phone", v)} placeholder="+212 6 XX XX XX XX" autoComplete="tel"/></div>}
-          {step === 4 && <div className="space-y-5"><div className="grid gap-5 sm:grid-cols-3">{cards.map((card) => <div key={card.id} role="checkbox" aria-checked={form.cardType === card.id} tabIndex={0} onClick={() => setForm((current) => ({ ...current, cardType: card.id, projectNeeds: [], reservationMode: "", reservationChannels: [], managementNeeds: [] }))} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setForm((current) => ({ ...current, cardType: card.id, projectNeeds: [], reservationMode: "", reservationChannels: [], managementNeeds: [] })); } }} className={`group cursor-pointer rounded-2xl border p-3 text-left transition focus:outline-none focus:ring-2 focus:ring-violet-400 ${form.cardType === card.id ? "border-violet-500 bg-violet-50 ring-2 ring-violet-200" : "border-slate-200 bg-white hover:border-violet-300 hover:bg-violet-50"}`}><div className="relative aspect-[1.586/1] w-full"><PhysicalNfcCard title={card.title} cardType={card.id} clientName={form.fullName || "M./Mme Client"}/>{form.cardType === card.id && <span className="absolute -right-2 -top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-violet-700 text-lg font-black text-white shadow-lg" aria-label="Sélectionné">✓</span>}</div><div className="mt-4 flex items-center justify-between gap-2"><h3 className="font-extrabold text-slate-900">{card.title}</h3>{form.cardType === card.id && <span className="text-xs font-bold text-violet-700">Choisie ✓</span>}</div><p className="mt-1 text-xs leading-5 text-slate-600">{card.desc}</p></div>)}</div><div><label className="mb-2 block text-sm font-semibold text-slate-800">Pourquoi avez-vous choisi cette carte ?</label><textarea value={form.reason} onChange={(event) => update("reason", event.target.value)} rows={3} placeholder="Expliquez-nous votre besoin..." className="w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-400/20"/></div></div>}{serviceChoiceRequired && step === 5 && <div className="space-y-5">
+          {step === 4 && <div className="space-y-5"><div className="grid gap-5 sm:grid-cols-2">{cards.map((card) => <div key={card.id} role="checkbox" aria-checked={form.cardType === card.id} tabIndex={0} onClick={() => setForm((current) => ({ ...current, cardType: card.id, projectNeeds: [], reservationMode: "", reservationChannels: [], managementNeeds: [] }))} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setForm((current) => ({ ...current, cardType: card.id, projectNeeds: [], reservationMode: "", reservationChannels: [], managementNeeds: [] })); } }} className={`group cursor-pointer rounded-2xl border p-3 text-left transition focus:outline-none focus:ring-2 focus:ring-violet-400 ${form.cardType === card.id ? "border-violet-500 bg-violet-50 ring-2 ring-violet-200" : "border-slate-200 bg-white hover:border-violet-300 hover:bg-violet-50"}`}><div className="relative aspect-[1.586/1] w-full"><PhysicalNfcCard title={card.title} cardType={card.id} clientName={form.fullName || "M./Mme Client"}/>{form.cardType === card.id && <span className="absolute -right-2 -top-2 z-20 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-violet-700 text-lg font-black text-white shadow-lg" aria-label="Sélectionné">✓</span>}</div><div className="mt-4 flex items-center justify-between gap-2"><h3 className="font-extrabold text-slate-900">{card.title}</h3>{form.cardType === card.id && <span className="text-xs font-bold text-violet-700">Choisie ✓</span>}</div><p className="mt-1 text-xs leading-5 text-slate-600">{card.desc}</p></div>)}</div><div><label className="mb-2 block text-sm font-semibold text-slate-800">Pourquoi avez-vous choisi cette carte ?</label><textarea value={form.reason} onChange={(event) => update("reason", event.target.value)} rows={3} placeholder="Expliquez-nous votre besoin..." className="w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none placeholder:text-slate-400 focus:border-indigo-300 focus:ring-2 focus:ring-indigo-400/20"/></div></div>}{serviceChoiceRequired && step === 5 && <div className="space-y-5">
   <div className="rounded-2xl border border-violet-100 bg-violet-50/60 p-5">
     <p className="text-sm font-bold text-slate-900">Choisissez une seule formule de service</p>
     <p className="mt-1 text-sm leading-6 text-slate-600">Cette étape apparaît uniquement après le choix E-Business ou Personnalisée. Les fonctionnalités seront préparées selon votre activité.</p>
@@ -254,58 +325,31 @@ export function ProspectIntake() {
   </div>}
 </div>}{step === 8 && <div className="space-y-3 rounded-2xl border border-violet-100 bg-violet-50/50 p-5 text-sm"><Review label="Nom" value={form.fullName}/><Review label="Ville" value={form.city}/><Review label="Secteur" value={form.sector === "Autre" ? form.sectorOther : form.sector}/><Review label="E-mail" value={form.email}/><Review label="Téléphone" value={form.phone}/><Review label="Pages & réseaux" value={form.socialLinks.filter((item) => item.url.trim()).map((item) => item.platform + ": " + item.url).join(" · ") || "Non renseignés"}/><Review label="Nom de l’activité" value={form.brandName || (form.cardType === "contact" ? form.fullName : "")}/><Review label="Carte souhaitée" value={cards.find((card) => card.id === form.cardType)?.title || ""}/>{!serviceChoiceRequired && <Review label="Adresse de l’établissement" value={form.businessAddress}/>}<Review label="Prix indicatif" value={({ contact: "149 DH", "google-review": "199 DH", "e-business": "399 DH", service: "499 DH" } as Record<string, string>)[form.cardType] || "À confirmer"}/><Review label="Formule choisie" value={form.projectNeeds[0] || (form.cardType === "contact" ? "Non applicable — E-Contact" : form.cardType === "google-review" ? "Non applicable — Avis Google" : "Non sélectionnée")}/><Review label="Personnalisation" value={form.customRequested ? "Oui" : "Non"}/>{form.customRequested && <><Review label="Marque" value={form.brandName}/><Review label="Logo" value={logoName || "Non fourni"}/><Review label="Adresse" value={form.businessAddress}/><Review label="Téléphone professionnel" value={form.businessPhone}/></>}</div>}
           {error && <p role="alert" className="mt-5 rounded-xl border border-rose-400/20 bg-rose-400/10 p-3 text-sm text-rose-700">{error}</p>}
-          <div className="mt-9 flex flex-col-reverse justify-between gap-3 sm:flex-row"><button type="button" disabled={step === 0 || busy} onClick={() => { setError(""); setStep((value) => value === 8 ? 7 : value === 6 && !serviceChoiceRequired ? 5 : value - 1); }} className="rounded-full border border-white/25 bg-white/5 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-white/10 disabled:opacity-30">Précédent</button><button type="submit" disabled={busy} className="rounded-full bg-gradient-to-r from-cyan-500 via-blue-600 to-violet-600 px-8 py-3.5 text-sm font-extrabold text-white shadow-[0_10px_30px_rgba(0,120,255,.28)] transition hover:-translate-y-0.5 hover:brightness-110 disabled:opacity-60">{busy ? "Enregistrement..." : step === 8 ? "Envoyer ma demande →" : "Continuer →"}</button></div>
-        </form>
-        <div className="mt-6 flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-5 text-center sm:flex-row sm:text-left"><p className="text-xs text-white/60">Vous souhaitez terminer plus tard ? Votre progression est sauvegardée automatiquement.</p><Link href="/" className="shrink-0 rounded-full border border-white/20 bg-white/5 px-5 py-2.5 text-xs font-bold text-white/85 transition hover:border-cyan-300/50 hover:bg-cyan-400/10 hover:text-white">Quitter et revenir plus tard</Link></div>
-        <p className="mt-7 text-center text-[11px] leading-5 text-white/55">En confirmant, vous acceptez que TouchCard utilise ces informations pour traiter votre demande et vous contacter à ce sujet.</p>
-      </section>
+          <div className="mt-8 flex flex-col items-center gap-5">
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              {step > 0 && <button type="button" disabled={busy} onClick={() => { setError(""); setStep((value) => value === 8 ? 7 : value === 6 && !serviceChoiceRequired ? 5 : value - 1); }} className="rounded-full border border-white/25 bg-white/5 px-7 py-4 text-base font-bold text-white transition hover:bg-white/10 disabled:opacity-30">{l.prev}</button>}
+              <button type="submit" disabled={busy} className="inline-flex min-w-[250px] items-center justify-center gap-2 rounded-full bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-600 px-10 py-4 text-xl font-bold text-white shadow-[0_10px_34px_rgba(0,140,255,.45)] transition hover:-translate-y-0.5 hover:brightness-110 disabled:opacity-60">{busy ? l.saving : step === 8 ? l.send : l.next}<span aria-hidden="true">{locale === "ar" ? "←" : "→"}</span></button>
+            </div>
+            <Link href="/" className="inline-flex items-center gap-2 text-base text-white/85 transition hover:text-white"><ExitIcon />{l.later}</Link>
+          </div>
+          </form>
+          {step === 8 && <p className="mt-6 text-center text-[11px] leading-5 text-white/55">{l.legal}</p>}
+        </section>
       </div>
-
-      <style jsx global>{`
-        .touchcard-intake { color-scheme: dark; }
-        .touchcard-intake .text-slate-900,
-        .touchcard-intake .text-slate-800,
-        .touchcard-intake .text-slate-700 { color: #f1f5fb !important; }
-        .touchcard-intake .text-slate-600,
-        .touchcard-intake .text-slate-500 { color: #b8c8dc !important; }
-        .touchcard-intake .border-slate-200,
-        .touchcard-intake .border-slate-300 { border-color: rgba(148, 181, 220, .28) !important; }
-        .touchcard-intake [class~="bg-white"],
-        .touchcard-intake [class~="bg-violet-50"],
-        .touchcard-intake [class~="bg-violet-50/60"],
-        .touchcard-intake [class~="bg-violet-50/50"] {
-          background-color: rgba(7, 22, 43, .88) !important;
-        }
-        .touchcard-intake input:not([type="radio"]):not([type="file"]),
-        .touchcard-intake textarea,
-        .touchcard-intake select {
-          color: #f8fbff !important;
-          background: rgba(3, 13, 29, .88) !important;
-          border-color: rgba(130, 177, 230, .38) !important;
-        }
-        .touchcard-intake input::placeholder,
-        .touchcard-intake textarea::placeholder { color: #91a6c0 !important; opacity: 1; }
-        .touchcard-intake select option { color: #f8fbff; background: #0b1930; }
-        .touchcard-intake input[type="radio"] { accent-color: #22d3ee; }
-        .touchcard-intake label { color: #e7f0fc; }
-        .touchcard-intake [class~="border-violet-500"] { border-color: rgba(103, 232, 249, .82) !important; }
-        .touchcard-intake [class~="ring-violet-200"] { --tw-ring-color: rgba(103, 232, 249, .28) !important; }
-        .touchcard-intake [class~="text-violet-900"],
-        .touchcard-intake [class~="text-violet-700"] { color: #d9f4ff !important; }
-        .touchcard-intake [class~="bg-violet-700"] { background-color: #3158c9 !important; }
-        .touchcard-intake .hover\\:bg-violet-50:hover,
-        .touchcard-intake .hover\\:bg-slate-50:hover { background-color: rgba(24, 62, 104, .72) !important; }
-        @media (max-width: 639px) {
-          .touchcard-intake section { border-radius: 1.35rem; }
-          .touchcard-intake aside { min-height: 300px; }
-        }
-      `}</style>
     </main>
   );
 }
 
-function Field({ label, value, onChange, placeholder, type = "text", autoComplete }: { label: string; value: string; onChange: (value: string) => void; placeholder: string; type?: string; autoComplete?: string }) {
-  return <div><label className="mb-2 block text-sm font-semibold text-slate-700">{label}</label><input type={type} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} autoComplete={autoComplete} className="w-full rounded-xl border border-white/20 bg-slate-950/35 px-4 py-4 text-white outline-none transition placeholder:text-slate-400 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/20"/></div>;
+function Field({ label, value, onChange, placeholder, type = "text", autoComplete, withUserIcon = false }: { label: string; value: string; onChange: (value: string) => void; placeholder: string; type?: string; autoComplete?: string; withUserIcon?: boolean }) {
+  return (
+    <div>
+      <label className="mb-3 block text-lg font-medium text-[#3da5ff]">{label}</label>
+      <div className="relative">
+        {withUserIcon && <span aria-hidden="true" className="pointer-events-none absolute start-4 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/40 text-white/90"><svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor"><circle cx="12" cy="8.5" r="3.6" /><path d="M5 20c0-3.6 3.1-5.8 7-5.8s7 2.2 7 5.8z" /></svg></span>}
+        <input type={type} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} autoComplete={autoComplete} className={`w-full rounded-2xl border border-blue-400/60 bg-[#06102e]/80 py-[1.15rem] pe-5 text-lg text-white outline-none transition placeholder:text-slate-300/80 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/25 ${withUserIcon ? "ps-16" : "ps-5"}`} />
+      </div>
+    </div>
+  );
 }
 
 function Choice({ selected, onClick, children }: { selected: boolean; onClick: () => void; children: React.ReactNode }) {

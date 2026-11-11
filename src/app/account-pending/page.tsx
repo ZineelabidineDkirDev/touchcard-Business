@@ -34,7 +34,7 @@ async function AccountPendingContent() {
   const displayName = String(request.full_name || user.user_metadata.full_name || "cher client").trim();
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-white px-5 py-12 text-slate-950">
+    <main className="flex min-h-screen items-center justify-center tc-dark-surface tc-auth-bg px-5 py-12 text-slate-950">
       <PendingStatusRefresh />
       <section className="w-full max-w-4xl text-center">
         <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-indigo-50 text-indigo-700">
