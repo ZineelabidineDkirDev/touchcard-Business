@@ -187,24 +187,24 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
         database: "Supabase a refusé l'enregistrement. Réessayez ; si le problème persiste, consultez les journaux serveur.",
         permission: "Aucune carte de cet espace n'a été modifiée. Vérifiez les droits d'accès à cette carte.",
       } as Record<string, string>)[status.card_error] ?? "L'enregistrement a échoué. Réessayez."}</div>}
-      <section className="overflow-hidden rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-white to-violet-50 p-6 shadow-sm sm:p-7">
+      <section className="rounded-3xl border border-indigo-100 bg-white p-6 shadow-sm sm:p-7">
         <div className="flex flex-wrap items-start justify-between gap-5">
           <div className="max-w-2xl">
-            <p className="text-xs font-black uppercase tracking-[.2em] text-indigo-700">Votre espace de personnalisation</p>
-            <h2 className="mt-2 text-2xl font-black text-slate-950">Personnalisation de ma carte</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-600">Votre carte est préparée selon votre activité et les fonctionnalités validées dans votre espace. Personnalisez son apparence et son contenu sans changer les outils liés à votre métier.</p>
+            <p className="text-xs font-black uppercase tracking-[.2em] text-indigo-700">À quoi sert cette rubrique ?</p>
+            <h2 className="mt-2 text-2xl font-black text-slate-950">Gérez l’apparence et les informations de votre carte NFC</h2>
+            <p className="mt-2 text-sm leading-6 text-slate-600">Ces réglages modifient directement la page publique que vos clients ouvrent en scannant votre carte NFC ou son QR code. Ils ne servent pas à gérer votre abonnement ni les outils de votre activité.</p>
           </div>
-          <a href="#mes-cartes-nfc" className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-6 py-4 text-sm font-extrabold text-white shadow-lg shadow-indigo-200 transition hover:-translate-y-0.5 hover:bg-indigo-700 sm:w-auto"><span aria-hidden="true" className="text-lg">✦</span> Personnaliser ma carte <span aria-hidden="true">→</span></a>
+          <a href="#mes-cartes-nfc" className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-indigo-700 sm:w-auto">Accéder aux réglages <span aria-hidden="true">→</span></a>
         </div>
         <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {[
-            { title: "Identité visuelle", detail: "Logo, photo de profil et couverture", icon: "◈" },
-            { title: "Style graphique", detail: "Couleurs et présentation de la carte", icon: "✦" },
-            { title: "Contenu", detail: "Coordonnées, textes et informations", icon: "▤" },
-            { title: "Boutons & liens", detail: "WhatsApp, réseaux sociaux et liens utiles", icon: "↗" },
-          ].map((item) => <div key={item.title} className="rounded-2xl border border-white bg-white/85 p-4 shadow-sm"><span className="text-xl text-indigo-600">{item.icon}</span><h3 className="mt-2 text-sm font-black text-slate-900">{item.title}</h3><p className="mt-1 text-xs leading-5 text-slate-500">{item.detail}</p></div>)}
+            { title: "Photo et identité", detail: "Modifier votre photo, votre logo et l’image de couverture.", icon: "◈" },
+            { title: "Couleurs", detail: "Choisir les couleurs des boutons et des textes de votre carte.", icon: "✦" },
+            { title: "Informations", detail: "Mettre à jour votre nom, activité, coordonnées et présentation.", icon: "▤" },
+            { title: "Contacts et réseaux", detail: "Configurer WhatsApp, téléphone, réseaux sociaux et liens utiles.", icon: "↗" },
+          ].map((item) => <div key={item.title} className="rounded-xl border border-slate-200 bg-slate-50 p-4"><span className="text-xl text-indigo-600">{item.icon}</span><h3 className="mt-2 text-sm font-black text-slate-900">{item.title}</h3><p className="mt-1 text-xs leading-5 text-slate-600">{item.detail}</p></div>)}
         </div>
-        <p className="mt-4 text-xs text-slate-500">La structure et les fonctionnalités de votre espace restent adaptées à votre secteur d’activité. Vous pouvez consulter votre carte publique à tout moment.</p>
+        <p className="mt-4 text-xs leading-5 text-slate-500">Après l’enregistrement, ouvrez l’aperçu public pour vérifier le résultat. Les options non autorisées pour votre espace ne peuvent pas être activées depuis cette rubrique.</p>
       </section>
 
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
