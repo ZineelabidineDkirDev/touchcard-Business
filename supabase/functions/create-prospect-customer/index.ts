@@ -95,6 +95,13 @@ Deno.serve(async (req: Request) => {
       selectedModules = [...new Set([...selectedModules.filter((module) => contactModules.has(module)), "dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc", "gallery", "analytics"])];
     }
 
+    const rawModuleSettings = submitted.module_settings && typeof submitted.module_settings === "object" ? submitted.module_settings as Record<string, unknown> : {};
+    const moduleSettings = Object.fromEntries(Object.entries(rawModuleSettings)
+      .filter(([moduleId]) => selectedModules.includes(moduleId))
+      .map(([moduleId, raw]) => [moduleId, Object.fromEntries(Object.entries(raw && typeof raw === "object" ? raw as Record<string, unknown> : {})
+        .slice(0, 30)
+        .map(([key, value]) => [String(key).slice(0, 64), typeof value === "boolean" ? value : String(value ?? "").slice(0, 500)]))]));
+
     const { data: prospect, error: prospectError } = await admin.from("prospect_requests")
       .select("id,user_id,full_name,email,phone,city,status,brand_name,logo_url,business_address,business_phone,social_links,card_type,activity_sector,project_needs,client_access_enabled,password_initialized")
       .eq("id", requestId).maybeSingle();
@@ -139,9 +146,10 @@ Deno.serve(async (req: Request) => {
     const uniqueSuffix = crypto.randomUUID().slice(0, 8);
     const organizationSlug = `${slugBase}-${uniqueSuffix}`;
     const workspaceConfig = {
-      version: 1,
+      version: 2,
       template: cardType,
       modules: selectedModules,
+      module_settings: moduleSettings,
       plan: { code: String(submitted.plan_code ?? "to_define"), status: "pending" },
       ai_suggestions: aiSuggestions,
       generator: { engine: "touchcard-template-engine", schema_version: 1, state: "draft" },
