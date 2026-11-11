@@ -128,6 +128,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
     : { data: [] as { card_id: string; event_type: string }[] };
   const config = (organization?.workspace_config ?? {}) as { version?: number; template?: string; modules?: string[]; ai_suggestions?: { profile_draft?: { tagline?: string; description?: string; card_fields?: { key: string; label: string; type: string; visible: boolean }[]; suggested_buttons?: { kind: string; label: string; enabled: boolean }[] } } };
   const modules = Array.isArray(config.modules) ? config.modules : [];
+  const galleryEnabled = !config.version || modules.includes("gallery");
   if (config.version && !modules.includes("digital_card")) notFound();
   const activitySector = String((organization?.workspace_config as any)?.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const selectedNeed = String(((organization?.workspace_config as any)?.original_client_choices?.project_needs?.selected ?? []).join(" ")).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -257,9 +258,10 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
           const settings = card.public_settings ?? {};
           const currentAccent = typeof card.theme?.accent === "string" ? card.theme.accent : "#2563EB";
           const currentTextColor = typeof card.theme?.text_color === "string" ? card.theme.text_color : "#111827";
-          const initialCustomFields: EditableCardField[] = Array.isArray(fields.custom_fields) && fields.custom_fields.length
-            ? fields.custom_fields
-            : (profileDraft?.card_fields ?? []).map((field) => ({ key: field.key, label: field.label, value: "", visible: field.visible }));
+          const storedCustomFields: EditableCardField[] = Array.isArray(fields.custom_fields) ? fields.custom_fields : [];
+          const initialCustomFields: EditableCardField[] = storedCustomFields.length
+            ? storedCustomFields.filter((field) => galleryEnabled || !/portfolio|cv professionnel/i.test(field.key + " " + field.label))
+            : (profileDraft?.card_fields ?? []).filter((field) => galleryEnabled || !/portfolio|cv/i.test(field.key + " " + field.label)).map((field) => ({ key: field.key, label: field.label, value: "", visible: field.visible }));
           const publicUrl = "/p/" + card.slug;
           return <article key={card.id} className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 p-5">
@@ -299,6 +301,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                   </>}
                   {config.template === "google-review" && <label className="text-xs font-semibold text-slate-600">Lien Google Avis<input name="google_review_url" type="url" defaultValue={fields.google_review_url ?? ""} placeholder="https://..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>}
                   <div className="sm:col-span-2"><CustomCardFieldsEditor initialFields={initialCustomFields}/></div>
+                  {galleryEnabled && <div className="sm:col-span-2 rounded-2xl border border-violet-200 bg-violet-50/60 p-4"><h4 className="text-sm font-black text-violet-950">Portfolio professionnel & CV</h4><p className="mt-1 text-xs leading-5 text-violet-800">Ajoutez vos réalisations dans les champs « Portfolio — Projet » avec leurs liens d’images, puis ajoutez votre CV au format PDF via son lien public. Cette rubrique est disponible car le module Portfolio / galerie a été autorisé par l’administrateur.</p></div>}
                   <section className="sm:col-span-2 rounded-2xl border border-slate-200 bg-white p-4">
                     <div className="mb-4">
                       <p className="text-xs font-black uppercase tracking-wider text-indigo-600">3. Organisation de la carte publique</p>
@@ -310,7 +313,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                         { title: "Présentation & identité", items: [["show_about", "Présentation / À propos"], ["show_company_info", "Informations entreprise"], ["show_categories", "Domaines et spécialités"], ["show_info_fields", "Informations complémentaires"]] },
                         { title: "Coordonnées", items: [["show_contact", "Bloc de contact"], ["show_phone", "Téléphone"], ["show_email", "E-mail"], ["show_website", "Site web"]] },
                         { title: "Services & demandes", items: [["show_catalog", catalogLabel], ["show_catalog_pdf", "Catalogue PDF"], ["show_orders", "Commandes boutique"], ["show_bookings", "Réservations"], ["show_quotes", "Demandes de devis"], ["show_request_forms", "Formulaires de demande"]] },
-                        { title: "Communication & découverte", items: [["show_google_reviews", "Avis Google"], ["show_social_links", "Réseaux sociaux"], ["show_featured_links", "Liens mis en avant"], ["show_faq", "Questions fréquentes (FAQ)"], ["show_videos", "Vidéos"], ["show_location", "Adresse et carte"]] },
+                        { title: "Communication & découverte", items: [...(galleryEnabled ? [["show_gallery", "Portfolio & galerie"], ["show_cv", "CV professionnel"]] : []), ["show_google_reviews", "Avis Google"], ["show_social_links", "Réseaux sociaux"], ["show_featured_links", "Liens mis en avant"], ["show_faq", "Questions fréquentes (FAQ)"], ["show_videos", "Vidéos"], ["show_location", "Adresse et carte"]] },
                       ].map((group) => (
                         <div key={group.title}>
                           <h5 className="mb-2 text-xs font-bold text-slate-700">{group.title}</h5>
