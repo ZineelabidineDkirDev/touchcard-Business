@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
-import { createClientCard, saveClientCardProfile, addClientCardLink, deleteClientCardLink, toggleClientCardPublication, createCatalogItem, updateCatalogItem, deleteCatalogItem, importCatalogItems, uploadCatalogPdf } from "@/app/actions/cards";
+import { createClientCard, saveClientCardProfile, saveClientCardVisibility, addClientCardLink, deleteClientCardLink, toggleClientCardPublication, createCatalogItem, updateCatalogItem, deleteCatalogItem, importCatalogItems, uploadCatalogPdf } from "@/app/actions/cards";
 import { createClient } from "@/lib/supabase/server";
 import { CustomCardFieldsEditor, type EditableCardField } from "@/components/cards/custom-card-fields-editor";
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
@@ -299,28 +299,30 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                   </>}
                   {config.template === "google-review" && <label className="text-xs font-semibold text-slate-600">Lien Google Avis<input name="google_review_url" type="url" defaultValue={fields.google_review_url ?? ""} placeholder="https://..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>}
                   <div className="sm:col-span-2"><CustomCardFieldsEditor initialFields={initialCustomFields}/></div>
-                  <div className="sm:col-span-2">
-                    <CardVisibilityPreview
-                      initialSettings={settings}
-                      cardName={card.full_name}
-                      companyName={config.template === "contact" ? "" : card.company_name ?? ""}
-                      jobTitle={card.job_title ?? ""}
-                      bio={card.bio ?? ""}
-                      phone={card.phone ?? ""}
-                      email={card.email ?? ""}
-                      website={card.website ?? ""}
-                      accent={currentAccent}
-                      textColor={currentTextColor}
-                      catalogLabel={catalogLabel}
-                      catalogCount={catalogItems?.length ?? 0}
-                      hasCatalogPdf={Boolean(catalogDocument?.file_url)}
-                      socialCount={cardLinks.filter((link) => ["instagram", "facebook", "linkedin", "tiktok", "youtube", "x", "pinterest", "whatsapp", "telegram"].includes(link.kind)).length}
-                      featuredCount={cardLinks.filter((link) => !["instagram", "facebook", "linkedin", "tiktok", "youtube", "x", "pinterest", "whatsapp", "telegram"].includes(link.kind)).length}
-                    />
-                  </div>
                 </div>
                 <div className="sticky bottom-0 -mx-1 border-t border-slate-100 bg-white/95 px-1 py-3 backdrop-blur"><button className="btn-primary w-full rounded-full py-3 text-sm">✓ Enregistrer ma carte</button><p className="mt-2 text-center text-[10px] text-slate-400">Vos modifications seront visibles après enregistrement.</p></div>
               </form>
+              </PopupDialog>
+              <PopupDialog title="Modules visibles dans ma carte" description="Choisissez les rubriques autorisées que vos visiteurs pourront voir après un scan NFC. Enregistrez pour appliquer les changements à la carte publique." triggerLabel="▦  Modules visibles dans ma carte" triggerClassName="mt-3 flex w-full items-center justify-center gap-3 rounded-2xl border border-indigo-200 bg-white px-6 py-4 text-base font-extrabold text-indigo-700 shadow-sm transition hover:border-indigo-400 hover:bg-indigo-50">
+                <CardVisibilityPreview
+                  cardId={card.id}
+                  action={saveClientCardVisibility}
+                  initialSettings={settings}
+                  cardName={card.full_name}
+                  companyName={config.template === "contact" ? "" : card.company_name ?? ""}
+                  jobTitle={card.job_title ?? ""}
+                  bio={card.bio ?? ""}
+                  phone={card.phone ?? ""}
+                  email={card.email ?? ""}
+                  website={card.website ?? ""}
+                  accent={currentAccent}
+                  textColor={currentTextColor}
+                  catalogLabel={catalogLabel}
+                  catalogCount={catalogItems?.length ?? 0}
+                  hasCatalogPdf={Boolean(catalogDocument?.file_url)}
+                  socialCount={cardLinks.filter((link) => ["instagram", "facebook", "linkedin", "tiktok", "youtube", "x", "pinterest", "whatsapp", "telegram"].includes(link.kind)).length}
+                  featuredCount={cardLinks.filter((link) => !["instagram", "facebook", "linkedin", "tiktok", "youtube", "x", "pinterest", "whatsapp", "telegram"].includes(link.kind)).length}
+                />
               </PopupDialog></div>
 
               <div className="space-y-5">
