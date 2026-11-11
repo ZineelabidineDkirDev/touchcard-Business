@@ -15,6 +15,9 @@ const cards = [
   { id: "e-business", title: "E-Business", desc: "Réunissez votre présence digitale et vos services.", mark: "E" },
 ];
 
+const DRAFT_KEY = "touchcard-prospect-draft-v3";
+const LEGACY_DRAFT_KEY = "touchcard-prospect-draft-v2";
+
 const empty: ProspectInput = {
   fullName: "", city: "", sector: "", sectorOther: "", email: "", phone: "",
   cardType: "", reason: "", customRequested: false, brandName: "", logoUrl: "",
@@ -41,7 +44,7 @@ export function ProspectIntake() {
 
   useEffect(() => {
     try {
-      const saved = window.localStorage.getItem("touchcard-prospect-draft-v2");
+      const saved = window.localStorage.getItem(DRAFT_KEY) || window.localStorage.getItem(LEGACY_DRAFT_KEY);
       if (saved) {
         const draft = JSON.parse(saved) as { savedAt?: number; step?: number; form?: ProspectInput };
         const draftAge = typeof draft.savedAt === "number" ? Date.now() - draft.savedAt : Number.POSITIVE_INFINITY;
@@ -49,27 +52,57 @@ export function ProspectIntake() {
         if (draftIsFresh && draft.form && typeof draft.form === "object") {
           const savedLogoUrl = String(draft.form.logoUrl ?? "");
           const restoredForm = { ...draft.form, logoUrl: savedLogoUrl.startsWith("https://") || savedLogoUrl.startsWith("http://") ? savedLogoUrl : "" };
+          const restoredCardType = String(restoredForm.cardType || "");
+          const restoredStep = Number.isInteger(draft.step) ? Number(draft.step) : 0;
+          const safeStep = restoredStep === 5 && restoredCardType !== "e-business" && restoredCardType !== "service" ? 6 : Math.min(8, Math.max(0, restoredStep));
           setForm((current) => ({ ...current, ...restoredForm }));
+          setStep(safeStep);
         }
-        if (draftIsFresh && Number.isInteger(draft.step)) setStep(Math.min(9, Math.max(0, Number(draft.step))));
-        if (!draftIsFresh) window.localStorage.removeItem("touchcard-prospect-draft-v2");
+        if (!draftIsFresh) {
+          window.localStorage.removeItem(DRAFT_KEY);
+          window.localStorage.removeItem(LEGACY_DRAFT_KEY);
+        }
       }
-    } catch { window.localStorage.removeItem("touchcard-prospect-draft-v2"); }
-    finally { setDraftLoaded(true); }
+    } catch {
+      window.localStorage.removeItem(DRAFT_KEY);
+      window.localStorage.removeItem(LEGACY_DRAFT_KEY);
+    } finally { setDraftLoaded(true); }
   }, []);
 
   useEffect(() => {
     if (!draftLoaded) return;
-    try { window.localStorage.setItem("touchcard-prospect-draft-v2", JSON.stringify({ savedAt: Date.now(), step, form })); }
-    catch { /* Storage may be disabled; the form remains usable. */ }
+    const saveDraft = () => {
+      try {
+        window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ savedAt: Date.now(), step, form }));
+        window.localStorage.removeItem(LEGACY_DRAFT_KEY);
+      } catch { /* Storage may be disabled; the form remains usable. */ }
+    };
+    saveDraft();
+    window.addEventListener("pagehide", saveDraft);
+    window.addEventListener("beforeunload", saveDraft);
+    return () => {
+      saveDraft();
+      window.removeEventListener("pagehide", saveDraft);
+      window.removeEventListener("beforeunload", saveDraft);
+    };
   }, [step, form, draftLoaded]);
 
   useEffect(() => {
     if (step === 5 && !serviceChoiceRequired) setStep(6);
   }, [step, serviceChoiceRequired]);
 
+  function persistDraft(nextStep: number, nextForm: ProspectInput) {
+    try {
+      window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ savedAt: Date.now(), step: nextStep, form: nextForm }));
+    } catch { /* Keep the form usable if browser storage is unavailable. */ }
+  }
+
   function update<K extends keyof ProspectInput>(key: K, value: ProspectInput[K]) {
-    setForm((current) => ({ ...current, [key]: value }));
+    setForm((current) => {
+      const next = { ...current, [key]: value };
+      persistDraft(step, next);
+      return next;
+    });
   }
 
   function onLogoChange(event: ChangeEvent<HTMLInputElement>) {
@@ -103,7 +136,12 @@ export function ProspectIntake() {
     setError("");
     const validation = validateStep();
     if (validation) { setError(validation); return; }
-    if (step < 8) { setStep((value) => value === 4 && !serviceChoiceRequired ? 6 : value === 7 ? 8 : value + 1); return; }
+    if (step < 8) {
+      const nextStep = step === 4 && !serviceChoiceRequired ? 6 : step + 1;
+      persistDraft(nextStep, form);
+      setStep(nextStep);
+      return;
+    }
 
     setBusy(true);
     const requestId = crypto.randomUUID();
@@ -133,7 +171,7 @@ export function ProspectIntake() {
     setSubmittedRequestId(requestId);
     setTemporaryPassword(result.temporaryPassword);
     // Remove locally cached contact details after a successful submission.
-    try { window.localStorage.removeItem("touchcard-prospect-draft-v2"); } catch { /* Storage may be disabled. */ }
+    try { window.localStorage.removeItem(DRAFT_KEY); window.localStorage.removeItem(LEGACY_DRAFT_KEY); } catch { /* Storage may be disabled. */ }
     // Le compte est créé sans e-mail de confirmation, mais reste verrouillé jusqu’à validation du Super Admin.
     setDone(true);
     setBusy(false);
@@ -184,7 +222,7 @@ export function ProspectIntake() {
       </aside>
       <header className="relative z-10 mx-auto flex w-full max-w-5xl items-center justify-between lg:col-start-2 lg:row-start-1">
         <Link href="/" className="flex items-center gap-3 lg:invisible"><img src="/brand/touchcard-mark.svg" alt="" className="h-9 w-9"/><span className="flex flex-col leading-none text-white"><strong className="text-lg font-black">TouchCard</strong><span className="mt-1 text-[10px] tracking-[.16em] text-white/70">BUSINESS</span></span></Link>
-        <Link href="/" onClick={() => { try { window.localStorage.setItem("touchcard-prospect-draft-v2", JSON.stringify({ savedAt: Date.now(), step, form })); } catch { /* Keep navigation available if storage is disabled. */ } }} className="rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-white/90 backdrop-blur hover:bg-white/10">Quitter et revenir plus tard ↗</Link>
+        <Link href="/" onClick={() => { try { persistDraft(step, form); } catch { /* Keep navigation available if storage is disabled. */ } }} className="rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-semibold text-white/90 backdrop-blur hover:bg-white/10">Quitter et revenir plus tard ↗</Link>
       </header>
 
       <section className="relative z-10 mx-auto mt-7 w-full max-w-3xl rounded-[2rem] border border-white/20 bg-slate-950/45 p-6 text-white shadow-[0_30px_90px_rgba(0,0,0,.35)] backdrop-blur-2xl sm:p-9 lg:col-start-2 lg:row-start-2 lg:mt-5">
