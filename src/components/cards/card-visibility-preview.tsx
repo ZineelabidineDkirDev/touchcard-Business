@@ -81,7 +81,7 @@ export function CardVisibilityPreview(props: Props) {
   return (
     <section className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
       <div>
-        <h3 className="text-sm font-black text-slate-900">Modules visibles dans ma carte</h3>
+        <h3 className="text-sm font-black text-slate-900">Modules visibles de ma carte</h3>
         <p className="mt-1 text-xs leading-5 text-slate-500">Activez ou désactivez les rubriques de votre carte. L’aperçu se met à jour immédiatement ; cliquez sur « Enregistrer » pour appliquer le choix à la carte publique.</p>
       </div>
       <form action={props.action}>
