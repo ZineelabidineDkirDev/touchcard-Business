@@ -94,7 +94,7 @@ export function ProspectWorkspaceConfigurator({ prospect, errorMessage }: { pros
     setAiSuggestions((current: any) => current ? ({ ...current, profile_draft: { ...current.profile_draft, suggested_buttons: current.profile_draft.suggested_buttons.map((button: any, i: number) => i === index ? { ...button, ...patch } : button) } }) : current);
   }
 
-  const visibleModuleCatalog = prospect.card_type === "contact" ? moduleCatalog.filter((item) => contactOnlyModules.has(item.id)) : moduleCatalog;
+  const visibleModuleCatalog = moduleCatalog.filter((item) => item.templates.includes(prospect.card_type as "contact" | "service" | "e-business" | "google-review") && (prospect.card_type !== "contact" || contactOnlyModules.has(item.id)));
   const groups = [...new Set(visibleModuleCatalog.map((item) => item.group))];
 
   return (
