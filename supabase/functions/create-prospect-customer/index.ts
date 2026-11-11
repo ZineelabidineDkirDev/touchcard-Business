@@ -10,7 +10,7 @@ const allowedModules = new Set([
   "edit_business_details", "manage_services_prices", "manage_bookings",
   "manage_content", "view_analytics", "manage_team",
 ]);
-const allowedButtonKinds = new Set(["whatsapp", "telegram", "instagram", "facebook", "linkedin", "website", "store"]);
+const allowedButtonKinds = new Set(["whatsapp", "telegram", "instagram", "facebook", "linkedin", "tiktok", "youtube", "x", "pinterest", "website", "store"]);
 const allowedFieldTypes = new Set(["text", "textarea", "url", "phone", "email"]);
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://touchcard-three.vercel.app",
