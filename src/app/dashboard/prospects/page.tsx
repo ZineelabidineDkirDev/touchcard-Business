@@ -3,7 +3,7 @@ import Link from "next/link";
 import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
-import { activateProspectClientAccess, updateProspectStatus } from "@/app/actions/prospects";
+import { activateProspectClientAccess, resyncProspectWorkspace, updateProspectStatus } from "@/app/actions/prospects";
 import { reviewCardDesignRequest } from "@/app/actions/cards";
 import { AdminResetPasswordButton } from "@/components/prospects/admin-reset-password-button";
 
@@ -13,7 +13,7 @@ const statuses = [
   ["completed", "Terminé"], ["rejected", "Refusé"], ["cancelled", "Annulé"],
 ];
 
-export default async function ProspectsPage({ searchParams }: { searchParams: Promise<{ created?: string; verified?: string; already_created?: string; approval_required?: string; provision_error?: string }> }) {
+export default async function ProspectsPage({ searchParams }: { searchParams: Promise<{ created?: string; verified?: string; already_created?: string; approval_required?: string; provision_error?: string; resynced?: string; resync_error?: string }> }) {
   await connection();
   const query = await searchParams;
   const supabase = await createClient();
@@ -41,6 +41,8 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
       <p className="mt-2 text-slate-500">Toutes les demandes reçues depuis le parcours « Créer votre carte ».</p>
       {query.created === "1" && <div role="status" className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-800">{query.verified === "1" ? "Création vérifiée : compte client, accès activé, organisation, adhésion, carte NFC et modules requis confirmés." : "L’espace client a été créé."}</div>}
       {query.already_created === "1" && <div className="mt-6 rounded-2xl bg-slate-100 p-4 text-sm text-slate-700">Cette demande est déjà liée à un compte client.</div>}
+      {query.resynced === "1" && <div role="status" className="mt-6 rounded-2xl bg-emerald-50 p-4 text-sm text-emerald-800">Profil resynchronisé : tous les choix de la demande sont activés.</div>}
+      {query.resync_error === "1" && <div role="alert" className="mt-6 rounded-2xl bg-rose-50 p-4 text-sm text-rose-800">La resynchronisation a échoué. Vérifiez que l’espace client existe puis réessayez.</div>}
       {query.approval_required === "1" && <div className="mt-6 rounded-2xl bg-amber-50 p-4 text-sm text-amber-800">Validez d'abord la demande avant de configurer son espace client.</div>}
       {query.provision_error === "1" && <div role="alert" className="mt-6 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">La demande est validée, mais la création automatique de l’espace client a rencontré un problème. Consultez la note de la demande et relancez la configuration. Le délai d’une heure doit être surveillé.</div>}
       <section className="mt-10 space-y-4">
@@ -85,6 +87,7 @@ export default async function ProspectsPage({ searchParams }: { searchParams: Pr
                 {p.user_id && p.client_access_enabled && <span className="rounded-lg bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800">Espace client activé</span>}
                 {p.user_id && <AdminResetPasswordButton requestId={p.id}/>}
                 {p.user_id && workspaceOwnerIds.has(p.user_id) && <Link href={`/dashboard/prospects/${p.id}/preview`} className="rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-bold text-indigo-700 hover:bg-indigo-100">Voir l'espace client ↗</Link>}
+                {p.user_id && workspaceOwnerIds.has(p.user_id) && <form action={resyncProspectWorkspace}><input type="hidden" name="id" value={p.id}/><button className="rounded-lg border border-cyan-300 bg-cyan-50 px-4 py-2 text-sm font-bold text-cyan-800 hover:bg-cyan-100">Activer tous les choix de la demande</button></form>}
                 {p.status === "in_production" && p.user_id && <Link href={`/dashboard/prospects/${p.id}/ai-test`} className="rounded-lg border border-violet-200 bg-violet-50 px-4 py-2 text-sm font-bold text-violet-700 hover:bg-violet-100">Tester Gemini sans création ✨</Link>}
               </div>
             </div>

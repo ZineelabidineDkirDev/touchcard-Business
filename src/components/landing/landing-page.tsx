@@ -263,7 +263,7 @@ export function LandingPage({ userName }: { userName?: string | null }) {
   const reduceMotion = useReducedMotion();
   const heroVideoRef = useRef<HTMLVideoElement>(null);
   const [previewName, setPreviewName] = useState("Votre nom");
-  const [previewColor, setPreviewColor] = useState<CardColorTheme>("gold");
+  const [previewColor, setPreviewColor] = useState<CardColorTheme>("metallic-black");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [pricingIndex, setPricingIndex] = useState(0);
@@ -716,7 +716,7 @@ export function LandingPage({ userName }: { userName?: string | null }) {
               <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
                 {([
                   { id: "gold", label: "Or", swatch: "bg-gradient-to-br from-[#fff0b8] via-[#c99b3d] to-[#76501b]" },
-                  { id: "metallic-black", label: "Noir métallique", swatch: "bg-gradient-to-br from-[#59616b] via-[#171c24] to-[#05070a]" },
+                  { id: "metallic-black", label: "TouchCard", swatch: "bg-gradient-to-br from-[#59616b] via-[#171c24] to-[#05070a]" },
                   { id: "dark-gray", label: "Gris sombre", swatch: "bg-gradient-to-br from-[#9aa1a9] via-[#555d66] to-[#252b32]" },
                   { id: "white", label: "Blanc", swatch: "bg-gradient-to-br from-white via-[#f4f6f8] to-[#cbd5e1]" },
                 ] as const).map((option) => (

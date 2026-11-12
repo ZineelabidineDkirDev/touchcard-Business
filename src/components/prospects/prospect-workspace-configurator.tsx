@@ -25,6 +25,7 @@ type Prospect = {
   card_type: string;
   reason: string | null;
   brand_name: string | null;
+  social_links?: { platform?: string | null; url?: string | null }[] | null;
   logo_url: string | null;
   business_address: string | null;
   business_phone: string | null;
@@ -71,6 +72,8 @@ export function ProspectWorkspaceConfigurator({ prospect, errorMessage }: { pros
       needs: prospect.project_needs,
       sector: prospect.activity_sector,
       reason: prospect.reason ?? "",
+      socialLinks: prospect.social_links ?? [],
+      businessPhone: prospect.business_phone ?? null,
     });
     setModules(blueprint.modules);
     setAiSuggestions(blueprint);

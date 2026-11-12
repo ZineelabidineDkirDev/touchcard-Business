@@ -21,7 +21,7 @@ export default async function ConfigureProspectPage({
 
   const { data: prospect, error } = await supabase
     .from("prospect_requests")
-    .select("id,user_id,full_name,city,activity_sector,email,phone,card_type,reason,customization_requested,brand_name,logo_url,business_address,business_phone,project_needs,status")
+    .select("id,user_id,full_name,city,activity_sector,email,phone,card_type,reason,customization_requested,brand_name,logo_url,business_address,business_phone,social_links,project_needs,status")
     .eq("id", id)
     .maybeSingle();
 

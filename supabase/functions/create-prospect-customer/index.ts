@@ -11,7 +11,7 @@ const allowedModules = new Set([
   "edit_business_details", "manage_services_prices", "manage_bookings",
   "manage_content", "view_analytics", "manage_team",
 ]);
-const allowedButtonKinds = new Set(["whatsapp", "telegram", "instagram", "facebook", "linkedin", "tiktok", "youtube", "x", "pinterest", "website", "store"]);
+const allowedButtonKinds = new Set(["whatsapp", "telegram", "instagram", "facebook", "linkedin", "tiktok", "youtube", "x", "pinterest", "website", "store", "calendly"]);
 const allowedFieldTypes = new Set(["text", "textarea", "url", "phone", "email"]);
 const corsHeaders = {
   "Access-Control-Allow-Origin": "https://touchcard-three.vercel.app",
@@ -59,6 +59,42 @@ function safeProfileDraft(raw: any) {
     card_fields: cardFields,
     suggested_buttons: suggestedButtons,
   };
+}
+
+const buttonKindByPlatform: Record<string, string> = {
+  instagram: "instagram", facebook: "facebook", tiktok: "tiktok", linkedin: "linkedin", youtube: "youtube",
+  whatsapp: "whatsapp", telegram: "telegram", "site web": "website", website: "website",
+};
+const buttonLabels: Record<string, string> = {
+  instagram: "Instagram", facebook: "Facebook", tiktok: "TikTok", linkedin: "LinkedIn", youtube: "YouTube",
+  whatsapp: "WhatsApp Business", telegram: "Telegram", website: "Site web",
+};
+const contactButtonKinds = new Set(["whatsapp", "telegram", "instagram", "facebook", "linkedin", "tiktok", "youtube", "website"]);
+// Active tout ce que le client a demandé (liens fournis, modules choisis). Ne désactive jamais rien.
+function activateRequestChoices(draft: any, ctx: { template: string; modules: string[]; socialLinks: any[]; businessPhone: string; needsText: string }) {
+  if (!draft) return draft;
+  const links = ctx.socialLinks.filter((link: any) => safeHttpUrl(link?.url));
+  const provided = new Set<string>(links.map((link: any) => buttonKindByPlatform[normalizeText(link?.platform).trim()]).filter(Boolean));
+  if (ctx.businessPhone.trim()) provided.add("whatsapp");
+  const buttons = draft.suggested_buttons.map((button: any) => ({ ...button, enabled: button.enabled || provided.has(button.kind) }));
+  for (const kind of provided) {
+    if (buttons.some((button: any) => button.kind === kind)) continue;
+    if (ctx.template === "contact" && !contactButtonKinds.has(kind)) continue;
+    buttons.push({ kind, label: buttonLabels[kind] ?? kind, enabled: true });
+  }
+  const has = (module: string) => ctx.modules.includes(module);
+  const hasOtherLink = links.some((link: any) => !buttonKindByPlatform[normalizeText(link?.platform).trim()]);
+  const showByKey: Record<string, boolean> = {
+    portfolio_url: hasOtherLink || (has("gallery") && /portfolio|cv|galerie|realisation/.test(ctx.needsText)),
+    booking_url: has("bookings") || has("availability_calendar"),
+    return_policy: has("orders") || has("product_catalog"),
+    delivery: has("orders") || has("product_catalog"),
+    service_area: has("service_catalog") || has("bookings"),
+    google_review_url: has("google_reviews"),
+    review_message: has("google_reviews"),
+  };
+  const card_fields = draft.card_fields.map((field: any) => ({ ...field, visible: field.visible || showByKey[field.key] === true }));
+  return { ...draft, suggested_buttons: buttons.slice(0, 8), card_fields };
 }
 
 Deno.serve(async (req: Request) => {
@@ -116,7 +152,18 @@ Deno.serve(async (req: Request) => {
     const requiredBeautyModules = beautyWorkspace ? ["service_catalog", "bookings", "availability_calendar", "whatsapp"] : [];
     selectedModules = [...new Set([...selectedModules, ...requiredBeautyModules])];
 
-    const rawProfileDraft = safeProfileDraft(submitted.ai_suggestions?.profile_draft);
+    const baseProfileDraft = safeProfileDraft(submitted.ai_suggestions?.profile_draft);
+    const needsText = normalizeText([
+      ...(Array.isArray(prospect.project_needs?.selected) ? prospect.project_needs.selected : []),
+      ...(Array.isArray(prospect.project_needs?.management_needs) ? prospect.project_needs.management_needs : []),
+      ...(Array.isArray(prospect.project_needs?.reservation_channels) ? prospect.project_needs.reservation_channels : []),
+      prospect.project_needs?.reservation_mode ?? "", prospect.activity_sector ?? "",
+    ].join(" "));
+    const rawProfileDraft = baseProfileDraft ? activateRequestChoices(baseProfileDraft, {
+      template: cardType, modules: selectedModules,
+      socialLinks: Array.isArray(prospect.social_links) ? prospect.social_links : [],
+      businessPhone: String(prospect.business_phone ?? ""), needsText,
+    }) : baseProfileDraft;
     const profileDraft = cardType === "contact" && rawProfileDraft ? {
       ...rawProfileDraft,
       categories: [],

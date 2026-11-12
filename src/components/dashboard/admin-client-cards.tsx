@@ -67,10 +67,8 @@ function formatDate(value: string) {
   return new Date(value).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
 }
 function colorForType(type: string): CardColorTheme {
-  if (type === "service") return "dark-gray";
-  if (type === "e-business") return "metallic-black";
-  if (type === "google-review") return "white";
-  return "gold";
+  void type;
+  return "metallic-black"; // modèle TouchCard (noir, bleu néon) pour tous les types de carte
 }
 
 export function AdminClientCards({ prospects }: Props) {

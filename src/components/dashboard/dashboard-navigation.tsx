@@ -4,13 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useI18n } from "@/i18n/provider";
 
-const clientItems = [
-  { label: "Vue d’ensemble", href: "/dashboard", modules: [] as string[] },
-  { label: "Ma carte NFC", href: "/dashboard/cards", modules: ["digital_card"] },
-  { label: "Demandes reçues", href: "/dashboard/requests", modules: ["orders", "bookings", "quote_requests"] },
+const clientItems: { label: string; href: string; modules: string[]; key?: string }[] = [
+  { label: "Vue d’ensemble", href: "/dashboard", modules: [] },
+  { label: "Ma carte NFC", href: "/dashboard/cards", modules: ["digital_card"], key: "digital_card" },
+  { label: "Demandes reçues", href: "/dashboard/requests", modules: ["orders", "bookings", "quote_requests"], key: "requests" },
   { label: "Mes modules métier", href: "/dashboard/modules", modules: ["service_catalog", "room_catalog", "bookings", "availability_calendar", "doctor_appointments", "gym_registration", "school_registration"] },
-  { label: "Mes contacts", href: "/dashboard/contacts", modules: ["crm_contacts"] },
-  { label: "Statistiques", href: "/dashboard/analytics", modules: ["analytics"] },
+  { label: "Mes contacts", href: "/dashboard/contacts", modules: ["crm_contacts"], key: "crm_contacts" },
+  { label: "Statistiques", href: "/dashboard/analytics", modules: ["analytics"], key: "analytics" },
   { label: "Mon profil", href: "/dashboard/profile", modules: ["company_profile", "contact_profile"] },
 ];
 
@@ -38,7 +38,7 @@ export function DashboardNavigation({
   if (!isSuperAdmin) {
     const visibleClientItems = clientItems.filter((item) => {
       if (!hasWorkspaceConfig || item.modules.length === 0) return true;
-      if (item.modules.some((module) => hiddenModules.includes(module))) return false;
+      if ((item.key && hiddenModules.includes(item.key)) || item.modules.some((module) => hiddenModules.includes(module))) return false;
       return item.modules.some((module) => enabledModules.includes(module));
     });
 

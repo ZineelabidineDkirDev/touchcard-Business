@@ -5,7 +5,7 @@ import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
 import { CARD_MODULES } from "@/lib/cards/module-registry";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { generateTemplateBlueprint } from "@/lib/cards/template-engine";
+import { generateTemplateBlueprint, activateRequestChoices, type TemplateProfileDraft } from "@/lib/cards/template-engine";
 
 export type ProspectInput = {
   fullName: string;
@@ -119,6 +119,8 @@ export async function updateProspectStatus(formData: FormData) {
         needs: (prospect.project_needs ?? {}) as { selected?: string[]; reservation_mode?: string | null; reservation_channels?: string[]; management_needs?: string[] },
         sector: prospect.activity_sector,
         reason: prospect.reason ?? "",
+        socialLinks: Array.isArray(prospect.social_links) ? prospect.social_links : [],
+        businessPhone: prospect.business_phone,
       });
       const { data: provisioned, error: provisionError } = await supabase.functions.invoke("create-prospect-customer", {
         body: {
@@ -248,7 +250,7 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
 
   const { data: prospect, error: prospectError } = await supabase
     .from("prospect_requests")
-    .select("card_type, activity_sector, reason, project_needs, customization_requested, brand_name, status")
+    .select("card_type, activity_sector, reason, project_needs, customization_requested, brand_name, status, social_links, business_phone")
     .eq("id", id)
     .single();
 
@@ -430,7 +432,7 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
       suggestions: {
         template,
         modules: finalModules,
-        profile_draft: {
+        profile_draft: activateRequestChoices({
           tagline: String(parsed.profile_draft.tagline ?? "").slice(0, 180),
           description: String(parsed.profile_draft.description ?? "").slice(0, 1200),
           categories: template === "contact" ? [] : Array.isArray(parsed.profile_draft.categories) ? parsed.profile_draft.categories.slice(0, 12).map((v) => String(v).slice(0, 80)) : [],
@@ -441,7 +443,7 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
             description: String(item.description ?? "").slice(0, 240),
             price: String(item.price ?? "").slice(0, 40),
           })) : [],
-        },
+        } as TemplateProfileDraft, { template, modules: finalModules, socialLinks: Array.isArray(prospect.social_links) ? prospect.social_links : [], businessPhone: prospect.business_phone, needsText: normalizedNeed }),
         rationale: String(parsed.rationale ?? "").slice(0, 600),
         generated_by: "gemini-3.8-flash",
         reviewed_by_super_admin: false,
@@ -478,4 +480,77 @@ export async function resetProspectClientPassword(requestId: string) {
 
   revalidatePath("/dashboard/prospects");
   return { ok: true as const, temporaryPassword: String(data.temporary_password) };
+}
+
+/**
+ * Resynchronise l'espace client déjà créé avec les choix de la demande : ajoute les modules manquants,
+ * active les boutons dont le client a fourni le lien, affiche les champs liés à ses choix et ajoute
+ * les liens sociaux absents. N'enlève ni ne désactive jamais rien.
+ */
+export async function resyncProspectWorkspace(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user || !isPlatformSuperAdmin(user.email)) return;
+
+  const { data: prospect } = await supabase.from("prospect_requests")
+    .select("id,user_id,activity_sector,reason,card_type,project_needs,social_links,business_phone,city")
+    .eq("id", id).maybeSingle();
+  if (!prospect?.user_id) redirect("/dashboard/prospects?resync_error=1");
+  const { data: organization } = await supabase.from("organizations").select("id,workspace_config").eq("owner_id", prospect.user_id).maybeSingle();
+  if (!organization) redirect("/dashboard/prospects?resync_error=1");
+
+  const needs = (prospect.project_needs ?? {}) as { selected?: string[]; reservation_mode?: string | null; reservation_channels?: string[]; management_needs?: string[] };
+  const socialLinks = (Array.isArray(prospect.social_links) ? prospect.social_links : []) as { platform?: string; url?: string }[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const config = (organization.workspace_config ?? {}) as Record<string, any>;
+  const blueprint = generateTemplateBlueprint({ template: prospect.card_type, needs, sector: prospect.activity_sector, reason: prospect.reason ?? "", socialLinks, businessPhone: prospect.business_phone });
+  const contactModules = new Set(["dashboard", "digital_card", "contact_profile", "social_links", "qr_nfc", "gallery", "analytics"]);
+  const modules = [...new Set([...(Array.isArray(config.modules) ? config.modules : []), ...blueprint.modules])]
+    .filter((module) => prospect.card_type !== "contact" || contactModules.has(module));
+  const existingDraft = config.ai_suggestions?.profile_draft;
+  const baseDraft = (existingDraft?.suggested_buttons && existingDraft?.card_fields ? existingDraft : blueprint.profile_draft) as TemplateProfileDraft;
+  const needsText = [...(needs.selected ?? []), ...(needs.management_needs ?? []), ...(needs.reservation_channels ?? []), needs.reservation_mode ?? "", prospect.activity_sector ?? ""]
+    .join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const profileDraft = activateRequestChoices(baseDraft, { template: prospect.card_type, modules, socialLinks, businessPhone: prospect.business_phone, needsText });
+
+  const { error: orgError } = await supabase.from("organizations").update({
+    workspace_config: {
+      ...config,
+      modules,
+      ai_suggestions: { ...(config.ai_suggestions ?? {}), template: prospect.card_type, modules, profile_draft: profileDraft },
+      original_client_choices: { card_type: prospect.card_type, activity_sector: prospect.activity_sector, project_needs: prospect.project_needs, city: prospect.city },
+      resynced_at: new Date().toISOString(),
+    },
+  }).eq("id", organization.id);
+  if (orgError) { console.error("Workspace resync failed", { id, message: orgError.message }); redirect("/dashboard/prospects?resync_error=1"); }
+
+  const { data: card } = await supabase.from("cards").select("id,public_fields").eq("organization_id", organization.id).order("created_at", { ascending: true }).limit(1).maybeSingle();
+  if (card) {
+    const kindByPlatform: Record<string, string> = { instagram: "instagram", facebook: "facebook", tiktok: "tiktok", linkedin: "linkedin", youtube: "youtube", whatsapp: "whatsapp", "site web": "website", website: "website" };
+    const { data: existingLinks } = await supabase.from("card_links").select("url").eq("card_id", card.id);
+    const known = new Set((existingLinks ?? []).map((link) => String(link.url).replace(/\/$/, "")));
+    const missing = socialLinks.filter((link) => link.url && /^https?:\/\//i.test(link.url.trim()) && !known.has(link.url.trim().replace(/\/$/, "")));
+    if (missing.length) {
+      await supabase.from("card_links").insert(missing.map((link, index) => ({
+        card_id: card.id, label: String(link.platform ?? "Lien").slice(0, 60), url: String(link.url).trim(),
+        kind: kindByPlatform[String(link.platform ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim()] ?? "other",
+        position: (existingLinks?.length ?? 0) + index,
+      })));
+    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const publicFields = (card.public_fields ?? {}) as Record<string, any>;
+    const custom = Array.isArray(publicFields.custom_fields) ? publicFields.custom_fields as { key: string; label: string; value: string; visible: boolean }[] : [];
+    const merged = profileDraft.card_fields.filter((field) => !["tagline", "location", "hours", "whatsapp", "google_review_url", "company_phone", "company_email", "company_address", "industry"].includes(field.key)).map((field) => {
+      const current = custom.find((item) => item.key === field.key);
+      return { key: field.key, label: current?.label ?? field.label, value: current?.value ?? "", visible: Boolean(current?.visible) || field.visible };
+    });
+    const extras = custom.filter((item) => !merged.some((field) => field.key === item.key));
+    await supabase.from("cards").update({ public_fields: { ...publicFields, custom_fields: [...merged, ...extras] } }).eq("id", card.id);
+  }
+
+  revalidatePath("/dashboard/prospects");
+  revalidatePath("/dashboard");
+  redirect("/dashboard/prospects?resynced=1");
 }

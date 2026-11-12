@@ -29,8 +29,60 @@ const themes: Record<CardTemplate, { accent: string; background: string; layout:
 };
 
 function normalizedText(needs: TemplateNeeds | null, sector: string, reason: string) {
-  return [...(needs?.selected ?? []), ...(needs?.management_needs ?? []), sector, reason]
+  return [...(needs?.selected ?? []), ...(needs?.management_needs ?? []), needs?.reservation_mode ?? "", ...(needs?.reservation_channels ?? []), sector, reason]
     .join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+export type RequestSocialLink = { platform?: string | null; url?: string | null };
+
+const buttonKindByPlatform: Record<string, string> = {
+  instagram: "instagram", facebook: "facebook", tiktok: "tiktok", linkedin: "linkedin", youtube: "youtube",
+  whatsapp: "whatsapp", telegram: "telegram", "site web": "website", website: "website",
+};
+const buttonLabels: Record<string, string> = {
+  instagram: "Instagram", facebook: "Facebook", tiktok: "TikTok", linkedin: "LinkedIn", youtube: "YouTube",
+  whatsapp: "WhatsApp Business", telegram: "Telegram", website: "Site web",
+};
+const contactButtonKinds = new Set(["whatsapp", "telegram", "instagram", "facebook", "linkedin", "tiktok", "youtube", "website"]);
+
+function plain(value: unknown) {
+  return String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+}
+
+/**
+ * Active tout ce que le client a demandé : un bouton est activé dès que le client a fourni le lien
+ * correspondant (ou un numéro pour WhatsApp), et un champ de profil est affiché dès que le module
+ * lié à son choix est activé. Ne désactive jamais rien.
+ */
+export function activateRequestChoices(
+  draft: TemplateProfileDraft,
+  ctx: { template: string; modules: string[]; socialLinks?: RequestSocialLink[] | null; businessPhone?: string | null; needsText?: string },
+): TemplateProfileDraft {
+  const links = (Array.isArray(ctx.socialLinks) ? ctx.socialLinks : []).filter((link) => link && String(link.url ?? "").trim());
+  const providedKinds = new Set(links.map((link) => buttonKindByPlatform[plain(link.platform)]).filter(Boolean));
+  if (String(ctx.businessPhone ?? "").trim()) providedKinds.add("whatsapp");
+
+  const buttons = draft.suggested_buttons.map((button) => ({ ...button, enabled: button.enabled || providedKinds.has(button.kind) }));
+  for (const kind of providedKinds) {
+    if (buttons.some((button) => button.kind === kind)) continue;
+    if (ctx.template === "contact" && !contactButtonKinds.has(kind)) continue;
+    buttons.push({ kind, label: buttonLabels[kind] ?? kind, enabled: true });
+  }
+
+  const has = (module: string) => ctx.modules.includes(module);
+  const needs = plain(ctx.needsText);
+  const hasOtherLink = links.some((link) => !buttonKindByPlatform[plain(link.platform)]);
+  const showByKey: Record<string, boolean> = {
+    portfolio_url: hasOtherLink || has("gallery") && /portfolio|cv|galerie|realisation/.test(needs),
+    booking_url: has("bookings") || has("availability_calendar"),
+    return_policy: has("orders") || has("product_catalog"),
+    delivery: has("orders") || has("product_catalog"),
+    service_area: has("service_catalog") || has("bookings"),
+    google_review_url: has("google_reviews"),
+    review_message: has("google_reviews"),
+  };
+  const card_fields = draft.card_fields.map((field) => ({ ...field, visible: field.visible || showByKey[field.key] === true }));
+  return { ...draft, suggested_buttons: buttons.slice(0, 8), card_fields };
 }
 
 export function generateTemplateBlueprint(input: {
@@ -38,6 +90,8 @@ export function generateTemplateBlueprint(input: {
   needs?: TemplateNeeds | null;
   sector?: string;
   reason?: string;
+  socialLinks?: RequestSocialLink[] | null;
+  businessPhone?: string | null;
 }) {
   const template: CardTemplate = input.template in baseModules ? input.template as CardTemplate : "contact";
   const text = normalizedText(input.needs ?? null, input.sector ?? "", input.reason ?? "");
@@ -145,7 +199,7 @@ export function generateTemplateBlueprint(input: {
     template,
     modules: [...modules],
     theme: { ...themes[template], schema_version: 1 },
-    profile_draft: profileDraft,
+    profile_draft: activateRequestChoices(profileDraft, { template, modules: [...modules], socialLinks: input.socialLinks, businessPhone: input.businessPhone, needsText: text }),
     rationale: "Configuration initiale générée localement à partir du type de carte et des besoins déclarés. Les champs et modules restent modifiables et doivent être vérifiés avant validation.",
     generated_by: "touchcard-template-engine-v1",
     reviewed_by_super_admin: false,
