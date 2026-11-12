@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createProspectCustomer, generateProspectWorkspaceAI } from "@/app/actions/prospects";
 import { generateTemplateBlueprint } from "@/lib/cards/template-engine";
 import { CARD_MODULES, getModuleDefaults } from "@/lib/cards/module-registry";
-import { getServiceChoice } from "@/lib/cards/service-choice-registry";
+import { getServiceChoice, getServiceFields } from "@/lib/cards/service-choice-registry";
 import { ModuleConfigurationEditor } from "@/components/prospects/module-configuration-editor";
 
 type ProjectNeeds = {
@@ -123,6 +123,7 @@ export function ProspectWorkspaceConfigurator({ prospect, errorMessage }: { pros
           <section className="rounded-3xl border border-violet-100 bg-violet-50/60 p-5">
             <p className="text-xs font-black uppercase tracking-wider text-violet-700">Choix d'origine du client</p>
             {prospect.card_type === "contact" ? <p className="mt-3 rounded-xl bg-white p-3 text-xs leading-5 text-slate-600">E-Contact : aucune formule commerciale ni gestion de boutique à configurer.</p> : <><p className="mt-3 text-sm font-bold text-slate-800">Objectifs</p><div className="mt-2 flex flex-wrap gap-2">{(prospect.project_needs?.selected ?? []).length ? prospect.project_needs!.selected!.map((v) => <span key={v} className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-700">{getServiceChoice(v)?.label ?? v}</span>) : <span className="text-sm text-slate-500">Aucun objectif détaillé.</span>}</div><p className="mt-4 text-sm font-bold text-slate-800">Gestion souhaitée</p><div className="mt-2 flex flex-wrap gap-2">{(prospect.project_needs?.management_needs ?? []).map((v) => <span key={v} className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-700">{v}</span>)}</div></>}
+            {prospect.card_type !== "contact" && getServiceFields(String(prospect.project_needs?.selected?.[0] ?? "")).length > 0 && <div className="mt-4 rounded-xl border border-cyan-300/50 bg-white p-3"><p className="text-xs font-bold text-slate-500">Champs spécifiques ajoutés pour ce service</p><div className="mt-2 flex flex-wrap gap-1.5">{getServiceFields(String(prospect.project_needs?.selected?.[0] ?? "")).map((field) => <span key={field.key} className="rounded-full bg-cyan-50 px-2.5 py-1 text-[11px] font-semibold text-cyan-800">{field.label}</span>)}</div></div>}
             <p className="mt-4 text-xs leading-5 text-violet-800">Ces réponses originales seront enregistrées dans la configuration du nouvel espace pour garder une trace de la demande initiale.</p>
           </section>
         </aside>

@@ -5,7 +5,7 @@ import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
 import { CARD_MODULES } from "@/lib/cards/module-registry";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { generateTemplateBlueprint, activateRequestChoices, type TemplateProfileDraft } from "@/lib/cards/template-engine";
+import { generateTemplateBlueprint, activateRequestChoices, withServiceFields, type TemplateProfileDraft } from "@/lib/cards/template-engine";
 
 export type ProspectInput = {
   fullName: string;
@@ -432,7 +432,7 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
       suggestions: {
         template,
         modules: finalModules,
-        profile_draft: activateRequestChoices({
+        profile_draft: activateRequestChoices(withServiceFields({
           tagline: String(parsed.profile_draft.tagline ?? "").slice(0, 180),
           description: String(parsed.profile_draft.description ?? "").slice(0, 1200),
           categories: template === "contact" ? [] : Array.isArray(parsed.profile_draft.categories) ? parsed.profile_draft.categories.slice(0, 12).map((v) => String(v).slice(0, 80)) : [],
@@ -443,7 +443,7 @@ export async function generateProspectWorkspaceAI(prospectId: string) {
             description: String(item.description ?? "").slice(0, 240),
             price: String(item.price ?? "").slice(0, 40),
           })) : [],
-        } as TemplateProfileDraft, { template, modules: finalModules, socialLinks: Array.isArray(prospect.social_links) ? prospect.social_links : [], businessPhone: prospect.business_phone, needsText: normalizedNeed }),
+        } as TemplateProfileDraft, String((prospect.project_needs as { selected?: string[] } | null)?.selected?.[0] ?? ""), template), { template, modules: finalModules, socialLinks: Array.isArray(prospect.social_links) ? prospect.social_links : [], businessPhone: prospect.business_phone, needsText: normalizedNeed }),
         rationale: String(parsed.rationale ?? "").slice(0, 600),
         generated_by: "gemini-3.8-flash",
         reviewed_by_super_admin: false,
@@ -513,7 +513,7 @@ export async function resyncProspectWorkspace(formData: FormData) {
   const baseDraft = (existingDraft?.suggested_buttons && existingDraft?.card_fields ? existingDraft : blueprint.profile_draft) as TemplateProfileDraft;
   const needsText = [...(needs.selected ?? []), ...(needs.management_needs ?? []), ...(needs.reservation_channels ?? []), needs.reservation_mode ?? "", prospect.activity_sector ?? ""]
     .join(" ").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-  const profileDraft = activateRequestChoices(baseDraft, { template: prospect.card_type, modules, socialLinks, businessPhone: prospect.business_phone, needsText });
+  const profileDraft = activateRequestChoices(withServiceFields(baseDraft, String(needs.selected?.[0] ?? ""), prospect.card_type), { template: prospect.card_type, modules, socialLinks, businessPhone: prospect.business_phone, needsText });
 
   const { error: orgError } = await supabase.from("organizations").update({
     workspace_config: {
@@ -541,10 +541,10 @@ export async function resyncProspectWorkspace(formData: FormData) {
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const publicFields = (card.public_fields ?? {}) as Record<string, any>;
-    const custom = Array.isArray(publicFields.custom_fields) ? publicFields.custom_fields as { key: string; label: string; value: string; visible: boolean }[] : [];
+    const custom = Array.isArray(publicFields.custom_fields) ? publicFields.custom_fields as { key: string; label: string; value: string; visible: boolean; section?: string }[] : [];
     const merged = profileDraft.card_fields.filter((field) => !["tagline", "location", "hours", "whatsapp", "google_review_url", "company_phone", "company_email", "company_address", "industry"].includes(field.key)).map((field) => {
       const current = custom.find((item) => item.key === field.key);
-      return { key: field.key, label: current?.label ?? field.label, value: current?.value ?? "", visible: Boolean(current?.visible) || field.visible };
+      return { key: field.key, label: current?.label ?? field.label, value: current?.value ?? "", visible: Boolean(current?.visible) || field.visible, ...(field.section ? { section: field.section } : {}) };
     });
     const extras = custom.filter((item) => !merged.some((field) => field.key === item.key));
     await supabase.from("cards").update({ public_fields: { ...publicFields, custom_fields: [...merged, ...extras] } }).eq("id", card.id);

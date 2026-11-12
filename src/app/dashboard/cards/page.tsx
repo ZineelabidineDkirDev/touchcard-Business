@@ -266,7 +266,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
           const cvField = storedCustomFields.find((field) => /cv professionnel|^cv$/i.test(field.label.trim()) && (field.value.trim().startsWith("https://") || field.value.trim().startsWith("http://")));
           const initialCustomFields: EditableCardField[] = storedCustomFields.length
             ? storedCustomFields.filter((field) => galleryEnabled || !/portfolio|cv professionnel/i.test(field.key + " " + field.label))
-            : (profileDraft?.card_fields ?? []).filter((field) => galleryEnabled || !/portfolio|cv/i.test(field.key + " " + field.label)).map((field) => ({ key: field.key, label: field.label, value: "", visible: field.visible }));
+            : (profileDraft?.card_fields ?? []).filter((field) => galleryEnabled || !/portfolio|cv/i.test(field.key + " " + field.label)).map((field) => ({ key: field.key, label: field.label, value: "", visible: field.visible, section: (field as { section?: string }).section }));
           const publicUrl = "/p/" + card.slug;
           return <article key={card.id} className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 p-5">

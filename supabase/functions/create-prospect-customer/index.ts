@@ -35,11 +35,12 @@ function safeHttpUrl(value: unknown) {
 }
 function safeProfileDraft(raw: any) {
   if (!raw || typeof raw !== "object") return null;
-  const cardFields = Array.isArray(raw.card_fields) ? raw.card_fields.slice(0, 20).map((field: any, index: number) => ({
+  const cardFields = Array.isArray(raw.card_fields) ? raw.card_fields.slice(0, 40).map((field: any, index: number) => ({
     key: String(field.key ?? "custom_" + index).toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 48),
     label: String(field.label ?? "").trim().slice(0, 80),
     type: allowedFieldTypes.has(field.type) ? field.type : "text",
     visible: field.visible !== false,
+    section: String(field.section ?? "").trim().slice(0, 80),
   })).filter((field: any) => field.key && field.label) : [];
   const suggestedButtons = Array.isArray(raw.suggested_buttons) ? raw.suggested_buttons.slice(0, 8).map((button: any) => ({
     kind: allowedButtonKinds.has(button.kind) ? button.kind : "website",
@@ -251,7 +252,7 @@ Deno.serve(async (req: Request) => {
     const businessPhone = String(prospect.business_phone ?? "").trim();
     const generatedFields = (profileDraft?.card_fields ?? [])
       .filter((field: any) => !["tagline", "location", "hours", "whatsapp", "google_review_url", "company_phone", "company_email", "company_address", "industry", "contact_person_name"].includes(field.key))
-      .map((field: any) => ({ key: field.key, label: field.label, value: "", visible: field.visible }));
+      .map((field: any) => ({ key: field.key, label: field.label, value: "", visible: field.visible, ...(field.section ? { section: field.section } : {}) }));
     if (cardType !== "contact" && !generatedFields.some((field: any) => field.key === "contact_person")) {
       generatedFields.unshift({ key: "contact_person", label: "Nom du contact", value: prospect.full_name ?? "", visible: true });
     }

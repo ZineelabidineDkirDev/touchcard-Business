@@ -1,5 +1,5 @@
 import { BASE_MODULES_BY_TEMPLATE } from "@/lib/cards/module-registry";
-import { getServiceModules } from "@/lib/cards/service-choice-registry";
+import { getServiceFields, getServiceModules } from "@/lib/cards/service-choice-registry";
 
 export type CardTemplate = "contact" | "service" | "e-business" | "google-review";
 
@@ -15,7 +15,7 @@ export type TemplateProfileDraft = {
   description: string;
   categories: string[];
   catalog_items: { name: string; description: string; price: string }[];
-  card_fields: { key: string; label: string; type: "text" | "textarea" | "url" | "phone" | "email"; visible: boolean }[];
+  card_fields: { key: string; label: string; type: "text" | "textarea" | "url" | "phone" | "email"; visible: boolean; section?: string }[];
   suggested_buttons: { kind: string; label: string; enabled: boolean }[];
 };
 
@@ -83,6 +83,19 @@ export function activateRequestChoices(
   };
   const card_fields = draft.card_fields.map((field) => ({ ...field, visible: field.visible || showByKey[field.key] === true }));
   return { ...draft, suggested_buttons: buttons.slice(0, 8), card_fields };
+}
+
+/**
+ * Ajoute les champs propres au service choisi par le client (ex. restaurant : type de cuisine, capacité…).
+ * Ils s'ajoutent aux champs classiques, sans jamais en retirer. L'E-Contact reste limité à son profil standard.
+ */
+export function withServiceFields(draft: TemplateProfileDraft, serviceId: string, template: string): TemplateProfileDraft {
+  if (!serviceId || template === "contact") return draft;
+  const known = new Set(draft.card_fields.map((field) => field.key));
+  const extra = getServiceFields(serviceId)
+    .filter((field) => !known.has(field.key))
+    .map((field) => ({ key: field.key, label: field.label, type: field.type, visible: true, section: field.section }));
+  return extra.length ? { ...draft, card_fields: [...draft.card_fields, ...extra].slice(0, 40) } : draft;
 }
 
 export function generateTemplateBlueprint(input: {
@@ -199,7 +212,7 @@ export function generateTemplateBlueprint(input: {
     template,
     modules: [...modules],
     theme: { ...themes[template], schema_version: 1 },
-    profile_draft: activateRequestChoices(profileDraft, { template, modules: [...modules], socialLinks: input.socialLinks, businessPhone: input.businessPhone, needsText: text }),
+    profile_draft: activateRequestChoices(withServiceFields(profileDraft, selectedServiceId, template), { template, modules: [...modules], socialLinks: input.socialLinks, businessPhone: input.businessPhone, needsText: text }),
     rationale: "Configuration initiale générée localement à partir du type de carte et des besoins déclarés. Les champs et modules restent modifiables et doivent être vérifiés avant validation.",
     generated_by: "touchcard-template-engine-v1",
     reviewed_by_super_admin: false,
