@@ -8,7 +8,6 @@ const modules = [
   { id: "digital_card", title: "Cartes digitales", description: "Accès à la gestion de vos cartes NFC et QR.", workspace: ["digital_card"] },
   { id: "requests", title: "Demandes clients", description: "Commandes, réservations et demandes de devis.", workspace: ["orders", "bookings", "quote_requests"] },
   { id: "crm_contacts", title: "Contacts & prospects", description: "Votre carnet de contacts et vos prospects.", workspace: ["crm_contacts"] },
-  { id: "team", title: "Équipe", description: "Gestion des membres et des accès de votre équipe.", workspace: ["team"] },
   { id: "analytics", title: "Statistiques", description: "Consultation des vues, scans et interactions.", workspace: ["analytics"] },
 ];
 

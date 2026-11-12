@@ -34,7 +34,7 @@ export async function saveDashboardSettings(formData: FormData) {
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) redirect("/login");
 
-  const allowedModules = ["digital_card", "requests", "crm_contacts", "team", "analytics"];
+  const allowedModules = ["digital_card", "requests", "crm_contacts", "analytics"];
   // Seuls les modules affichés (inclus dans la formule du client) sont modifiés ; les autres gardent leur état.
   const rendered = formData.getAll("rendered_module").map(String).filter((module) => allowedModules.includes(module));
   const previousHidden = (Array.isArray((user.user_metadata?.dashboard_preferences as { hidden_modules?: string[] } | undefined)?.hidden_modules)
