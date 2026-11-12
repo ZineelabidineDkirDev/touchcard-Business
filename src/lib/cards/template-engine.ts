@@ -1,4 +1,5 @@
 import { BASE_MODULES_BY_TEMPLATE } from "@/lib/cards/module-registry";
+import { buildSectionBlocks, mergeSectionBlocks, type SectionBlock } from "@/lib/cards/section-blocks";
 import { getServiceFields, getServiceModules } from "@/lib/cards/service-choice-registry";
 
 export type CardTemplate = "contact" | "service" | "e-business" | "google-review";
@@ -16,6 +17,7 @@ export type TemplateProfileDraft = {
   categories: string[];
   catalog_items: { name: string; description: string; price: string }[];
   card_fields: { key: string; label: string; type: "text" | "textarea" | "url" | "phone" | "email"; visible: boolean; section?: string }[];
+  sections?: SectionBlock[];
   suggested_buttons: { kind: string; label: string; enabled: boolean }[];
 };
 
@@ -96,6 +98,12 @@ export function withServiceFields(draft: TemplateProfileDraft, serviceId: string
     .filter((field) => !known.has(field.key))
     .map((field) => ({ key: field.key, label: field.label, type: field.type, visible: true, section: field.section }));
   return extra.length ? { ...draft, card_fields: [...draft.card_fields, ...extra].slice(0, 40) } : draft;
+}
+
+/** Ajoute les sections métier (listes, champs typés, boutons d'action) propres au service et au secteur demandés. */
+export function withSections(draft: TemplateProfileDraft, serviceId: string, template: string, text: string): TemplateProfileDraft {
+  const proposed = buildSectionBlocks({ template, serviceId, text });
+  return { ...draft, sections: mergeSectionBlocks(draft.sections ?? [], proposed) };
 }
 
 export function generateTemplateBlueprint(input: {
@@ -212,7 +220,7 @@ export function generateTemplateBlueprint(input: {
     template,
     modules: [...modules],
     theme: { ...themes[template], schema_version: 1 },
-    profile_draft: activateRequestChoices(withServiceFields(profileDraft, selectedServiceId, template), { template, modules: [...modules], socialLinks: input.socialLinks, businessPhone: input.businessPhone, needsText: text }),
+    profile_draft: activateRequestChoices(withSections(withServiceFields(profileDraft, selectedServiceId, template), selectedServiceId, template, text), { template, modules: [...modules], socialLinks: input.socialLinks, businessPhone: input.businessPhone, needsText: text }),
     rationale: "Configuration initiale générée localement à partir du type de carte et des besoins déclarés. Les champs et modules restent modifiables et doivent être vérifiés avant validation.",
     generated_by: "touchcard-template-engine-v1",
     reviewed_by_super_admin: false,

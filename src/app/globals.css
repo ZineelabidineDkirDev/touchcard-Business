@@ -108,3 +108,6 @@ html[data-theme="dark"] nav a:not(.bg-indigo-600):hover { background: rgba(31, 1
 .touchcard-intake button, .touchcard-intake input, .touchcard-intake select, .touchcard-intake textarea { font: revert-layer; }
 .tc-dark-surface .border-violet-500 { border-color: #5fdcff !important; }
 .tc-dark-surface .ring-violet-200 { --tw-ring-color: rgba(95, 220, 255, .3) !important; }
+
+/* Éditeur de sections : laisse les classes Tailwind (taille, graisse) s'appliquer aux boutons */
+.tc-revert-font button { font: revert-layer; }

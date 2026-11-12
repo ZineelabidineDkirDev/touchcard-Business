@@ -33,6 +33,45 @@ function safeHttpUrl(value: unknown) {
     return ["https:", "http:"].includes(url.protocol) ? url.toString() : null;
   } catch { return null; }
 }
+// Sections métier (listes, champs typés, boutons d'action) : version compacte de sanitizeSectionBlocks (src/lib/cards/section-blocks.ts).
+function sanitizeSections(raw: unknown) {
+  if (!Array.isArray(raw)) return [];
+  const clean = (value: unknown, max: number) => String(value ?? "").replace(/[\u0000-\u001f\u007f]/g, " ").trim().slice(0, max);
+  const url = (value: unknown) => { const v = clean(value, 500); return /^https?:\/\//i.test(v) ? v : ""; };
+  const kinds = new Set(["dishes", "listings", "vehicles", "projects", "team", "sessions", "offers", "services"]);
+  const fieldTypes = new Set(["date", "time", "number", "text", "url"]);
+  const seen = new Set<string>();
+  const out: any[] = [];
+  for (const block of raw.slice(0, 12) as any[]) {
+    const id = clean(block?.id, 48).replace(/[^a-zA-Z0-9_-]/g, "");
+    const title = clean(block?.title, 80);
+    if (!id || !title || seen.has(id) || !["list", "fields", "action"].includes(block?.type)) continue;
+    seen.add(id);
+    const base: any = { id, type: block.type, title, enabled: block.enabled !== false, origin: clean(block.origin, 60) || undefined };
+    if (block.type === "list") {
+      base.kind = kinds.has(block.kind) ? block.kind : "offers";
+      base.item_fields = (Array.isArray(block.item_fields) ? block.item_fields : []).filter((f: string) => ["price", "date", "link"].includes(f));
+      base.items = (Array.isArray(block.items) ? block.items : []).slice(0, 30).map((item: any, index: number) => ({
+        id: clean(item?.id, 40).replace(/[^a-zA-Z0-9_-]/g, "") || "i" + (index + 1), title: clean(item?.title, 100),
+        description: clean(item?.description, 400) || undefined, price: clean(item?.price, 40) || undefined,
+        date: clean(item?.date, 40) || undefined, link: url(item?.link) || undefined,
+      })).filter((item: any) => item.title);
+    } else if (block.type === "fields") {
+      base.fields = (Array.isArray(block.fields) ? block.fields : []).slice(0, 12).map((f: any) => {
+        const type = fieldTypes.has(f?.type) ? f.type : "text"; const value = clean(f?.value, 300);
+        return { key: clean(f?.key, 40).replace(/[^a-zA-Z0-9_-]/g, ""), label: clean(f?.label, 80), type, value: type === "url" ? url(value) : value };
+      }).filter((f: any) => f.key && f.label);
+    } else {
+      base.action = ["booking", "order", "quote"].includes(block.action) ? block.action : "booking";
+      base.label = clean(block.label, 40) || title; base.hint = clean(block.hint, 120) || undefined;
+      base.date_mode = block.date_mode === "stay" ? "stay" : "datetime";
+      base.start_label = clean(block.start_label, 40) || undefined; base.end_label = clean(block.end_label, 40) || undefined;
+    }
+    out.push(base);
+  }
+  return out;
+}
+
 function safeProfileDraft(raw: any) {
   if (!raw || typeof raw !== "object") return null;
   const cardFields = Array.isArray(raw.card_fields) ? raw.card_fields.slice(0, 40).map((field: any, index: number) => ({
@@ -59,6 +98,7 @@ function safeProfileDraft(raw: any) {
     catalog_items: catalogItems,
     card_fields: cardFields,
     suggested_buttons: suggestedButtons,
+    sections: sanitizeSections(raw.sections),
   };
 }
 
@@ -268,6 +308,7 @@ Deno.serve(async (req: Request) => {
       contact_person_name: cardType === "contact" ? "" : String(prospect.full_name ?? ""),
       google_review_url: "",
       custom_fields: generatedFields,
+      sections: Array.isArray(profileDraft?.sections) ? profileDraft.sections : [],
     };
     const { data: card, error: cardError } = await admin.from("cards").insert({
       organization_id: organization.id,

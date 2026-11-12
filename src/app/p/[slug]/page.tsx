@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { I18nText } from "@/i18n/provider";
 import { PublicCardTracker, TrackedPublicLink } from "@/components/cards/public-card-tracker";
 import { PublicWorkspaceRequestForms } from "@/components/cards/public-workspace-request-forms";
+import { bookingUiFromSections, sanitizeSectionBlocks } from "@/lib/cards/section-blocks";
 import { PublicBusinessModules } from "@/components/cards/public-business-modules";
 
 type PublicFields = { nfc_display_code?: string; tagline?: string; location?: string; hours?: string; whatsapp?: string; company_phone?: string; company_email?: string; company_address?: string; industry?: string; custom_fields?: { key: string; label: string; value: string; visible: boolean }[] };
@@ -103,6 +104,8 @@ async function PublicCardContent({
       .eq("organization_id", card.organization_id).eq("is_active", true).order("display_order").limit(20)
     : { data: [] as { id: string; title: string; description: string | null; duration_label: string | null; price: number | null; currency: string; start_date: string | null; end_date: string | null }[] };
   const fields = (card.public_fields ?? {}) as PublicFields & { google_review_url?: string };
+  const sections = template === "contact" ? [] : sanitizeSectionBlocks((card.public_fields as Record<string, unknown> | null)?.sections).filter((section) => section.enabled);
+  const bookingUi = bookingUiFromSections(sections);
   const settings = (card.public_settings ?? {}) as Record<string, boolean>;
   const source = query.source === "nfc" ? "nfc_scan" : query.source === "qr" ? "qr_scan" : "view";
   const publicSiteUrl = (process.env.NEXT_PUBLIC_SITE_URL || "https://touchcard-three.vercel.app").replace(/\/$/, "");
@@ -202,6 +205,23 @@ async function PublicCardContent({
             </div> : <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-xs leading-5 text-slate-500">Aucun élément publié pour le moment.</p>}
           </section>}
 
+          {sections.filter((section) => section.type !== "action").map((section) => {
+            const items = (section.items ?? []).filter((item) => item.title);
+            const filled = (section.fields ?? []).filter((field) => field.value);
+            if (section.type === "list" && !items.length) return null;
+            if (section.type === "fields" && !filled.length) return null;
+            return <section key={section.id} className="rounded-2xl bg-white p-4">
+              <h2 className="mb-3 text-base font-bold text-black">{section.title}</h2>
+              {section.type === "list" ? <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">{items.map((item) => <article key={item.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                <h3 className="font-bold text-slate-900">{item.title}</h3>
+                {item.description && <p className="mt-1 text-sm leading-6 text-slate-600">{item.description}</p>}
+                {item.date && <p className="mt-2 text-xs font-semibold text-slate-500">{new Date(item.date + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</p>}
+                {item.price && <p className="mt-2 text-sm font-black text-slate-700">{item.price}</p>}
+                {item.link && <a href={item.link} target="_blank" rel="noopener noreferrer" className="mt-3 inline-flex text-sm font-bold" style={{ color: accent }}>Voir le détail</a>}
+              </article>)}</div> : <dl className="grid gap-3 sm:grid-cols-2">{filled.map((field) => <div key={field.key} className="rounded-xl bg-slate-50 p-3"><dt className="text-xs font-semibold text-slate-500">{field.label}</dt><dd className="mt-1 text-sm font-bold text-slate-900">{field.type === "date" && /^\d{4}-\d{2}-\d{2}$/.test(field.value) ? new Date(field.value + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : field.type === "url" ? <a href={field.value} target="_blank" rel="noopener noreferrer" style={{ color: accent }}>{field.value}</a> : field.value}</dd></div>)}</dl>}
+            </section>;
+          })}
+
           {!isCreativeProfile && settings.show_request_forms !== false && (allowOrders || allowBookings || allowQuotes || (isEcommerce && showCatalog) || (hasRoomCatalog && allowBookings)) && <PublicWorkspaceRequestForms
             cardSlug={card.slug}
             accent={accent}
@@ -210,9 +230,12 @@ async function PublicCardContent({
             allowBookings={allowBookings}
             allowQuotes={allowQuotes}
             shopMode={isEcommerce}
-            bookingLabel={String(moduleSettings.bookings?.section_title || (isTraining ? "S'inscrire" : isHealth ? "Prendre rendez-vous" : isHospitality ? "Réserver une chambre" : "Réserver"))}
-            bookingHint={String(moduleSettings.bookings?.confirmation_message || (isTraining ? "Demander une inscription à une formation" : isHealth ? "Choisir une date de consultation" : isHospitality ? "Choisir les dates de votre séjour" : "Choisir une date"))}
-            bookingDateMode={isHospitality ? "stay" : "datetime"}
+            bookingLabel={String(bookingUi?.label || moduleSettings.bookings?.section_title || (isTraining ? "S'inscrire" : isHealth ? "Prendre rendez-vous" : isHospitality ? "Réserver une chambre" : "Réserver"))}
+            bookingHint={String(bookingUi?.hint || moduleSettings.bookings?.confirmation_message || (isTraining ? "Demander une inscription à une formation" : isHealth ? "Choisir une date de consultation" : isHospitality ? "Choisir les dates de votre séjour" : "Choisir une date"))}
+            bookingDateMode={bookingUi?.dateMode ?? (isHospitality ? "stay" : "datetime")}
+            bookingStartLabel={bookingUi?.startLabel}
+            bookingEndLabel={bookingUi?.endLabel}
+            stayRequiresItem={!(bookingUi?.dateMode === "stay" && !hasRoomCatalog)}
             serviceMode={isBeauty}
             whatsappPhone={fields.whatsapp || card.phone || ""}
           />}

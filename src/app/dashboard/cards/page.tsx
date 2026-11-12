@@ -4,6 +4,8 @@ import { connection } from "next/server";
 import { createClientCard, saveClientCardProfile, saveClientCardVisibility, addClientCardLink, deleteClientCardLink, toggleClientCardPublication, createCatalogItem, updateCatalogItem, deleteCatalogItem, importCatalogItems, uploadCatalogPdf } from "@/app/actions/cards";
 import { createClient } from "@/lib/supabase/server";
 import { CustomCardFieldsEditor, type EditableCardField } from "@/components/cards/custom-card-fields-editor";
+import { SectionBlocksEditor } from "@/components/cards/section-blocks-editor";
+import { sanitizeSectionBlocks } from "@/lib/cards/section-blocks";
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
 import { AdminClientCards } from "@/components/dashboard/admin-client-cards";
 import { MediaImagePicker } from "@/components/dashboard/media-image-picker";
@@ -304,6 +306,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
                   <label className="text-xs font-semibold text-slate-600">WhatsApp professionnel<input name="whatsapp" defaultValue={fields.whatsapp ?? card.phone ?? ""} placeholder="+212..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>
                   {(config.template === "google-review" || config.template === "e-business") && <label className="text-xs font-semibold text-slate-600">Lien Google Avis<input name="google_review_url" type="url" defaultValue={fields.google_review_url ?? ""} placeholder="https://..." className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/></label>}
                   <div className="sm:col-span-2"><CustomCardFieldsEditor initialFields={initialCustomFields} showPortfolioActions={galleryEnabled}/></div>
+                  {config.template !== "contact" && <div className="sm:col-span-2"><SectionBlocksEditor initialSections={(() => { const stored = sanitizeSectionBlocks(fields.sections); return stored.length ? stored : sanitizeSectionBlocks((profileDraft as { sections?: unknown } | null | undefined)?.sections); })()}/></div>}
 
 
                 </div>

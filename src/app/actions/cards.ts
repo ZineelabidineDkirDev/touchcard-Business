@@ -1,5 +1,6 @@
 "use server";
 
+import { sanitizeSectionBlocks } from "@/lib/cards/section-blocks";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
@@ -215,6 +216,11 @@ export async function saveClientCardProfile(formData: FormData) {
   if (!galleryEnabled) {
     customFields = [...customFields, ...existingCustomFields.filter((field) => /portfolio/i.test(field.key + " " + field.label))].slice(0, 40);
   }
+  // Sections métier : si le formulaire les envoie, on les nettoie et on les enregistre ; sinon on garde les existantes.
+  const submittedSections = formData.get("sections_json");
+  (fields as Record<string, unknown>).sections = typeof submittedSections === "string" && submittedSections
+    ? (() => { try { return sanitizeSectionBlocks(JSON.parse(submittedSections)); } catch { return sanitizeSectionBlocks((existingCard?.public_fields as Record<string, unknown> | null)?.sections); } })()
+    : sanitizeSectionBlocks((existingCard?.public_fields as Record<string, unknown> | null)?.sections);
   const existingTheme = (existingCard?.theme ?? {}) as Record<string, unknown>;
   const requestedAccent = String(formData.get("accent_color") ?? "").trim().toUpperCase();
   const requestedTextColor = String(formData.get("text_color") ?? "").trim().toUpperCase();
