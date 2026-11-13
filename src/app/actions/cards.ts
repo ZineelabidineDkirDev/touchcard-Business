@@ -203,10 +203,11 @@ export async function saveClientCardProfile(formData: FormData) {
   };
 
   const { data: organization } = await supabase.from("organizations").select("workspace_config").eq("id", organizationId).maybeSingle();
-  const workspaceConfig = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[]; original_client_choices?: { activity_sector?: string } };
+  const workspaceConfig = (organization?.workspace_config ?? {}) as { version?: number; template?: string; modules?: string[]; original_client_choices?: { activity_sector?: string; project_needs?: { selected?: string[] } } };
   const sector = String(workspaceConfig.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const isCreativeProfile = /designer|design graphique|graphiste|photographe|photography/.test(sector);
-  const galleryEnabled = isCreativeProfile || !workspaceConfig.version || (Array.isArray(workspaceConfig.modules) && workspaceConfig.modules.includes("gallery"));
+  const portfolioCvEnabled = workspaceConfig.template === "contact" || isCreativeProfile || !workspaceConfig.version || workspaceConfig.original_client_choices?.project_needs?.selected?.[0] === "professional_profile" || /developpeur|developer|freelance|marketing digital|media buy|photograph|graphiste|designer|community manager|consultant independant/.test(sector);
+  const galleryEnabled = portfolioCvEnabled;
   const { data: existingCard } = await supabase.from("cards").select("theme,public_settings,public_fields").eq("id", cardId).eq("organization_id", organizationId).maybeSingle();
   const existingCustomFields = (((existingCard?.public_fields as any)?.custom_fields ?? []) as typeof customFields);
   // Le CV est géré séparément via un upload direct vers Storage (pas dans le body d'une Server Action).

@@ -2,7 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { isPlatformSuperAdmin } from "@/lib/auth/platform-admin";
-import { CARD_MODULES } from "@/lib/cards/module-registry";
+import { CARD_MODULES, getModuleDefaults } from "@/lib/cards/module-registry";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { mergeSectionBlocks, sanitizeSectionBlocks } from "@/lib/cards/section-blocks";
@@ -555,4 +555,84 @@ export async function resyncProspectWorkspace(formData: FormData) {
   revalidatePath("/dashboard/prospects");
   revalidatePath("/dashboard");
   redirect("/dashboard/prospects?resynced=1");
+}
+
+/**
+ * Reconfigure l'espace d'un client existant : change la carte et/ou le service choisi, puis REMPLACE les modules,
+ * les champs et les sections par ceux du nouveau choix. Les informations déjà saisies par le client sont conservées
+ * (champs remplis, sections avec contenu) ; les champs et sections vides qui ne correspondent plus sont retirés.
+ */
+export async function reconfigureProspectWorkspace(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  const cardType = String(formData.get("card_type") ?? "");
+  const serviceId = String(formData.get("service_id") ?? "");
+  if (!id || !["service", "e-business", "contact", "google-review"].includes(cardType)) return;
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user || !isPlatformSuperAdmin(user.email)) return;
+
+  const { data: prospect } = await supabase.from("prospect_requests")
+    .select("id,user_id,activity_sector,reason,card_type,project_needs,social_links,business_phone,city")
+    .eq("id", id).maybeSingle();
+  if (!prospect?.user_id) redirect("/dashboard/prospects?reconfigure_error=1");
+  const { data: organization } = await supabase.from("organizations").select("id,workspace_config").eq("owner_id", prospect.user_id).maybeSingle();
+  if (!organization) redirect("/dashboard/prospects?reconfigure_error=1");
+
+  const oldNeeds = (prospect.project_needs ?? {}) as { selected?: string[]; reservation_mode?: string | null; reservation_channels?: string[]; management_needs?: string[] };
+  const needs = { ...oldNeeds, selected: cardType === "contact" ? [] : [serviceId || (oldNeeds.selected?.[0] ?? ""), ...(oldNeeds.selected ?? []).slice(1)].filter(Boolean) };
+  const socialLinks = (Array.isArray(prospect.social_links) ? prospect.social_links : []) as { platform?: string; url?: string }[];
+  const blueprint = generateTemplateBlueprint({ template: cardType, needs, sector: prospect.activity_sector, reason: prospect.reason ?? "", socialLinks, businessPhone: prospect.business_phone });
+  const modules = blueprint.modules;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const config = (organization.workspace_config ?? {}) as Record<string, any>;
+  const previousSettings = (config.module_settings ?? {}) as Record<string, Record<string, string | boolean>>;
+  const defaults = getModuleDefaults(modules) as Record<string, Record<string, string | boolean>>;
+  const moduleSettings = Object.fromEntries(modules.filter((module) => defaults[module] || previousSettings[module]).map((module) => [module, { ...(defaults[module] ?? {}), ...(previousSettings[module] ?? {}) }]));
+
+  const { error: prospectError } = await supabase.from("prospect_requests").update({ card_type: cardType, project_needs: needs }).eq("id", prospect.id);
+  if (prospectError) { console.error("Reconfigure prospect update failed", { id, message: prospectError.message }); redirect("/dashboard/prospects?reconfigure_error=1"); }
+
+  const { error: orgError } = await supabase.from("organizations").update({
+    workspace_config: {
+      ...config,
+      template: cardType,
+      modules,
+      module_settings: moduleSettings,
+      ai_suggestions: { ...(config.ai_suggestions ?? {}), template: cardType, modules, profile_draft: blueprint.profile_draft },
+      original_client_choices: { ...(config.original_client_choices ?? {}), card_type: cardType, project_needs: needs },
+      reconfigured_at: new Date().toISOString(),
+    },
+  }).eq("id", organization.id);
+  if (orgError) { console.error("Reconfigure workspace failed", { id, message: orgError.message }); redirect("/dashboard/prospects?reconfigure_error=1"); }
+
+  const { data: card } = await supabase.from("cards").select("id,theme,public_fields").eq("organization_id", organization.id).order("created_at", { ascending: true }).limit(1).maybeSingle();
+  if (card) {
+    const draft = blueprint.profile_draft;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const publicFields = (card.public_fields ?? {}) as Record<string, any>;
+    const classic = new Set(["tagline", "location", "hours", "whatsapp", "google_review_url", "company_phone", "company_email", "company_address", "industry"]);
+    const existing = (Array.isArray(publicFields.custom_fields) ? publicFields.custom_fields : []) as { key: string; label: string; value: string; visible: boolean; section?: string }[];
+    const generated = draft.card_fields.filter((field) => !classic.has(field.key)).map((field) => {
+      const current = existing.find((item) => item.key === field.key);
+      return { key: field.key, label: current?.label ?? field.label, value: current?.value ?? "", visible: current ? current.visible : field.visible, ...(field.section ? { section: field.section } : {}) };
+    });
+    const keptByUser = existing.filter((item) => !generated.some((field) => field.key === item.key) && String(item.value ?? "").trim());
+    const customFields = [...generated, ...keptByUser].slice(0, 40);
+
+    const hasData = (block: ReturnType<typeof sanitizeSectionBlocks>[number]) => Boolean(block.items?.length || block.fields?.some((field) => field.value));
+    const existingSections = sanitizeSectionBlocks(publicFields.sections);
+    const proposedIds = new Set((draft.sections ?? []).map((block) => block.id));
+    const kept = existingSections.filter((block) => hasData(block) || proposedIds.has(block.id));
+    const sections = mergeSectionBlocks(kept, draft.sections ?? []);
+
+    const accents: Record<string, string> = { "google-review": "#16a34a", service: "#0ea5e9", "e-business": "#10b981", contact: "#6366f1" };
+    const layouts: Record<string, string> = { "google-review": "review", "e-business": "commerce", service: "service", contact: "classic" };
+    const theme: Record<string, unknown> = { ...((card.theme ?? {}) as Record<string, unknown>), template: cardType, layout: layouts[cardType] ?? "classic", design_id: "default-" + cardType };
+    if (!(card.theme as { accent?: string } | null)?.accent || Object.values(accents).includes(String((card.theme as { accent?: string }).accent))) theme.accent = accents[cardType];
+    await supabase.from("cards").update({ theme, public_fields: { ...publicFields, custom_fields: customFields, sections } }).eq("id", card.id);
+  }
+
+  revalidatePath("/dashboard/prospects");
+  revalidatePath("/dashboard");
+  redirect("/dashboard/prospects?reconfigured=1");
 }

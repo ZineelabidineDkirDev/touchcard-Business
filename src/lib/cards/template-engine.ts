@@ -131,7 +131,9 @@ export function generateTemplateBlueprint(input: {
   const isBeauty = isBeautySector && ["service", "e-business"].includes(template);
   const isRestaurant = template !== "contact" && (/restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(sectorText) || /restaurant|restauration|menu|plats|cuisine|traiteur|pizzeria/.test(text));
   const explicitlyRequestsCommerce = /boutique en ligne|vente en ligne|e.?commerce|catalogue de produits|commande de produits/.test(text);
-  const portfolioProfessional = /developpeur|developer|developpement web|freelance|marketer|marketing digital|media buyer|media buying|photographe|photography|photographer|graphiste|graphic designer|designer|community manager|consultant independant/.test(sectorText + " " + text);
+  // Portfolio / CV : uniquement si le secteur ou le service choisi l'indique, jamais à cause de mots dans la description libre.
+  const choiceText = normalizedText(input.needs ?? null, "", "");
+  const portfolioProfessional = selectedServiceId === "professional_profile" || /developpeur|developer|developpement web|freelance|marketer|marketing digital|media buyer|media buying|photographe|photography|photographer|graphiste|graphic designer|designer|community manager|consultant independant/.test(sectorText + " " + choiceText);
 
   if (template !== "contact") {
     if (template === "e-business" && (isCommerce || explicitlyRequestsCommerce)) { modules.add("product_catalog"); modules.add("orders"); }
