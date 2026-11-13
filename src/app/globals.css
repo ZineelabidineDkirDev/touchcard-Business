@@ -111,3 +111,4 @@ html[data-theme="dark"] nav a:not(.bg-indigo-600):hover { background: rgba(31, 1
 
 /* Éditeur de sections : laisse les classes Tailwind (taille, graisse) s'appliquer aux boutons */
 .tc-revert-font button { font: revert-layer; }
+.tc-revert-font .btn-primary { font-size: .9rem; font-weight: 700; }
