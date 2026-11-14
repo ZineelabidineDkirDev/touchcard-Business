@@ -282,6 +282,8 @@ async function PublicCardContent({
             availability={(healthcareAvailability ?? []) as PublicHealthcareAvailability[]}
             showCatalog={Boolean(settings.show_catalog ?? true)}
             showRequests={Boolean(settings.show_request_forms ?? true)}
+            showRental={settings.show_car_rental !== false}
+            showHealthcare={settings.show_healthcare !== false}
           />}
 
           {!isCreativeProfile && (Boolean(settings.show_catalog ?? true) || Boolean(settings.show_request_forms ?? true)) && <PublicBusinessModules
