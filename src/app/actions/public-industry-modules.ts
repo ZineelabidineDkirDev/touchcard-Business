@@ -64,6 +64,7 @@ export async function submitPublicHealthcareAppointment(data:FormData){
  const practitionerId=field(data,"practitioner_id",80);
  const locationId=field(data,"location_id",80);
  let duration=30;
+ let servicePractitionerId:string|null=null;
  if(serviceId){
   const {data:service}=await ctx.supabase.from("healthcare_services").select("id,duration_minutes,practitioner_id")
    .eq("id",serviceId).eq("organization_id",ctx.card.organization_id).eq("is_active",true).eq("is_public",true).maybeSingle();
