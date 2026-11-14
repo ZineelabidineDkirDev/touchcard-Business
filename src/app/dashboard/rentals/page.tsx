@@ -30,7 +30,9 @@ export default async function RentalsPage() {
     supabase.from("rental_maintenance").select("*").eq("organization_id",organizationId).order("scheduled_start"),
     canManage ? supabase.from("rental_vehicle_private").select("*").eq("organization_id",organizationId) : Promise.resolve({data:[] as any[]}),
   ]);
-  const vehicles = vehiclesResult.data ?? [];
+  const allVehicles = vehiclesResult.data ?? [];
+  const vehicles = allVehicles.filter((vehicle: any) => vehicle.is_active !== false);
+  const archivedVehiclesCount = allVehicles.length - vehicles.length;
   const locations = locationsResult.data ?? [];
   const bookings = bookingsResult.data ?? [];
   const maintenance = maintenanceResult.data ?? [];
@@ -50,6 +52,7 @@ export default async function RentalsPage() {
       <Metric label="Annonces publiées" value={vehicles.filter((v:any)=>v.is_published&&v.is_active).length} hint="Visibles sur votre carte NFC"/>
       <Metric label="Demandes en attente" value={pending} hint="À traiter"/>
       <Metric label="Entretiens planifiés" value={activeMaintenance} hint="Véhicules temporairement indisponibles"/>
+      <Metric label="Véhicules archivés" value={archivedVehiclesCount} hint="Historique conservé, non publiés"/>
     </div>
 
     {canManage && <section className="grid gap-5 xl:grid-cols-[.8fr_1.2fr]">
