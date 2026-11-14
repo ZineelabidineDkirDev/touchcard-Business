@@ -206,8 +206,8 @@ create policy healthcare_availability_manager_manage on public.healthcare_availa
 create policy healthcare_appointments_manager_read on public.healthcare_appointments for select to authenticated
  using(private.has_org_role(organization_id,array['organization_admin'::app_role,'manager'::app_role,'super_admin'::app_role]));
 create policy healthcare_appointments_assigned_practitioner_read on public.healthcare_appointments for select to authenticated
- using(practitioner_id is not null and exists(select 1 from public.healthcare_practitioner_accounts a where a.practitioner_id=healthcare_appointments.practitioner_id
- and a.organization_id=healthcare_appointments.organization_id and a.user_id=(select auth.uid())));
+ using(practitioner_id is not null and exists(select 1 from public.healthcare_practitioners p where p.id=healthcare_appointments.practitioner_id
+ and p.organization_id=healthcare_appointments.organization_id and p.user_id=(select auth.uid())));
 create policy healthcare_appointments_public_create on public.healthcare_appointments for insert to anon,authenticated with check(status='pending' and exists(
  select 1 from public.cards c join public.organizations o on o.id=c.organization_id where c.id=healthcare_appointments.card_id
  and c.organization_id=healthcare_appointments.organization_id and c.is_published and o.workspace_config->'modules' ? 'doctor_appointments')
