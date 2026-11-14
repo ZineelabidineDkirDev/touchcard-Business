@@ -51,6 +51,43 @@ export async function createBusinessCatalogItem(data: FormData) {
   revalidatePath("/dashboard/modules");
 }
 
+export async function updateBusinessCatalogItem(data: FormData) {
+  const id = value(data, "id", 80);
+  const itemType = value(data, "item_type");
+  if (!id || !["service", "menu", "room"].includes(itemType)) return;
+  const moduleId = itemType === "room" ? "room_catalog" : "service_catalog";
+  const ctx = await getModuleContext([moduleId]);
+  if (!ctx) return;
+  const name = value(data, "name", 140);
+  if (!name) return;
+  const { error } = await ctx.supabase.from("business_catalog_items").update({
+    item_type: itemType,
+    name,
+    description: value(data, "description"),
+    price: Math.max(0, numeric(data, "price")),
+    currency: value(data, "currency", 3) || "MAD",
+    image_url: safeImageUrl(value(data, "image_url", 1000)),
+    duration_minutes: numeric(data, "duration_minutes") || null,
+    capacity: numeric(data, "capacity") || null,
+    updated_at: new Date().toISOString(),
+  }).eq("id", id).eq("organization_id", ctx.organizationId);
+  if (error) console.error("Catalog item update failed", error);
+  revalidatePath("/dashboard/modules");
+  revalidatePath("/dashboard/cards");
+}
+
+export async function deleteBusinessCatalogItem(data: FormData) {
+  const id = value(data, "id", 80);
+  if (!id) return;
+  const ctx = await getModuleContext(["service_catalog", "room_catalog"], "any");
+  if (!ctx) return;
+  const { error } = await ctx.supabase.from("business_catalog_items").delete()
+    .eq("id", id).eq("organization_id", ctx.organizationId);
+  if (error) console.error("Catalog item deletion failed", error);
+  revalidatePath("/dashboard/modules");
+  revalidatePath("/dashboard/cards");
+}
+
 export async function createAvailabilityRule(data: FormData) {
   const ctx = await getModuleContext(["availability_calendar"]);
   if (!ctx) return;
