@@ -34,6 +34,15 @@ export async function submitPublicRentalBooking(data:FormData){
  const pickup=field(data,"pickup_date",10);
  const returned=field(data,"return_date",10);
  if(!vehicleId||!name||!phone||!/^\d{4}-\d{2}-\d{2}$/.test(pickup)||!/^\d{4}-\d{2}-\d{2}$/.test(returned)||returned<=pickup) return;
+ const {data:vehicle}=await ctx.supabase.from("rental_vehicles").select("id")
+  .eq("id",vehicleId).eq("organization_id",ctx.card.organization_id).eq("is_active",true).eq("is_published",true).maybeSingle();
+ if(!vehicle) return;
+ const {data:overlaps,error:overlapError}=await ctx.supabase.from("rental_bookings").select("id")
+  .eq("organization_id",ctx.card.organization_id).eq("vehicle_id",vehicleId)
+  .in("status",["pending","confirmed","active"])
+  .lt("pickup_date",returned).gt("return_date",pickup).limit(1);
+ if(overlapError){console.error("Rental availability check failed",overlapError);return;}
+ if(overlaps?.length) return;
  const locationIds=[field(data,"pickup_location_id",80),field(data,"return_location_id",80)].filter(Boolean);
  if(locationIds.length){
   const {data:locations}=await ctx.supabase.from("rental_locations").select("id")
@@ -73,10 +82,30 @@ export async function submitPublicHealthcareAppointment(data:FormData){
   servicePractitionerId=service.practitioner_id;
   if(service.practitioner_id&&practitionerId&&service.practitioner_id!==practitionerId) return;
  }
+ const resolvedPractitionerId=practitionerId||servicePractitionerId||null;
+ if(practitionerId){
+  const {data:practitioner}=await ctx.supabase.from("healthcare_practitioners").select("id")
+   .eq("id",practitionerId).eq("organization_id",ctx.card.organization_id).eq("is_active",true).eq("is_public",true).maybeSingle();
+  if(!practitioner) return;
+ }
+ if(locationId){
+  const {data:location}=await ctx.supabase.from("healthcare_locations").select("id")
+   .eq("id",locationId).eq("organization_id",ctx.card.organization_id).eq("is_active",true).eq("is_public",true).maybeSingle();
+  if(!location) return;
+ }
  const endAt=new Date(new Date(startsAt).getTime()+duration*60000).toISOString();
+ let conflictQuery=ctx.supabase.from("healthcare_appointments").select("id")
+  .eq("organization_id",ctx.card.organization_id)
+  .in("status",["pending","confirmed"])
+  .lt("starts_at",endAt).gt("ends_at",startsAt);
+ if(resolvedPractitionerId) conflictQuery=conflictQuery.eq("practitioner_id",resolvedPractitionerId);
+ else if(serviceId) conflictQuery=conflictQuery.eq("service_id",serviceId);
+ const {data:conflicts,error:conflictError}=await conflictQuery.limit(1);
+ if(conflictError){console.error("Healthcare availability check failed",conflictError);return;}
+ if(conflicts?.length) return;
  const {error}=await ctx.supabase.from("healthcare_appointments").insert({
   organization_id:ctx.card.organization_id,card_id:ctx.card.id,
-  practitioner_id:practitionerId||servicePractitionerId||null,service_id:serviceId||null,location_id:locationId||null,
+  practitioner_id:resolvedPractitionerId,service_id:serviceId||null,location_id:locationId||null,
   patient_name:patientName,patient_phone:patientPhone,
   patient_email:field(data,"patient_email",180)||null,
   starts_at:startsAt,ends_at:endAt,
