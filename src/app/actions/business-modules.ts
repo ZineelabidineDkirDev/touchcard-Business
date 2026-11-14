@@ -120,6 +120,20 @@ export async function createAvailabilityRule(data: FormData) {
   });
   if (error) console.error("Availability rule creation failed", error);
   revalidatePath("/dashboard/modules");
+  revalidatePath("/dashboard/calendar");
+}
+
+export async function setBusinessAvailabilityRuleState(data: FormData) {
+  const ctx = await getModuleContext(["availability_calendar"]);
+  if (!ctx) return;
+  const id = value(data, "id", 80);
+  if (!id) return;
+  const { error } = await ctx.supabase.from("business_availability_rules").update({
+    is_available: value(data, "is_available") === "true", updated_at: new Date().toISOString(),
+  }).eq("id", id).eq("organization_id", ctx.organizationId);
+  if (error) console.error("Business availability update failed", error);
+  revalidatePath("/dashboard/calendar");
+  revalidatePath("/dashboard/modules");
 }
 
 export async function createGymPlan(data: FormData) {
