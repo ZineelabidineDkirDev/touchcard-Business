@@ -6,19 +6,31 @@ type CatalogItem = { id: string; item_type: string; name: string; description: s
 type GymPlan = { id: string; name: string; description: string | null; price: number; currency: string; duration_days: number; benefits: string[] };
 type SchoolProgram = { id: string; title: string; description: string | null; duration_label: string | null; price: number | null; currency: string; start_date: string | null; end_date: string | null };
 
-export function PublicBusinessModules({ slug, modules, catalog, plans, programs, accent }: {
-  slug: string; modules: string[]; catalog: CatalogItem[]; plans: GymPlan[]; programs: SchoolProgram[]; accent: string;
+export function PublicBusinessModules({ slug, modules, catalog, plans, programs, accent, whatsappPhone }: {
+  slug: string; modules: string[]; catalog: CatalogItem[]; plans: GymPlan[]; programs: SchoolProgram[]; accent: string; whatsappPhone?: string;
 }) {
   const enabled = (id: string) => modules.includes(id);
   const services = catalog.filter((item) => item.item_type !== "room");
   const rooms = catalog.filter((item) => item.item_type === "room");
   if (!services.length && !rooms.length && !enabled("doctor_appointments") && !enabled("gym_registration") && !enabled("school_registration")) return null;
-  const buttonStyle = { backgroundColor: accent };\n  const whatsapp = (whatsappPhone || "").replace(/\\D/g, "");\n  const hasMenu = services.some((item) => item.item_type === "menu");
+  const buttonStyle = { backgroundColor: accent };
+  const whatsapp = (whatsappPhone || "").replace(/\D/g, "");
+  const hasMenu = services.some((item) => item.item_type === "menu");
 
   return <div className="space-y-3">
     {(enabled("service_catalog") && services.length > 0) && <section className="rounded-2xl bg-white p-4">
-      <h2 className="text-base font-black text-slate-950">Nos prestations & notre menu</h2>
-      <div className="mt-3 space-y-3">{services.map((item) => <article key={item.id} className="flex items-start justify-between gap-3 border-b border-slate-100 pb-3 last:border-0"><div className="min-w-0"><h3 className="text-sm font-bold text-slate-900">{item.name}</h3>{item.description && <p className="mt-1 text-xs leading-5 text-slate-500">{item.description}</p>}{item.duration_minutes && <p className="mt-1 text-[11px] text-slate-400">{item.duration_minutes} min</p>}</div><strong className="shrink-0 text-sm" style={{ color: accent }}>{Number(item.price).toLocaleString("fr-MA")} {item.currency}</strong></article>)}</div>
+      <h2 className="text-base font-black text-slate-950">{hasMenu ? "Notre menu" : "Nos prestations"}</h2>
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">{services.map((item) => {
+        const message = hasMenu
+          ? `Bonjour, je souhaite commander : ${item.name} — ${Number(item.price).toLocaleString("fr-MA")} ${item.currency}. Pouvez-vous me confirmer la disponibilité ?`
+          : `Bonjour, je souhaite demander la prestation : ${item.name} — ${Number(item.price).toLocaleString("fr-MA")} ${item.currency}. Pouvez-vous me renseigner ?`;
+        return <article key={item.id} className="overflow-hidden rounded-2xl border border-slate-100 bg-white">
+          <div className="flex items-start gap-3 p-3">{item.image_url ? <img src={item.image_url} alt={item.name} loading="lazy" className="h-20 w-20 shrink-0 rounded-xl object-cover"/> : <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-2xl text-slate-300">✦</div>}
+            <div className="min-w-0 flex-1"><h3 className="text-sm font-bold text-slate-900">{item.name}</h3>{item.description && <p className="mt-1 text-xs leading-5 text-slate-500">{item.description}</p>}{item.duration_minutes && <p className="mt-1 text-[11px] text-slate-400">{item.duration_minutes} min</p>}<strong className="mt-2 block text-sm" style={{ color: accent }}>{Number(item.price).toLocaleString("fr-MA")} {item.currency}</strong></div>
+          </div>
+          {whatsapp && <a href={`https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer" className="mx-3 mb-3 flex items-center justify-center rounded-xl px-3 py-2.5 text-xs font-bold text-white" style={buttonStyle}>{hasMenu ? "Commander sur WhatsApp" : "Demander ce service"}</a>}
+        </article>;
+      })}</div>
     </section>}
     {(enabled("room_catalog") && rooms.length > 0) && <section className="rounded-2xl bg-white p-4">
       <h2 className="text-base font-black text-slate-950">Nos chambres</h2>
