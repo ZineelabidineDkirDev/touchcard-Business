@@ -31,7 +31,7 @@ export default async function BusinessModulesPage() {
   const canGym = enabled("gym_registration");
   const canSchool = enabled("school_registration");
   const canAvailability = enabled("availability_calendar");
-  const sector = String(config.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
+  const sector = String(config.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
   const isRestaurant = /restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(sector);
   const isSpa = /spa|hammam|beaute|esthetique|massage|coiffure|barber/.test(sector);
   if (!canCatalog && !canAppointments && !canGym && !canSchool && !canAvailability) notFound();
