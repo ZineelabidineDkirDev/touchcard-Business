@@ -40,11 +40,13 @@ export default async function DashboardPage() {
   const canUseCards = !hasWorkspaceConfig || enabledModules.includes("digital_card");
   const cardIds = (cards ?? []).map((card) => card.id);
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const [{ data: events }, { count: contactCount }, { count: pendingRequests }, { count: pendingAppointments }, { count: catalogCount }] = await Promise.all([
+  const [{ data: events }, { count: contactCount }, { count: pendingRequests }, { count: pendingAppointments }, { count: pendingRentalBookings }, { count: pendingHealthAppointments }, { count: catalogCount }] = await Promise.all([
     cardIds.length ? supabase.from("card_events").select("event_type").in("card_id", cardIds).gte("created_at", since) : Promise.resolve({ data: [] as {event_type:string}[] }),
     organizationId ? supabase.from("contacts").select("id", { count: "exact", head: true }).eq("organization_id", organizationId) : Promise.resolve({ count: 0 }),
     organizationId ? supabase.from("workspace_requests").select("id", { count: "exact", head: true }).eq("organization_id", organizationId).eq("status", "pending") : Promise.resolve({ count: 0 }),
     organizationId ? supabase.from("business_appointments").select("id", { count: "exact", head: true }).eq("organization_id", organizationId).eq("status", "pending") : Promise.resolve({ count: 0 }),
+    organizationId && enabledModules.includes("car_rental") ? supabase.from("rental_bookings").select("id", { count: "exact", head: true }).eq("organization_id", organizationId).eq("status", "pending") : Promise.resolve({ count: 0 }),
+    organizationId && enabledModules.includes("doctor_appointments") ? supabase.from("healthcare_appointments").select("id", { count: "exact", head: true }).eq("organization_id", organizationId).eq("status", "pending") : Promise.resolve({ count: 0 }),
     organizationId && enabledModules.some((id) => ["product_catalog", "service_catalog", "room_catalog"].includes(id)) ? supabase.from("business_catalog_items").select("id", { count: "exact", head: true }).eq("organization_id", organizationId).eq("is_active", true) : Promise.resolve({ count: 0 }),
   ]);
   const views = (events ?? []).filter((event) => ["view", "qr_scan", "nfc_scan"].includes(event.event_type)).length;
@@ -52,7 +54,7 @@ export default async function DashboardPage() {
     { label: "Cartes NFC", value: String(cards?.length ?? 0), note: (cards ?? []).filter((card) => card.is_published).length + " publiée(s)" },
     { label: "Visites & scans", value: String(views), note: "30 derniers jours" },
     { label: "Contacts collectés", value: String(contactCount ?? 0), note: "Contacts enregistrés" },
-    { label: "Demandes en attente", value: String((pendingRequests ?? 0) + (pendingAppointments ?? 0)), note: "À traiter dans votre espace" },
+    { label: "Demandes en attente", value: String((pendingRequests ?? 0) + (pendingAppointments ?? 0) + (pendingRentalBookings ?? 0) + (pendingHealthAppointments ?? 0)), note: "À traiter dans votre espace" },
   ];
 
   const published = (cards ?? []).some((card) => card.is_published);
