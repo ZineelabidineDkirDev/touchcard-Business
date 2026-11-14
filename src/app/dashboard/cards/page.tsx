@@ -24,6 +24,12 @@ type Card = {
 type CardLink = { id: string; card_id: string; label: string; url: string; kind: string };
 type CatalogItem = { id: string; name: string; description: string | null; price: number; currency: string; image_url: string | null; is_active: boolean };
 
+function studioHash(value: string) {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index++) hash = Math.imul(hash ^ value.charCodeAt(index), 16777619);
+  return (hash >>> 0).toString(36);
+}
+
 export default async function ClientCardsPage({ searchParams }: { searchParams: Promise<{ card?: string; card_saved?: string; card_created?: string; card_error?: string; publish_error?: string; catalog_import?: string; imported?: string; skipped?: string }> }) {
   await connection();
   const status = await searchParams;
@@ -154,6 +160,10 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
     ? await supabase.from("products").select("id,name,description,price,currency,image_url,is_active")
       .eq("organization_id", organizationId).order("created_at", { ascending: false })
     : { data: [] as CatalogItem[] };
+  const { data: businessCatalogItems } = catalogEnabled && organizationId
+    ? await supabase.from("business_catalog_items").select("id,name,description,price,currency,image_url,is_active,item_type")
+      .eq("organization_id", organizationId).order("display_order").order("created_at", { ascending: false })
+    : { data: [] as { id: string; name: string; description: string | null; price: number; currency: string; image_url: string | null; is_active: boolean; item_type: string }[] };
   const { data: catalogDocument } = catalogEnabled && organizationId
     ? await supabase.from("organization_catalog_documents").select("file_url,file_name")
       .eq("organization_id", organizationId).maybeSingle()
@@ -202,9 +212,12 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
       ...(modules.includes("orders") ? [{ label: "Commander", kind: "order" as const }] : []),
       ...(modules.includes("quote_requests") ? [{ label: "Demander un devis", kind: "quote" as const }] : []),
     ] : [];
+    const studioCatalog = (businessCatalogItems?.length ? businessCatalogItems : (catalogItems ?? []))
+      .filter((item) => item.is_active !== false)
+      .map((item) => ({ id: item.id, name: item.name, description: item.description, price: Number(item.price), currency: item.currency || "MAD", image_url: item.image_url }));
     const base: PreviewBase = {
       template: config.template ?? "service", links: cardLinks.map((link) => ({ id: link.id, label: link.label, url: link.url, kind: link.kind })),
-      catalog: (catalogItems ?? []).filter((item) => item.is_active !== false), catalogLabel, catalogEnabled, requestButtons, settings,
+      catalog: studioCatalog, catalogLabel, catalogEnabled, requestButtons, settings,
       visibilityKeys: visibilityGroups.flatMap((group) => group.items.map(([key]) => key)),
     };
     const initial: PreviewValues = {
@@ -314,7 +327,8 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
         <p className="text-xs text-slate-400">Modules autorisés : {modules.join(" · ") || "Configuration standard"}</p>
       </> },
     ];
-    return <CardStudio key={card.id} cardId={card.id} slug={card.slug} title={card.full_name} subtitle={config.template === "contact" ? "E-Contact personnel" : card.company_name || "Carte professionnelle"} isPublished={card.is_published} publicUrl={publicUrl} formAction={saveClientCardProfile} tabs={tabs} base={base} initial={initial} stats={{ views: count(["view", "qr_scan", "nfc_scan"]), nfc: count(["nfc_scan"]) }}
+    const studioRevision = studioHash(JSON.stringify({ initial, base }));
+    return <CardStudio key={card.id + "-" + studioRevision} cardId={card.id} slug={card.slug} title={card.full_name} subtitle={config.template === "contact" ? "E-Contact personnel" : card.company_name || "Carte professionnelle"} isPublished={card.is_published} publicUrl={publicUrl} formAction={saveClientCardProfile} tabs={tabs} base={base} initial={initial} stats={{ views: count(["view", "qr_scan", "nfc_scan"]), nfc: count(["nfc_scan"]) }}
       headerActions={<form action={toggleClientCardPublication}><input type="hidden" name="card_id" value={card.id}/><input type="hidden" name="publish" value={String(!card.is_published)}/><button className="btn-primary">{card.is_published ? "Dépublier" : "Publier"}</button></form>} />;
   })() : null;
 
