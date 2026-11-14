@@ -238,9 +238,11 @@ async function PublicCardContent({
             stayRequiresItem={!(bookingUi?.dateMode === "stay" && !hasRoomCatalog)}
             serviceMode={isBeauty}
             whatsappPhone={fields.whatsapp || card.phone || ""}
+            showCatalog={settings.show_catalog !== false}
+            showRequests={settings.show_request_forms !== false}
           />}
 
-          {!isCreativeProfile && settings.show_request_forms !== false && <PublicBusinessModules
+          {!isCreativeProfile && (settings.show_catalog !== false || settings.show_request_forms !== false) && <PublicBusinessModules
             slug={card.slug}
             modules={modules}
             catalog={(businessModuleCatalog ?? []) as any[]}
