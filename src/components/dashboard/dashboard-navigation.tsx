@@ -8,6 +8,7 @@ const clientItems: { label: string; href: string; modules: string[]; key?: strin
   { label: "Vue d’ensemble", href: "/dashboard", modules: [], section: "Espace" },
   { label: "Ma carte NFC", href: "/dashboard/cards", modules: ["digital_card"], key: "digital_card", section: "Espace" },
   { label: "Demandes reçues", href: "/dashboard/requests", modules: ["orders", "bookings", "quote_requests", "car_rental", "doctor_appointments"], key: "requests", section: "Activité" },
+  { label: "Calendrier & disponibilités", href: "/dashboard/calendar", modules: ["bookings", "availability_calendar", "doctor_appointments", "car_rental"], key: "calendar", section: "Activité" },
   { label: "Location de voitures", href: "/dashboard/rentals", modules: ["car_rental"], key: "car_rental", section: "Gestion métier" },
   { label: "Santé & praticiens", href: "/dashboard/healthcare", modules: ["doctor_appointments"], key: "doctor_appointments", section: "Gestion métier" },
   { label: "Catalogue & prestations", href: "/dashboard/modules", modules: ["service_catalog", "room_catalog", "bookings", "availability_calendar"], key: "catalog", section: "Gestion métier" },
