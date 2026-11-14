@@ -37,12 +37,8 @@ export async function submitPublicRentalBooking(data:FormData){
  const {data:vehicle}=await ctx.supabase.from("rental_vehicles").select("id")
   .eq("id",vehicleId).eq("organization_id",ctx.card.organization_id).eq("is_active",true).eq("is_published",true).maybeSingle();
  if(!vehicle) return;
- const {data:overlaps,error:overlapError}=await ctx.supabase.from("rental_bookings").select("id")
-  .eq("organization_id",ctx.card.organization_id).eq("vehicle_id",vehicleId)
-  .in("status",["pending","confirmed","active"])
-  .lt("pickup_date",returned).gt("return_date",pickup).limit(1);
- if(overlapError){console.error("Rental availability check failed",overlapError);return;}
- if(overlaps?.length) return;
+ // Availability and overlap checks are enforced atomically by private database triggers/constraints.
+ // The public role intentionally has no SELECT access to customer bookings.
  const locationIds=[field(data,"pickup_location_id",80),field(data,"return_location_id",80)].filter(Boolean);
  if(locationIds.length){
   const {data:locations}=await ctx.supabase.from("rental_locations").select("id")
@@ -115,15 +111,8 @@ export async function submitPublicHealthcareAppointment(data:FormData){
   });
   if(!hasAvailableSlot)return;
  }
- let conflictQuery=ctx.supabase.from("healthcare_appointments").select("id")
-  .eq("organization_id",ctx.card.organization_id)
-  .in("status",["pending","confirmed"])
-  .lt("starts_at",endAt).gt("ends_at",startsAt);
- if(resolvedPractitionerId) conflictQuery=conflictQuery.eq("practitioner_id",resolvedPractitionerId);
- else if(serviceId) conflictQuery=conflictQuery.eq("service_id",serviceId);
- const {data:conflicts,error:conflictError}=await conflictQuery.limit(1);
- if(conflictError){console.error("Healthcare availability check failed",conflictError);return;}
- if(conflicts?.length) return;
+ // Practitioner/service/location overlaps are enforced by PostgreSQL exclusion constraints.
+ // The public role intentionally has no SELECT access to patient appointments.
  const {error}=await ctx.supabase.from("healthcare_appointments").insert({
   organization_id:ctx.card.organization_id,card_id:ctx.card.id,
   practitioner_id:resolvedPractitionerId,service_id:serviceId||null,location_id:locationId||null,
