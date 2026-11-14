@@ -1,0 +1,115 @@
+import { notFound, redirect } from "next/navigation";
+import { connection } from "next/server";
+import { createClient } from "@/lib/supabase/server";
+import { MediaImagePicker } from "@/components/dashboard/media-image-picker";
+import {
+  createHealthcarePractitioner, createHealthcareLocation, createHealthcareService,
+  createHealthcareAvailability, updateHealthcareAppointmentStatus,
+} from "@/app/actions/industry-modules";
+
+const money=(value:number|null,currency="MAD")=>value===null?"Sur devis":`${Number(value||0).toLocaleString("fr-MA")} ${currency}`;
+const dateTime=(value:string)=>new Date(value).toLocaleString("fr-FR",{dateStyle:"medium",timeStyle:"short"});
+const statusLabels:Record<string,string>={pending:"À confirmer",confirmed:"Confirmé",cancelled:"Annulé",completed:"Terminé",rejected:"Refusé"};
+const dayNames=["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
+
+export default async function HealthcarePage(){
+ await connection();
+ const supabase=await createClient();
+ const {data:{user}}=await supabase.auth.getUser();
+ if(!user) redirect("/login");
+ const {data:membership}=await supabase.from("organization_members").select("organization_id,role").eq("user_id",user.id).limit(1).maybeSingle();
+ if(!membership?.organization_id) notFound();
+ const organizationId=membership.organization_id;
+ const {data:organization}=await supabase.from("organizations").select("name,workspace_config").eq("id",organizationId).maybeSingle();
+ const config=(organization?.workspace_config??{}) as {version?:number;modules?:string[]};
+ if(config.version&&!config.modules?.includes("doctor_appointments")) notFound();
+ const canManage=["organization_admin","manager","super_admin"].includes(String(membership.role));
+ const [practitionerResult,serviceResult,locationResult,availabilityResult,appointmentResult]=await Promise.all([
+  supabase.from("healthcare_practitioners").select("*").eq("organization_id",organizationId).order("display_order").order("created_at"),
+  supabase.from("healthcare_services").select("*").eq("organization_id",organizationId).order("display_order").order("created_at"),
+  supabase.from("healthcare_locations").select("*").eq("organization_id",organizationId).order("is_primary",{ascending:false}),
+  supabase.from("healthcare_availability_rules").select("*").eq("organization_id",organizationId).order("day_of_week").order("starts_at"),
+  supabase.from("healthcare_appointments").select("*").eq("organization_id",organizationId).order("starts_at",{ascending:false}).limit(100),
+ ]);
+ const practitioners=practitionerResult.data??[];
+ const services=serviceResult.data??[];
+ const locations=locationResult.data??[];
+ const availability=availabilityResult.data??[];
+ const appointments=appointmentResult.data??[];
+ const pending=appointments.filter((a:any)=>a.status==="pending").length;
+ const practitionerName=(id:string|null)=>practitioners.find((p:any)=>p.id===id)?.full_name??"Praticien à attribuer";
+ const serviceName=(id:string|null)=>services.find((s:any)=>s.id===id)?.name??"Consultation générale";
+ const locationName=(id:string|null)=>locations.find((l:any)=>l.id===id)?.name??"Lieu à confirmer";
+ return <div className="mx-auto max-w-7xl space-y-7">
+  <header className="flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-black uppercase tracking-[.18em] text-indigo-600">Espace client · {organization?.name||"TouchCard"}</p><h1 className="mt-2 text-3xl font-black text-slate-950">Espace santé</h1><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">Gérez votre équipe médicale, les spécialités, les lieux de consultation, les horaires et les rendez-vous des patients.</p></div><a href="/dashboard" className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700">Retour au tableau de bord</a></header>
+  <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"><Metric label="Praticiens" value={practitioners.length} hint="Profils actifs"/><Metric label="Prestations" value={services.length} hint="Services de consultation"/><Metric label="Lieux de consultation" value={locations.length} hint="Cabinets et établissements"/><Metric label="Rendez-vous en attente" value={pending} hint="À confirmer par l’équipe"/></div>
+
+  {canManage&&<section className="grid gap-5 xl:grid-cols-2">
+   <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+    <Heading title="Équipe médicale" description="Créez les profils publics des praticiens. Les comptes d’accès restent séparés de ces profils."/>
+    <form action={createHealthcarePractitioner} className="mt-4 grid gap-3 sm:grid-cols-2">
+     <input name="full_name" required placeholder="Nom complet du praticien" className="field sm:col-span-2"/>
+     <input name="professional_title" placeholder="Titre (Dr, Professeur…)" className="field"/>
+     <input name="specialty" placeholder="Spécialité" className="field"/>
+     <input name="languages" placeholder="Langues (français, arabe…)" className="field sm:col-span-2"/>
+     <textarea name="biography" rows={2} placeholder="Présentation professionnelle" className="field sm:col-span-2"/>
+     <div className="sm:col-span-2"><MediaImagePicker organizationId={organizationId} name="avatar_url" label="Photo du praticien"/></div>
+     <button className="primary sm:col-span-2">Ajouter le praticien</button>
+    </form>
+    <div className="mt-5 space-y-2">{practitioners.map((p:any)=><div key={p.id} className="flex items-center gap-3 rounded-xl bg-slate-50 p-3">{p.avatar_url?<img src={p.avatar_url} alt="" className="h-11 w-11 rounded-full object-cover"/>:<div className="flex h-11 w-11 items-center justify-center rounded-full bg-indigo-100 text-sm font-black text-indigo-700">{p.full_name.slice(0,1)}</div>}<div><p className="text-sm font-bold text-slate-900">{p.professional_title? p.professional_title+" ":""}{p.full_name}</p><p className="text-xs text-slate-500">{p.specialty||"Spécialité à renseigner"}</p></div></div>)}{!practitioners.length&&<Empty text="Aucun praticien ajouté pour le moment."/>}</div>
+   </div>
+   <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+    <Heading title="Lieux de consultation" description="Ajoutez vos cabinets, cliniques, centres et lieux de visite."/>
+    <form action={createHealthcareLocation} className="mt-4 grid gap-3 sm:grid-cols-2">
+     <input name="name" required placeholder="Nom de l’établissement" className="field sm:col-span-2"/>
+     <input name="address" placeholder="Adresse" className="field sm:col-span-2"/>
+     <input name="city" placeholder="Ville" className="field"/><input name="phone" placeholder="Téléphone" className="field"/>
+     <label className="flex items-center gap-2 text-sm text-slate-600 sm:col-span-2"><input type="checkbox" name="is_primary"/> Lieu principal</label>
+     <button className="primary sm:col-span-2">Ajouter le lieu</button>
+    </form>
+    <div className="mt-5 space-y-2">{locations.map((l:any)=><div key={l.id} className="rounded-xl bg-slate-50 p-3"><p className="text-sm font-bold text-slate-900">{l.name} {l.is_primary&&<span className="ml-1 text-[10px] font-black uppercase text-indigo-600">Principal</span>}</p><p className="mt-1 text-xs text-slate-500">{[l.address,l.city].filter(Boolean).join(", ")||"Adresse à compléter"}</p></div>)}{!locations.length&&<Empty text="Aucun lieu enregistré."/>}</div>
+   </div>
+  </section>}
+
+  {canManage&&<section className="grid gap-5 xl:grid-cols-2">
+   <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+    <Heading title="Prestations & consultations" description="Définissez les services proposés, leur durée, leur tarif et le mode de consultation."/>
+    <form action={createHealthcareService} className="mt-4 grid gap-3 sm:grid-cols-2">
+     <input name="name" required placeholder="Nom de la prestation" className="field sm:col-span-2"/>
+     <input name="specialty" placeholder="Spécialité" className="field"/>
+     <select name="practitioner_id" className="field"><option value="">Tous les praticiens</option>{practitioners.map((p:any)=><option key={p.id} value={p.id}>{p.full_name}</option>)}</select>
+     <input name="duration_minutes" type="number" min="5" max="720" defaultValue="30" placeholder="Durée (minutes)" className="field"/>
+     <div className="grid grid-cols-[1fr_86px] gap-2"><input name="price" type="number" min="0" step="0.01" placeholder="Tarif" className="field"/><input name="currency" defaultValue="MAD" maxLength={3} className="field"/></div>
+     <select name="consultation_mode" className="field sm:col-span-2"><option value="in_person">Au cabinet</option><option value="teleconsultation">Téléconsultation</option><option value="home_visit">À domicile</option></select>
+     <textarea name="description" rows={2} placeholder="Description" className="field sm:col-span-2"/>
+     <div className="sm:col-span-2"><MediaImagePicker organizationId={organizationId} name="image_url" label="Image de la prestation"/></div>
+     <button className="primary sm:col-span-2">Ajouter la prestation</button>
+    </form>
+   </div>
+   <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+    <Heading title="Horaires & disponibilités" description="Définissez les créneaux hebdomadaires ou une disponibilité pour une date précise."/>
+    <form action={createHealthcareAvailability} className="mt-4 grid gap-3 sm:grid-cols-2">
+     <select name="practitioner_id" required className="field sm:col-span-2"><option value="">Choisir un praticien</option>{practitioners.map((p:any)=><option key={p.id} value={p.id}>{p.full_name}</option>)}</select>
+     <select name="location_id" className="field sm:col-span-2"><option value="">Lieu (facultatif)</option>{locations.map((l:any)=><option key={l.id} value={l.id}>{l.name}</option>)}</select>
+     <select name="day_of_week" className="field"><option value="1">Lundi</option><option value="2">Mardi</option><option value="3">Mercredi</option><option value="4">Jeudi</option><option value="5">Vendredi</option><option value="6">Samedi</option><option value="0">Dimanche</option></select>
+     <input name="specific_date" type="date" aria-label="Date spécifique (facultatif)" className="field"/>
+     <label className="text-xs text-slate-500">Début<input name="starts_at" type="time" required defaultValue="09:00" className="field mt-1"/></label>
+     <label className="text-xs text-slate-500">Fin<input name="ends_at" type="time" required defaultValue="17:00" className="field mt-1"/></label>
+     <input name="slot_minutes" type="number" min="5" max="720" defaultValue="30" placeholder="Durée du créneau (min)" className="field sm:col-span-2"/>
+     <button className="primary sm:col-span-2">Enregistrer les disponibilités</button>
+    </form>
+    <div className="mt-5 space-y-2">{availability.map((a:any)=><div key={a.id} className="rounded-xl bg-slate-50 p-3"><p className="text-sm font-bold text-slate-900">{practitionerName(a.practitioner_id)}</p><p className="mt-1 text-xs text-slate-500">{a.specific_date?new Date(a.specific_date+"T12:00:00").toLocaleDateString("fr-FR"):dayNames[a.day_of_week??0]} · {String(a.starts_at).slice(0,5)} – {String(a.ends_at).slice(0,5)} · {a.slot_minutes} min</p></div>)}{!availability.length&&<Empty text="Aucun créneau configuré."/>}</div>
+   </div>
+  </section>}
+
+  <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+   <Heading title="Rendez-vous patients" description="Les demandes contiennent uniquement les coordonnées nécessaires à la prise de rendez-vous. Aucun diagnostic ni dossier médical n’est stocké dans ce module."/>
+   <div className="mt-4 space-y-3">{appointments.map((a:any)=><article key={a.id} className="grid gap-3 rounded-2xl border border-slate-100 p-4 md:grid-cols-[1fr_auto] md:items-center"><div><div className="flex flex-wrap items-center gap-2"><h3 className="font-bold text-slate-950">{a.patient_name}</h3><span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600">{statusLabels[a.status]||a.status}</span></div><p className="mt-1 text-xs text-slate-500">{dateTime(a.starts_at)} – {new Date(a.ends_at).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"})}</p><p className="mt-1 text-xs text-slate-500">{serviceName(a.service_id)} · {practitionerName(a.practitioner_id)} · {locationName(a.location_id)}</p><p className="mt-1 text-xs text-slate-500">{a.patient_phone}{a.patient_email?" · "+a.patient_email:""}</p></div>
+    {canManage&&<form action={updateHealthcareAppointmentStatus} className="flex flex-wrap gap-2"><input type="hidden" name="id" value={a.id}/><select name="status" defaultValue={a.status} className="field min-w-36"><option value="pending">En attente</option><option value="confirmed">Confirmer</option><option value="completed">Terminé</option><option value="rejected">Refuser</option><option value="cancelled">Annuler</option></select><button className="primary">Mettre à jour</button></form>}</article>)}{!appointments.length&&<Empty text="Les rendez-vous demandés depuis votre carte NFC apparaîtront ici."/>}</div>
+  </section>
+  <section className="rounded-2xl border border-blue-100 bg-blue-50 p-4"><p className="text-sm font-bold text-blue-950">Confidentialité des patients</p><p className="mt-1 text-xs leading-5 text-blue-900">Ce module gère les rendez-vous et les coordonnées de contact uniquement. Il n’est pas un dossier médical électronique et ne doit pas être utilisé pour stocker des diagnostics, ordonnances, résultats d’examens ou notes cliniques.</p></section>
+ </div>;
+}
+function Metric({label,value,hint}:{label:string;value:number;hint:string}){return <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><p className="text-xs font-bold text-slate-500">{label}</p><p className="mt-2 text-3xl font-black text-slate-950">{value}</p><p className="mt-1 text-[11px] text-slate-400">{hint}</p></div>}
+function Heading({title,description}:{title:string;description:string}){return <div><h2 className="text-lg font-black text-slate-950">{title}</h2><p className="mt-1 text-sm leading-5 text-slate-500">{description}</p></div>}
+function Empty({text}:{text:string}){return <p className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">{text}</p>}
