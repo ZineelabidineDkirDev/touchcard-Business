@@ -86,7 +86,7 @@ function EventStatusForm({event}:{event:CalendarEvent}) {
 export default async function CalendarPage({searchParams}:{searchParams:Promise<{month?:string;status?:string;type?:string}>}) {
   await connection();
   const params=await searchParams;
-  const month=/^\\d{4}-(0[1-9]|1[0-2])$/.test(params.month||"")?params.month!:monthFromNow();
+  const month=/^\d{4}-(0[1-9]|1[0-2])$/.test(params.month||"")?params.month!:monthFromNow();
   const statusFilter=["all","pending","confirmed","active","in_progress","completed","cancelled","rejected"].includes(params.status||"")?params.status||"all":"all";
   const typeFilter=["all","business","healthcare","rental","maintenance"].includes(params.type||"")?params.type||"all":"all";
   const {first,next,count,mondayOffset,last}=monthDays(month);
@@ -102,7 +102,7 @@ export default async function CalendarPage({searchParams}:{searchParams:Promise<
   const config=(organization?.workspace_config??{}) as {version?:number;modules?:string[]};
   const modules=Array.isArray(config.modules)?config.modules:[];
   const enabled=(module:string)=>!config.version||modules.includes(module);
-  const canBusiness=enabled("bookings")||enabled("doctor_appointments");
+  const canBusiness=enabled("bookings");
   const canAvailability=enabled("availability_calendar");
   const canHealth=enabled("doctor_appointments");
   const canRental=enabled("car_rental");
