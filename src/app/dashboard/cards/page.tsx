@@ -24,7 +24,7 @@ type Card = {
 type CardLink = { id: string; card_id: string; label: string; url: string; kind: string };
 type CatalogItem = { id: string; name: string; description: string | null; price: number; currency: string; image_url: string | null; is_active: boolean };
 
-export default async function ClientCardsPage({ searchParams }: { searchParams: Promise<{ card?: string; card_saved?: string; card_created?: string; card_error?: string; catalog_import?: string; imported?: string; skipped?: string }> }) {
+export default async function ClientCardsPage({ searchParams }: { searchParams: Promise<{ card?: string; card_saved?: string; card_created?: string; card_error?: string; publish_error?: string; catalog_import?: string; imported?: string; skipped?: string }> }) {
   await connection();
   const status = await searchParams;
   const supabase = await createClient();
@@ -334,6 +334,7 @@ export default async function ClientCardsPage({ searchParams }: { searchParams: 
 
             {status.card_created === "1" && <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">Votre nouvelle carte NFC a été créée en brouillon. Vous pouvez maintenant la personnaliser.</div>}
       {status.card_saved === "1" && <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">Modifications enregistrées. Votre carte publique a été actualisée.</div>}
+      {status.publish_error === "contact" && <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">Avant de publier, ajoutez au moins un moyen de contact (téléphone ou e-mail) dans votre carte. Vos visiteurs doivent pouvoir vous joindre facilement.</div>}
       {status.card_error === "cv_format" && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">Le CV doit être un fichier PDF de 10 Mo maximum.</div>}
       {status.card_error === "cv_upload" && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">Le téléversement du CV a échoué. Vérifiez le stockage puis réessayez.</div>}
       {status.catalog_import === "success" && <div role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">Import réussi : {status.imported ?? "0"} élément(s) ajouté(s). {Number(status.skipped ?? 0) > 0 ? status.skipped + " ligne(s) ignorée(s) car les données étaient invalides." : ""}</div>}
