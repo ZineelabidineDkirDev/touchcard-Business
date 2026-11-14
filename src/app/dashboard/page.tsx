@@ -32,13 +32,12 @@ export default async function DashboardPage() {
   const organizationId = membership?.organization_id;
   const [{ data: organization }, { data: cards }] = await Promise.all([
     organizationId ? supabase.from("organizations").select("name,workspace_config").eq("id", organizationId).maybeSingle() : Promise.resolve({ data: null }),
-    organizationId ? supabase.from("cards").select("id,is_published,full_name,company_name,phone,email,avatar_url,bio").eq("organization_id", organizationId) : Promise.resolve({ data: [] as {id:string;is_published:boolean}[] }),
+    organizationId ? supabase.from("cards").select("id,is_published,full_name,company_name,phone,email,avatar_url,bio").eq("organization_id", organizationId) : Promise.resolve({ data: [] as {id:string;is_published:boolean;full_name:string;company_name:string|null;phone:string|null;email:string|null;avatar_url:string|null;bio:string|null}[] }),
   ]);
   const config = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[]; template?: string; original_client_choices?: { activity_sector?: string } };
   const hasWorkspaceConfig = Boolean(config.version);
   const enabledModules = Array.isArray(config.modules) ? config.modules : [];
   const canUseCards = !hasWorkspaceConfig || enabledModules.includes("digital_card");
-  const canManageCompany = !hasWorkspaceConfig || enabledModules.includes("company_profile") || enabledModules.includes("contact_profile");
   const cardIds = (cards ?? []).map((card) => card.id);
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const [{ data: events }, { count: contactCount }, { count: pendingRequests }, { count: catalogCount }] = await Promise.all([
@@ -48,7 +47,6 @@ export default async function DashboardPage() {
     organizationId && enabledModules.some((id) => ["product_catalog", "service_catalog", "room_catalog"].includes(id)) ? supabase.from("business_catalog_items").select("id", { count: "exact", head: true }).eq("organization_id", organizationId).eq("is_active", true) : Promise.resolve({ count: 0 }),
   ]);
   const views = (events ?? []).filter((event) => ["view", "qr_scan", "nfc_scan"].includes(event.event_type)).length;
-  const interactions = (events ?? []).filter((event) => ["click", "contact_save"].includes(event.event_type)).length;
   const stats = [
     { label: "Cartes NFC", value: String(cards?.length ?? 0), note: (cards ?? []).filter((card) => card.is_published).length + " publiée(s)" },
     { label: "Visites & scans", value: String(views), note: "30 derniers jours" },
