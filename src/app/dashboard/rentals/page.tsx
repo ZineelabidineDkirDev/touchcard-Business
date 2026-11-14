@@ -118,7 +118,7 @@ export default async function RentalsPage() {
         </form>
       </div>
       <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-        <SectionHeading title="Calendrier d’entretien" description="Les périodes planifiées ou en cours bloquent la confirmation d’une location sur ces dates."/>
+        <SectionHeading title="Calendrier d’entretien" description="Visualisez les périodes planifiées ou en cours pour éviter les chevauchements lors du traitement des demandes."/>
         <div className="mt-4 space-y-3">{maintenance.map((item:any)=><div key={item.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-100 p-4"><div><p className="font-bold text-slate-900">{item.title}</p><p className="mt-1 text-xs text-slate-500">{vehicles.find((v:any)=>v.id===item.vehicle_id)?.brand} {vehicles.find((v:any)=>v.id===item.vehicle_id)?.model} · {dateLabel(item.scheduled_start)} – {dateLabel(item.scheduled_end)}</p>{item.next_due_mileage&&<p className="mt-1 text-xs text-slate-500">Prochaine échéance : {item.next_due_mileage.toLocaleString("fr-MA")} km</p>}</div><span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800">{statusLabel[item.status]||item.status}</span></div>)}{!maintenance.length&&<Empty text="Aucun entretien planifié pour le moment."/>}</div>
       </div>
     </section>}
