@@ -7,8 +7,10 @@ import { useI18n } from "@/i18n/provider";
 const clientItems: { label: string; href: string; modules: string[]; key?: string }[] = [
   { label: "Vue d’ensemble", href: "/dashboard", modules: [] },
   { label: "Ma carte NFC", href: "/dashboard/cards", modules: ["digital_card"], key: "digital_card" },
-  { label: "Demandes reçues", href: "/dashboard/requests", modules: ["orders", "bookings", "quote_requests"], key: "requests" },
-  { label: "Mes modules métier", href: "/dashboard/modules", modules: ["service_catalog", "room_catalog", "bookings", "availability_calendar", "doctor_appointments", "gym_registration", "school_registration"] },
+  { label: "Demandes reçues", href: "/dashboard/requests", modules: ["orders", "bookings", "quote_requests", "car_rental", "doctor_appointments"], key: "requests" },
+  { label: "Gestion de flotte", href: "/dashboard/rentals", modules: ["car_rental"], key: "car_rental" },
+  { label: "Espace santé", href: "/dashboard/healthcare", modules: ["doctor_appointments"], key: "doctor_appointments" },
+  { label: "Mes modules métier", href: "/dashboard/modules", modules: ["service_catalog", "room_catalog", "bookings", "availability_calendar", "gym_registration", "school_registration"] },
   { label: "Mes contacts", href: "/dashboard/contacts", modules: ["crm_contacts"], key: "crm_contacts" },
   { label: "Statistiques", href: "/dashboard/analytics", modules: ["analytics"], key: "analytics" },
   { label: "Mon profil", href: "/dashboard/profile", modules: ["company_profile", "contact_profile"] },
