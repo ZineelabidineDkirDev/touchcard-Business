@@ -30,7 +30,7 @@ export function PublicBusinessModules({ slug, modules, catalog, plans, programs,
           <div className="flex items-start gap-3 p-3">{item.image_url ? <img src={item.image_url} alt={item.name} loading="lazy" className="h-20 w-20 shrink-0 rounded-xl object-cover"/> : <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-2xl text-slate-300">✦</div>}
             <div className="min-w-0 flex-1"><h3 className="text-sm font-bold text-slate-900">{item.name}</h3>{item.description && <p className="mt-1 text-xs leading-5 text-slate-500">{item.description}</p>}{item.duration_minutes && <p className="mt-1 text-[11px] text-slate-400">{item.duration_minutes} min</p>}<strong className="mt-2 block text-sm" style={{ color: accent }}>{Number(item.price).toLocaleString("fr-MA")} {item.currency}</strong></div>
           </div>
-          {whatsapp && <a href={`https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer" className="mx-3 mb-3 flex items-center justify-center rounded-xl px-3 py-2.5 text-xs font-bold text-white" style={buttonStyle}>{hasMenu ? "Commander sur WhatsApp" : "Demander ce service"}</a>}
+          {showRequests && whatsapp && <a href={`https://wa.me/${whatsapp}?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener noreferrer" className="mx-3 mb-3 flex items-center justify-center rounded-xl px-3 py-2.5 text-xs font-bold text-white" style={buttonStyle}>{hasMenu ? "Commander sur WhatsApp" : "Demander ce service"}</a>}
         </article>;
       })}</div>
     </section>}
