@@ -10,8 +10,8 @@ async function getModuleContext(required: string[], match: "all" | "any" = "all"
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
   const { data: membership } = await supabase.from("organization_members")
-    .select("organization_id").eq("user_id", user.id).limit(1).maybeSingle();
-  if (!membership?.organization_id) return null;
+    .select("organization_id,role").eq("user_id", user.id).limit(1).maybeSingle();
+  if (!membership?.organization_id || !["organization_admin", "manager", "super_admin"].includes(String(membership.role))) return null;
   const { data: organization } = await supabase.from("organizations")
     .select("workspace_config").eq("id", membership.organization_id).maybeSingle();
   const config = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[] };
@@ -88,6 +88,19 @@ export async function deleteBusinessCatalogItem(data: FormData) {
   revalidatePath("/dashboard/cards");
 }
 
+export async function setBusinessCatalogItemVisibility(data: FormData) {
+  const id = value(data, "id", 80);
+  const itemType = value(data, "item_type");
+  if (!id || !["service", "menu", "room"].includes(itemType)) return;
+  const ctx = await getModuleContext([itemType === "room" ? "room_catalog" : "service_catalog"]);
+  if (!ctx) return;
+  const { error } = await ctx.supabase.from("business_catalog_items").update({
+    is_active: value(data, "is_active") === "true", updated_at: new Date().toISOString(),
+  }).eq("id", id).eq("organization_id", ctx.organizationId);
+  if (error) console.error("Catalog publication update failed", error);
+  revalidatePath("/dashboard/modules"); revalidatePath("/dashboard/cards");
+}
+
 export async function createAvailabilityRule(data: FormData) {
   const ctx = await getModuleContext(["availability_calendar"]);
   if (!ctx) return;
@@ -124,6 +137,30 @@ export async function createGymPlan(data: FormData) {
   revalidatePath("/dashboard/modules");
 }
 
+export async function updateGymPlan(data: FormData) {
+  const id = value(data, "id", 80), name = value(data, "name", 140);
+  const ctx = await getModuleContext(["gym_registration"]);
+  if (!ctx || !id || !name) return;
+  const benefits = value(data, "benefits").split("\n").map((x) => x.trim()).filter(Boolean).slice(0, 12);
+  const { error } = await ctx.supabase.from("gym_membership_plans").update({
+    name, description: value(data, "description"), price: Math.max(0, numeric(data, "price")),
+    currency: value(data, "currency", 3) || "MAD", duration_days: Math.max(1, Math.min(3650, numeric(data, "duration_days", 30))),
+    benefits, updated_at: new Date().toISOString(),
+  }).eq("id", id).eq("organization_id", ctx.organizationId);
+  if (error) console.error("Gym plan update failed", error);
+  revalidatePath("/dashboard/modules"); revalidatePath("/dashboard/cards");
+}
+
+export async function setGymPlanVisibility(data: FormData) {
+  const id = value(data, "id", 80), ctx = await getModuleContext(["gym_registration"]);
+  if (!ctx || !id) return;
+  const { error } = await ctx.supabase.from("gym_membership_plans").update({
+    is_active: value(data, "is_active") === "true", updated_at: new Date().toISOString(),
+  }).eq("id", id).eq("organization_id", ctx.organizationId);
+  if (error) console.error("Gym plan visibility update failed", error);
+  revalidatePath("/dashboard/modules"); revalidatePath("/dashboard/cards");
+}
+
 export async function createSchoolProgram(data: FormData) {
   const ctx = await getModuleContext(["school_registration"]);
   if (!ctx) return;
@@ -139,6 +176,31 @@ export async function createSchoolProgram(data: FormData) {
   });
   if (error) console.error("School program creation failed", error);
   revalidatePath("/dashboard/modules");
+}
+
+export async function updateSchoolProgram(data: FormData) {
+  const id = value(data, "id", 80), title = value(data, "title", 160);
+  const ctx = await getModuleContext(["school_registration"]);
+  if (!ctx || !id || !title) return;
+  const { error } = await ctx.supabase.from("school_programs").update({
+    title, description: value(data, "description"), duration_label: value(data, "duration_label", 100),
+    price: value(data, "price") === "" ? null : Math.max(0, numeric(data, "price")),
+    currency: value(data, "currency", 3) || "MAD", capacity: numeric(data, "capacity") || null,
+    start_date: value(data, "start_date") || null, end_date: value(data, "end_date") || null,
+    updated_at: new Date().toISOString(),
+  }).eq("id", id).eq("organization_id", ctx.organizationId);
+  if (error) console.error("School program update failed", error);
+  revalidatePath("/dashboard/modules"); revalidatePath("/dashboard/cards");
+}
+
+export async function setSchoolProgramVisibility(data: FormData) {
+  const id = value(data, "id", 80), ctx = await getModuleContext(["school_registration"]);
+  if (!ctx || !id) return;
+  const { error } = await ctx.supabase.from("school_programs").update({
+    is_active: value(data, "is_active") === "true", updated_at: new Date().toISOString(),
+  }).eq("id", id).eq("organization_id", ctx.organizationId);
+  if (error) console.error("School program visibility update failed", error);
+  revalidatePath("/dashboard/modules"); revalidatePath("/dashboard/cards");
 }
 
 async function updateStatus(table: string, id: string, status: string, modules: string[]) {
