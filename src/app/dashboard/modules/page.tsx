@@ -3,7 +3,7 @@ import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { MediaImagePicker } from "@/components/dashboard/media-image-picker";
 import {
-  createAvailabilityRule, createBusinessCatalogItem, createGymPlan, createSchoolProgram,
+  createAvailabilityRule, createBusinessCatalogItem, updateBusinessCatalogItem, deleteBusinessCatalogItem, createGymPlan, createSchoolProgram,
   updateAppointmentStatus, updateGymRegistrationStatus, updateSchoolEnrollmentStatus,
 } from "@/app/actions/business-modules";
 
@@ -18,9 +18,10 @@ export default async function BusinessModulesPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
   const { data: membership } = await supabase.from("organization_members")
-    .select("organization_id").eq("user_id", user.id).limit(1).maybeSingle();
+    .select("organization_id,role").eq("user_id", user.id).limit(1).maybeSingle();
   if (!membership?.organization_id) notFound();
   const organizationId = membership.organization_id;
+  const canManage = ["organization_admin", "manager", "super_admin"].includes(String(membership.role));
   const { data: organization } = await supabase.from("organizations")
     .select("name,workspace_config").eq("id", organizationId).maybeSingle();
   const config = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[]; original_client_choices?: { activity_sector?: string } };
@@ -52,7 +53,7 @@ export default async function BusinessModulesPage() {
 
     {canCatalog && <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
       <SectionTitle title={isRestaurant ? "Menu du restaurant" : isSpa ? "Prestations du spa" : "Catalogue métier"} description={isRestaurant ? "Ajoutez vos plats, leurs descriptions, photos et prix. Ils seront visibles sur votre carte publique." : isSpa ? "Présentez vos soins et prestations avec photos, durées et tarifs." : "Ajoutez les éléments qui seront présentés sur votre carte publique."}/>
-      <form action={createBusinessCatalogItem} className="grid gap-3 rounded-2xl bg-slate-50 p-4 sm:grid-cols-2 lg:grid-cols-6">
+      {canManage && <form action={createBusinessCatalogItem} className="grid gap-3 rounded-2xl bg-slate-50 p-4 sm:grid-cols-2 lg:grid-cols-6">
         <select name="item_type" defaultValue={isRestaurant ? "menu" : isSpa ? "service" : "service"} className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm">{isRestaurant ? <option value="menu">Plat du menu</option> : isSpa ? <option value="service">Soin / prestation</option> : <><option value="service">Prestation</option><option value="menu">Plat / élément du menu</option><option value="room">Chambre</option></>}</select>
         <input name="name" required maxLength={140} placeholder="Nom" className="rounded-xl border border-slate-200 px-3 py-3 text-sm"/>
         <input name="price" type="number" min="0" step="0.01" placeholder="Prix (MAD)" className="rounded-xl border border-slate-200 px-3 py-3 text-sm"/>
@@ -61,8 +62,9 @@ export default async function BusinessModulesPage() {
         <button className="rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white">Ajouter</button>
         <textarea name="description" placeholder={isRestaurant ? "Description du plat, ingrédients ou accompagnement" : isSpa ? "Description du soin, bénéfices et détails" : "Description"} rows={2} className="rounded-xl border border-slate-200 px-3 py-3 text-sm sm:col-span-2 lg:col-span-6"/>
         <div className="sm:col-span-2 lg:col-span-6"><MediaImagePicker organizationId={organizationId} name="image_url" label={isRestaurant ? "Photo du plat" : isSpa ? "Photo du soin / de la prestation" : "Photo de l’élément"} /></div>
-      </form>
-      <div className="grid gap-3 md:grid-cols-2">{(catalog.data ?? []).map((item: any) => <article key={item.id} className="flex gap-3 rounded-2xl border border-slate-200 p-4">{item.image_url ? <img src={item.image_url} alt={item.name} className="h-20 w-20 shrink-0 rounded-xl object-cover"/> : <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-xl text-slate-300">✦</div>}<div className="min-w-0 flex-1"><div className="flex justify-between gap-3"><div><h3 className="font-bold text-slate-900">{item.name}</h3><p className="mt-1 text-xs text-slate-500">{item.item_type === "room" ? "Chambre" : item.item_type === "menu" ? "Plat" : "Prestation"}</p></div><strong className="shrink-0 text-indigo-700">{Number(item.price).toLocaleString("fr-MA")} {item.currency}</strong></div>{item.description && <p className="mt-2 text-sm text-slate-600">{item.description}</p>}</div></article>)}{!(catalog.data?.length) && <Empty text="Aucun élément ajouté pour le moment."/>}</div>
+      </form>}
+      {!canManage && <p className="rounded-xl bg-amber-50 px-4 py-3 text-xs font-medium text-amber-800">Votre rôle permet de consulter le catalogue. Un administrateur ou gestionnaire peut le modifier.</p>}
+      <div className="grid gap-3 md:grid-cols-2">{(catalog.data ?? []).map((item: any) => <article key={item.id} className="flex gap-3 rounded-2xl border border-slate-200 p-4">{item.image_url ? <img src={item.image_url} alt={item.name} className="h-20 w-20 shrink-0 rounded-xl object-cover"/> : <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-xl text-slate-300">✦</div>}<div className="min-w-0 flex-1"><div className="flex justify-between gap-3"><div><h3 className="font-bold text-slate-900">{item.name}</h3><p className="mt-1 text-xs text-slate-500">{item.item_type === "room" ? "Chambre" : item.item_type === "menu" ? "Plat" : "Prestation"}</p></div><strong className="shrink-0 text-indigo-700">{Number(item.price).toLocaleString("fr-MA")} {item.currency}</strong></div>{item.description && <p className="mt-2 text-sm text-slate-600">{item.description}</p>}{canManage && <details className="mt-3 border-t border-slate-100 pt-3"><summary className="cursor-pointer text-xs font-bold text-indigo-700">Modifier cet élément</summary><form action={updateBusinessCatalogItem} className="mt-3 space-y-2"><input type="hidden" name="id" value={item.id}/><input type="hidden" name="item_type" value={item.item_type}/><input name="name" required defaultValue={item.name} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" aria-label="Nom"/><textarea name="description" defaultValue={item.description || ""} rows={2} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" aria-label="Description"/><div className="grid grid-cols-2 gap-2"><input name="price" type="number" min="0" step="0.01" defaultValue={item.price} className="rounded-lg border border-slate-200 px-3 py-2 text-sm" aria-label="Prix"/><input name="currency" maxLength={3} defaultValue={item.currency || "MAD"} className="rounded-lg border border-slate-200 px-3 py-2 text-sm" aria-label="Devise"/></div><MediaImagePicker organizationId={organizationId} name="image_url" initialUrl={item.image_url} label="Photo de l’élément"/><button className="rounded-lg bg-indigo-600 px-4 py-2 text-xs font-bold text-white">Enregistrer</button></form><form action={deleteBusinessCatalogItem} className="mt-2"><input type="hidden" name="id" value={item.id}/><button className="text-xs font-bold text-rose-600">Supprimer cet élément</button></form></details>}</div></article>)}{!(catalog.data?.length) && <Empty text="Aucun élément ajouté pour le moment."/>}</div>
     </section>}
 
     {canAvailability && <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
