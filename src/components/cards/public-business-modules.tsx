@@ -2,7 +2,7 @@ import {
   submitPublicAppointment, submitPublicGymRegistration, submitPublicSchoolEnrollment,
 } from "@/app/actions/public-business-modules";
 
-type CatalogItem = { id: string; item_type: string; name: string; description: string | null; price: number; currency: string; duration_minutes: number | null; capacity: number | null };
+type CatalogItem = { id: string; item_type: string; name: string; description: string | null; price: number; currency: string; duration_minutes: number | null; capacity: number | null; image_url?: string | null };
 type GymPlan = { id: string; name: string; description: string | null; price: number; currency: string; duration_days: number; benefits: string[] };
 type SchoolProgram = { id: string; title: string; description: string | null; duration_label: string | null; price: number | null; currency: string; start_date: string | null; end_date: string | null };
 
@@ -13,7 +13,7 @@ export function PublicBusinessModules({ slug, modules, catalog, plans, programs,
   const services = catalog.filter((item) => item.item_type !== "room");
   const rooms = catalog.filter((item) => item.item_type === "room");
   if (!services.length && !rooms.length && !enabled("doctor_appointments") && !enabled("gym_registration") && !enabled("school_registration")) return null;
-  const buttonStyle = { backgroundColor: accent };
+  const buttonStyle = { backgroundColor: accent };\n  const whatsapp = (whatsappPhone || "").replace(/\\D/g, "");\n  const hasMenu = services.some((item) => item.item_type === "menu");
 
   return <div className="space-y-3">
     {(enabled("service_catalog") && services.length > 0) && <section className="rounded-2xl bg-white p-4">
@@ -22,7 +22,7 @@ export function PublicBusinessModules({ slug, modules, catalog, plans, programs,
     </section>}
     {(enabled("room_catalog") && rooms.length > 0) && <section className="rounded-2xl bg-white p-4">
       <h2 className="text-base font-black text-slate-950">Nos chambres</h2>
-      <div className="mt-3 space-y-3">{rooms.map((item) => <article key={item.id} className="border-b border-slate-100 pb-3 last:border-0"><div className="flex justify-between gap-3"><h3 className="text-sm font-bold text-slate-900">{item.name}</h3><strong className="text-sm" style={{ color: accent }}>{Number(item.price).toLocaleString("fr-MA")} {item.currency}</strong></div>{item.description && <p className="mt-1 text-xs text-slate-500">{item.description}</p>}{item.capacity && <p className="mt-1 text-[11px] text-slate-400">Capacité : {item.capacity} personnes</p>}</article>)}</div>
+      <div className="mt-3 space-y-3">{rooms.map((item) => <article key={item.id} className="flex gap-3 border-b border-slate-100 pb-3 last:border-0">{item.image_url && <img src={item.image_url} alt={item.name} loading="lazy" className="h-20 w-24 rounded-xl object-cover"/>}<div className="min-w-0 flex-1"><div className="flex justify-between gap-3"><h3 className="text-sm font-bold text-slate-900">{item.name}</h3><strong className="text-sm" style={{ color: accent }}>{Number(item.price).toLocaleString("fr-MA")} {item.currency}</strong></div>{item.description && <p className="mt-1 text-xs text-slate-500">{item.description}</p>}{item.capacity && <p className="mt-1 text-[11px] text-slate-400">Capacité : {item.capacity} personnes</p>}</div></article>)}</div>
     </section>}
     {enabled("doctor_appointments") && <section className="rounded-2xl bg-white p-4">
       <h2 className="text-base font-black text-slate-950">Prendre rendez-vous médical</h2><p className="mt-1 text-xs leading-5 text-slate-500">Envoyez une demande de consultation. Le cabinet vous contactera pour confirmer le créneau.</p>
