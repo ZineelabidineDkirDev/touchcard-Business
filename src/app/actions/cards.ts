@@ -136,7 +136,7 @@ export async function saveClientCardVisibility(formData: FormData) {
   ]);
   if (readError || !card) redirect("/dashboard/cards?card_error=not_found");
 
-  const keys = ["show_phone", "show_email", "show_website", "show_about", "show_contact", "show_company_info", "show_categories", "show_info_fields", "show_google_reviews", "show_catalog_pdf", "show_catalog", "show_request_forms", "show_orders", "show_bookings", "show_quotes", "show_social_links", "show_featured_links", "show_faq", "show_videos", "show_location", "show_gallery", "show_cv"];
+  const keys = ["show_phone", "show_email", "show_website", "show_about", "show_contact", "show_company_info", "show_categories", "show_info_fields", "show_google_reviews", "show_catalog_pdf", "show_catalog", "show_request_forms", "show_orders", "show_bookings", "show_quotes", "show_car_rental", "show_healthcare", "show_social_links", "show_featured_links", "show_faq", "show_videos", "show_location", "show_gallery", "show_cv"];
   const current = (card.public_settings ?? {}) as Record<string, boolean>;
   const workspaceConfig = (organization?.workspace_config ?? {}) as { template?: string; original_client_choices?: { activity_sector?: string } };
   const sector = String(workspaceConfig.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
