@@ -69,12 +69,13 @@ export async function submitPublicHealthcareAppointment(data:FormData){
    .eq("id",serviceId).eq("organization_id",ctx.card.organization_id).eq("is_active",true).eq("is_public",true).maybeSingle();
   if(!service) return;
   duration=Number(service.duration_minutes)||30;
+  servicePractitionerId=service.practitioner_id;
   if(service.practitioner_id&&practitionerId&&service.practitioner_id!==practitionerId) return;
  }
  const endAt=new Date(new Date(startsAt).getTime()+duration*60000).toISOString();
  const {error}=await ctx.supabase.from("healthcare_appointments").insert({
   organization_id:ctx.card.organization_id,card_id:ctx.card.id,
-  practitioner_id:practitionerId||null,service_id:serviceId||null,location_id:locationId||null,
+  practitioner_id:practitionerId||servicePractitionerId||null,service_id:serviceId||null,location_id:locationId||null,
   patient_name:patientName,patient_phone:patientPhone,
   patient_email:field(data,"patient_email",180)||null,
   starts_at:startsAt,ends_at:endAt,
