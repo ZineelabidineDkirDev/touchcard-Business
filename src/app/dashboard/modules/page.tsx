@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { connection } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { MediaImagePicker } from "@/components/dashboard/media-image-picker";
 import {
   createAvailabilityRule, createBusinessCatalogItem, createGymPlan, createSchoolProgram,
   updateAppointmentStatus, updateGymRegistrationStatus, updateSchoolEnrollmentStatus,
@@ -22,7 +23,7 @@ export default async function BusinessModulesPage() {
   const organizationId = membership.organization_id;
   const { data: organization } = await supabase.from("organizations")
     .select("name,workspace_config").eq("id", organizationId).maybeSingle();
-  const config = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[] };
+  const config = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[]; original_client_choices?: { activity_sector?: string } };
   const modules = Array.isArray(config.modules) ? config.modules : [];
   const enabled = (id: string) => !config.version || modules.includes(id);
   const canCatalog = enabled("service_catalog") || enabled("room_catalog");
@@ -30,6 +31,9 @@ export default async function BusinessModulesPage() {
   const canGym = enabled("gym_registration");
   const canSchool = enabled("school_registration");
   const canAvailability = enabled("availability_calendar");
+  const sector = String(config.original_client_choices?.activity_sector ?? "").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase();
+  const isRestaurant = /restaurant|restauration|cafe|coffee shop|snack|traiteur|pizzeria|boulangerie|patisserie/.test(sector);
+  const isSpa = /spa|hammam|beaute|esthetique|massage|coiffure|barber/.test(sector);
   if (!canCatalog && !canAppointments && !canGym && !canSchool && !canAvailability) notFound();
 
   const [catalog, rules, appointments, plans, gymRegistrations, programs, enrollments] = await Promise.all([
@@ -47,17 +51,18 @@ export default async function BusinessModulesPage() {
     <header><p className="text-xs font-black uppercase tracking-[.18em] text-indigo-600">Espace client · {organization?.name || "TouchCard"}</p><h1 className="mt-2 text-3xl font-black text-slate-950">Mes modules métier</h1><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">Gérez vos prestations, disponibilités, rendez-vous, abonnements et inscriptions depuis un espace unique. Seuls les modules activés par TouchCard apparaissent ici.</p></header>
 
     {canCatalog && <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <SectionTitle title="Prestations, menus & chambres" description="Ajoutez les éléments qui seront présentés sur votre carte publique."/>
+      <SectionTitle title={isRestaurant ? "Menu du restaurant" : isSpa ? "Prestations du spa" : "Catalogue métier"} description={isRestaurant ? "Ajoutez vos plats, leurs descriptions, photos et prix. Ils seront visibles sur votre carte publique." : isSpa ? "Présentez vos soins et prestations avec photos, durées et tarifs." : "Ajoutez les éléments qui seront présentés sur votre carte publique."}/>
       <form action={createBusinessCatalogItem} className="grid gap-3 rounded-2xl bg-slate-50 p-4 sm:grid-cols-2 lg:grid-cols-6">
-        <select name="item_type" className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm"><option value="service">Prestation</option><option value="menu">Plat / élément du menu</option><option value="room">Chambre</option></select>
+        <select name="item_type" defaultValue={isRestaurant ? "menu" : isSpa ? "service" : "service"} className="rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm">{isRestaurant ? <option value="menu">Plat du menu</option> : isSpa ? <option value="service">Soin / prestation</option> : <><option value="service">Prestation</option><option value="menu">Plat / élément du menu</option><option value="room">Chambre</option></>}</select>
         <input name="name" required maxLength={140} placeholder="Nom" className="rounded-xl border border-slate-200 px-3 py-3 text-sm"/>
         <input name="price" type="number" min="0" step="0.01" placeholder="Prix (MAD)" className="rounded-xl border border-slate-200 px-3 py-3 text-sm"/>
         <input name="duration_minutes" type="number" min="0" placeholder="Durée (min)" className="rounded-xl border border-slate-200 px-3 py-3 text-sm"/>
         <input name="capacity" type="number" min="0" placeholder="Capacité" className="rounded-xl border border-slate-200 px-3 py-3 text-sm"/>
         <button className="rounded-xl bg-indigo-600 px-4 py-3 text-sm font-bold text-white">Ajouter</button>
-        <textarea name="description" placeholder="Description" rows={2} className="rounded-xl border border-slate-200 px-3 py-3 text-sm sm:col-span-2 lg:col-span-6"/>
+        <textarea name="description" placeholder={isRestaurant ? "Description du plat, ingrédients ou accompagnement" : isSpa ? "Description du soin, bénéfices et détails" : "Description"} rows={2} className="rounded-xl border border-slate-200 px-3 py-3 text-sm sm:col-span-2 lg:col-span-6"/>
+        <div className="sm:col-span-2 lg:col-span-6"><MediaImagePicker organizationId={organizationId} name="image_url" label={isRestaurant ? "Photo du plat" : isSpa ? "Photo du soin / de la prestation" : "Photo de l’élément"} /></div>
       </form>
-      <div className="grid gap-3 md:grid-cols-2">{(catalog.data ?? []).map((item: any) => <article key={item.id} className="rounded-2xl border border-slate-200 p-4"><div className="flex justify-between gap-3"><div><h3 className="font-bold text-slate-900">{item.name}</h3><p className="mt-1 text-xs text-slate-500">{item.item_type === "room" ? "Chambre" : "Prestation / menu"}</p></div><strong className="text-indigo-700">{Number(item.price).toLocaleString("fr-MA")} {item.currency}</strong></div>{item.description && <p className="mt-2 text-sm text-slate-600">{item.description}</p>}</article>)}{!(catalog.data?.length) && <Empty text="Aucun élément ajouté pour le moment."/>}</div>
+      <div className="grid gap-3 md:grid-cols-2">{(catalog.data ?? []).map((item: any) => <article key={item.id} className="flex gap-3 rounded-2xl border border-slate-200 p-4">{item.image_url ? <img src={item.image_url} alt={item.name} className="h-20 w-20 shrink-0 rounded-xl object-cover"/> : <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-xl text-slate-300">✦</div>}<div className="min-w-0 flex-1"><div className="flex justify-between gap-3"><div><h3 className="font-bold text-slate-900">{item.name}</h3><p className="mt-1 text-xs text-slate-500">{item.item_type === "room" ? "Chambre" : item.item_type === "menu" ? "Plat" : "Prestation"}</p></div><strong className="shrink-0 text-indigo-700">{Number(item.price).toLocaleString("fr-MA")} {item.currency}</strong></div>{item.description && <p className="mt-2 text-sm text-slate-600">{item.description}</p>}</div></article>)}{!(catalog.data?.length) && <Empty text="Aucun élément ajouté pour le moment."/>}</div>
     </section>}
 
     {canAvailability && <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
