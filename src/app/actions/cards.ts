@@ -342,9 +342,13 @@ export async function toggleClientCardPublication(formData: FormData) {
   if (!user || !organizationId || !(await hasWorkspaceModule(supabase, organizationId, "digital_card"))) return;
   const cardId = String(formData.get("card_id") ?? "");
   const publish = String(formData.get("publish") ?? "") === "true";
-  const { data: card } = await supabase.from("cards").select("id,slug")
+  const { data: card } = await supabase.from("cards").select("id,slug,full_name,phone,email")
     .eq("id", cardId).eq("organization_id", organizationId).maybeSingle();
   if (!card) return;
+
+  if (publish && (!card.full_name?.trim() || (!card.phone?.trim() && !card.email?.trim()))) {
+    redirect("/dashboard/cards?publish_error=contact");
+  }
 
   const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://touchcard-three.vercel.app";
   const siteUrl = rawSiteUrl.endsWith("/") ? rawSiteUrl.slice(0, -1) : rawSiteUrl;
