@@ -90,7 +90,8 @@ export default async function CalendarPage({searchParams}:{searchParams:Promise<
   const statusFilter=["all","pending","confirmed","active","in_progress","completed","cancelled","rejected"].includes(params.status||"")?params.status||"all":"all";
   const typeFilter=["all","business","healthcare","rental","maintenance"].includes(params.type||"")?params.type||"all":"all";
   const {first,next,count,mondayOffset,last}=monthDays(month);
-  const monthEndExclusive=new Date(new Date(last+"T12:00:00Z").getTime()+86400000).toISOString().slice(0,10);
+  const rangeStart=casablancaLocalToIso(month+"-01T00:00");
+  const rangeEnd=casablancaLocalToIso(shiftMonth(month,1)+"-01T00:00");
   const supabase=await createClient();
   const {data:{user}}=await supabase.auth.getUser();
   if(!user)redirect("/login");
@@ -110,7 +111,7 @@ export default async function CalendarPage({searchParams}:{searchParams:Promise<
 
   const [businessResult,healthResult,rentalResult,maintenanceResult,businessRulesResult,healthRulesResult,vehiclesResult,practitionersResult,servicesResult,locationsResult]=await Promise.all([
     canBusiness?supabase.from("business_appointments").select("id,customer_name,customer_phone,appointment_type,starts_at,ends_at,status,party_size,message").eq("organization_id",organizationId).gte("starts_at",rangeStart).lt("starts_at",rangeEnd).order("starts_at"):Promise.resolve({data:[] as any[]}),
-    canHealth?supabase.from("healthcare_appointments").select("id,patient_name,patient_phone,practitioner_id,service_id,starts_at,ends_at,status").eq("organization_id",organizationId).gte("starts_at",first).lt("starts_at",next).order("starts_at"):Promise.resolve({data:[] as any[]}),
+    canHealth?supabase.from("healthcare_appointments").select("id,patient_name,patient_phone,practitioner_id,service_id,starts_at,ends_at,status").eq("organization_id",organizationId).gte("starts_at",rangeStart).lt("starts_at",rangeEnd).order("starts_at"):Promise.resolve({data:[] as any[]}),
     canRental?supabase.from("rental_bookings").select("id,vehicle_id,customer_name,customer_phone,pickup_date,return_date,status,total_amount,currency").eq("organization_id",organizationId).lte("pickup_date",last).gt("return_date",month.slice(0,7)+"-01").order("pickup_date"):Promise.resolve({data:[] as any[]}),
     canRental?supabase.from("rental_maintenance").select("id,vehicle_id,title,scheduled_start,scheduled_end,status").eq("organization_id",organizationId).lte("scheduled_start",last).gte("scheduled_end",month.slice(0,7)+"-01").order("scheduled_start"):Promise.resolve({data:[] as any[]}),
     canAvailability?supabase.from("business_availability_rules").select("*").eq("organization_id",organizationId).order("day_of_week").order("starts_at"):Promise.resolve({data:[] as any[]}),
