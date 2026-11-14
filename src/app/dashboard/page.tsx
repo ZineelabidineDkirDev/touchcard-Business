@@ -32,7 +32,7 @@ export default async function DashboardPage() {
   const organizationId = membership?.organization_id;
   const [{ data: organization }, { data: cards }] = await Promise.all([
     organizationId ? supabase.from("organizations").select("name,workspace_config").eq("id", organizationId).maybeSingle() : Promise.resolve({ data: null }),
-    organizationId ? supabase.from("cards").select("id,is_published").eq("organization_id", organizationId) : Promise.resolve({ data: [] as {id:string;is_published:boolean}[] }),
+    organizationId ? supabase.from("cards").select("id,is_published,full_name,company_name,phone,email,avatar_url,bio").eq("organization_id", organizationId) : Promise.resolve({ data: [] as {id:string;is_published:boolean}[] }),
   ]);
   const config = (organization?.workspace_config ?? {}) as { version?: number; modules?: string[]; template?: string; original_client_choices?: { activity_sector?: string } };
   const hasWorkspaceConfig = Boolean(config.version);
@@ -41,10 +41,11 @@ export default async function DashboardPage() {
   const canManageCompany = !hasWorkspaceConfig || enabledModules.includes("company_profile") || enabledModules.includes("contact_profile");
   const cardIds = (cards ?? []).map((card) => card.id);
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const [{ data: events }, { count: contactCount }, { count: pendingRequests }] = await Promise.all([
+  const [{ data: events }, { count: contactCount }, { count: pendingRequests }, { count: catalogCount }] = await Promise.all([
     cardIds.length ? supabase.from("card_events").select("event_type").in("card_id", cardIds).gte("created_at", since) : Promise.resolve({ data: [] as {event_type:string}[] }),
     organizationId ? supabase.from("contacts").select("id", { count: "exact", head: true }).eq("organization_id", organizationId) : Promise.resolve({ count: 0 }),
     organizationId ? supabase.from("workspace_requests").select("id", { count: "exact", head: true }).eq("organization_id", organizationId).eq("status", "pending") : Promise.resolve({ count: 0 }),
+    organizationId && enabledModules.some((id) => ["product_catalog", "service_catalog", "room_catalog"].includes(id)) ? supabase.from("business_catalog_items").select("id", { count: "exact", head: true }).eq("organization_id", organizationId).eq("is_active", true) : Promise.resolve({ count: 0 }),
   ]);
   const views = (events ?? []).filter((event) => ["view", "qr_scan", "nfc_scan"].includes(event.event_type)).length;
   const interactions = (events ?? []).filter((event) => ["click", "contact_save"].includes(event.event_type)).length;
@@ -57,11 +58,13 @@ export default async function DashboardPage() {
 
   const published = (cards ?? []).some((card) => card.is_published);
   const hasCard = (cards ?? []).length > 0;
+  const catalogRequired = enabledModules.some((id) => ["product_catalog", "service_catalog", "room_catalog"].includes(id));
+  const profileReady = (cards ?? []).some((card) => Boolean(card.phone || card.email) && Boolean(card.avatar_url || card.bio || card.company_name));
   const checklist = [
     { label: "Découvrir votre espace client", done: true, href: "/dashboard" },
-    { label: "Personnaliser votre carte NFC", done: hasCard, href: "/dashboard/cards" },
-    { label: "Compléter votre profil entreprise", done: !canManageCompany || true, href: "/dashboard/settings" },
-    { label: "Configurer votre catalogue métier", done: !enabledModules.some((id) => ["product_catalog", "service_catalog", "room_catalog"].includes(id)), href: "/dashboard/modules" },
+    { label: "Créer votre carte NFC", done: hasCard, href: "/dashboard/cards" },
+    { label: "Compléter vos coordonnées et votre présentation", done: profileReady, href: "/dashboard/cards" },
+    { label: "Ajouter vos premiers éléments au catalogue", done: !catalogRequired || (catalogCount ?? 0) > 0, href: "/dashboard/modules" },
     { label: "Publier votre carte", done: published, href: "/dashboard/cards" },
   ];
   const progress = Math.round(checklist.filter((item) => item.done).length / checklist.length * 100);
