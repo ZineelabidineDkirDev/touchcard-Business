@@ -7,10 +7,16 @@ import { PublicCardTracker, TrackedPublicLink } from "@/components/cards/public-
 import { PublicWorkspaceRequestForms } from "@/components/cards/public-workspace-request-forms";
 import { bookingUiFromSections, sanitizeSectionBlocks } from "@/lib/cards/section-blocks";
 import { PublicBusinessModules } from "@/components/cards/public-business-modules";
+import { PublicIndustryModules } from "@/components/cards/public-industry-modules";
 
 type PublicFields = { nfc_display_code?: string; tagline?: string; location?: string; hours?: string; whatsapp?: string; company_phone?: string; company_email?: string; company_address?: string; industry?: string; custom_fields?: { key: string; label: string; value: string; visible: boolean }[] };
 type PublicLink = { id: string; label: string; url: string; kind: string };
 type PublicCatalogItem = { id: string; name: string; description: string | null; price: number; currency: string; image_url: string | null };
+type PublicRentalVehicle = { id: string; brand: string; model: string; category: string; model_year: number | null; seats: number; transmission: string; fuel_type: string; daily_rate: number; currency: string; description: string | null; image_url: string | null; base_location_id: string | null };
+type PublicIndustryLocation = { id: string; name: string; city: string | null; address: string | null };
+type PublicPractitioner = { id: string; full_name: string; professional_title: string | null; specialty: string | null; biography: string | null; avatar_url: string | null; languages: string[] };
+type PublicHealthcareService = { id: string; name: string; specialty: string | null; description: string | null; duration_minutes: number; price: number | null; currency: string; consultation_mode: string; image_url: string | null; practitioner_id: string | null };
+type PublicHealthcareAvailability = { id: string; practitioner_id: string; day_of_week: number | null; specific_date: string | null; starts_at: string; ends_at: string; slot_minutes: number };
 
 export default function PublicCardPage({
   params, searchParams,
@@ -103,6 +109,31 @@ async function PublicCardContent({
     ? await supabase.from("school_programs").select("id,title,description,duration_label,price,currency,start_date,end_date")
       .eq("organization_id", card.organization_id).eq("is_active", true).order("display_order").limit(20)
     : { data: [] as { id: string; title: string; description: string | null; duration_label: string | null; price: number | null; currency: string; start_date: string | null; end_date: string | null }[] };
+
+  const { data: rentalVehicles } = moduleEnabled("car_rental")
+    ? await supabase.from("rental_vehicles").select("id,brand,model,category,model_year,seats,transmission,fuel_type,daily_rate,currency,description,image_url,base_location_id")
+      .eq("organization_id", card.organization_id).eq("is_active", true).eq("is_published", true).limit(20)
+    : { data: [] as PublicRentalVehicle[] };
+  const { data: rentalLocations } = moduleEnabled("car_rental")
+    ? await supabase.from("rental_locations").select("id,name,city,address")
+      .eq("organization_id", card.organization_id).eq("is_active", true).eq("is_public", true).limit(20)
+    : { data: [] as PublicIndustryLocation[] };
+  const { data: healthcarePractitioners } = moduleEnabled("doctor_appointments")
+    ? await supabase.from("healthcare_practitioners").select("id,full_name,professional_title,specialty,biography,avatar_url,languages")
+      .eq("organization_id", card.organization_id).eq("is_active", true).eq("is_public", true).limit(30)
+    : { data: [] as PublicPractitioner[] };
+  const { data: healthcareServices } = moduleEnabled("doctor_appointments")
+    ? await supabase.from("healthcare_services").select("id,name,specialty,description,duration_minutes,price,currency,consultation_mode,image_url,practitioner_id")
+      .eq("organization_id", card.organization_id).eq("is_active", true).eq("is_public", true).order("display_order").limit(30)
+    : { data: [] as PublicHealthcareService[] };
+  const { data: healthcareLocations } = moduleEnabled("doctor_appointments")
+    ? await supabase.from("healthcare_locations").select("id,name,city,address")
+      .eq("organization_id", card.organization_id).eq("is_active", true).eq("is_public", true).limit(20)
+    : { data: [] as PublicIndustryLocation[] };
+  const { data: healthcareAvailability } = moduleEnabled("doctor_appointments")
+    ? await supabase.from("healthcare_availability_rules").select("id,practitioner_id,day_of_week,specific_date,starts_at,ends_at,slot_minutes")
+      .eq("organization_id", card.organization_id).eq("is_available", true).order("day_of_week").limit(40)
+    : { data: [] as PublicHealthcareAvailability[] };
   const fields = (card.public_fields ?? {}) as PublicFields & { google_review_url?: string };
   const sections = template === "contact" ? [] : sanitizeSectionBlocks((card.public_fields as Record<string, unknown> | null)?.sections).filter((section) => section.enabled);
   const bookingUi = bookingUiFromSections(sections);
@@ -238,6 +269,19 @@ async function PublicCardContent({
             stayRequiresItem={!(bookingUi?.dateMode === "stay" && !hasRoomCatalog)}
             serviceMode={isBeauty}
             whatsappPhone={fields.whatsapp || card.phone || ""}
+          />}
+
+          {!isCreativeProfile && (moduleEnabled("car_rental") || moduleEnabled("doctor_appointments")) && (Boolean(settings.show_catalog ?? true) || Boolean(settings.show_request_forms ?? true)) && <PublicIndustryModules
+            slug={card.slug}
+            accent={accent}
+            vehicles={(rentalVehicles ?? []) as PublicRentalVehicle[]}
+            rentalLocations={(rentalLocations ?? []) as PublicIndustryLocation[]}
+            practitioners={(healthcarePractitioners ?? []) as PublicPractitioner[]}
+            services={(healthcareServices ?? []) as PublicHealthcareService[]}
+            healthLocations={(healthcareLocations ?? []) as PublicIndustryLocation[]}
+            availability={(healthcareAvailability ?? []) as PublicHealthcareAvailability[]}
+            showCatalog={Boolean(settings.show_catalog ?? true)}
+            showRequests={Boolean(settings.show_request_forms ?? true)}
           />}
 
           {!isCreativeProfile && (Boolean(settings.show_catalog ?? true) || Boolean(settings.show_request_forms ?? true)) && <PublicBusinessModules
