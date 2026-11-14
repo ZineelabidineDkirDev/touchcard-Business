@@ -113,6 +113,40 @@ export async function setRentalVehiclePublished(data: FormData) {
   refresh("/dashboard/rentals");
 }
 
+export async function updateRentalVehicle(data: FormData) {
+  const ctx = await industryContext("car_rental");
+  if (!ctx?.canManage) return;
+  const id = field(data, "id", 80);
+  const brand = field(data, "brand", 80);
+  const model = field(data, "model", 100);
+  if (!id || !brand || !model) return;
+  const { error } = await ctx.supabase.from("rental_vehicles").update({
+    brand, model, category: field(data, "category", 60) || "economy",
+    model_year: amount(data, "model_year") || null,
+    seats: Math.max(1, Math.min(60, amount(data, "seats", 5))),
+    transmission: ["manual", "automatic", "other"].includes(field(data, "transmission")) ? field(data, "transmission") : "manual",
+    fuel_type: ["petrol", "diesel", "hybrid", "electric", "other"].includes(field(data, "fuel_type")) ? field(data, "fuel_type") : "petrol",
+    daily_rate: Math.max(0, amount(data, "daily_rate")), currency: field(data, "currency", 3).toUpperCase() || "MAD",
+    description: field(data, "description", 1200) || null,
+    image_url: imageUrl(field(data, "image_url", 1000)),
+    base_location_id: field(data, "base_location_id") || null, updated_at: new Date().toISOString(),
+  }).eq("id", id).eq("organization_id", ctx.organizationId);
+  if (error) console.error("Rental vehicle update failed", error);
+  refresh("/dashboard/rentals");
+}
+
+export async function archiveRentalVehicle(data: FormData) {
+  const ctx = await industryContext("car_rental");
+  if (!ctx?.canManage) return;
+  const id = field(data, "id", 80);
+  if (!id) return;
+  const { error } = await ctx.supabase.from("rental_vehicles").update({
+    is_active: false, is_published: false, updated_at: new Date().toISOString(),
+  }).eq("id", id).eq("organization_id", ctx.organizationId);
+  if (error) console.error("Rental vehicle archive failed", error);
+  refresh("/dashboard/rentals");
+}
+
 export async function createRentalMaintenance(data: FormData) {
   const ctx = await industryContext("car_rental");
   if (!ctx?.canManage) return;
@@ -166,6 +200,35 @@ export async function createHealthcarePractitioner(data: FormData) {
   refresh("/dashboard/healthcare");
 }
 
+export async function updateHealthcarePractitioner(data: FormData) {
+  const ctx = await industryContext("doctor_appointments");
+  if (!ctx?.canManage) return;
+  const id = field(data, "id", 80);
+  const fullName = field(data, "full_name", 180);
+  if (!id || !fullName) return;
+  const languages = field(data, "languages", 200).split(",").map((v) => v.trim()).filter(Boolean).slice(0, 8);
+  const { error } = await ctx.supabase.from("healthcare_practitioners").update({
+    full_name: fullName, professional_title: field(data, "professional_title", 120) || null,
+    specialty: field(data, "specialty", 120) || null, biography: field(data, "biography", 1200) || null,
+    avatar_url: imageUrl(field(data, "avatar_url", 1000)), languages, updated_at: new Date().toISOString(),
+  }).eq("id", id).eq("organization_id", ctx.organizationId);
+  if (error) console.error("Healthcare practitioner update failed", error);
+  refresh("/dashboard/healthcare");
+}
+
+export async function setHealthcarePractitionerVisibility(data: FormData) {
+  const ctx = await industryContext("doctor_appointments");
+  if (!ctx?.canManage) return;
+  const id = field(data, "id", 80);
+  if (!id) return;
+  const visible = field(data, "is_public") === "true";
+  const { error } = await ctx.supabase.from("healthcare_practitioners").update({
+    is_public: visible, is_active: visible, updated_at: new Date().toISOString(),
+  }).eq("id", id).eq("organization_id", ctx.organizationId);
+  if (error) console.error("Healthcare practitioner visibility update failed", error);
+  refresh("/dashboard/healthcare");
+}
+
 export async function createHealthcareLocation(data: FormData) {
   const ctx = await industryContext("doctor_appointments");
   if (!ctx?.canManage) return;
@@ -197,6 +260,38 @@ export async function createHealthcareService(data: FormData) {
     image_url: imageUrl(field(data, "image_url", 1000)),
   });
   if (error) console.error("Healthcare service creation failed", error);
+  refresh("/dashboard/healthcare");
+}
+
+export async function updateHealthcareService(data: FormData) {
+  const ctx = await industryContext("doctor_appointments");
+  if (!ctx?.canManage) return;
+  const id = field(data, "id", 80);
+  const name = field(data, "name", 180);
+  if (!id || !name) return;
+  const { error } = await ctx.supabase.from("healthcare_services").update({
+    practitioner_id: field(data, "practitioner_id") || null, name,
+    specialty: field(data, "specialty", 120) || null, description: field(data, "description", 1200) || null,
+    duration_minutes: Math.max(5, Math.min(720, amount(data, "duration_minutes", 30))),
+    price: field(data, "price") === "" ? null : Math.max(0, amount(data, "price")),
+    currency: field(data, "currency", 3).toUpperCase() || "MAD",
+    consultation_mode: ["in_person", "teleconsultation", "home_visit"].includes(field(data, "consultation_mode")) ? field(data, "consultation_mode") : "in_person",
+    image_url: imageUrl(field(data, "image_url", 1000)), updated_at: new Date().toISOString(),
+  }).eq("id", id).eq("organization_id", ctx.organizationId);
+  if (error) console.error("Healthcare service update failed", error);
+  refresh("/dashboard/healthcare");
+}
+
+export async function setHealthcareServiceVisibility(data: FormData) {
+  const ctx = await industryContext("doctor_appointments");
+  if (!ctx?.canManage) return;
+  const id = field(data, "id", 80);
+  if (!id) return;
+  const visible = field(data, "is_public") === "true";
+  const { error } = await ctx.supabase.from("healthcare_services").update({
+    is_public: visible, is_active: visible, updated_at: new Date().toISOString(),
+  }).eq("id", id).eq("organization_id", ctx.organizationId);
+  if (error) console.error("Healthcare service visibility update failed", error);
   refresh("/dashboard/healthcare");
 }
 
