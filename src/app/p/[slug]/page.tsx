@@ -92,7 +92,7 @@ async function PublicCardContent({
       .eq("organization_id", card.organization_id).maybeSingle()
     : { data: null as { file_url: string; file_name: string } | null };
   const { data: businessModuleCatalog } = (moduleEnabled("service_catalog") || moduleEnabled("room_catalog"))
-    ? await supabase.from("business_catalog_items").select("id,item_type,name,description,price,currency,duration_minutes,capacity")
+    ? await supabase.from("business_catalog_items").select("id,item_type,name,description,price,currency,duration_minutes,capacity,image_url")
       .eq("organization_id", card.organization_id).eq("is_active", true).order("display_order").limit(40)
     : { data: [] as { id: string; item_type: string; name: string; description: string | null; price: number; currency: string; duration_minutes: number | null; capacity: number | null }[] };
   const { data: gymPlans } = moduleEnabled("gym_registration")
