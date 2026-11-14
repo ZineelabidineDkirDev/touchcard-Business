@@ -14,6 +14,15 @@ type AdminNotification = {
   created_at: string;
 };
 
+type ClientNotification = {
+  id: string;
+  title: string;
+  description: string;
+  created_at: string;
+  href: string;
+  kind: string;
+};
+
 type Props = {
   name: string;
   email: string;
@@ -53,6 +62,8 @@ export function DashboardTopbar({ name, email, avatarUrl = "", notificationsEnab
   const [notifications, setNotifications] = useState<AdminNotification[]>([]);
   const [notificationCount, setNotificationCount] = useState(0);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
+  const [clientNotifications, setClientNotifications] = useState<ClientNotification[]>([]);
+  const [clientNotificationCount, setClientNotificationCount] = useState(0);
 
   const loadNotifications = useCallback(async () => {
     if (!isSuperAdmin || !notificationsEnabled) return;
@@ -65,6 +76,22 @@ export function DashboardTopbar({ name, email, avatarUrl = "", notificationsEnab
       setNotificationCount(Number(payload.count) || 0);
     } catch (error) {
       console.error("Unable to refresh admin notifications", error);
+    } finally {
+      setNotificationsLoading(false);
+    }
+  }, [isSuperAdmin, notificationsEnabled]);
+
+  const loadClientNotifications = useCallback(async () => {
+    if (isSuperAdmin || !notificationsEnabled) return;
+    setNotificationsLoading(true);
+    try {
+      const response = await fetch("/api/client/notifications", { cache: "no-store" });
+      if (!response.ok) throw new Error("Client notification request failed");
+      const payload = await response.json();
+      setClientNotifications(Array.isArray(payload.notifications) ? payload.notifications : []);
+      setClientNotificationCount(Number(payload.count) || 0);
+    } catch (error) {
+      console.error("Unable to refresh client notifications", error);
     } finally {
       setNotificationsLoading(false);
     }
@@ -88,6 +115,17 @@ export function DashboardTopbar({ name, email, avatarUrl = "", notificationsEnab
     const interval = window.setInterval(() => void loadNotifications(), 30000);
     return () => window.clearInterval(interval);
   }, [isSuperAdmin, notificationsEnabled, loadNotifications]);
+
+  useEffect(() => {
+    if (isSuperAdmin || !notificationsEnabled) {
+      setClientNotifications([]);
+      setClientNotificationCount(0);
+      return;
+    }
+    void loadClientNotifications();
+    const interval = window.setInterval(() => void loadClientNotifications(), 60000);
+    return () => window.clearInterval(interval);
+  }, [isSuperAdmin, notificationsEnabled, loadClientNotifications]);
 
   function toggleTheme() {
     const next = !dark;
@@ -113,8 +151,8 @@ export function DashboardTopbar({ name, email, avatarUrl = "", notificationsEnab
           <Icon name={dark ? "sun" : "moon"} />
         </button>
         {!isSuperAdmin && <div className="relative">
-          <button type="button" onClick={() => { setNotificationsOpen(!notificationsOpen); setMenuOpen(false); }} aria-expanded={notificationsOpen} aria-label="Notifications" className="dashboard-icon-button relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100"><Icon name="bell" /></button>
-          {notificationsOpen && <div className="dashboard-popover absolute right-0 top-12 z-50 w-[min(320px,calc(100vw-2rem))] rounded-2xl border border-slate-200 bg-white p-5 shadow-xl"><p className="font-bold text-slate-900">Notifications</p><p className="mt-2 text-sm text-slate-500">Vous serez informé ici des nouvelles activités concernant votre espace.</p><div className="mt-4 rounded-xl bg-slate-50 p-3 text-xs text-slate-500">Aucune nouvelle notification.</div></div>}
+          <button type="button" onClick={() => { const next = !notificationsOpen; setNotificationsOpen(next); setMenuOpen(false); if (next) void loadClientNotifications(); }} aria-expanded={notificationsOpen} aria-label={`Notifications : ${clientNotificationCount} nouvelle(s)`} className="dashboard-icon-button relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100"><Icon name="bell" />{notificationsEnabled && clientNotificationCount > 0 && <span className="absolute -right-1 -top-1 flex min-h-[19px] min-w-[19px] items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-black text-white ring-2 ring-white">{clientNotificationCount > 99 ? "99+" : clientNotificationCount}</span>}</button>
+          {notificationsOpen && <div className="dashboard-popover absolute right-0 top-12 z-50 w-[min(360px,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl"><div className="flex items-center justify-between border-b border-slate-100 px-4 py-3"><div><p className="font-bold text-slate-900">Activité de votre espace</p><p className="mt-1 text-[11px] text-slate-500">Nouvelles demandes et réservations</p></div>{clientNotificationCount > 0 && <span className="rounded-full bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700">{clientNotificationCount}</span>}</div>{!notificationsEnabled ? <p className="p-5 text-sm text-slate-500">Les notifications sont désactivées dans vos paramètres.</p> : notificationsLoading && clientNotifications.length === 0 ? <p className="p-5 text-sm text-slate-500">Chargement de votre activité…</p> : clientNotifications.length === 0 ? <div className="px-5 py-7 text-center"><span className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-emerald-50 text-emerald-600"><Icon name="check"/></span><p className="mt-3 text-sm font-semibold text-slate-800">Tout est à jour</p><p className="mt-1 text-xs text-slate-500">Les nouvelles demandes apparaîtront ici.</p></div> : <div className="max-h-[min(420px,65vh)] divide-y divide-slate-100 overflow-y-auto">{clientNotifications.map((item) => <Link key={item.id} href={item.href} onClick={() => setNotificationsOpen(false)} className="block px-4 py-3 transition hover:bg-indigo-50/60"><p className="text-sm font-bold text-slate-900">{item.title}</p><p className="mt-1 text-xs text-slate-600">{item.description}</p><p className="mt-1 text-[11px] text-slate-400">{new Date(item.created_at).toLocaleString("fr-FR", {dateStyle:"short",timeStyle:"short"})}</p></Link>)}</div>}<div className="border-t border-slate-100 bg-slate-50 px-4 py-3"><Link href="/dashboard/requests" onClick={() => setNotificationsOpen(false)} className="text-xs font-bold text-indigo-700 hover:underline">Voir toutes les demandes →</Link></div></div>}
         </div>}
         {isSuperAdmin && <div className="relative">
           <button type="button" onClick={() => { const next = !notificationsOpen; setNotificationsOpen(next); setMenuOpen(false); if (next) void loadNotifications(); }} aria-expanded={notificationsOpen} aria-label={`Notifications : ${notificationCount} demande(s) en attente`} className="dashboard-icon-button relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition hover:bg-slate-100">
