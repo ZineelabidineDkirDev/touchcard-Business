@@ -1,5 +1,5 @@
 import {
-  submitPublicAppointment, submitPublicGymRegistration, submitPublicSchoolEnrollment,
+  submitPublicGymRegistration, submitPublicSchoolEnrollment,
 } from "@/app/actions/public-business-modules";
 
 type CatalogItem = { id: string; item_type: string; name: string; description: string | null; price: number; currency: string; duration_minutes: number | null; capacity: number | null; image_url?: string | null };
@@ -12,7 +12,7 @@ export function PublicBusinessModules({ slug, modules, catalog, plans, programs,
   const enabled = (id: string) => modules.includes(id);
   const services = catalog.filter((item) => item.item_type !== "room");
   const rooms = catalog.filter((item) => item.item_type === "room");
-  if (!services.length && !rooms.length && !enabled("doctor_appointments") && !enabled("gym_registration") && !enabled("school_registration")) return null;
+  if (!services.length && !rooms.length && !enabled("gym_registration") && !enabled("school_registration")) return null;
   const buttonStyle = { backgroundColor: accent };
   const whatsapp = (whatsappPhone || "").replace(/\D/g, "");
   const hasMenu = services.some((item) => item.item_type === "menu");
@@ -37,10 +37,6 @@ export function PublicBusinessModules({ slug, modules, catalog, plans, programs,
     {(showCatalog && enabled("room_catalog") && rooms.length > 0) && <section className="rounded-2xl bg-white p-4">
       <h2 className="text-base font-black text-slate-950">Nos chambres</h2>
       <div className="mt-3 space-y-3">{rooms.map((item) => <article key={item.id} className="flex gap-3 border-b border-slate-100 pb-3 last:border-0">{item.image_url && <img src={item.image_url} alt={item.name} loading="lazy" className="h-20 w-24 rounded-xl object-cover"/>}<div className="min-w-0 flex-1"><div className="flex justify-between gap-3"><h3 className="text-sm font-bold text-slate-900">{item.name}</h3><strong className="text-sm" style={{ color: accent }}>{Number(item.price).toLocaleString("fr-MA")} {item.currency}</strong></div>{item.description && <p className="mt-1 text-xs text-slate-500">{item.description}</p>}{item.capacity && <p className="mt-1 text-[11px] text-slate-400">Capacité : {item.capacity} personnes</p>}</div></article>)}</div>
-    </section>}
-    {showRequests && enabled("doctor_appointments") && <section className="rounded-2xl bg-white p-4">
-      <h2 className="text-base font-black text-slate-950">Prendre rendez-vous médical</h2><p className="mt-1 text-xs leading-5 text-slate-500">Envoyez une demande de consultation. Le cabinet vous contactera pour confirmer le créneau.</p>
-      <form action={submitPublicAppointment} className="mt-3 space-y-2"><input type="hidden" name="card_slug" value={slug}/><input required name="customer_name" placeholder="Nom complet" maxLength={140} className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"/><input required name="customer_phone" type="tel" placeholder="Téléphone" maxLength={40} className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"/><input name="customer_email" type="email" placeholder="E-mail (facultatif)" className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"/><label className="block text-xs font-semibold text-slate-600">Date et heure souhaitées<input required name="starts_at" type="datetime-local" min={new Date().toISOString().slice(0,16)} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"/></label><textarea name="message" rows={2} placeholder="Motif de consultation (facultatif)" maxLength={1000} className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm"/><button className="w-full rounded-xl px-4 py-3 text-sm font-bold text-white" style={buttonStyle}>Envoyer ma demande</button></form>
     </section>}
     {showRequests && enabled("gym_registration") && <section className="rounded-2xl bg-white p-4">
       <h2 className="text-base font-black text-slate-950">Nos abonnements & inscription</h2>
