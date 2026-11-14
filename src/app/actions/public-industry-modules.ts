@@ -43,12 +43,6 @@ export async function submitPublicRentalBooking(data:FormData){
   .lt("pickup_date",returned).gt("return_date",pickup).limit(1);
  if(overlapError){console.error("Rental availability check failed",overlapError);return;}
  if(overlaps?.length) return;
- const {data:maintenance,error:maintenanceError}=await ctx.supabase.from("rental_maintenance").select("id")
-  .eq("organization_id",ctx.card.organization_id).eq("vehicle_id",vehicleId)
-  .in("status",["planned","in_progress"])
-  .lt("scheduled_start",returned).gte("scheduled_end",pickup).limit(1);
- if(maintenanceError){console.error("Rental maintenance availability check failed",maintenanceError);return;}
- if(maintenance?.length) return;
  const locationIds=[field(data,"pickup_location_id",80),field(data,"return_location_id",80)].filter(Boolean);
  if(locationIds.length){
   const {data:locations}=await ctx.supabase.from("rental_locations").select("id")
