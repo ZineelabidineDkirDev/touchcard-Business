@@ -23,6 +23,9 @@ async function getModuleContext(required: string[], match: "all" | "any" = "all"
 function value(data: FormData, key: string, max = 500) {
   return String(data.get(key) ?? "").trim().slice(0, max);
 }
+function safeImageUrl(raw: string) {
+  try { const url = new URL(raw); return ["https:", "http:"].includes(url.protocol) ? url.toString() : null; } catch { return null; }
+}
 function numeric(data: FormData, key: string, fallback = 0) {
   const n = Number(value(data, key));
   return Number.isFinite(n) ? n : fallback;
@@ -30,6 +33,7 @@ function numeric(data: FormData, key: string, fallback = 0) {
 
 export async function createBusinessCatalogItem(data: FormData) {
   const itemType = value(data, "item_type");
+  if (!["service", "menu", "room"].includes(itemType)) return;
   const moduleId = itemType === "room" ? "room_catalog" : "service_catalog";
   const ctx = await getModuleContext([moduleId]);
   if (!ctx) return;
@@ -39,6 +43,7 @@ export async function createBusinessCatalogItem(data: FormData) {
     organization_id: ctx.organizationId, item_type: itemType, name,
     description: value(data, "description"), price: numeric(data, "price"),
     currency: value(data, "currency", 3) || "MAD",
+    image_url: safeImageUrl(value(data, "image_url", 1000)),
     duration_minutes: numeric(data, "duration_minutes") || null,
     capacity: numeric(data, "capacity") || null,
   });
