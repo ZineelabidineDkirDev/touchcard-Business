@@ -238,11 +238,9 @@ async function PublicCardContent({
             stayRequiresItem={!(bookingUi?.dateMode === "stay" && !hasRoomCatalog)}
             serviceMode={isBeauty}
             whatsappPhone={fields.whatsapp || card.phone || ""}
-            showCatalog={settings.show_catalog !== false}
-            showRequests={settings.show_request_forms !== false}
           />}
 
-          {!isCreativeProfile && (settings.show_catalog !== false || settings.show_request_forms !== false) && <PublicBusinessModules
+          {!isCreativeProfile && (Boolean(settings.show_catalog ?? true) || Boolean(settings.show_request_forms ?? true)) && <PublicBusinessModules
             slug={card.slug}
             modules={modules}
             catalog={(businessModuleCatalog ?? []) as any[]}
@@ -250,6 +248,8 @@ async function PublicCardContent({
             programs={(schoolPrograms ?? []) as any[]}
             accent={accent}
             whatsappPhone={fields.whatsapp || card.phone || ""}
+            showCatalog={Boolean(settings.show_catalog ?? true)}
+            showRequests={Boolean(settings.show_request_forms ?? true)}
           />}
 
           {settings.show_social_links !== false && <section className="rounded-2xl bg-white p-4"><div className="flex flex-wrap items-end justify-between gap-2"><div><h2 className="text-base font-bold text-black">Réseaux sociaux</h2></div></div>{socialLinks.length > 0 ? <div className="mt-4 grid grid-cols-5 gap-2">{socialLinks.map((link: PublicLink) => <TrackedPublicLink key={link.id} cardId={card.id} linkId={link.id} href={link.url} className="flex aspect-square min-w-0 items-center justify-center rounded-xl text-lg font-black text-white shadow-sm transition hover:-translate-y-0.5" style={{ backgroundColor: ({instagram:"#E4405F",facebook:"#1877F2",linkedin:"#0A66C2",tiktok:"#111111",youtube:"#FF0000",x:"#000000",pinterest:"#BD081C",whatsapp:"#25D366",telegram:"#229ED9"} as Record<string,string>)[link.kind] ?? "#64748b" }}><span>{({instagram:"◎",facebook:"f",linkedin:"in",tiktok:"♪",youtube:"▶",x:"𝕏",pinterest:"P",whatsapp:"◉",telegram:"➤"} as Record<string,string>)[link.kind] ?? "↗"}</span></TrackedPublicLink>)}</div> : <p className="mt-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-5 text-center text-xs leading-5 text-slate-500">Les réseaux sociaux ajoutés par le client apparaîtront ici.</p>}</section>}
