@@ -43,6 +43,12 @@ export async function submitPublicRentalBooking(data:FormData){
   .lt("pickup_date",returned).gt("return_date",pickup).limit(1);
  if(overlapError){console.error("Rental availability check failed",overlapError);return;}
  if(overlaps?.length) return;
+ const {data:maintenance,error:maintenanceError}=await ctx.supabase.from("rental_maintenance").select("id")
+  .eq("organization_id",ctx.card.organization_id).eq("vehicle_id",vehicleId)
+  .in("status",["planned","in_progress"])
+  .lt("scheduled_start",returned).gte("scheduled_end",pickup).limit(1);
+ if(maintenanceError){console.error("Rental maintenance availability check failed",maintenanceError);return;}
+ if(maintenance?.length) return;
  const locationIds=[field(data,"pickup_location_id",80),field(data,"return_location_id",80)].filter(Boolean);
  if(locationIds.length){
   const {data:locations}=await ctx.supabase.from("rental_locations").select("id")
@@ -94,6 +100,27 @@ export async function submitPublicHealthcareAppointment(data:FormData){
   if(!location) return;
  }
  const endAt=new Date(new Date(startsAt).getTime()+duration*60000).toISOString();
+ const localDate=localStart.slice(0,10);
+ const localStartTime=localStart.slice(11,16);
+ const localEndTime=new Date(endAt).toLocaleTimeString("en-GB",{timeZone:"Africa/Casablanca",hour:"2-digit",minute:"2-digit",hourCycle:"h23"});
+ const dayOfWeek=new Date(localDate+"T12:00:00Z").getUTCDay();
+ const {data:availabilityRules,error:availabilityError}=await ctx.supabase.from("healthcare_availability_rules")
+  .select("practitioner_id,location_id,day_of_week,specific_date,starts_at,ends_at,is_available")
+  .eq("organization_id",ctx.card.organization_id);
+ if(availabilityError){console.error("Healthcare schedule lookup failed",availabilityError);return;}
+ if(availabilityRules?.length){
+  const practitionerIds=resolvedPractitionerId?[resolvedPractitionerId]:[...new Set(availabilityRules.map((rule:any)=>rule.practitioner_id))];
+  const hasAvailableSlot=practitionerIds.some((id:string)=>{
+   const practitionerRules=(availabilityRules??[]).filter((rule:any)=>rule.practitioner_id===id);
+   const dateRules=practitionerRules.filter((rule:any)=>rule.specific_date===localDate);
+   const applicable=dateRules.length?dateRules:practitionerRules.filter((rule:any)=>rule.specific_date===null&&rule.day_of_week===dayOfWeek);
+   return applicable.some((rule:any)=>rule.is_available
+    &&String(rule.starts_at).slice(0,5)<=localStartTime
+    &&String(rule.ends_at).slice(0,5)>=localEndTime
+    &&(!locationId||!rule.location_id||rule.location_id===locationId));
+  });
+  if(!hasAvailableSlot)return;
+ }
  let conflictQuery=ctx.supabase.from("healthcare_appointments").select("id")
   .eq("organization_id",ctx.card.organization_id)
   .in("status",["pending","confirmed"])
