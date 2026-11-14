@@ -7,6 +7,25 @@ function field(data: FormData, key: string, max = 500) {
   return String(data.get(key) ?? "").trim().slice(0, max);
 }
 
+function localCasablancaToIso(value: string) {
+  if (!/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$/.test(value)) {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+  }
+  const [date, time] = value.split("T");
+  const [year, month, day] = date.split("-").map(Number);
+  const [hour, minute] = time.split(":").map(Number);
+  const desired = Date.UTC(year, month - 1, day, hour, minute);
+  let guess = new Date(desired);
+  for (let index = 0; index < 3; index++) {
+    const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Casablanca", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }).formatToParts(guess);
+    const get = (key: string) => Number(parts.find((part) => part.type === key)?.value || 0);
+    const observed = Date.UTC(get("year"), get("month") - 1, get("day"), get("hour"), get("minute"), get("second"));
+    guess = new Date(guess.getTime() + desired - observed);
+  }
+  return guess.toISOString();
+}
+
 async function getPublishedCard(slug: string, requiredModule: string) {
   if (!slug || !/^[a-z0-9-]{2,100}$/i.test(slug)) return null;
   const supabase = await createClient();
@@ -28,13 +47,30 @@ export async function submitPublicAppointment(data: FormData) {
   const phone = field(data, "customer_phone", 40);
   const startsAt = field(data, "starts_at", 40);
   const reason = field(data, "message", 1000);
-  const parsed = new Date(startsAt);
-  if (!name || !phone || !startsAt || Number.isNaN(parsed.getTime()) || parsed.getTime() < Date.now()) return;
+  const startsAtIso = localCasablancaToIso(startsAt);
+  if (!name || !phone || !startsAtIso || new Date(startsAtIso).getTime() < Date.now()) return;
+  const localDate = startsAt.slice(0, 10);
+  const localTime = startsAt.slice(11, 16);
+  const dayOfWeek = new Date(localDate + "T12:00:00Z").getUTCDay();
+  const endTimeDate = new Date(new Date(startsAtIso).getTime() + 30 * 60000);
+  const endLocalTime = endTimeDate.toLocaleTimeString("en-GB", { timeZone: "Africa/Casablanca", hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+  const { data: rules, error: rulesError } = await ctx.supabase.from("business_availability_rules")
+    .select("specific_date,day_of_week,starts_at,ends_at,is_available")
+    .eq("organization_id", ctx.card.organization_id);
+  if (rulesError) { console.error("Business availability lookup failed", rulesError); return; }
+  if (rules?.length) {
+    const dateRules = rules.filter((rule: any) => rule.specific_date === localDate);
+    const applicable = dateRules.length ? dateRules : rules.filter((rule: any) => rule.specific_date === null && rule.day_of_week === dayOfWeek);
+    const allowed = applicable.some((rule: any) => rule.is_available
+      && String(rule.starts_at).slice(0, 5) <= localTime
+      && String(rule.ends_at).slice(0, 5) >= endLocalTime);
+    if (!allowed) return;
+  }
   const { error } = await ctx.supabase.from("business_appointments").insert({
     organization_id: ctx.card.organization_id, card_id: ctx.card.id,
     appointment_type: "consultation", customer_name: name,
     customer_email: field(data, "customer_email", 180) || null,
-    customer_phone: phone, starts_at: parsed.toISOString(),
+    customer_phone: phone, starts_at: startsAtIso,
     message: reason || null, status: "pending", source: "public_card",
   });
   if (error) console.error("Public appointment submission failed", error);
