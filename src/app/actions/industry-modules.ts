@@ -51,6 +51,7 @@ function refresh(path: string) {
   revalidatePath(path);
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/cards");
+  revalidatePath("/dashboard/calendar");
 }
 
 export async function createRentalLocation(data: FormData) {
@@ -312,6 +313,19 @@ export async function createHealthcareAvailability(data: FormData) {
     is_available: true,
   });
   if (error) console.error("Healthcare availability creation failed", error);
+  refresh("/dashboard/healthcare");
+}
+
+export async function setHealthcareAvailabilityRuleState(data: FormData) {
+  const ctx = await industryContext("doctor_appointments");
+  if (!ctx?.canManage) return;
+  const id = field(data, "id", 80);
+  if (!id) return;
+  const { error } = await ctx.supabase.from("healthcare_availability_rules").update({
+    is_available: field(data, "is_available") === "true", updated_at: new Date().toISOString(),
+  }).eq("id", id).eq("organization_id", ctx.organizationId);
+  if (error) console.error("Healthcare availability update failed", error);
+  refresh("/dashboard/calendar");
   refresh("/dashboard/healthcare");
 }
 
