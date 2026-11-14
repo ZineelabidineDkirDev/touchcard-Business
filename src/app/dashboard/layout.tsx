@@ -43,10 +43,26 @@ async function AuthenticatedDashboard({ children }: Readonly<{ children: React.R
 
   if (!isSuperAdmin) {
     return (
-      <div className="min-h-screen bg-[#f5f7fc]">
-        <main className="mx-auto min-w-0 max-w-[1500px] px-4 pb-6 sm:px-7 sm:pb-8">
-          <div className="sticky top-0 z-40 -mx-4 mb-6 border-b border-slate-200/80 bg-[#f5f7fc]/95 px-4 pb-3 pt-4 shadow-sm backdrop-blur-xl sm:-mx-7 sm:px-7">
-            <DashboardTopbar name={clientDisplayName} email={user.email || ""} avatarUrl={String(user.user_metadata.avatar_url || "")} notificationsEnabled={preferences.notifications_enabled ?? true} isSuperAdmin={false} navigation={<DashboardNavigation isSuperAdmin={false} enabledModules={enabledModules} hasWorkspaceConfig={hasWorkspaceConfig} hiddenModules={hiddenModules} />} />
+      <div className="min-h-screen bg-[#f5f7fc] lg:flex">
+        <aside className="relative z-30 w-full border-b border-slate-200 bg-white px-5 py-5 shadow-sm lg:fixed lg:inset-y-0 lg:left-0 lg:w-72 lg:overflow-y-auto lg:border-b-0 lg:border-r lg:shadow-none">
+          <Link href="/dashboard" className="inline-flex items-center gap-3" aria-label="TouchCard Business - espace client">
+            <img src="/brand/touchcard-mark.svg" alt="" className="h-11 w-11 object-contain"/>
+            <span className="flex flex-col leading-none"><strong className="text-2xl font-black tracking-tight text-slate-950">TouchCard</strong><span className="mt-1 text-[10px] font-bold tracking-[.2em] text-slate-500">BUSINESS WORKSPACE</span></span>
+          </Link>
+          <div className="mt-5 rounded-2xl bg-slate-50 px-3 py-3">
+            <p className="truncate text-sm font-extrabold text-slate-900">{clientDisplayName || "Mon entreprise"}</p>
+            <p className="mt-1 truncate text-[11px] text-slate-500">{user.email}</p>
+          </div>
+          <div className="mt-4"><LanguageSwitcher /></div>
+          <DashboardNavigation isSuperAdmin={false} enabledModules={enabledModules} hasWorkspaceConfig={hasWorkspaceConfig} hiddenModules={hiddenModules}/>
+          <div className="mt-5 border-t border-slate-100 pt-4 lg:mt-8">
+            <Link href="/dashboard/settings" className="flex items-center rounded-xl px-3 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-indigo-700">Paramètres de l’espace</Link>
+            <form action={signOut}><button className="mt-2 flex w-full items-center rounded-xl px-3 py-2.5 text-left text-sm font-bold text-rose-600 transition hover:bg-rose-50"><DashboardLogoutLabel/></button></form>
+          </div>
+        </aside>
+        <main className="min-w-0 flex-1 px-4 pb-8 pt-4 sm:px-7 lg:ml-72 lg:px-8">
+          <div className="sticky top-0 z-20 mb-6 bg-[#f5f7fc]/95 pb-3 pt-1 backdrop-blur-xl">
+            <DashboardTopbar name={clientDisplayName} email={user.email || ""} avatarUrl={String(user.user_metadata.avatar_url || "")} notificationsEnabled={preferences.notifications_enabled ?? true} isSuperAdmin={false}/>
           </div>
           {children}
         </main>
