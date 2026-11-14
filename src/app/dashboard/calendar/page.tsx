@@ -26,7 +26,21 @@ function localDateKey(value:string|Date) {
   const get=(name:string)=>parts.find((part)=>part.type===name)?.value||"";
   return get("year")+"-"+get("month")+"-"+get("day");
 }
-function casablancaLocalToIso(value:string) {\n  const match=/^(\\d{4})-(\\d{2})-(\\d{2})T(\\d{2}):(\\d{2})$/.exec(value);\n  if(!match)return new Date(value).toISOString();\n  const [,y,m,d,h,min]=match;\n  const desired=Date.UTC(Number(y),Number(m)-1,Number(d),Number(h),Number(min));\n  let guess=new Date(desired);\n  for(let i=0;i<3;i++){const parts=new Intl.DateTimeFormat("en-CA",{timeZone:TZ,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"}).formatToParts(guess);const get=(key:string)=>Number(parts.find((part)=>part.type===key)?.value||0);const observed=Date.UTC(get("year"),get("month")-1,get("day"),get("hour"),get("minute"),get("second"));guess=new Date(guess.getTime()+desired-observed);}\n  return guess.toISOString();\n}\nfunction localTime(value:string) {
+function casablancaLocalToIso(value:string) {
+  const match=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(value);
+  if(!match)return new Date(value).toISOString();
+  const [,y,m,d,h,min]=match;
+  const desired=Date.UTC(Number(y),Number(m)-1,Number(d),Number(h),Number(min));
+  let guess=new Date(desired);
+  for(let i=0;i<3;i++){
+    const parts=new Intl.DateTimeFormat("en-CA",{timeZone:TZ,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"}).formatToParts(guess);
+    const get=(key:string)=>Number(parts.find((part)=>part.type===key)?.value||0);
+    const observed=Date.UTC(get("year"),get("month")-1,get("day"),get("hour"),get("minute"),get("second"));
+    guess=new Date(guess.getTime()+desired-observed);
+  }
+  return guess.toISOString();
+}
+function localTime(value:string) {
   return new Date(value).toLocaleTimeString("fr-FR",{timeZone:TZ,hour:"2-digit",minute:"2-digit"});
 }
 function dateLabel(value:string) {
