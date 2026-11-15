@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, type FormEvent } from "react";
+import { useState, useTransition, type CSSProperties, type FormEvent } from "react";
 import { submitPublicHealthcareAppointment, submitPublicRentalBooking } from "@/app/actions/public-industry-modules";
 
 type RentalVehicle={id:string;brand:string;model:string;category:string;model_year:number|null;seats:number;transmission:string;fuel_type:string;daily_rate:number;currency:string;description:string|null;image_url:string|null;base_location_id:string|null};
@@ -20,10 +20,10 @@ function BookingStatus({status}:{status:BookingFeedback}) {
  };
  const success=status==="success";
  return <div role="alert" aria-live="polite" className={`rounded-xl border px-3 py-3 text-xs leading-5 ${success?"border-emerald-200 bg-emerald-50 text-emerald-800":"border-amber-200 bg-amber-50 text-amber-900"}`}>
-  <strong className="block">{success?"Demande envoyée":"Créneau indisponible"}</strong>{messages[status]}
+  <strong className="block">{status==="success"?"Demande envoyée":status==="conflict"?"Créneau indisponible":status==="invalid"?"Informations à vérifier":"Envoi impossible"}</strong>{messages[status]}
  </div>;
 }
-function PublicRentalBookingForm({slug,vehicleId,locations,button}:{slug:string;vehicleId:string;locations:IndustryLocation[];button:React.CSSProperties}) {
+function PublicRentalBookingForm({slug,vehicleId,locations,button}:{slug:string;vehicleId:string;locations:IndustryLocation[];button:CSSProperties}) {
  const [status,setStatus]=useState<BookingFeedback>(null);
  const [pending,startTransition]=useTransition();
  function handleSubmit(event:FormEvent<HTMLFormElement>) {
