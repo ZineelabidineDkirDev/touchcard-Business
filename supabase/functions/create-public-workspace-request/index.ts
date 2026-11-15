@@ -122,7 +122,17 @@ Deno.serve(async (req: Request) => {
       status: "pending",
       source: "public_card",
     }).select("id,created_at").single();
-    if (insertError || !request) return json({ error: "La demande n'a pas pu être enregistrée. Réessayez." }, 500);
+    if (insertError?.code === "23P01") {
+      return json({
+        ok: false,
+        code: "SLOT_UNAVAILABLE",
+        error: "Ce créneau vient d’être réservé ou n’est plus disponible. Choisissez une autre date ou un autre horaire.",
+      });
+    }
+    if (insertError || !request) {
+      console.error("Public workspace request insert failed", insertError);
+      return json({ ok: false, error: "La demande n'a pas pu être enregistrée. Réessayez." }, 500);
+    }
     return json({ ok: true, request_id: request.id, created_at: request.created_at, total, currency: "MAD" });
   } catch (error) {
     return json({ error: error instanceof Error ? error.message : "Unexpected error" }, 400);
