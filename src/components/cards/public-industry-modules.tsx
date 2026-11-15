@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useTransition, type FormEvent } from "react";
 import { submitPublicHealthcareAppointment, submitPublicRentalBooking } from "@/app/actions/public-industry-modules";
 
 type RentalVehicle={id:string;brand:string;model:string;category:string;model_year:number|null;seats:number;transmission:string;fuel_type:string;daily_rate:number;currency:string;description:string|null;image_url:string|null;base_location_id:string|null};
@@ -5,6 +8,73 @@ type IndustryLocation={id:string;name:string;city:string|null;address:string|nul
 type Practitioner={id:string;full_name:string;professional_title:string|null;specialty:string|null;biography:string|null;avatar_url:string|null;languages:string[]};
 type HealthcareService={id:string;name:string;specialty:string|null;description:string|null;duration_minutes:number;price:number|null;currency:string;consultation_mode:string;image_url:string|null;practitioner_id:string|null};
 type Availability={id:string;practitioner_id:string;day_of_week:number|null;specific_date:string|null;starts_at:string;ends_at:string;slot_minutes:number};
+
+type BookingFeedback = "success" | "conflict" | "invalid" | "error" | null;
+function BookingStatus({status}:{status:BookingFeedback}) {
+ if(!status) return null;
+ const messages = {
+  success: "Votre demande a bien été envoyée. L’établissement doit maintenant la confirmer.",
+  conflict: "Ce créneau vient d’être réservé ou n’est plus disponible. Choisissez une autre date ou un autre horaire. Vos informations sont conservées.",
+  invalid: "Certaines informations sont manquantes ou ne sont plus valides. Vérifiez le formulaire puis réessayez.",
+  error: "Nous n’avons pas pu envoyer votre demande pour le moment. Vos informations sont conservées : réessayez dans quelques instants."
+ };
+ const success=status==="success";
+ return <div role="alert" aria-live="polite" className={`rounded-xl border px-3 py-3 text-xs leading-5 ${success?"border-emerald-200 bg-emerald-50 text-emerald-800":"border-amber-200 bg-amber-50 text-amber-900"}`}>
+  <strong className="block">{success?"Demande envoyée":"Créneau indisponible"}</strong>{messages[status]}
+ </div>;
+}
+function PublicRentalBookingForm({slug,vehicleId,locations,button}:{slug:string;vehicleId:string;locations:IndustryLocation[];button:React.CSSProperties}) {
+ const [status,setStatus]=useState<BookingFeedback>(null);
+ const [pending,startTransition]=useTransition();
+ function handleSubmit(event:FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+  const form=event.currentTarget;
+  const data=new FormData(form);
+  startTransition(async()=>{
+   const result=await submitPublicRentalBooking(data);
+   setStatus(result.status);
+   if(result.status==="success") form.reset();
+  });
+ }
+ return <form onSubmit={handleSubmit} className="mt-3 space-y-2 rounded-xl bg-slate-50 p-3">
+  <input type="hidden" name="card_slug" value={slug}/><input type="hidden" name="vehicle_id" value={vehicleId}/>
+  <BookingStatus status={status}/>
+  <div className="grid grid-cols-2 gap-2"><label className="text-[10px] font-semibold text-slate-500">Retrait<input name="pickup_date" type="date" required className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs"/></label><label className="text-[10px] font-semibold text-slate-500">Retour<input name="return_date" type="date" required className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs"/></label></div>
+  {locations.length>0&&<div className="grid grid-cols-2 gap-2"><select name="pickup_location_id" className="min-w-0 rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs"><option value="">Lieu de retrait</option>{locations.map((l)=><option key={l.id} value={l.id}>{l.name}{l.city?" · "+l.city:""}</option>)}</select><select name="return_location_id" className="min-w-0 rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs"><option value="">Lieu de retour</option>{locations.map((l)=><option key={l.id} value={l.id}>{l.name}{l.city?" · "+l.city:""}</option>)}</select></div>}
+  <input name="customer_name" required placeholder="Nom complet" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"/>
+  <div className="grid grid-cols-2 gap-2"><input name="customer_phone" required type="tel" placeholder="Téléphone" className="min-w-0 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"/><input name="customer_email" type="email" placeholder="E-mail" className="min-w-0 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"/></div>
+  <textarea name="customer_message" rows={2} placeholder="Message (facultatif)" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"/>
+  <button disabled={pending} className="w-full rounded-xl px-3 py-3 text-xs font-black text-white disabled:cursor-wait disabled:opacity-60" style={button}>{pending?"Vérification…":"Envoyer ma demande"}</button>
+  <p className="text-[10px] leading-4 text-slate-400">Le tarif estimatif sera calculé automatiquement. La réservation reste en attente de confirmation.</p>
+ </form>;
+}
+function PublicHealthcareBookingForm({slug,services,practitioners,locations,button}:{slug:string;services:HealthcareService[];practitioners:Practitioner[];locations:IndustryLocation[];button:React.CSSProperties}) {
+ const [status,setStatus]=useState<BookingFeedback>(null);
+ const [pending,startTransition]=useTransition();
+ function handleSubmit(event:FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+  const form=event.currentTarget;
+  const data=new FormData(form);
+  startTransition(async()=>{
+   const result=await submitPublicHealthcareAppointment(data);
+   setStatus(result.status);
+   if(result.status==="success") form.reset();
+  });
+ }
+ return <form onSubmit={handleSubmit} className="mt-3 space-y-2 rounded-xl bg-slate-50 p-3">
+  <input type="hidden" name="card_slug" value={slug}/>
+  <BookingStatus status={status}/>
+  <select name="service_id" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"><option value="">Consultation générale</option>{services.map((s)=><option key={s.id} value={s.id}>{s.name} · {s.duration_minutes} min</option>)}</select>
+  <select name="practitioner_id" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"><option value="">Praticien (au choix)</option>{practitioners.map((p)=><option key={p.id} value={p.id}>{p.full_name}{p.specialty?" · "+p.specialty:""}</option>)}</select>
+  {locations.length>0&&<select name="location_id" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"><option value="">Lieu de consultation</option>{locations.map((l)=><option key={l.id} value={l.id}>{l.name}{l.city?" · "+l.city:""}</option>)}</select>}
+  <select name="consultation_mode" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"><option value="in_person">Au cabinet</option><option value="teleconsultation">Téléconsultation</option><option value="home_visit">À domicile</option></select>
+  <label className="block text-[10px] font-semibold text-slate-500">Date et heure souhaitées<input name="starts_at" type="datetime-local" required className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"/></label>
+  <input name="patient_name" required placeholder="Nom complet" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"/>
+  <div className="grid grid-cols-2 gap-2"><input name="patient_phone" required type="tel" placeholder="Téléphone" className="min-w-0 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"/><input name="patient_email" type="email" placeholder="E-mail" className="min-w-0 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"/></div>
+  <button disabled={pending} className="w-full rounded-xl px-3 py-3 text-xs font-black text-white disabled:cursor-wait disabled:opacity-60" style={button}>{pending?"Vérification…":"Envoyer la demande de rendez-vous"}</button>
+  <p className="text-[10px] leading-4 text-slate-400">Votre demande sera transmise à l’établissement. Le rendez-vous n’est confirmé qu’après validation.</p>
+ </form>;
+}
 
 export function PublicIndustryModules({slug,accent,vehicles,rentalLocations,practitioners,services,healthLocations,availability,showCatalog=true,showRequests=true,showRental=true,showHealthcare=true}:{slug:string;accent:string;vehicles:RentalVehicle[];rentalLocations:IndustryLocation[];practitioners:Practitioner[];services:HealthcareService[];healthLocations:IndustryLocation[];availability:Availability[];showCatalog?:boolean;showRequests?:boolean;showRental?:boolean;showHealthcare?:boolean}){
  const button={backgroundColor:accent};
@@ -17,16 +87,7 @@ export function PublicIndustryModules({slug,accent,vehicles,rentalLocations,prac
      {vehicle.description&&<p className="mt-2 text-xs leading-5 text-slate-600">{vehicle.description}</p>}
      <p className="mt-3 text-lg font-black" style={{color:accent}}>{Number(vehicle.daily_rate).toLocaleString("fr-MA")} {vehicle.currency}<span className="ml-1 text-[10px] font-semibold text-slate-400">/ jour</span></p>
      {showRequests&&<details className="mt-3"><summary className="flex cursor-pointer list-none items-center justify-center rounded-xl px-4 py-3 text-xs font-black text-white" style={button}>Demander une location</summary>
-      <form action={submitPublicRentalBooking} className="mt-3 space-y-2 rounded-xl bg-slate-50 p-3">
-       <input type="hidden" name="card_slug" value={slug}/><input type="hidden" name="vehicle_id" value={vehicle.id}/>
-       <div className="grid grid-cols-2 gap-2"><label className="text-[10px] font-semibold text-slate-500">Retrait<input name="pickup_date" type="date" required className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs"/></label><label className="text-[10px] font-semibold text-slate-500">Retour<input name="return_date" type="date" required className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs"/></label></div>
-       {rentalLocations.length>0&&<div className="grid grid-cols-2 gap-2"><select name="pickup_location_id" className="min-w-0 rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs"><option value="">Lieu de retrait</option>{rentalLocations.map((l)=><option key={l.id} value={l.id}>{l.name}{l.city?" · "+l.city:""}</option>)}</select><select name="return_location_id" className="min-w-0 rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs"><option value="">Lieu de retour</option>{rentalLocations.map((l)=><option key={l.id} value={l.id}>{l.name}{l.city?" · "+l.city:""}</option>)}</select></div>}
-       <input name="customer_name" required placeholder="Nom complet" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"/>
-       <div className="grid grid-cols-2 gap-2"><input name="customer_phone" required type="tel" placeholder="Téléphone" className="min-w-0 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"/><input name="customer_email" type="email" placeholder="E-mail" className="min-w-0 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"/></div>
-       <textarea name="customer_message" rows={2} placeholder="Message (facultatif)" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"/>
-       <button className="w-full rounded-xl px-3 py-3 text-xs font-black text-white" style={button}>Envoyer ma demande</button>
-       <p className="text-[10px] leading-4 text-slate-400">Le tarif estimatif sera calculé automatiquement. La réservation reste en attente de confirmation.</p>
-      </form>
+      <PublicRentalBookingForm slug={slug} vehicleId={vehicle.id} locations={rentalLocations} button={button}/>
      </details>}
     </div>
    </article>)}</div>
@@ -38,18 +99,7 @@ export function PublicIndustryModules({slug,accent,vehicles,rentalLocations,prac
    {showCatalog&&services.length>0&&<div className="mt-4 grid gap-2">{services.map((s)=><div key={s.id} className="flex gap-3 rounded-xl border border-slate-100 p-3">{s.image_url&&<img src={s.image_url} alt={s.name} loading="lazy" className="h-16 w-16 rounded-lg object-cover"/>}<div className="min-w-0 flex-1"><p className="text-xs font-bold text-slate-900">{s.name}</p>{s.description&&<p className="mt-1 text-[11px] leading-4 text-slate-500">{s.description}</p>}<p className="mt-1 text-[10px] text-slate-400">{s.duration_minutes} min · {s.consultation_mode==="teleconsultation"?"Téléconsultation":s.consultation_mode==="home_visit"?"À domicile":"Au cabinet"}</p><p className="mt-1 text-xs font-black" style={{color:accent}}>{s.price===null?"Sur devis":Number(s.price).toLocaleString("fr-MA")+" "+s.currency}</p></div></div>)}</div>}
    {showCatalog&&availability.length>0&&<div className="mt-4 rounded-xl bg-slate-50 p-3"><p className="text-xs font-bold text-slate-800">Horaires de consultation</p><div className="mt-2 grid grid-cols-2 gap-2">{availability.slice(0,8).map((a)=><div key={a.id} className="text-[10px] text-slate-500"><span className="font-bold text-slate-700">{a.specific_date?new Date(a.specific_date+"T12:00:00").toLocaleDateString("fr-FR"):["Dim.","Lun.","Mar.","Mer.","Jeu.","Ven.","Sam."][a.day_of_week??0]}</span><br/>{String(a.starts_at).slice(0,5)} – {String(a.ends_at).slice(0,5)}</div>)}</div></div>}
    {showRequests&&<details className="mt-4" open><summary className="cursor-pointer rounded-xl px-4 py-3 text-center text-xs font-black text-white" style={button}>Demander un rendez-vous</summary>
-    <form action={submitPublicHealthcareAppointment} className="mt-3 space-y-2 rounded-xl bg-slate-50 p-3">
-     <input type="hidden" name="card_slug" value={slug}/>
-     <select name="service_id" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"><option value="">Consultation générale</option>{services.map((s)=><option key={s.id} value={s.id}>{s.name} · {s.duration_minutes} min</option>)}</select>
-     <select name="practitioner_id" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"><option value="">Praticien (au choix)</option>{practitioners.map((p)=><option key={p.id} value={p.id}>{p.full_name}{p.specialty?" · "+p.specialty:""}</option>)}</select>
-     {healthLocations.length>0&&<select name="location_id" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"><option value="">Lieu de consultation</option>{healthLocations.map((l)=><option key={l.id} value={l.id}>{l.name}{l.city?" · "+l.city:""}</option>)}</select>}
-     <select name="consultation_mode" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"><option value="in_person">Au cabinet</option><option value="teleconsultation">Téléconsultation</option><option value="home_visit">À domicile</option></select>
-     <label className="block text-[10px] font-semibold text-slate-500">Date et heure souhaitées<input name="starts_at" type="datetime-local" required className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"/></label>
-     <input name="patient_name" required placeholder="Nom complet" className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"/>
-     <div className="grid grid-cols-2 gap-2"><input name="patient_phone" required type="tel" placeholder="Téléphone" className="min-w-0 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"/><input name="patient_email" type="email" placeholder="E-mail" className="min-w-0 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs"/></div>
-     <button className="w-full rounded-xl px-3 py-3 text-xs font-black text-white" style={button}>Envoyer la demande de rendez-vous</button>
-     <p className="text-[10px] leading-4 text-slate-400">Votre demande sera transmise à l’établissement. Le rendez-vous n’est confirmé qu’après validation.</p>
-    </form>
+    <PublicHealthcareBookingForm slug={slug} services={services} practitioners={practitioners} locations={healthLocations} button={button}/>
    </details>}
   </section>}
  </>;
