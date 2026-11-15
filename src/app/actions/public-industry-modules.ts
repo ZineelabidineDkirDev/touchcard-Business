@@ -4,6 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 function field(data:FormData,key:string,max=500){return String(data.get(key)??"").trim().slice(0,max);}
+type BookingResult = { status: "success" | "conflict" | "invalid" | "error" };
+function bookingError(error: { code?: string } | null): BookingResult {
+ if(error?.code==="23P01") return {status:"conflict"};
+ return {status:"error"};
+}
 async function publishedCard(slug:string){
  if(!/^[a-z0-9-]{2,100}$/i.test(slug)) return null;
  const supabase=await createClient();
@@ -25,25 +30,25 @@ function casablancaLocalToIso(value:string){
  return guess.toISOString();
 }
 
-export async function submitPublicRentalBooking(data:FormData){
+export async function submitPublicRentalBooking(data:FormData):Promise<BookingResult>{
  const ctx=await publishedCard(field(data,"card_slug",100));
- if(!ctx) return;
+ if(!ctx) return {status:"invalid"};
  const vehicleId=field(data,"vehicle_id",80);
  const name=field(data,"customer_name",180);
  const phone=field(data,"customer_phone",40);
  const pickup=field(data,"pickup_date",10);
  const returned=field(data,"return_date",10);
- if(!vehicleId||!name||!phone||!/^\d{4}-\d{2}-\d{2}$/.test(pickup)||!/^\d{4}-\d{2}-\d{2}$/.test(returned)||returned<=pickup) return;
+ if(!vehicleId||!name||!phone||!/^\d{4}-\d{2}-\d{2}$/.test(pickup)||!/^\d{4}-\d{2}-\d{2}$/.test(returned)||returned<=pickup) return {status:"invalid"};
  const {data:vehicle}=await ctx.supabase.from("rental_vehicles").select("id")
   .eq("id",vehicleId).eq("organization_id",ctx.card.organization_id).eq("is_active",true).eq("is_published",true).maybeSingle();
- if(!vehicle) return;
+ if(!vehicle) return {status:"invalid"};
  // Availability and overlap checks are enforced atomically by private database triggers/constraints.
  // The public role intentionally has no SELECT access to customer bookings.
  const locationIds=[field(data,"pickup_location_id",80),field(data,"return_location_id",80)].filter(Boolean);
  if(locationIds.length){
   const {data:locations}=await ctx.supabase.from("rental_locations").select("id")
    .eq("organization_id",ctx.card.organization_id).eq("is_active",true).eq("is_public",true).in("id",locationIds);
-  if((locations??[]).length!==new Set(locationIds).size) return;
+  if((locations??[]).length!==new Set(locationIds).size) return {status:"invalid"};
  }
  const {error}=await ctx.supabase.from("rental_bookings").insert({
   organization_id:ctx.card.organization_id,card_id:ctx.card.id,vehicle_id:vehicleId,
@@ -53,18 +58,22 @@ export async function submitPublicRentalBooking(data:FormData){
   return_location_id:field(data,"return_location_id",80)||null,
   customer_message:field(data,"customer_message",1000)||null,status:"pending",
  });
- if(error) console.error("Public rental booking failed",error);
+ if(error) {
+  console.error("Public rental booking failed",error);
+  if(error.code==="23P01") return {status:"conflict"};
+  return {status:"error"};
+ }
  revalidatePath("/dashboard/rentals");
+ return {status:"success"};
 }
-
-export async function submitPublicHealthcareAppointment(data:FormData){
+export async function submitPublicHealthcareAppointment(data:FormData):Promise<BookingResult>{
  const ctx=await publishedCard(field(data,"card_slug",100));
- if(!ctx) return;
+ if(!ctx) return {status:"invalid"};
  const patientName=field(data,"patient_name",180);
  const patientPhone=field(data,"patient_phone",40);
  const localStart=field(data,"starts_at",16);
  const startsAt=casablancaLocalToIso(localStart);
- if(!patientName||!patientPhone||!startsAt||new Date(startsAt).getTime()<=Date.now()) return;
+ if(!patientName||!patientPhone||!startsAt||new Date(startsAt).getTime()<=Date.now()) return {status:"invalid"};
  const serviceId=field(data,"service_id",80);
  const practitionerId=field(data,"practitioner_id",80);
  const locationId=field(data,"location_id",80);
@@ -73,21 +82,21 @@ export async function submitPublicHealthcareAppointment(data:FormData){
  if(serviceId){
   const {data:service}=await ctx.supabase.from("healthcare_services").select("id,duration_minutes,practitioner_id")
    .eq("id",serviceId).eq("organization_id",ctx.card.organization_id).eq("is_active",true).eq("is_public",true).maybeSingle();
-  if(!service) return;
+  if(!service) return {status:"invalid"};
   duration=Number(service.duration_minutes)||30;
   servicePractitionerId=service.practitioner_id;
-  if(service.practitioner_id&&practitionerId&&service.practitioner_id!==practitionerId) return;
+  if(service.practitioner_id&&practitionerId&&service.practitioner_id!==practitionerId) return {status:"invalid"};
  }
  const resolvedPractitionerId=practitionerId||servicePractitionerId||null;
  if(practitionerId){
   const {data:practitioner}=await ctx.supabase.from("healthcare_practitioners").select("id")
    .eq("id",practitionerId).eq("organization_id",ctx.card.organization_id).eq("is_active",true).eq("is_public",true).maybeSingle();
-  if(!practitioner) return;
+  if(!practitioner) return {status:"invalid"};
  }
  if(locationId){
   const {data:location}=await ctx.supabase.from("healthcare_locations").select("id")
    .eq("id",locationId).eq("organization_id",ctx.card.organization_id).eq("is_active",true).eq("is_public",true).maybeSingle();
-  if(!location) return;
+  if(!location) return {status:"invalid"};
  }
  const endAt=new Date(new Date(startsAt).getTime()+duration*60000).toISOString();
  const localDate=localStart.slice(0,10);
@@ -97,7 +106,7 @@ export async function submitPublicHealthcareAppointment(data:FormData){
  const {data:availabilityRules,error:availabilityError}=await ctx.supabase.from("healthcare_availability_rules")
   .select("practitioner_id,location_id,day_of_week,specific_date,starts_at,ends_at,is_available")
   .eq("organization_id",ctx.card.organization_id);
- if(availabilityError){console.error("Healthcare schedule lookup failed",availabilityError);return;}
+ if(availabilityError){console.error("Healthcare schedule lookup failed",availabilityError);return {status:"error"};}
  if(availabilityRules?.length){
   const practitionerIds=resolvedPractitionerId?[resolvedPractitionerId]:[...new Set(availabilityRules.map((rule:any)=>rule.practitioner_id))];
   const hasAvailableSlot=practitionerIds.some((id:string)=>{
@@ -109,10 +118,9 @@ export async function submitPublicHealthcareAppointment(data:FormData){
     &&String(rule.ends_at).slice(0,5)>=localEndTime
     &&(!locationId||!rule.location_id||rule.location_id===locationId));
   });
-  if(!hasAvailableSlot)return;
+  if(!hasAvailableSlot) return {status:"conflict"};
  }
- // Practitioner/service/location overlaps are enforced by PostgreSQL exclusion constraints.
- // The public role intentionally has no SELECT access to patient appointments.
+ // PostgreSQL exclusion constraints enforce conflicts without public access to patient records.
  const {error}=await ctx.supabase.from("healthcare_appointments").insert({
   organization_id:ctx.card.organization_id,card_id:ctx.card.id,
   practitioner_id:resolvedPractitionerId,service_id:serviceId||null,location_id:locationId||null,
@@ -121,6 +129,11 @@ export async function submitPublicHealthcareAppointment(data:FormData){
   starts_at:startsAt,ends_at:endAt,
   consultation_mode:field(data,"consultation_mode",30)||"in_person",status:"pending",
  });
- if(error) console.error("Public healthcare appointment failed",error);
+ if(error){
+  console.error("Public healthcare appointment failed",error);
+  if(error.code==="23P01") return {status:"conflict"};
+  return {status:"error"};
+ }
  revalidatePath("/dashboard/healthcare");
+ return {status:"success"};
 }
