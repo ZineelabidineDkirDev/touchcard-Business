@@ -31,9 +31,13 @@ function PublicRentalBookingForm({slug,vehicleId,locations,button}:{slug:string;
   const form=event.currentTarget;
   const data=new FormData(form);
   startTransition(async()=>{
-   const result=await submitPublicRentalBooking(data);
-   setStatus(result.status);
-   if(result.status==="success") form.reset();
+   try {
+    const result=await submitPublicRentalBooking(data);
+    setStatus(result.status);
+    if(result.status==="success") form.reset();
+   } catch {
+    setStatus("error");
+   }
   });
  }
  return <form onSubmit={handleSubmit} className="mt-3 space-y-2 rounded-xl bg-slate-50 p-3">
@@ -56,9 +60,13 @@ function PublicHealthcareBookingForm({slug,services,practitioners,locations,butt
   const form=event.currentTarget;
   const data=new FormData(form);
   startTransition(async()=>{
-   const result=await submitPublicHealthcareAppointment(data);
-   setStatus(result.status);
-   if(result.status==="success") form.reset();
+   try {
+    const result=await submitPublicHealthcareAppointment(data);
+    setStatus(result.status);
+    if(result.status==="success") form.reset();
+   } catch {
+    setStatus("error");
+   }
   });
  }
  return <form onSubmit={handleSubmit} className="mt-3 space-y-2 rounded-xl bg-slate-50 p-3">
