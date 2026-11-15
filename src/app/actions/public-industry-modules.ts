@@ -5,10 +5,6 @@ import { revalidatePath } from "next/cache";
 
 function field(data:FormData,key:string,max=500){return String(data.get(key)??"").trim().slice(0,max);}
 type BookingResult = { status: "success" | "conflict" | "invalid" | "error" };
-function bookingError(error: { code?: string } | null): BookingResult {
- if(error?.code==="23P01") return {status:"conflict"};
- return {status:"error"};
-}
 async function publishedCard(slug:string){
  if(!/^[a-z0-9-]{2,100}$/i.test(slug)) return null;
  const supabase=await createClient();
