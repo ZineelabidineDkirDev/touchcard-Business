@@ -73,6 +73,10 @@ export function PublicWorkspaceRequestForms({ cardSlug, accent = "#4f46e5", prod
           items: type === "quote" ? [] : selectedItems,
         },
       });
+      if (data?.code === "SLOT_UNAVAILABLE") {
+        setFeedback({ ok: false, text: data.error || "Ce créneau vient d’être réservé. Choisissez une autre date ou un autre horaire. Vos informations sont conservées." });
+        return;
+      }
       if (error || !data?.ok) throw new Error(data?.error || error?.message || "La demande n'a pas pu être envoyée.");
       const chosenService = products.find((item) => item.id === selectedService);
       const whatsappMessage = [
